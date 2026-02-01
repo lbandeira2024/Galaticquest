@@ -1,0 +1,5 @@
+{
+    "frontendUrl": "http://192.168.15.8:3000",
+    "apiBaseUrl": "http://192.168.15.8:5000",
+    "serverPort": 5000
+}

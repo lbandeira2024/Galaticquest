@@ -1,0 +1,12 @@
+.planet {
+    position: absolute;
+  }
+  
+  .planet-img {
+    object-fit: cover;
+  }
+  
+  .planet-fallback {
+    display: inline-block;
+  }
+  

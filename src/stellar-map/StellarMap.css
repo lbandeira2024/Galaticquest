@@ -1,0 +1,878 @@
+.stellar-map {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: radial-gradient(ellipse at center, #0a0a20 0%, #000000 100%);
+  overflow: hidden;
+  font-family: 'Arial', sans-serif;
+  touch-action: none;
+  cursor: grab;
+}
+
+.stellar-map.grabbing {
+  cursor: grabbing;
+}
+
+.star-field {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  background-color: white;
+  border-radius: 50%;
+  animation: twinkle var(--duration, 3s) infinite ease-in-out;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 0 2px white);
+}
+
+@keyframes twinkle {
+
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+.grid-3d {
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background:
+    linear-gradient(rgba(65, 131, 215, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(65, 131, 215, 0.1) 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: moveGrid 15s linear infinite;
+  z-index: 0;
+}
+
+@keyframes moveGrid {
+  from {
+    transform: translate(0, 0);
+  }
+
+  to {
+    transform: translate(-40px, -40px);
+  }
+}
+
+.asteroid {
+  position: absolute;
+  background: linear-gradient(45deg, #aaa, #666);
+  border-radius: 50%;
+  clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%,
+      21% 91%, 32% 57%, 2% 35%, 39% 35%);
+  animation: asteroidGlow 1.5s infinite alternate;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+  transform-origin: center;
+  z-index: 1;
+}
+
+@keyframes asteroidGlow {
+  0% {
+    opacity: 0.5;
+    filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.2));
+  }
+
+  100% {
+    opacity: 0.9;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+  }
+}
+
+.solar-system {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center center;
+  will-change: transform;
+  z-index: 2;
+}
+
+.orbit {
+  position: absolute;
+  border: 1px solid rgba(65, 131, 215, 0.2);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 10s linear;
+}
+
+.asteroid-belt {
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(circle, transparent 60%, rgba(255, 255, 255, 0.02) 60.5%),
+    repeating-radial-gradient(circle, transparent 0 10px, rgba(255, 255, 255, 0.01) 10px 20px);
+}
+
+.kuiper-belt {
+  border: 1px dotted rgba(100, 150, 255, 0.15);
+  background:
+    radial-gradient(circle, transparent 95%, rgba(100, 150, 255, 0.02) 95.5%),
+    repeating-radial-gradient(circle, transparent 0 15px, rgba(100, 150, 255, 0.01) 15px 30px);
+}
+
+.celestial-body {
+  position: absolute;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: all 0.3s ease;
+  will-change: transform;
+  z-index: 3;
+}
+
+.celestial-body:hover {
+  filter: drop-shadow(0 0 10px rgba(185, 246, 255, 0.8));
+  transform: translate(-50%, -50%) scale(1.1) !important;
+}
+
+.planet {
+  box-shadow: 0 0 15px currentColor;
+  transition: transform 0.5s ease;
+  transform-style: preserve-3d;
+}
+
+.planet:hover {
+  box-shadow: 0 0 25px currentColor;
+}
+
+.dwarf-planet {
+  border: 1px dashed rgba(255, 255, 255, 0.5);
+  animation: pulseDwarfPlanet 3s infinite alternate;
+}
+
+@keyframes pulseDwarfPlanet {
+  0% {
+    box-shadow: 0 0 5px currentColor;
+  }
+
+  100% {
+    box-shadow: 0 0 15px currentColor;
+  }
+}
+
+.moon {
+  background: linear-gradient(45deg, #ddd, #aaa);
+  box-shadow: 0 0 5px white;
+  transform-style: preserve-3d;
+}
+
+.moon:hover {
+  box-shadow: 0 0 15px white;
+}
+
+.sun {
+  width: 50px;
+  height: 50px;
+}
+
+.sun-fire {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ff8c00, transparent 70%);
+  box-shadow: 0 0 80px #ff8c00;
+  animation: pulseSun 3s infinite alternate;
+}
+
+.sun:hover .sun-fire {
+  animation: pulseSunHover 1s infinite alternate;
+}
+
+@keyframes pulseSunHover {
+  0% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.sun-core {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffde00, #ff8c00);
+  box-shadow: 0 0 60px #ffde00;
+}
+
+.sun-corona {
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 140, 0, 0.2), transparent 70%);
+  animation: rotateCorona 60s linear infinite;
+}
+
+@keyframes pulseSun {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes rotateCorona {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.planet-rings {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(20deg);
+  border: 3px solid rgba(210, 180, 140, 0.6);
+  border-radius: 50%;
+  background: transparent;
+  box-shadow: 0 0 15px rgba(210, 180, 140, 0.5);
+}
+
+.body-label {
+  position: absolute;
+  color: white !important;
+  font-size: 10px;
+  white-space: nowrap;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+  left: calc(100% + 5px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: normal;
+  padding: 2px 5px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+  transform-style: preserve-3d;
+  backface-visibility: visible;
+}
+
+.moon .body-label {
+  font-size: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.moon:hover .body-label {
+  opacity: 0.8;
+}
+
+.dwarf-planet-label {
+  color: #d7bde2 !important;
+  font-style: italic;
+}
+
+.info-panel {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 15px;
+  border-radius: 8px;
+  max-width: 300px;
+  border: 1px solid #3498db;
+  box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
+  backdrop-filter: blur(5px);
+  z-index: 4;
+  font-size: 12px;
+  color: white !important;
+}
+
+.info-panel h3 {
+  margin-top: 0;
+  color: white !important;
+  font-size: 14px;
+  border-bottom: 1px solid #3498db;
+  padding-bottom: 5px;
+}
+
+.section-title {
+  color: #4fc3f7 !important;
+  margin: 0 0 10px 0;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(79, 195, 247, 0.3);
+  font-size: 13px;
+}
+
+.info-section {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(52, 152, 219, 0.3);
+}
+
+.info-section:last-child {
+  border-bottom: none;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0;
+  padding: 5px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.info-row:hover {
+  background-color: rgba(79, 195, 247, 0.1);
+}
+
+.info-label {
+  color: #bbdefb !important;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.info-value {
+  color: white !important;
+  text-align: right;
+}
+
+.transfer-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+  justify-content: space-between;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+  color: #e0e0e0;
+  min-width: 120px;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+  border-radius: 2px;
+}
+
+.legend-color.direct {
+  background-color: #3498db;
+}
+
+.legend-color.hohmann {
+  background-color: #ff9800;
+}
+
+.legend-color.gravity-assist {
+  background-color: #9c27b0;
+}
+
+.transfer-map {
+  margin: 10px 0;
+  border: 1px solid rgba(52, 152, 219, 0.3);
+  border-radius: 5px;
+  padding: 5px;
+  background: rgba(0, 0, 0, 0.3);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.transfer-route {
+  margin: 8px 0;
+  padding: 5px;
+  border-radius: 3px;
+  position: relative;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.transfer-route:hover {
+  background-color: rgba(185, 246, 255, 0.15);
+}
+
+.transfer-route.direct {
+  border-left: 3px solid #3498db;
+}
+
+.transfer-route.hohmann {
+  border-left: 3px solid #ff9800;
+}
+
+.transfer-route.gravity-assist {
+  border-left: 3px solid #9c27b0;
+}
+
+.transfer-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  padding: 8px;
+}
+
+.transfer-destination-group,
+.transfer-distance-group,
+.transfer-fuel-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.transfer-label {
+  color: #bbdefb !important;
+  font-size: 9px;
+  margin-bottom: 2px;
+}
+
+.transfer-destination {
+  font-weight: bold;
+  color: #fff;
+}
+
+.transfer-distance {
+  color: #e0e0e0;
+}
+
+.transfer-fuel {
+  color: #ffeb3b;
+  font-weight: bold;
+}
+
+.transfer-line {
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(52, 152, 219, 0.5), transparent);
+}
+
+.no-routes {
+  text-align: center;
+  font-size: 11px;
+  color: #aaa !important;
+  padding: 10px 0;
+}
+
+.info-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 5px;
+  transition: all 0.2s ease;
+}
+
+.close-button:hover {
+  color: #4fc3f7 !important;
+  transform: scale(1.2);
+}
+
+.zoom-controls {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 5;
+}
+
+.zoom-controls button {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: 1px solid #3498db;
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+.zoom-controls button:hover {
+  background-color: #4fc3f7 !important;
+  box-shadow: 0 0 15px rgba(79, 195, 247, 0.7);
+}
+
+.planet[style*="Venus"] .body-label {
+  transform: translateY(-50%) rotateX(-177deg) translateZ(10px);
+}
+
+.transfer-confirm-modal {
+  position: fixed;
+  top: 0;
+  pointer-events: auto;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.transfer-confirm-modal .modal-content {
+  background: rgba(0, 10, 30, 0.9);
+  padding: 25px;
+  border-radius: 10px;
+  border: 1px solid #3498db;
+  box-shadow: 0 0 30px rgba(52, 152, 219, 0.6);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  pointer-events: auto;
+}
+
+.transfer-confirm-modal h3 {
+  margin-top: 0;
+  color: white !important;
+  font-size: 18px;
+  margin-bottom: 25px;
+}
+
+.transfer-confirm-modal .modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.transfer-confirm-modal button {
+  padding: 10px 25px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+}
+
+.transfer-confirm-modal .confirm-button {
+  background-color: #27ae60;
+  color: white;
+}
+
+.confirm-button {
+  pointer-events: auto;
+  cursor: pointer;
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  z-index: 1001;
+}
+
+.transfer-confirm-modal .confirm-button:hover {
+  background-color: #2ecc71;
+  transform: scale(1.05);
+}
+
+.transfer-confirm-modal .cancel-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.transfer-confirm-modal .cancel-button:hover {
+  background-color: #c0392b;
+  transform: scale(1.05);
+}
+
+.route-visualization {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.artemis-icon-container {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  left: 50%;
+  top: 50%;
+}
+
+.artemis-icon {
+  width: 32px;
+  height: 32px;
+  filter: drop-shadow(0 0 5px rgba(65, 131, 215, 0.8));
+  animation: float 2s ease-in-out infinite;
+  position: relative;
+  z-index: 2;
+  transform-origin: bottom center;
+}
+
+.artemis-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background-color: #4fc3f7;
+  border-radius: 50%;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 10px 2px rgba(79, 195, 247, 0.8);
+}
+
+.wave-effect {
+  position: absolute;
+  border: 2px solid #4fc3f7;
+  width: 20px;
+  height: 20px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+.wave-1 {
+  animation: wave 3s infinite;
+}
+
+.wave-2 {
+  animation: wave 3s infinite 1s;
+}
+
+.wave-3 {
+  animation: wave 3s infinite 2s;
+}
+
+@keyframes wave {
+  0% {
+    width: 20px;
+    height: 20px;
+    opacity: 0.8;
+  }
+
+  100% {
+    width: 100px;
+    height: 100px;
+    opacity: 0;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.route-info-panel {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  transform: none;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #3498db;
+  box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
+  backdrop-filter: blur(5px);
+  z-index: 4;
+  font-size: 12px;
+  color: white;
+  max-width: 80%;
+  text-align: center;
+}
+
+.route-info-panel h3 {
+  margin-top: 0;
+  color: #4fc3f7;
+  font-size: 14px;
+  border-bottom: 1px solid #3498db;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.route-visualization-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 10px;
+}
+
+.route-origin {
+  padding: 8px 12px;
+  background: rgba(52, 152, 219, 0.2);
+  border-radius: 4px;
+  border: 1px solid #3498db;
+  min-width: 80px;
+  z-index: 2;
+}
+
+.route-destination {
+  padding: 8px 12px;
+  background: rgba(52, 152, 219, 0.2);
+  border-radius: 4px;
+  border: 1px solid #3498db;
+  min-width: 80px;
+  z-index: 2;
+}
+
+.route-line {
+  position: relative;
+  flex-grow: 1;
+  height: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dotted-line {
+  position: absolute;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, #3498db 50%, transparent 50%);
+  background-size: 10px 2px;
+  z-index: 1;
+}
+
+.artemis-icon-container {
+  position: absolute;
+  transform-origin: center center;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.route-point-label {
+  font-size: 10px;
+  color: #bbdefb;
+  margin-bottom: 2px;
+}
+
+.route-point-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+}
+
+.route-origin,
+.route-destination {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(52, 152, 219, 0.2);
+  border-radius: 4px;
+  border: 1px solid #3498db;
+  min-width: 80px;
+  z-index: 2;
+}
+
+.celestial-body.isExoplanet {
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  animation: pulseExoplanet 2s infinite alternate;
+}
+
+@keyframes pulseExoplanet {
+  0% {
+    box-shadow: 0 0 10px currentColor;
+  }
+
+  100% {
+    box-shadow: 0 0 20px currentColor;
+  }
+}
+
+.exoplanet-label {
+  color: #ff9800 !important;
+  font-style: italic;
+}
+
+.station {
+  position: relative;
+  background-color: #a020f0 !important;
+  width: 6px;
+  height: 6px;
+  border-radius: 0;
+  transform: rotate(45deg);
+  box-shadow: 0 0 8px #a020f0;
+}
+
+/* Ondas pulsantes */
+.station::before,
+.station::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #a020f0;
+  transform: translate(-50%, -50%) scale(1);
+  opacity: 0.6;
+  animation: pulse-wave 2s infinite;
+  z-index: -1;
+}
+
+.station::after {
+  animation-delay: 1s;
+}
+
+@keyframes pulse-wave {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.6;
+  }
+
+  70% {
+    opacity: 0.1;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(8);
+    opacity: 0;
+  }
+}
+
+transfer-confirm-modal .cancel-button:disabled {
+  background-color: #7f8c8d;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.transfer-confirm-modal .cancel-button:disabled:hover {
+  background-color: #7f8c8d;
+  transform: none;
+}

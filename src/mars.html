@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <title>Marte em 3D</title>
+  <style>
+    body { margin: 0; background: black; overflow: hidden; }
+    canvas { display: block; }
+  </style>
+</head>
+<body>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/examples/js/controls/OrbitControls.js"></script>
+  <script>
+    // Cena
+    const scene = new THREE.Scene();
+
+    // Câmara
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.z = 3;
+
+    // Renderizador
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Luz
+    const light = new THREE.PointLight(0xffffff, 1.2);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+
+    // Textura
+    const textureLoader = new THREE.TextureLoader();
+    const marsTexture = textureLoader.load('mars.png');
+
+    // Esfera (Marte)
+    const geometry = new THREE.SphereGeometry(1, 64, 64);
+    const material = new THREE.MeshStandardMaterial({ map: marsTexture });
+    const mars = new THREE.Mesh(geometry, material);
+    scene.add(mars);
+
+    // Controles
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+    // Animação
+    function animate() {
+      requestAnimationFrame(animate);
+      mars.rotation.y += 0.002;
+      controls.update();
+      renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Responsivo
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>

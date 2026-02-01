@@ -1,0 +1,22 @@
+.mission-timer {
+  position: absolute;
+  top: 40px;
+  right: 30px;
+  color: #0f0;
+  font-family: 'Courier New', monospace;
+  text-align: right;
+  z-index: 10;
+}
+
+.timer-label {
+  font-size: 0.9em;
+  margin-bottom: 5px;
+  text-shadow: 0 0 5px #0f0;
+  letter-spacing: 1px;
+}
+
+.timer-display {
+  font-size: 2em;
+  font-weight: bold;
+  text-shadow: 0 0 8px #0f0;
+}

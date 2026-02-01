@@ -1,0 +1,1551 @@
+/* Base Styles */
+.tela-decolagem {
+  width: 100%;
+  height: 100vh;
+  background-color: #000;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  position: relative;
+  perspective: 2000px;
+}
+
+/* Cockpit Container */
+.cockpit-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: linear-gradient(to bottom, #0a1a2e, #0c2d4e);
+  transition: transform 0.5s ease-out;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Main Display */
+.main-display {
+  position: absolute;
+  width: 60%;
+  height: 72%;
+  left: 50%;
+  top: 37%;
+  transform: translate(-50%, -50%) translateZ(100px);
+  z-index: 5;
+  border-radius: 8px;
+  background-color: #000;
+  border: 1px solid rgba(0, 150, 255, 0.3);
+  box-shadow: 0 0 40px rgba(0, 80, 150, 0.4);
+  overflow: hidden;
+  transition: transform 0.5s ease-out;
+  transform-style: preserve-3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ======================= NOVA CLASSE ADICIONADA ======================= */
+.cloud-animation-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Garante que o vídeo cubra todo o espaço sem distorcer */
+  display: block;
+  z-index: 1;
+}
+
+/* ====================================================================== */
+
+/* Efeito de estática com rolagem vertical (versão correta e final) */
+@keyframes verticalStaticScroll {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 0 720px;
+  }
+}
+
+.static-animation {
+  width: 100%;
+  height: 100%;
+  background-image: url('/public/images/estatica.png');
+  background-size: cover;
+  background-repeat: repeat-y;
+  filter: contrast(1.8) brightness(1.1);
+  animation: verticalStaticScroll 0.4s infinite linear;
+}
+
+/* 3D Panels */
+.left-panel-3d,
+.right-panel-3d {
+  position: absolute;
+  top: 0;
+  width: 20%;
+  height: 100%;
+  background: linear-gradient(145deg, #001a33 0%, #002b52 100%);
+  z-index: 4;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.5s ease-out;
+}
+
+.left-panel-3d {
+  left: 0;
+  transform: perspective(800px) rotateY(15deg) translateZ(50px);
+  transform-origin: left;
+  border-right: 1px solid rgba(0, 180, 255, 0.4);
+  box-shadow: inset -15px 0 20px rgba(0, 0, 0, 0.5);
+  justify-content: flex-start;
+}
+
+.right-panel-3d {
+  right: 0;
+  transform: perspective(800px) rotateY(-15deg) translateZ(50px);
+  transform-origin: right;
+  border-left: 1px solid rgba(0, 180, 255, 0.4);
+  box-shadow: inset 15px 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Panel Effects */
+.left-panel-3d::before,
+.right-panel-3d::before {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg,
+      rgba(0, 40, 80, 0.7) 0%,
+      transparent 30%,
+      transparent 70%,
+      rgba(0, 40, 80, 0.7) 100%);
+}
+
+.left-panel-3d::after,
+.right-panel-3d::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image:
+    linear-gradient(rgba(0, 120, 200, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 120, 200, 0.1) 1px, transparent 1px);
+  background-size: 25px 25px;
+}
+
+/* Route Monitor Styles */
+.route-monitor {
+  padding: 15px;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  margin-top: 20px;
+  position: relative;
+  z-index: 5;
+}
+
+.route-monitor h4 {
+  margin-bottom: 15px;
+  font-size: 1.0em;
+  color: rgba(11, 223, 50, 0.789);
+  text-shadow: 0 0 5px rgba(13, 255, 0, 0.848);
+}
+
+.route-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 20, 40, 0.8);
+  border: 1px solid rgba(0, 180, 255, 0.3);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: inset 0 0 15px rgba(0, 80, 150, 0.4);
+  height: 140px;
+  position: relative;
+  flex-direction: column;
+}
+
+/* Overlay */
+.cockpit-overlay {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center,
+      transparent 60%,
+      rgba(0, 30, 60, 0.7) 100%);
+  z-index: 6;
+  pointer-events: none;
+  transform: translateZ(200px);
+}
+
+/* Shake Effect */
+.tela-decolagem.shaking {
+  animation: shake 0.08s infinite;
+}
+
+@keyframes shake {
+  0% {
+    transform: translate(1px, -1px) rotate(0.3deg);
+  }
+
+  10% {
+    transform: translate(-1px, 2px) rotate(-0.3deg);
+  }
+
+  20% {
+    transform: translate(2px, 0px) rotate(0.4deg);
+  }
+
+  30% {
+    transform: translate(-2px, 1px) rotate(-0.2deg);
+  }
+
+  40% {
+    transform: translate(1px, -2px) rotate(0.2deg);
+  }
+
+  50% {
+    transform: translate(-1px, 1px) rotate(-0.4deg);
+  }
+
+  60% {
+    transform: translate(2px, 1px) rotate(0.1deg);
+  }
+
+  70% {
+    transform: translate(-2px, 1px) rotate(-0.1deg);
+  }
+
+  80% {
+    transform: translate(1px, -1px) rotate(0.3deg);
+  }
+
+  90% {
+    transform: translate(-1px, 2px) rotate(-0.2deg);
+  }
+
+  100% {
+    transform: translate(1px, -2px) rotate(0.2deg);
+  }
+}
+
+/* Mission Timer */
+.mission-timer {
+  position: absolute;
+  bottom: 30px;
+  right: 30px;
+  text-align: right;
+  color: #0f0;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 10px #0f0;
+  z-index: 10;
+  transform: translateZ(150px);
+}
+
+.mission-timer span {
+  display: block;
+  font-size: 1em;
+  margin-bottom: 5px;
+  color: #7f7;
+}
+
+.mission-timer h2 {
+  margin: 0;
+  font-size: 2em;
+  letter-spacing: 2px;
+}
+
+/* Depth Effects */
+.cockpit-controls {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%) translateZ(120px);
+  width: 80%;
+  max-width: 800px;
+}
+
+/* Right Monitor Styles */
+.right-monitor-container {
+  background: rgba(0, 20, 40, 0.8);
+  border: 1px solid rgba(0, 180, 255, 0.3);
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 15px;
+  box-shadow: inset 0 0 10px rgba(0, 80, 150, 0.4);
+}
+
+.monitor-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding: 5px 10px;
+  background: rgba(0, 10, 20, 0.6);
+  border-radius: 4px;
+  position: relative;
+  z-index: 10;
+}
+
+.play-button {
+  background: rgba(0, 50, 100, 0.5);
+  color: #aaa;
+  border: 1px solid rgba(0, 120, 200, 0.3);
+  border-radius: 4px;
+  padding: 2px 10px;
+  font-size: 0.8em;
+  cursor: not-allowed;
+}
+
+.monitor-screen {
+  width: 100%;
+  height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.monitor-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Propulsion Nuclear Panel */
+.propulsion-panel {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: auto auto;
+  gap: 10px;
+  padding: 15px;
+  background: rgba(0, 20, 40, 0.8);
+  border: 1px solid rgba(0, 180, 255, 0.3);
+  border-radius: 10px;
+  box-shadow: inset 0 0 15px rgba(0, 80, 150, 0.4);
+  margin-bottom: 15px;
+}
+
+.propulsion-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  background: rgba(0, 30, 60, 0.5);
+  border-radius: 6px;
+  border: 1px solid rgba(0, 150, 255, 0.2);
+}
+
+.propulsion-indicator h4 {
+  margin: 0 0 5px 0;
+  font-size: 0.9em;
+  color: #0bf;
+  text-align: center;
+}
+
+.propulsion-value {
+  font-size: 1.1em;
+  color: #0f0;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+  font-family: 'Courier New', monospace;
+}
+
+.space-coins-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  background: rgba(0, 30, 60, 0.7);
+  border: 1px solid rgba(0, 180, 255, 0.3);
+  border-radius: 8px;
+}
+
+.space-coins-title {
+  font-size: 1.1em;
+  color: #ff0;
+  text-shadow: 0 0 5px rgba(255, 255, 0, 0.5);
+}
+
+.space-coins-value {
+  font-size: 1.3em;
+  color: #0f0;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+}
+
+/* Button Container Styles */
+.dobra-buttons-container {
+  display: flex;
+  justify-content: space-between;
+  width: 95%;
+  margin: 0 auto;
+  gap: 10px;
+}
+
+.dobra-btn-wrapper {
+  width: 50%;
+  position: relative;
+  z-index: 7;
+  margin: 10px 0;
+}
+
+/* Button Base Styles */
+.ativar-de-btn,
+.inventory-btn {
+  width: 100%;
+  padding: 10px 8px;
+  font-size: 0.9em;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  z-index: 5;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+  margin: 0;
+  min-height: 56px;
+  height: 56px;
+  white-space: normal;
+  line-height: 1.2;
+}
+
+/* Dobra Espacial Button */
+.ativar-de-btn {
+  background: linear-gradient(145deg, #00a800, #008500);
+  color: #fff;
+  box-shadow:
+    0 0 6px rgba(0, 200, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  animation: pulse-green 2.5s infinite;
+}
+
+/* Inventory Button */
+.inventory-btn {
+  background: linear-gradient(145deg, #ff8c00, #e67300);
+  color: #fff;
+  box-shadow:
+    0 0 6px rgba(255, 140, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  animation: pulse-orange 2.5s infinite;
+}
+
+/* Hover States */
+.ativar-de-btn:hover {
+  background: linear-gradient(145deg, #00b000, #009000);
+  box-shadow:
+    0 0 10px rgba(0, 220, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.inventory-btn:hover {
+  background: linear-gradient(145deg, #ff9933, #ff8000);
+  box-shadow:
+    0 0 10px rgba(255, 165, 0, 0.8),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Active States */
+.ativar-de-btn:active,
+.inventory-btn:active {
+  transform: scale(0.98);
+  animation: none;
+}
+
+/* Shine Effect */
+.ativar-de-btn::before,
+.inventory-btn::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(to bottom right,
+      rgba(255, 255, 255, 0) 45%,
+      rgba(255, 255, 255, 0.1) 50%,
+      rgba(255, 255, 255, 0) 55%);
+  transform: rotate(30deg);
+  animation: shine 3.5s infinite;
+}
+
+/* Animations */
+@keyframes pulse-green {
+  0% {
+    box-shadow: 0 0 6px rgba(0, 200, 0, 0.7);
+  }
+
+  50% {
+    box-shadow: 0 0 14px rgba(0, 220, 0, 0.8);
+  }
+
+  100% {
+    box-shadow: 0 0 6px rgba(0, 200, 0, 0.7);
+  }
+}
+
+@keyframes pulse-orange {
+  0% {
+    box-shadow: 0 0 6px rgba(255, 140, 0, 0.7);
+  }
+
+  50% {
+    box-shadow: 0 0 14px rgba(255, 165, 0, 0.8);
+  }
+
+  100% {
+    box-shadow: 0 0 6px rgba(255, 140, 0, 0.7);
+  }
+}
+
+@keyframes shine {
+  0% {
+    transform: rotate(30deg) translate(-30%, -30%);
+  }
+
+  100% {
+    transform: rotate(30deg) translate(30%, 30%);
+  }
+}
+
+/* Active States */
+.ativar-de-btn.active {
+  background: linear-gradient(145deg, #008500, #00a800);
+  animation: pulse-green-fast 1.2s infinite;
+}
+
+@keyframes pulse-green-fast {
+  0% {
+    box-shadow: 0 0 8px rgba(0, 200, 0, 0.7);
+  }
+
+  50% {
+    box-shadow: 0 0 18px rgba(0, 220, 0, 0.9);
+  }
+
+  100% {
+    box-shadow: 0 0 8px rgba(0, 200, 0, 0.7);
+  }
+}
+
+/* Disabled State */
+.ativar-de-btn.disabled {
+  background: linear-gradient(145deg, #333, #555);
+  color: #777;
+  cursor: not-allowed;
+  box-shadow: none;
+  animation: none;
+}
+
+.ativar-de-btn.disabled::before {
+  content: none;
+}
+
+.ativar-de-btn.disabled:hover {
+  background: linear-gradient(145deg, #333, #555);
+  box-shadow: none;
+}
+
+/* Speed Gauge Styles */
+.left-panel-speed-gauge {
+  width: 100%;
+  background: rgba(0, 20, 40, 0.8);
+  border: 1px solid rgba(0, 180, 255, 0.3);
+  border-radius: 8px;
+  box-shadow: inset 0 0 15px rgba(0, 80, 150, 0.4);
+  padding: 12px;
+  margin-top: 9px;
+  display: flex;
+  flex-direction: column;
+}
+
+.speed-gauge-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.speed-gauge-title {
+  color: #0bf;
+  font-size: 0.9em;
+  text-shadow: 0 0 5px rgba(0, 180, 255, 0.5);
+}
+
+.speed-gauge-value {
+  color: #0f0;
+  font-family: 'Courier New', monospace;
+  font-size: 1.1em;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+}
+
+.speed-gauge-bar {
+  width: 100%;
+  height: 12px;
+  background: rgba(0, 30, 60, 0.6);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 8px;
+  position: relative;
+}
+
+.speed-gauge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #006600, #00cc00);
+  border-radius: 6px;
+  width: 0%;
+  transition: width 0.3s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.speed-gauge-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0) 100%);
+  animation: shine 2s infinite;
+}
+
+.speed-gauge-marks {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-size: 0.6em;
+  color: #7f7;
+}
+
+.speed-gauge-unit {
+  text-align: right;
+  font-size: 0.7em;
+  color: #7f7;
+  margin-top: 3px;
+}
+
+/* Minerva Section */
+.minerva-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 10px;
+  background: rgba(0, 20, 40, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 180, 255, 0.3);
+  box-shadow: inset 0 0 10px rgba(0, 80, 150, 0.4);
+}
+
+.minerva-image {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 5px rgba(0, 180, 255, 0.7));
+  transition: filter 0.5s ease;
+}
+
+.minerva-section {
+  width: 100%;
+  margin-top: 25px;
+  position: relative;
+}
+
+.minerva-title {
+  color: #0bf;
+  font-family: 'Orbitron', 'Courier New', monospace;
+  font-size: 1.1em;
+  font-weight: 500;
+  text-align: center;
+  letter-spacing: 3px;
+  margin: 0 auto 12px auto;
+  text-shadow: 0 0 10px rgba(0, 180, 255, 0.8);
+  position: relative;
+  width: fit-content;
+  padding: 0 15px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.minerva-title::before,
+.minerva-title::after {
+  content: '';
+  color: rgba(0, 180, 255, 0.6);
+  position: absolute;
+  font-size: 0.9em;
+}
+
+.minerva-title::before {
+  left: -10px;
+}
+
+.minerva-title::after {
+  right: -10px;
+}
+
+.minerva-title.highlighted,
+.minerva-title:hover {
+  color: #0ff;
+  text-shadow: 0 0 15px rgba(0, 255, 255, 0.9);
+  transform: scale(1.05);
+}
+
+/* Estilo quando o modal está aberto */
+.minerva-title.active {
+  color: #0f0;
+  text-shadow: 0 0 20px rgba(0, 255, 0, 0.9);
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 50px;
+}
+
+.modal-content {
+  background-color: rgba(0, 30, 60, 0.95);
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 800px;
+  width: 90%;
+  max-height: 70vh;
+  overflow: auto;
+  position: relative;
+  border: 1px solid rgba(0, 180, 255, 0.5);
+  box-shadow: 0 0 30px rgba(0, 150, 255, 0.5);
+  margin-top: 20px;
+}
+
+/* Glossary Button */
+.glossary-button {
+  margin-left: 35px;
+  position: relative;
+  overflow: hidden;
+  background: rgba(0, 50, 100, 0.7);
+  color: #0bf;
+  border: 1px solid rgba(0, 200, 255, 0.4);
+  border-radius: 5px;
+  padding: 8px 15px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 100, 200, 0.3);
+  z-index: 10;
+  pointer-events: auto;
+  width: 130px;
+  /* Largura fixa */
+  box-sizing: border-box;
+  /* Garante que o padding não estoure a largura */
+}
+
+.glossary-button:hover {
+  background: rgba(0, 80, 160, 0.9);
+  box-shadow: 0 0 15px rgba(0, 150, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+/* === FOTO DA EQUIPE NO COCKPIT === */
+.team-photo-frame {
+  margin-top: auto;
+  /* Empurra para o fundo do painel direito */
+  margin-bottom: 60px;
+  /* Espaço para não cobrir os botões flutuantes */
+  width: 100%;
+  border: 2px solid #00aaff;
+  border-radius: 8px;
+  background: rgba(0, 20, 40, 0.8);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(0, 170, 255, 0.4);
+  display: flex;
+  flex-direction: column;
+  z-index: 15;
+  /* Garante visibilidade acima de elementos com z-index menor */
+}
+
+.team-photo-header {
+  background: rgba(0, 170, 255, 0.2);
+  color: #00aaff;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8em;
+  font-weight: bold;
+  text-align: center;
+  padding: 4px;
+  letter-spacing: 2px;
+  border-bottom: 1px solid #00aaff;
+  text-shadow: 0 0 5px rgba(0, 170, 255, 0.8);
+}
+
+.team-photo-img {
+  width: 100%;
+  height: 140px;
+  /* Altura fixa para manter layout consistente */
+  object-fit: cover;
+  /* Preenche o espaço sem distorcer */
+  display: block;
+  filter: sepia(20%) contrast(1.1) brightness(0.9);
+  /* Filtro para integrar visualmente ao cockpit */
+}
+
+/* Efeito de linhas de monitor (scanlines) */
+.team-photo-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
+}
+
+/* Responsive Design */
+/* MODIFICAÇÃO: O media query existente foi alterado para empilhar os painéis */
+@media (max-width: 768px) {
+
+  /* Permite rolagem em telas pequenas */
+  .tela-decolagem {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* Transforma o cockpit em um container flexível de coluna */
+  .cockpit-container {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    position: relative;
+    perspective: none;
+    transform: none;
+  }
+
+  /* Reseta e centraliza os painéis */
+  .left-panel-3d,
+  .right-panel-3d,
+  .main-display {
+    position: relative;
+    width: 95%;
+    max-width: 500px;
+    margin: 10px auto;
+    left: auto;
+    top: auto;
+    transform: none;
+    height: auto;
+    box-shadow: none;
+    border: 1px solid rgba(0, 180, 255, 0.4);
+    padding: 10px;
+  }
+
+  /* Define a ordem de exibição */
+  .main-display {
+    order: 1;
+    /* Aparece primeiro */
+    height: 60vh;
+    /* Mantém uma boa altura para o display */
+  }
+
+  .left-panel-3d {
+    order: 2;
+    /* Aparece no meio */
+  }
+
+  .right-panel-3d {
+    order: 3;
+    /* Aparece por último */
+  }
+
+  .mission-timer {
+    top: 15px;
+    right: 15px;
+    bottom: auto;
+    /* Reseta o 'bottom' */
+    transform: none;
+    /* Reseta transformação 3D */
+    font-size: 0.9em;
+  }
+
+  .mission-timer h2 {
+    font-size: 1.5em;
+  }
+
+  .right-monitor-container {
+    padding: 8px;
+  }
+
+  .monitor-screen {
+    height: 150px;
+    /* Aumenta um pouco a altura no modo empilhado */
+  }
+
+  .propulsion-panel {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 10px;
+  }
+
+  .propulsion-indicator h4 {
+    font-size: 0.8em;
+  }
+
+  .dobra-buttons-container {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .dobra-btn-wrapper {
+    width: 100%;
+  }
+
+  .ativar-de-btn,
+  .inventory-btn {
+    font-size: 0.9em;
+    padding: 12px 8px;
+    min-height: 50px;
+    height: 50px;
+  }
+
+  /* ==================== INÍCIO DA CORREÇÃO ==================== */
+  /* NOVO: Ajusta o container flutuante em telas menores */
+  .floating-buttons-container {
+    bottom: 10px;
+    right: 10px;
+    gap: 5px;
+    /* Espaçamento menor para mobile */
+  }
+
+  /* Ajusta os botões flutuantes */
+  .pause-button {
+    /* bottom: 10px !important;  <-- REMOVIDO */
+    /* right: 10px !important;   <-- REMOVIDO */
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+
+  .sos-button {
+    /* bottom: 10px !important;  <-- REMOVIDO */
+    /* right: 80px !important;   <-- REMOVIDO */
+    width: 50px;
+    font-size: 0.7rem;
+  }
+
+  /* Ajuste da foto em mobile */
+  .team-photo-frame {
+    margin-bottom: 10px;
+    height: auto;
+  }
+
+  .team-photo-img {
+    height: 180px;
+  }
+
+  /* ==================== FIM DA CORREÇÃO ==================== */
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .tela-decolagem.shaking {
+    animation: none;
+  }
+
+  .cockpit-container {
+    transition: none;
+  }
+
+  .ativar-de-btn,
+  .ativar-de-btn::before,
+  .ativar-de-btn.active,
+  .inventory-btn,
+  .inventory-btn::before {
+    animation: none;
+  }
+}
+
+.speed-gauge-fill.is-dobra-active {
+  background: linear-gradient(90deg,
+      #ff0000 0%,
+      #ff8000 10%,
+      #ffff00 20%,
+      #00ff00 30%,
+      #00ffff 40%,
+      #0000ff 50%,
+      #8000ff 60%,
+      #ff00ff 70%,
+      #ff0080 80%,
+      #ff0000 90%,
+      #ff8000 100%);
+  animation: rainbow-pulse 2s infinite alternate;
+}
+
+@keyframes rainbow-pulse {
+  0% {
+    opacity: 0.8;
+    background-size: 100% 100%;
+  }
+
+  100% {
+    opacity: 1;
+    background-size: 200% 100%;
+  }
+}
+
+.speed-gauge-fill.is-dobra-active::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.3) 50%,
+      rgba(255, 255, 255, 0) 100%);
+  animation: shine-move 1.5s infinite linear;
+}
+
+@keyframes shine-move {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes staticFlicker {
+  0% {
+    opacity: 0.8;
+    filter: brightness(1.1) contrast(1.3);
+  }
+
+  50% {
+    opacity: 0.9;
+    filter: brightness(1.3) contrast(1.5);
+  }
+
+  100% {
+    opacity: 1;
+    filter: brightness(1.2) contrast(1.4);
+  }
+}
+
+.ativar-de-btn.active {
+  background: linear-gradient(145deg,
+      #ff0000 0%,
+      #ff8000 10%,
+      #ffff00 20%,
+      #00ff00 30%,
+      #00ffff 40%,
+      #0000ff 50%,
+      #8000ff 60%,
+      #ff00ff 70%,
+      #ff0080 80%,
+      #ff0000 90%);
+  animation: rainbow-pulse 2s infinite alternate, pulse-green-fast 1.2s infinite;
+  background-size: 200% 200%;
+  color: white;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+}
+
+@keyframes rainbow-pulse {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 60, 60, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+}
+
+.close-button:hover {
+  background: rgba(255, 80, 80, 1);
+  transform: scale(1.1);
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+}
+
+.bolsa-espacial-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bolsa-espacial-imagem {
+  width: 100px;
+  height: auto;
+  filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.6));
+  animation: brilhoBolsa 6s infinite;
+}
+
+@keyframes brilhoBolsa {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.6));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 15px rgba(0, 255, 255, 1));
+  }
+}
+
+.bolsa-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 15px;
+  z-index: 10;
+}
+
+.bolsa-button img {
+  width: 90px;
+  height: auto;
+  filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.6));
+  animation: brilhoBolsa 6s infinite;
+  transition: transform 0.3s ease;
+}
+
+.bolsa-button:hover img {
+  transform: scale(1.1);
+}
+
+/* --- ESTILOS MODIFICADOS E ADICIONADOS PARA O REC E TRANSMISSÃO --- */
+
+/* Animação de piscar para o REC */
+@keyframes blink-animation {
+
+  0%,
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 8px rgba(255, 0, 0, 1);
+  }
+
+  50% {
+    opacity: 0.6;
+    text-shadow: 0 0 4px rgba(255, 0, 0, 0.7);
+  }
+}
+
+/* Classe base para o REC, sempre visível */
+.rec-label {
+  font-size: 1.3em;
+  font-weight: bold;
+  transition: color 0.4s ease, text-shadow 0.4s ease, opacity 0.4s ease;
+}
+
+/* Classe para o estado desativado do REC */
+.rec-label.inactive-rec {
+  color: #5a0000;
+  /* Vermelho escuro e apagado */
+  text-shadow: none;
+  opacity: 0.7;
+}
+
+/* Classe para o estado ativado e piscante do REC */
+.rec-label.blinking-rec {
+  color: #f00;
+  /* Vermelho brilhante */
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+  animation: blink-animation 1.2s infinite;
+}
+
+/* Classe para a mensagem de transmissão */
+.transmission-message {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: yellow;
+  font-family: 'Courier New', monospace;
+  font-size: 1.4em;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  text-shadow: 0 0 10px yellow;
+  animation: text-fade-in 2s ease-in-out;
+}
+
+/* Animação para a mensagem aparecer suavemente */
+@keyframes text-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.monitor-text-display {
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+  box-sizing: border-box;
+  color: #f6faf5df;
+  font-family: 'Courier New', monospace;
+  font-size: 1em;
+  line-height: 1.4;
+  text-align: left;
+  white-space: pre-wrap;
+  text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.monitor-text-display p {
+  margin: 0;
+}
+
+@keyframes pulse-bright {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff;
+    color: #fff;
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 12px #00ffff, 0 0 20px #00ffff;
+    color: #00ffff;
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff;
+    color: #fff;
+  }
+}
+
+.play-button.pulsing-play {
+  opacity: 1;
+  cursor: pointer;
+  border: 1px solid #00ffff;
+  animation: pulse-bright 2s infinite;
+}
+
+.play-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.palavra-chave {
+  color: yellow;
+  font-weight: bold;
+  text-shadow: 0 0 5px rgba(255, 255, 0, 0.7);
+  /* Sombra para melhor legibilidade no fundo escuro */
+}
+
+/* ==========================================================
+   === ESTILOS ADICIONADOS PARA A BARRA DE VELOCIDADE DOBRA ===
+   ========================================================== */
+
+.speed-gauge-fill.is-dobra-active {
+  background: linear-gradient(90deg,
+      #ff0000 0%,
+      #ff8000 10%,
+      #ffff00 20%,
+      #00ff00 30%,
+      #00ffff 40%,
+      #0000ff 50%,
+      #8000ff 60%,
+      #ff00ff 70%,
+      #ff0080 80%,
+      #ff0000 90%);
+  background-size: 200% 200%;
+  animation: rainbow-scroll 2s linear infinite;
+}
+
+@keyframes rainbow-scroll {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+/* --- ESTILO PARA O NOME DO PERSONAGEM NO DIÁLOGO --- */
+.dialogue-character-name {
+  color: yellow;
+  font-weight: bold;
+}
+
+/* =============================================================== */
+/* ==================== ESTILOS FLUTUANTES (S.O.S. / PAUSA) ==================== */
+/* =============================================================== */
+
+.floating-buttons-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999;
+  display: flex;
+  flex-direction: row-reverse;
+  /* Alinha da direita para a esquerda */
+  align-items: center;
+  /* Alinha verticalmente */
+  gap: 10px;
+  /* Espaço entre os botões */
+}
+
+.pause-button {
+  background-color: rgba(50, 255, 50, 0.2) !important;
+  /* FORÇANDO O VERDE */
+  border: 1px solid rgba(79, 195, 247, 0.8);
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  text-shadow: 0 0 5px #4fc3f7;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.pause-button.paused {
+  background-color: rgba(50, 255, 50, 0.2) !important;
+  /* FORÇANDO O VERDE (mesmo pausado) */
+}
+
+
+.pause-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sos-button {
+  width: 65px;
+  aspect-ratio: 1 / 1;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Estilos Base (Desativado) */
+  background-color: rgba(180, 0, 0, 0.7);
+  border: 1px solid rgba(255, 50, 50, 0.5);
+  color: #fff;
+  padding: 5px;
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+  cursor: not-allowed;
+  font-size: 0.8rem;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  text-shadow: 0 0 5px #f55;
+  opacity: 0.7;
+  transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.sos-button.active {
+  /* Estilos Ativos */
+  background-color: rgba(255, 0, 0, 0.9);
+  border: 1px solid rgba(255, 100, 100, 0.8);
+  cursor: pointer;
+  text-shadow: 0 0 8px #ff0000;
+  opacity: 1;
+  animation: pulse-sos 1.5s infinite;
+}
+
+.sos-button.active:hover {
+  transform: scale(1.02);
+}
+
+@keyframes pulse-sos {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 1);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+  }
+}
+
+/* ============================================================ */
+
+/* --- NOVO: Estilo para o Processador O2 --- */
+.o2-processor-display {
+  width: 100%;
+  margin-top: 25px;
+  padding: 10px;
+  background: rgba(0, 20, 40, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 180, 255, 0.3);
+  box-shadow: inset 0 0 10px rgba(0, 80, 150, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  /* === CORREÇÃO PARA CLIQUE: Adicionar z-index alto para sobrepor elementos 3D ou contêineres vizinhos === */
+  position: relative;
+  z-index: 999;
+  /* Garante que este bloco está acima de outros elementos do painel 3D */
+  /* === FIM DA CORREÇÃO === */
+}
+
+.o2-processor-label {
+  color: #00ffcc;
+  /* Ciano/Verde Água */
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  font-weight: bold;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+  text-shadow: 0 0 8px rgba(0, 255, 204, 0.7);
+}
+
+/* Container que simula o grid do medidor */
+.o2-meter-visual {
+  display: flex;
+  gap: 4px;
+  /* Espaço entre os quadrados */
+  width: 90%;
+  max-width: 150px;
+  height: 25px;
+  padding: 3px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid #00ffcc;
+  border-radius: 4px;
+  box-shadow: 0 0 5px rgba(0, 255, 204, 0.4);
+  margin-bottom: 10px;
+}
+
+/* Unidade individual do grid */
+.o2-unit {
+  flex-grow: 1;
+  background: rgba(0, 50, 80, 0.3);
+  /* Cor de fundo vazia */
+  border: 1px solid rgba(0, 180, 255, 0.5);
+  border-radius: 2px;
+  transition: background-color 0.4s ease-out;
+}
+
+/* Estilo para as unidades preenchidas */
+.o2-unit.filled {
+  background: #00bfff;
+  /* Azul brilhante/ciano */
+  box-shadow: inset 0 0 5px #00ffff, 0 0 5px #00ffff;
+}
+
+/* NOVO ESTILO PARA O BOTÃO TRANSFERIR (ESTILO PADRÃO) */
+.o2-transfer-button {
+  /* Substitui estilos antigos por um look mais 'botao-transferir' */
+  width: 100px;
+  /* Largura do botao-transferir */
+  padding: 0.25rem 1rem;
+  /* Padding do botao-transferir */
+  margin-top: 0.5rem;
+  /* Espaçamento com o medidor */
+
+  /* Cor e aparência baseadas no tema azul/ciano do painel, mas com estilo sólido */
+  background-color: #1d4ed8;
+  /* Azul escuro sólido */
+  color: white;
+  font-size: 0.7em;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+
+  border: none;
+  /* Remove a borda ciano */
+  border-radius: 1rem;
+  /* Raio de borda idêntico */
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  text-align: center;
+  box-sizing: border-box;
+  /* Garante que padding e border não alterem a largura total */
+}
+
+.o2-transfer-button:hover:not(:disabled) {
+  background-color: #1e40af;
+  /* Azul escuro mais forte no hover */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  /* Sombra mais evidente */
+  transform: translateY(-1px);
+}
+
+.o2-transfer-button.disabled {
+  /* Mantém o estilo de desativado */
+  cursor: not-allowed;
+  opacity: 0.5;
+  background-color: #333;
+  /* Cor neutra para desativado */
+  box-shadow: none;
+  border: none;
+  color: #ccc;
+  transform: none;
+}
+
+.o2-processor-value {
+  /* ESTILO REMOVIDO, MANTENDO APENAS PARA EVITAR ERROS DE COMPATIBILIDADE DE CSS ANTIGO,
+     MAS O CÓDIGO HTML FOI SUBSTITUÍDO PELO BOTÃO */
+  margin-top: 5px;
+  color: #0f0;
+  font-size: 0.8em;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+}
