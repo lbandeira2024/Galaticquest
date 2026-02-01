@@ -3,13 +3,12 @@ import { useEffect, useState } from "react";
 import { useAuth } from "./AuthContext";
 import "./FullscreenWarning.css";
 
-
 // Componentes da Aplicação
 import CadastroForm from "./CadastroForm";
 import Login from "./login";
 import TelaPlaneta from "./TelaPlaneta";
 import DecolagemMarte from './DecolagemMarte';
-import StellarMap from './stellar-map/StellarMap';
+// import StellarMap from './stellar-map/StellarMap'; // <--- (COMENTADO PARA CORRIGIR ERRO)
 import SelecaoNave from './SelecaoNave';
 import SelecaoEquipe from './SelecaoEquipe';
 import SelecaoRota from './SelecaoRota';
@@ -19,45 +18,38 @@ import Inventario from './CompraDeMaterial';
 import SelecaoRotaPrep from './SelecaoRotaPrep';
 import PlanejamentoRotaPrep from './Planejamento-Rota/StellarMapPlanPrep';
 import BoasVindas from './BoasVindas';
-import LobbyGrupos from './LobbyGrupos'; // <--- (ADICIONADO) Importação do Lobby
+import LobbyGrupos from './LobbyGrupos';
 import ContadorRegressivo from './ContadorRegressivo';
 import AdminPage from './AdminPage';
 import GameConfig from './GameConfig';
 
 // Context Providers
-import { AudioProvider, useAudio } from './AudioManager'; // Importa o Provider e o hook
+import { AudioProvider, useAudio } from './AudioManager';
 import { PauseProvider } from './PauseContext';
 import { AuthProvider } from './AuthContext';
 import { SpaceCoinsProvider } from './SpaceCoinsContext';
-import { ConfigProvider, useConfig } from './ConfigContext'; // Importa o Provider e o hook
-
+import { ConfigProvider, useConfig } from './ConfigContext';
 
 /**
  * Novo componente Wrapper (Inicializador).
- * Busca o gameNumber e apiBaseUrl do usuário logado.
- * Renderiza o PauseProvider e o AudioProvider na ordem correta.
  */
 function AppInitializer() {
   const { user } = useAuth();
   const { apiBaseUrl } = useConfig();
   const [currentUserGameNumber, setCurrentUserGameNumber] = useState(null);
-  // Estado para guardar o status inicial de pausa
   const [initialPauseState, setInitialPauseState] = useState(false);
 
   useEffect(() => {
     const fetchUserGameData = async () => {
-      // Se o usuário está logado E não é um admin, busca seus dados
       if (user && user._id && !user.administrador) {
         try {
           const response = await fetch(`${apiBaseUrl}/${user._id}/game-data`);
           const data = await response.json();
 
           if (data.success) {
-            // Armazena o gameNumber para passar ao PauseProvider
             if (data.gameNumber) {
               setCurrentUserGameNumber(data.gameNumber);
             }
-            // Armazena o estado inicial de pausa
             if (data.isPaused) {
               setInitialPauseState(data.isPaused);
             }
@@ -66,7 +58,7 @@ function AppInitializer() {
           console.error("Erro ao buscar dados para o PauseContext:", error);
         }
       } else if (user && user.administrador) {
-        setCurrentUserGameNumber(null); // Admin não joga
+        setCurrentUserGameNumber(null);
       }
     };
 
@@ -74,26 +66,20 @@ function AppInitializer() {
   }, [user, apiBaseUrl]);
 
   return (
-    // 1. PauseProvider é renderizado com gameNumber, apiBaseUrl e o estado inicial
     <PauseProvider
       gameNumber={currentUserGameNumber}
       apiBaseUrl={apiBaseUrl}
-      initialPauseState={initialPauseState} // Passa o estado inicial
+      initialPauseState={initialPauseState}
     >
-      {/* 2. AudioProvider é renderizado DENTRO do PauseProvider */}
-      {/* Agora o AudioProvider pode chamar usePause() com segurança */}
       <AudioProvider>
-        {/* 3. AppContent (rotas) é filho de ambos */}
         <AppContent />
       </AudioProvider>
     </PauseProvider>
   );
 }
 
-
 function AppContent() {
   const location = useLocation();
-  // 'useAudio' agora funciona aqui, pois AppContent é filho de AudioProvider
   const { stopAllAudio } = useAudio();
   const { user } = useAuth();
   const [showFullscreenWarning, setShowFullscreenWarning] = useState(false);
@@ -136,7 +122,6 @@ function AppContent() {
     setShowFullscreenWarning(false);
   };
 
-
   useEffect(() => {
     if (location.pathname === '/decolagem-marte') {
       stopAllAudio();
@@ -151,8 +136,6 @@ function AppContent() {
 
         <Route path="/ContadorRegressivo" element={<ContadorRegressivo />} />
         <Route path="/BoasVindas" element={<BoasVindas />} />
-
-        {/* (ADICIONADO) Rota para o Lobby */}
         <Route path="/LobbyGrupos" element={<LobbyGrupos />} />
 
         <Route path="/StellarMapPlanPrep" element={<PlanejamentoRotaPrep />} />
@@ -163,7 +146,10 @@ function AppContent() {
         <Route path="/SelecaoRota" element={<SelecaoRota />} />
         <Route path="/SelecaoEquipe" element={<SelecaoEquipe />} />
         <Route path="/SelecaoNave" element={<SelecaoNave />} />
-        <Route path="/stellar-map" element={<StellarMap />} />
+
+        {/* Rota temporariamente desativada pois o arquivo não foi encontrado */}
+        {/* <Route path="/stellar-map" element={<StellarMap />} /> */}
+
         <Route path="/" element={<CadastroForm />} />
         <Route path="/login" element={<Login />} />
         <Route path="/telaplaneta" element={<TelaPlaneta />} />
@@ -189,13 +175,10 @@ function AppContent() {
 
 function App() {
   return (
-    // ConfigProvider envolve todos os outros providers
     <ConfigProvider>
-      {/* AudioProvider e PauseProvider foram REMOVIDOS daqui */}
       <AuthProvider>
         <SpaceCoinsProvider>
           <Router>
-            {/* AppInitializer agora renderiza PauseProvider E AudioProvider na ordem correta */}
             <AppInitializer />
           </Router>
         </SpaceCoinsProvider>
