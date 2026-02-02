@@ -109,7 +109,7 @@ const CadastroForm = () => {
   // --- AJUSTE DE ÁUDIO AQUI ---
   // Certifique-se que o arquivo existe em: public/sounds/01. Intro_To_the_Stars.mp3
   useEffect(() => {
-    const currentMusic = "/sounds/01. Intro_To_the_Stars.mp3";
+    const currentMusic = "/sounds/musica_fundo.mp3";
     playTrack(currentMusic, { loop: true, isPrimary: false });
   }, [playTrack]);
 
