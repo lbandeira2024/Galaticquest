@@ -339,7 +339,7 @@ const CadastroForm = () => {
       <img src="/images/logogalaticQuest.png" className="game-logo" alt="Galactic Quest" />
 
       <div className="solar-system">
-        <img src="/images/earth.png" className="planet earth" alt="Terra" />
+        <img src="/images/Terra.png" className="planet earth" alt="Terra" />
         <img src="/images/mercury.png" className="planet mercury" alt="Mercúrio" />
         <img src="/images/venus.png" className="planet venus" alt="Vênus" />
         <img src="/images/sun.png" className="sun" alt="Sol" />
