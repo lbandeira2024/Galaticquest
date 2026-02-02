@@ -344,6 +344,7 @@ const CadastroForm = () => {
         <img src="/images/venus.png" className="planet venus" alt="Vênus" />
         <img src="/images/sun.png" className="sun" alt="Sol" />
         <img src="/images/mars.png" className="planet mars" alt="Marte" />
+
       </div>
 
       <div className="game-info2">
