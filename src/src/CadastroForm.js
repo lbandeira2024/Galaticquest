@@ -243,6 +243,7 @@ const CadastroForm = () => {
           redirectToNextStep(loggedInUser);
         }
 
+
       } else {
         alert(`❌ ${response.data.message}`);
       }
