@@ -1,0 +1,432 @@
+/* Fundo cobrindo toda a tela */
+.background {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Animação de estrelas */
+.stars {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+/* Sistema solar movido para a esquerda */
+.solar-system {
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  width: 450px;
+  height: 350px;
+  transform: rotate(10deg);
+}
+
+/* Logo do jogo */
+.game-logo {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 180px;
+  height: auto;
+}
+
+/* Quadro informativo sobre o jogo */
+.game-info2 {
+  position: absolute;
+  bottom: 8%;
+  left: 5%;
+  width: 370px;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #e68900;
+  border-radius: 10px;
+  color: white;
+  font-size: 14px;
+  text-align: justify;
+}
+
+/* Contêiner do formulário */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* Formulário estilizado */
+.cadastro-form {
+  background: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  /* Reduzido de 25px para 20px */
+  border-radius: 12px;
+  color: white;
+  width: 350px;
+  text-align: center;
+  z-index: 10;
+}
+
+/* Título do formulário */
+.cadastro-form h2 {
+  font-size: 1.5rem;
+  /* Fonte menor para caber */
+  margin-bottom: 10px;
+}
+
+
+/* Adicionando espaçamento para múltiplos campos */
+.cadastro-form input {
+  width: 100%;
+  padding: 8px;
+  /* Reduzido de 10px para 8px */
+  margin: 6px 0;
+  /* Reduzido de 8px para 6px */
+  border-radius: 5px;
+  border: 1px solid #ff9800;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 14px;
+  /* Reduzido de 16px para 14px */
+}
+
+/* Botão de cadastro */
+.cadastro-form button {
+  width: 100%;
+  padding: 10px;
+  /* Reduzido de 12px para 10px */
+  border: none;
+  border-radius: 5px;
+  background-color: #ff9800;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  /* Reduzido de 18px para 16px */
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Animação do foguete ao clicar */
+.launching {
+  transform: translateY(-50px);
+  background-color: #ff5722;
+  font-size: 24px;
+  transition: transform 0.5s ease-in-out;
+}
+
+/* Alternar entre login e cadastro */
+.toggle-form {
+  color: #ff9800;
+  cursor: pointer;
+  margin-top: 8px;
+  /* Reduzido de 10px para 8px */
+  font-size: 14px;
+}
+
+/* Animação de rotação para a Terra */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.earth {
+  animation: spin 110s linear infinite;
+  transform-origin: center;
+}
+
+/* Posicionamento específico para a Terra (ajuste conforme necessário) */
+.earth {
+  width: 1300px;
+  height: 1300px;
+  top: 230%;
+  left: 2480%;
+  margin-left: -60px;
+  margin-top: -60px;
+  /* Metade da altura para centralizar */
+}
+
+/* Mensagem de e-mail em uso */
+.cadastro-form p.error-message {
+  color: #ff4444;
+  font-size: 12px;
+  margin: -8px 0 8px 0;
+  text-align: left;
+}
+
+/* Botão desabilitado */
+.cadastro-form button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Input de e-mail com erro */
+.cadastro-form input.error {
+  border-color: #ff4444;
+}
+
+.contador-regressivo {
+  text-align: center;
+  color: white;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 15px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.contador-numeros {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+.contador-bloco {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem 2rem;
+  border-radius: 15x;
+  min-width: 130px;
+}
+
+.contador-bloco span {
+  font-size: 8rem;
+  font-weight: bold;
+  display: block;
+}
+
+.contador-bloco small {
+  font-size: 1rem;
+  opacity: 0.8;
+}
+
+.game-logo {
+  z-index: 20;
+}
+
+.game-info2 {
+  z-index: 20;
+}
+
+.fullscreen-prompt-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: white;
+  text-align: center;
+  backdrop-filter: blur(5px);
+  font-family: 'Courier New', monospace;
+}
+
+.fullscreen-prompt-box {
+  background: rgba(0, 20, 40, 0.85);
+  border: 2px solid #ffae00;
+  border-radius: 15px;
+  padding: 40px;
+  max-width: 600px;
+  box-shadow: 0 0 30px rgba(255, 174, 0, 0.5);
+}
+
+.fullscreen-prompt-box h2 {
+  font-size: 2em;
+  color: #ffc400;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px #ffae00;
+}
+
+.fullscreen-prompt-box p {
+  font-size: 1.1em;
+  margin-bottom: 30px;
+  color: #ddd;
+}
+
+.fullscreen-prompt-box button {
+  background: linear-gradient(145deg, #e67300, #ff8c00);
+  border: 1px solid #ffae00;
+  color: #fff;
+  padding: 12px 25px;
+  font-size: 1.1em;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 10px rgba(255, 140, 0, 0.5);
+}
+
+.fullscreen-prompt-box button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 165, 0, 0.8);
+}
+
+.game-version {
+  position: absolute;
+  bottom: calc(5% - 5px);
+  left: 5%;
+  color: #e68900;
+  font-size: 12px;
+  font-weight: bold;
+  opacity: 0.8;
+  z-index: 20;
+  font-family: sans-serif;
+}
+
+/* ======================================== */
+/* CSS ADICIONAL PARA SELETOR DE IDIOMA     */
+/* ======================================== */
+
+.language-selector {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+}
+
+.flag {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  filter: grayscale(100%);
+  transition: filter 0.3s ease, transform 0.3s ease;
+  border: 2px solid #555;
+}
+
+.flag.active {
+  filter: grayscale(0%);
+  transform: scale(1.15);
+  border: 2px solid #ffae00;
+}
+
+.flag:not(.active):hover {
+  filter: grayscale(50%);
+  transform: scale(1.05);
+}
+
+
+/* ======================================== */
+/* --- INÍCIO DA RESPONSIVIDADE ---         */
+/* ======================================== */
+
+/* Telas de tablet e celular (largura máxima de 900px) */
+@media (max-width: 900px) {
+  .background {
+    overflow-y: auto;
+    /* Permite rolar a tela */
+    padding: 20px 0;
+    /* Adiciona espaço para rolagem */
+  }
+
+  .form-container {
+    padding-top: 60px;
+    /* Espaço para o logo */
+    padding-bottom: 20px;
+    gap: 20px;
+    justify-content: flex-start;
+    /* Alinha ao topo */
+  }
+
+  .cadastro-form {
+    width: 90%;
+    max-width: 350px;
+    padding: 15px;
+  }
+
+  /* Esconde elementos decorativos que não cabem */
+  .solar-system {
+    display: none;
+  }
+
+  /* Reposiciona a caixa de informação */
+  .game-info2 {
+    position: relative;
+    /* Remove posicionamento absoluto */
+    width: 90%;
+    max-width: 370px;
+    left: auto;
+    bottom: auto;
+    margin: 20px auto 0 auto;
+    /* Centraliza e adiciona margem */
+    text-align: left;
+    font-size: 13px;
+  }
+
+  .game-logo {
+    width: 120px;
+    top: 10px;
+    right: 10px;
+  }
+
+  .language-selector {
+    top: 15px;
+    left: 15px;
+  }
+
+  .game-version {
+    /* Esconde a versão se ela estiver sobrepondo a info-box */
+    display: none;
+  }
+}
+
+/* Telas de celular (largura máxima de 480px) */
+@media (max-width: 480px) {
+  .fullscreen-prompt-box {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .fullscreen-prompt-box h2 {
+    font-size: 1.5em;
+  }
+
+  .fullscreen-prompt-box p {
+    font-size: 1em;
+  }
+
+  /* Empilha o contador regressivo */
+  .contador-numeros {
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .contador-bloco {
+    padding: 0.5rem 1rem;
+    min-width: auto;
+  }
+
+  .contador-bloco span {
+    font-size: 5rem;
+  }
+
+  .contador-bloco small {
+    font-size: 0.9rem;
+  }
+
+  .cadastro-form h2 {
+    font-size: 1.3rem;
+  }
+}

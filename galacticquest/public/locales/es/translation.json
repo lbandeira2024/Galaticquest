@@ -1,0 +1,19 @@
+{
+    "gameDescription": "Embárcate en un viaje interplanetario para desarrollar tus habilidades de liderazgo y trabajo en equipo.",
+    "loginTitle": "Acceso de astronauta",
+    "registerTitle": "Registro de nuevo astronauta",
+    "emailPlaceholder": "Correo electrónico",
+    "passwordPlaceholder": "Contraseña",
+    "confirmPasswordPlaceholder": "Confirmar Contraseña",
+    "loginButton": "Entrar",
+    "registerButton": "Registrar",
+    "toggleToRegister": "¿Nuevo astronauta? ¡Regístrate aquí!",
+    "toggleToLogin": "¿Ya tienes una cuenta? ¡Inicia sesión!",
+    "namePlaceholder": "Nombre",
+    "companyPlaceholder": "Empresa",
+    "sectorPlaceholder": "Sector",
+    "regionalPlaceholder": "Regional",
+    "leadershipTimePlaceholder": "Tiempo en Liderazgo",
+    "ledNumberPlaceholder": "Número de Liderados",
+    "cargoPlaceholder": "Cargo"
+}

@@ -1,0 +1,641 @@
+/* Starfield Background */
+.background_equipe {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  overflow: hidden;
+}
+
+.stars_equipe {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+/* Mission Info Panel */
+.game-info_equipe {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 300px;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.85);
+  border: 2px solid #ff9800;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 14px;
+  text-align: justify;
+  z-index: 10;
+  box-shadow: 0 0 15px rgba(255, 152, 0, 0.3);
+}
+
+.game-info_equipe p {
+  margin-bottom: 30px;
+}
+
+.game-info_equipe h3 {
+  margin: 0 0 15px 0;
+  color: #ff9800;
+  border-bottom: 1px solid #444;
+  padding-bottom: 10px;
+  font-size: 18px;
+}
+
+.game-info_equipe h4 {
+  color: #ff9800;
+  font-size: 14px;
+}
+
+/* Mission Progress Steps */
+.mission-steps_equipe {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.step-container_equipe {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.step-circle_equipe {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-family: 'Courier New', monospace;
+  flex-shrink: 0;
+}
+
+.step-text_equipe {
+  padding: 8px 15px;
+  border-radius: 20px;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 12px;
+  flex-grow: 1;
+}
+
+.step-details_equipe {
+  font-size: 11px;
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-top: 5px;
+  padding-left: 15px;
+}
+
+.step-details_equipe ul {
+  margin: 5px 0;
+  padding-left: 15px;
+}
+
+.step-details_equipe li {
+  margin-bottom: 3px;
+}
+
+/* Enhanced Thick Arrow */
+.digital-arrow_equipe {
+  color: #ff9800;
+  margin: 10px 0;
+  text-shadow: 0 0 12px rgba(255, 152, 0, 0.9);
+  position: relative;
+  height: 40px;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.digital-arrow_equipe::before {
+  content: "↓";
+  position: absolute;
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1;
+  animation: digitalGlitch 2.5s infinite;
+  text-shadow:
+    0 0 2px #ff9800,
+    0 0 4px #ff9800;
+  color: rgba(255, 152, 0, 0.9);
+}
+
+/* Step States */
+.step-active_equipe .step-circle_equipe {
+  background: #ff5722;
+  color: #000;
+  box-shadow: 0 0 10px #ff5722, 0 0 20px #ff5722;
+  animation: pulse 2s infinite;
+}
+
+.step-active_equipe .step-text_equipe {
+  background: rgba(255, 87, 34, 0.2);
+  color: #ffcc80;
+  border: 1px solid #ff5722;
+}
+
+.step-inactive_equipe .step-circle_equipe {
+  background: #333;
+  color: #666;
+  border: 1px solid #444;
+}
+
+.step-inactive_equipe .step-text_equipe {
+  background: rgba(30, 30, 30, 0.5);
+  color: #666;
+  border: 1px solid #444;
+}
+
+/* Main Selection Container */
+.selection-container_equipe {
+  display: flex;
+  position: absolute;
+  top: 20px;
+  left: 370px;
+  width: calc(100% - 380px);
+  height: calc(100vh - 90px);
+  max-width: 1000px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #ff9800;
+  border-radius: 15px;
+  padding: 25px;
+  color: white;
+  z-index: 10;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Ships List Section */
+.ships-section_equipe {
+  flex: 1;
+  padding-right: 25px;
+  overflow-y: auto;
+  border-right: 1px solid #444;
+}
+
+.ships-section_equipe h2 {
+  margin: 0 0 20px 0;
+  color: #ff9800;
+  border-bottom: 1px solid #444;
+  padding-bottom: 10px;
+  text-align: center;
+  font-size: 22px;
+}
+
+.ship-option_equipe {
+  display: flex;
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #444;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(30, 30, 30, 0.5);
+}
+
+.ship-option_equipe:hover:not(.disabled_equipe) {
+  border-color: #ff9800;
+  background: rgba(255, 152, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.ship-option_equipe.selected_equipe {
+  border-color: #ff5722;
+  background: rgba(255, 87, 34, 0.2);
+  box-shadow: 0 0 15px rgba(255, 87, 34, 0.3);
+}
+
+.ship-option_equipe.disabled_equipe {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.ship-image_equipe {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-right: 20px;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+}
+
+.ship-code_equipe {
+  font-weight: bold;
+  color: #ff9800;
+}
+
+/* Ship Details Section */
+.ship-details_equipe {
+  flex: 1;
+  padding: 0 25px;
+  overflow-y: auto;
+  position: relative;
+}
+
+.ship-details_equipe h2 {
+  color: #ff9800;
+  margin: 0 0 15px 0;
+  border-bottom: 1px solid #444;
+  padding-bottom: 10px;
+  font-size: 24px;
+}
+
+.ship-details_equipe h4 {
+  color: #ff9800;
+  font-size: 14px;
+}
+
+.ship-details_equipe strong {
+  color: #ff9800;
+}
+
+.no-ship-selected_equipe {
+  text-align: center;
+  margin-top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+}
+
+/* Selection Button */
+.select-button_equipe {
+  position: absolute;
+  bottom: 25px;
+  left: 25px;
+  padding: 12px 25px;
+  background: linear-gradient(to right, #ff9800, #ff5722);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.select-button_equipe:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.select-button_equipe:disabled {
+  background: linear-gradient(to right, #666, #444);
+  color: #ff9800;
+  cursor: not-allowed;
+  border: 1px solid #ff9800;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#ff9800, #ff5722);
+  border-radius: 10px;
+}
+
+/* Animations */
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes digitalGlitch {
+  0% {
+    transform: translateY(0) scale(1.3);
+    opacity: 1;
+    text-shadow: 0 0 15px rgba(255, 152, 0, 1);
+  }
+
+  20% {
+    transform: translateY(-3px) scale(1.2);
+    opacity: 0.9;
+  }
+
+  40% {
+    transform: translateY(3px) scale(1.4);
+    text-shadow: 0 0 20px rgba(255, 152, 0, 0.8);
+  }
+
+  60% {
+    transform: translateY(0) scale(1.25);
+    opacity: 1;
+  }
+
+  80% {
+    transform: translateY(2px) scale(1.35);
+    opacity: 0.95;
+  }
+
+  100% {
+    transform: translateY(0) scale(1.3);
+    opacity: 1;
+  }
+}
+
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 0.8;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Team Selection Layout */
+.team-definition_equipe {
+  background: rgba(20, 20, 20, 0.7);
+  border: 1px solid #444;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  min-height: 150px;
+}
+
+.team-achievements_equipe {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #444;
+}
+
+.team-achievements_equipe strong {
+  color: #ff9800;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.team-achievements_equipe ul {
+  margin: 5px 0 0 0;
+  padding-left: 15px;
+}
+
+.team-achievements_equipe li {
+  font-size: 12px;
+  margin-bottom: 3px;
+  line-height: 1.4;
+}
+
+.team-grid_equipe {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.team-column_equipe {
+  background: rgba(30, 30, 30, 0.7);
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 10px;
+  transition: all 0.3s ease;
+}
+
+.team-column_equipe:hover {
+  border-color: #ff9800;
+  background: rgba(255, 152, 0, 0.1);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.team-column_equipe.selected_equipe {
+  border-color: #ff5722;
+  background: rgba(255, 87, 34, 0.2);
+  box-shadow: 0 0 15px rgba(255, 87, 34, 0.3);
+}
+
+.team-member_equipe {
+  padding: 8px;
+  margin-bottom: 8px;
+  background: rgba(50, 50, 50, 0.5);
+  border-radius: 5px;
+  font-size: 12px;
+  text-align: left;
+  overflow: hidden;
+  min-height: 60px;
+  position: relative;
+}
+
+.team-member-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+  float: left;
+}
+
+.team-member-details {
+  overflow: hidden;
+}
+
+.team-member-role {
+  color: #ff9800;
+  font-size: 11px;
+  margin-bottom: 2px;
+}
+
+.team-member-name-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 2px;
+}
+
+.team-member-experience {
+  font-size: 11px;
+  color: #aaa;
+}
+
+.member-flag-container {
+  position: relative;
+  display: inline-block;
+}
+
+.member-flag {
+  width: 25px;
+  height: 25px;
+  border: 1px solid #444;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+}
+
+.member-flag-tooltip {
+  visibility: hidden;
+  width: max-content;
+  max-width: 150px;
+  background-color: rgba(0, 0, 0, 0.95);
+  color: #ff9800;
+  text-align: center;
+  border-radius: 4px;
+  padding: 5px 8px;
+  position: absolute;
+  z-index: 1000;
+  top: 50%;
+  left: 50%;
+  transform: translate(-65%, -50%);
+  /* Centraliza exatamente sobre a bandeira */
+  opacity: 0;
+  transition: all 0.3s ease;
+  font-size: 9px;
+  border: 1px solid #ff9800;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.member-flag-container:hover .member-flag-tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.team-header_equipe {
+  text-align: center;
+  color: #ff9800;
+  font-weight: bold;
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #444;
+}
+
+.select-team-button_equipe {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  background: linear-gradient(to right, #ff9800, #ff5722);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.select-team-button_equipe:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.select-team-button_equipe:disabled {
+  background: linear-gradient(to right, #666, #444);
+  color: #888;
+  cursor: not-allowed;
+  border: 1px solid #444;
+}
+
+/* Continue Arrow */
+.continue-arrow-container_equipe {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+}
+
+.continue-arrow_equipe {
+  display: flex;
+  height: 1200px;
+  align-items: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.continue-arrow_equipe.visible_equipe {
+  opacity: 1;
+  animation: blink 1.5s infinite;
+}
+
+.continue-arrow_equipe:hover .continue-text_equipe {
+  color: #ff5722;
+}
+
+.continue-arrow_equipe:hover .arrow-icon_equipe {
+  fill: #ff5722;
+  transform: translateX(5px);
+}
+
+.continue-text_equipe {
+  color: #ff9800;
+  font-family: 'Courier New', monospace;
+  font-size: 18px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  transition: all 0.3s;
+}
+
+.arrow-icon_equipe {
+  width: 40px;
+  height: 40px;
+  margin-left: 10px;
+  fill: #ff9800;
+  transition: all 0.3s;
+}
+
+/* Team Photo Container */
+.team-photo-container_equipe {
+  position: absolute;
+  right: 20px;
+  left: 630px;
+  top: 210px;
+  width: 320px;
+  height: 220px;
+  border: 2px solid #ff9800;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(255, 152, 0, 0.3);
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.team-photo-container_equipe.visible_equipe {
+  opacity: 1;
+}
+
+.team-photo_equipe {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.team-photo-caption_equipe {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: #ff9800;
+  text-align: center;
+  padding: 8px;
+  font-size: 14px;
+}
+
+.team-column_equipe.selected_equipe {
+  border-color: #ff5722;
+  background: rgba(255, 87, 34, 0.2);
+  box-shadow: 0 0 15px rgba(255, 87, 34, 0.3);
+  transform: translateY(-3px);
+}

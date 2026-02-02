@@ -1,0 +1,689 @@
+/* Base Styles */
+.background {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+}
+
+.stars {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+/* Game Info Panel */
+.game-info {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    width: 300px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid #ff9800;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    text-align: justify;
+    z-index: 10;
+    box-shadow: 0 0 15px rgba(255, 152, 0, 0.3);
+}
+
+.game-info p {
+    margin-bottom: 30px;
+}
+
+.game-info h3 {
+    margin: 0 0 15px 0;
+    color: #ff9800;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+    font-size: 18px;
+}
+
+/* Tabs Navigation */
+.tabs-container {
+    position: absolute;
+    top: 20px;
+    left: 370px;
+    width: calc(100% - 380px);
+    max-width: 1000px;
+    display: flex;
+    gap: 10px;
+    z-index: 10;
+}
+
+.tab-button {
+    padding: 12px 25px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #ff9800;
+    border: 2px solid #ff9800;
+    border-radius: 5px 5px 0 0;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab-button.active {
+    background: rgba(255, 152, 0, 0.2);
+    border-bottom: 2px solid rgba(0, 0, 0, 0.8);
+    margin-bottom: -2px;
+    color: #fff;
+}
+
+.tab-button:hover {
+    background: rgba(255, 152, 0, 0.1);
+}
+
+/* Main Container */
+.purchase-container {
+    display: flex;
+    position: absolute;
+    top: 70px;
+    left: 370px;
+    width: calc(100% - 380px);
+    height: calc(100vh - 140px);
+    max-width: 1000px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #ff9800;
+    border-radius: 0 15px 15px 15px;
+    padding: 25px;
+    color: white;
+    z-index: 10;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Items Section */
+.items-section {
+    flex: 1;
+    padding-right: 25px;
+    overflow-y: auto;
+    border-right: 1px solid #444;
+}
+
+.items-section h2 {
+    margin: 0 0 20px 0;
+    color: #ff9800;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+    text-align: center;
+    font-size: 22px;
+}
+
+.item-option {
+    display: flex;
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #444;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(30, 30, 30, 0.5);
+}
+
+.item-option:hover {
+    border-color: #ff9800;
+    background: rgba(255, 152, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.item-option.selected {
+    border-color: #ff5722;
+    background: rgba(255, 87, 34, 0.2);
+    box-shadow: 0 0 15px rgba(255, 87, 34, 0.3);
+}
+
+.item-option.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    border-color: #666;
+}
+
+.item-option.disabled:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: #666;
+    background: rgba(30, 30, 30, 0.5);
+}
+
+.item-image {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-right: 20px;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+}
+
+.item-details {
+    flex: 1;
+}
+
+.item-name {
+    font-weight: bold;
+    color: #ff9800;
+    margin-bottom: 5px;
+}
+
+.item-price {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.shop .item-price {
+    color: #4CAF50;
+}
+
+.personal .item-price {
+    color: #2196F3;
+}
+
+.item-description {
+    font-size: 12px;
+    margin-top: 5px;
+    color: #ccc;
+}
+
+.item-added {
+    color: #4CAF50;
+    font-size: 11px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+/* Inventory Section */
+.inventory-section {
+    flex: 1;
+    padding-left: 25px;
+    overflow-y: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.inventory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+}
+
+.inventory-header h2 {
+    color: #ff9800;
+    margin: 0;
+    font-size: 22px;
+}
+
+.currency-display {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.shop .currency-display {
+    color: #FFD700;
+}
+
+.personal .currency-display {
+    color: #4FC3F7;
+}
+
+/* Storage Info */
+.storage-info {
+    background: rgba(30, 30, 30, 0.5);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+    border-left: 3px solid #4CAF50;
+}
+
+.storage-stats {
+    display: flex;
+    justify-content: space-between;
+    margin: 8px 0;
+    color: #ccc;
+}
+
+.storage-stats span:first-child {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+/* Inventory Grid */
+.inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 60px;
+}
+
+.inventory-item {
+    background: rgba(30, 30, 30, 0.3);
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.shop .inventory-item {
+    border-left: 3px solid #ff9800;
+}
+
+.personal .inventory-item {
+    border-left: 3px solid #2196F3;
+}
+
+.inventory-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.inventory-item.selected {
+    border-left: 3px solid #ff5722;
+    background: rgba(255, 87, 34, 0.2);
+    box-shadow: 0 0 10px rgba(255, 87, 34, 0.3);
+}
+
+.inventory-item.empty {
+    border-left: 3px solid #666;
+    color: #666;
+    font-style: italic;
+    cursor: default;
+    justify-content: center;
+}
+
+.inventory-item.empty:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.inventory-item img {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    margin: 0 auto 10px;
+}
+
+.inventory-item-name {
+    font-weight: bold;
+    color: #ffcc80;
+    margin-bottom: 5px;
+}
+
+.inventory-item-quantity {
+    color: #fff;
+    font-size: 12px;
+}
+
+/* Action Buttons */
+.inventory-actions {
+    position: absolute;
+    bottom: 25px;
+    right: 25px;
+    display: flex;
+    gap: 15px;
+}
+
+.remove-button {
+    padding: 12px 25px;
+    background: linear-gradient(to right, #f44336, #d32f2f);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.remove-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.remove-button:disabled {
+    background: linear-gradient(to right, #666, #444);
+    color: #f44336;
+    cursor: not-allowed;
+}
+
+.purchase-button {
+    padding: 12px 25px;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.shop .purchase-button {
+    background: linear-gradient(to right, #4CAF50, #388E3C);
+}
+
+.personal .purchase-button {
+    background: linear-gradient(to right, #2196F3, #1976D2);
+}
+
+.purchase-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+}
+
+.shop .purchase-button:disabled {
+    background: linear-gradient(to right, #666, #444);
+    color: #4CAF50;
+    cursor: not-allowed;
+}
+
+.personal .purchase-button:disabled {
+    background: linear-gradient(to right, #666, #444);
+    color: #2196F3;
+    cursor: not-allowed;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(#ff9800, #ff5722);
+    border-radius: 10px;
+}
+
+/* Mission Progress Steps */
+.mission-steps {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.step-container {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.step-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    flex-shrink: 0;
+}
+
+.step-text {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 12px;
+}
+
+/* Enhanced Thick Arrow */
+.digital-arrow {
+    color: #ff9800;
+    margin: 10px 0;
+    text-shadow: 0 0 12px rgba(255, 152, 0, 0.9);
+    position: relative;
+    height: 40px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.digital-arrow::before {
+    content: "↓";
+    position: absolute;
+    font-size: 36px;
+    font-weight: 900;
+    line-height: 1;
+    animation: digitalGlitch 2.5s infinite;
+    text-shadow:
+        0 0 2px #ff9800,
+        0 0 4px #ff9800;
+    color: rgba(255, 152, 0, 0.9);
+}
+
+/* Step States */
+.step-active .step-circle {
+    background: #ff5722;
+    color: #000;
+    box-shadow: 0 0 10px #ff5722, 0 0 20px #ff5722;
+    animation: pulse 2s infinite;
+}
+
+.step-active .step-text {
+    background: rgba(255, 87, 34, 0.2);
+    color: #ffcc80;
+    border: 1px solid #ff5722;
+}
+
+.step-inactive .step-circle {
+    background: #333;
+    color: #666;
+    border: 1px solid #444;
+}
+
+.step-inactive .step-text {
+    background: rgba(30, 30, 30, 0.5);
+    color: #666;
+    border: 1px solid #444;
+}
+
+
+/* ======================================== */
+/* --- INÍCIO DA RESPONSIVIDADE ---         */
+/* ======================================== */
+
+/* Telas de tablet (largura máxima de 1024px) */
+@media (max-width: 1024px) {
+    .background {
+        overflow-y: auto;
+        /* Permite rolagem */
+        height: auto;
+        min-height: 100vh;
+    }
+
+    /* Empilha os containers principais */
+    .game-info {
+        position: relative;
+        width: auto;
+        /* Largura automática */
+        left: auto;
+        top: auto;
+        margin: 20px 20px 0 20px;
+        /* Adiciona margens */
+        z-index: 10;
+    }
+
+    .tabs-container {
+        position: relative;
+        width: auto;
+        left: auto;
+        top: auto;
+        margin: 20px 20px 0 20px;
+        z-index: 10;
+    }
+
+    .purchase-container {
+        position: relative;
+        flex-direction: column;
+        /* Empilha as seções */
+        width: auto;
+        height: auto;
+        /* Altura automática */
+        max-height: none;
+        /* Remove altura máxima */
+        left: auto;
+        top: auto;
+        margin: 0 20px 100px 20px;
+        /* Margem inferior para o botão 'Continuar' */
+        padding: 15px;
+    }
+
+    /* Ajusta as seções internas */
+    .items-section {
+        border-right: none;
+        /* Remove borda lateral */
+        border-bottom: 1px solid #444;
+        /* Adiciona borda inferior */
+        padding-right: 0;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+        max-height: 50vh;
+        /* Limita a altura da lista */
+    }
+
+    .inventory-section {
+        padding-left: 0;
+        max-height: 50vh;
+        /* Limita a altura da lista */
+    }
+
+    /* Ajusta os botões de ação do inventário */
+    .inventory-actions {
+        position: relative;
+        /* Tira de absoluto */
+        bottom: auto;
+        right: auto;
+        width: 100%;
+        margin-top: 20px;
+        justify-content: space-between;
+        /* Espaça os botões */
+    }
+
+    .purchase-button,
+    .remove-button {
+        width: 48%;
+        /* Faz os botões dividirem o espaço */
+        padding: 10px;
+        font-size: 14px;
+    }
+}
+
+/* Telas de celular (largura máxima de 768px) */
+@media (max-width: 768px) {
+    .game-info {
+        margin: 10px 10px 0 10px;
+        padding: 15px;
+    }
+
+    .tabs-container {
+        margin: 15px 10px 0 10px;
+        gap: 5px;
+    }
+
+    .tab-button {
+        padding: 10px 15px;
+        font-size: 14px;
+        flex-grow: 1;
+        /* Faz os botões dividirem o espaço */
+        text-align: center;
+        justify-content: center;
+    }
+
+    .purchase-container {
+        margin: 0 10px 100px 10px;
+        padding: 10px;
+    }
+
+    .item-option {
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .item-image {
+        width: 60px;
+        height: 60px;
+        margin-right: 10px;
+    }
+
+    .item-name {
+        font-size: 0.9em;
+    }
+
+    .item-price {
+        font-size: 0.9em;
+    }
+
+    .item-description {
+        font-size: 11px;
+    }
+
+    .inventory-grid {
+        /* Mostra 2 colunas e permite preenchimento */
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+    }
+
+    .inventory-item {
+        padding: 10px;
+        min-height: 110px;
+    }
+
+    .inventory-item img {
+        width: 50px;
+        height: 50px;
+    }
+
+    .inventory-item-name {
+        font-size: 0.8em;
+    }
+
+    /* Ajusta o painel de "steppers" */
+    .mission-steps {
+        gap: 10px;
+    }
+
+    .step-container {
+        gap: 10px;
+    }
+
+    .step-text {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+
+    .digital-arrow {
+        margin: 5px 0;
+        height: 30px;
+    }
+
+    .digital-arrow::before {
+        font-size: 30px;
+    }
+}
