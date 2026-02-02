@@ -1,7 +1,0 @@
-{
-    "__ANTIGO_frontendUrl": "http://192.168.15.8:3000",
-    "frontendUrl": "*",
-    "__ANTIGO_apiBaseUrl": "http://192.168.15.8:5000",
-    "apiBaseUrl": "http://3.136.236.17:5000",
-    "serverPort": 5000
-}
