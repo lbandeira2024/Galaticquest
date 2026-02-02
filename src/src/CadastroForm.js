@@ -6,14 +6,11 @@ import { useAudio } from "./AudioManager";
 import { useAuth } from "./AuthContext";
 import { useTranslation } from "react-i18next";
 import { decryptData } from "./crypto";
-import { useConfig } from './ConfigContext'; // NOVO: Importa o hook para usar a configuração
-
-// REMOVIDO: A linha antiga que definia a URL estaticamente
-// const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:5000";
+import { useConfig } from './ConfigContext';
 
 const CadastroForm = () => {
-  const { apiBaseUrl } = useConfig(); // NOVO: Pega a URL da API do contexto
-  const API_BASE_URL = apiBaseUrl; // NOVO: Atribui à constante usada pelo resto do componente
+  const { apiBaseUrl } = useConfig();
+  const API_BASE_URL = apiBaseUrl;
 
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
@@ -78,7 +75,7 @@ const CadastroForm = () => {
       setIsRegistering(true);
       const fetchUserData = async () => {
         try {
-          if (!API_BASE_URL) return; // Garante que a URL foi carregada
+          if (!API_BASE_URL) return;
           const response = await axios.get(`${API_BASE_URL}/user-by-email?email=${encodeURIComponent(prefilledEmail)}`);
           const userData = response.data.usuario;
 
@@ -109,6 +106,8 @@ const CadastroForm = () => {
       .catch(error => console.error("Erro ao buscar a versão:", error));
   }, []);
 
+  // --- AJUSTE DE ÁUDIO AQUI ---
+  // Certifique-se que o arquivo existe em: public/sounds/01. Intro_To_the_Stars.mp3
   useEffect(() => {
     const currentMusic = "/sounds/01. Intro_To_the_Stars.mp3";
     playTrack(currentMusic, { loop: true, isPrimary: false });
@@ -305,6 +304,10 @@ const CadastroForm = () => {
     <div className="background" onClick={unlockAudio}>
       <canvas ref={canvasRef} className="stars"></canvas>
 
+      {/* --- AJUSTE BANDEIRAS --- 
+          Assumindo que estão em public/images/flags/ 
+          Se estiverem soltas em public/images, remova o "/flags"
+      */}
       <div className="language-selector">
         <img
           src="/images/flags/brazil.png"
@@ -332,7 +335,9 @@ const CadastroForm = () => {
         />
       </div>
 
+      {/* --- AJUSTE IMAGENS --- */}
       <img src="/images/logogalaticQuest.png" className="game-logo" alt="Galactic Quest" />
+
       <div className="solar-system">
         <img src="/images/earth.png" className="planet earth" alt="Terra" />
         <img src="/images/mercury.png" className="planet mercury" alt="Mercúrio" />
@@ -340,6 +345,7 @@ const CadastroForm = () => {
         <img src="/images/sun.png" className="sun" alt="Sol" />
         <img src="/images/mars.png" className="planet mars" alt="Marte" />
       </div>
+
       <div className="game-info2">
         <h3>Galactic Quest</h3>
         <p>{t('gameDescription')}</p>
