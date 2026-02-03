@@ -6,11 +6,13 @@ import { useAudio } from "./AudioManager";
 import { useAuth } from "./AuthContext";
 import { useTranslation } from "react-i18next";
 import { decryptData } from "./crypto";
-import { useConfig } from './ConfigContext';
+// import { useConfig } from './ConfigContext'; // Não precisamos mais do ConfigContext por enquanto
 
 const CadastroForm = () => {
-  const { apiBaseUrl } = useConfig();
-  const API_BASE_URL = apiBaseUrl;
+  // --- CORREÇÃO APLICADA AQUI ---
+  // Em vez de pegar do config (que traz http://IP...), forçamos o caminho relativo "/api"
+  // Isso faz a AWS Amplify usar a regra de Rewrite e o CloudFront (HTTPS)
+  const API_BASE_URL = "/api";
 
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
