@@ -525,6 +525,7 @@ const GameConfig = () => {
         }
     };
 
+    // --- CORREÇÃO PRINCIPAL AQUI ---
     const handleStartGame = async () => {
         if (!window.confirm(`Tem certeza que deseja INICIAR o GAME ${gameNumber}? \n\nIsso autorizará o acesso de todos os jogadores cadastrados para este Jogo.`)) {
             return;
@@ -533,17 +534,29 @@ const GameConfig = () => {
             setClientMessage({ type: 'error', text: 'URL da API não configurada.' });
             return;
         }
-        setClientMessage({ type: 'info', text: 'Iniciando o jogo e autorizando jogadores...' });
+
+        setClientMessage({ type: 'info', text: 'Conectando ao servidor...' });
+
         try {
             const response = await axios.post(`${apiBaseUrl}/users/authorize-by-game`, {
                 gameNumber: Number(gameNumber)
             });
-            let successMessage = response.data.message || `Jogo ${gameNumber} iniciado com sucesso.`;
-            if (response.data.updatedCount !== undefined) {
-                successMessage += ` ${response.data.updatedCount} jogadores foram autorizados.`;
+
+            // Se o servidor retorna success: true (achou jogadores)
+            if (response.data.success) {
+                let successMessage = response.data.message || `Jogo ${gameNumber} iniciado com sucesso.`;
+                if (response.data.updatedCount !== undefined) {
+                    successMessage += ` ${response.data.updatedCount} jogadores foram autorizados.`;
+                }
+                setClientMessage({ type: 'success', text: successMessage });
             }
-            setClientMessage({ type: 'success', text: successMessage });
+            // Se o servidor retorna success: false (0 jogadores), agora mostramos o erro!
+            else {
+                setClientMessage({ type: 'error', text: response.data.message });
+            }
+
         } catch (error) {
+            console.error("Erro ao iniciar:", error);
             const errorMessage = error.response?.data?.message || "Erro ao iniciar o jogo ou autorizar jogadores.";
             setClientMessage({ type: 'error', text: errorMessage });
         }
