@@ -293,7 +293,7 @@ app.post("/transfer-funds", async (req, res) => {
   } catch (error) { res.status(500).json({ success: false }); }
 });
 
-// === ROTAS DE LISTAGEM E CRIAÇÃO (CORRIGIDO) ===
+// === ROTAS DE LISTAGEM E CRIAÇÃO ===
 
 app.get("/games", async (req, res) => { const games = await Game.find({}); res.json({ success: true, games }); });
 
@@ -601,17 +601,25 @@ app.put("/update-user-by-email", normalizeEmail, async (req, res) => {
 });
 
 // ==========================================
-//  CORREÇÃO CRÍTICA: AUTORIZAÇÃO "IMÃ"
+//  ROTA CORRIGIDA: AUTORIZAÇÃO COM DEBUG
 // ==========================================
 app.post("/users/authorize-by-game", async (req, res) => {
+  console.log("🚀 [AUTORIZAR] Iniciando autorização...");
   try {
     const { gameNumber } = req.body;
+    console.log(`🔍 [AUTORIZAR] Buscando Game: ${gameNumber}`);
+
     if (!gameNumber) return res.status(400).json({ success: false, message: "Número do jogo inválido." });
 
     // 1. Descobrir qual Empresa e Regional estão neste Game
     const game = await Game.findOne({ gameNumber });
-    if (!game || !game.clienteId || !game.regionalId) {
-      return res.status(400).json({ success: false, message: "Jogo não possui Cliente ou Regional configurados." });
+    if (!game) {
+      console.log("❌ [AUTORIZAR] Jogo não encontrado.");
+      return res.status(404).json({ success: false, message: "Jogo não encontrado." });
+    }
+    if (!game.clienteId || !game.regionalId) {
+      console.log("❌ [AUTORIZAR] Jogo sem Cliente/Regional configurados.");
+      return res.status(400).json({ success: false, message: "Configure o Cliente e a Regional do jogo antes de iniciar." });
     }
 
     // 2. Pegar os NOMES (String) do Cliente e Regional
@@ -619,33 +627,53 @@ app.post("/users/authorize-by-game", async (req, res) => {
     const regional = await Regional.findById(game.regionalId);
 
     if (!cliente || !regional) {
-      return res.status(400).json({ success: false, message: "Cliente ou Regional não encontrados no banco." });
+      console.log("❌ [AUTORIZAR] Cliente ou Regional não existem no banco.");
+      return res.status(400).json({ success: false, message: "Cadastro de Cliente ou Regional inválido." });
     }
 
-    // 3. Atualizar TODOS os usuários que pertencem a essa Empresa e Regional
-    // Isso conserta usuários que estavam sem gameNumber ou com número antigo
+    console.log(`🎯 [AUTORIZAR] Alvo: Empresa '${cliente.nome}' | Regional '${regional.nome}'`);
+
+    // 3. Verificar quantos usuários existem ANTES de atualizar (Para Diagnóstico)
+    // Usamos RegExp para ignorar maiúsculas/minúsculas (case insensitive)
+    const countCheck = await Usuario.countDocuments({
+      empresa: { $regex: new RegExp(`^${cliente.nome.trim()}$`, 'i') },
+      regional: { $regex: new RegExp(`^${regional.nome.trim()}$`, 'i') }
+    });
+    console.log(`👥 [AUTORIZAR] Usuários encontrados com esses critérios: ${countCheck}`);
+
+    if (countCheck === 0) {
+      return res.json({
+        success: true,
+        updatedCount: 0,
+        message: `⚠️ Jogo Iniciado, mas NENHUM jogador foi encontrado para a empresa "${cliente.nome}" e regional "${regional.nome}". Verifique se os nomes no cadastro dos usuários estão idênticos.`
+      });
+    }
+
+    // 4. Atualizar TODOS os usuários encontrados (Case Insensitive)
     const resUpdate = await Usuario.updateMany(
       {
-        empresa: cliente.nome,
-        regional: regional.nome
+        empresa: { $regex: new RegExp(`^${cliente.nome.trim()}$`, 'i') },
+        regional: { $regex: new RegExp(`^${regional.nome.trim()}$`, 'i') }
       },
       {
         $set: {
           autorizado: true,
-          gameNumber: gameNumber // Traz o usuário para o jogo atual
+          gameNumber: gameNumber
         }
       }
     );
 
+    console.log(`✅ [AUTORIZAR] Atualizados: ${resUpdate.modifiedCount}`);
+
     res.json({
       success: true,
       updatedCount: resUpdate.modifiedCount,
-      message: `Sucesso! ${resUpdate.modifiedCount} jogadores da empresa ${cliente.nome} foram vinculados ao Game ${gameNumber} e autorizados.`
+      message: `Sucesso! ${resUpdate.modifiedCount} jogadores vinculados ao Game ${gameNumber} e autorizados.`
     });
 
   } catch (error) {
-    console.error("Erro ao autorizar:", error);
-    res.status(500).json({ success: false, message: "Erro interno ao autorizar jogadores." });
+    console.error("❌ [ERRO AUTORIZAR]:", error);
+    res.status(500).json({ success: false, message: "Erro interno no servidor ao autorizar." });
   }
 });
 
