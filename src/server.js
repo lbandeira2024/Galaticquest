@@ -4,7 +4,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const config = require("./config.json");
-// NOVOS IMPORTS
 const path = require("path");
 const fs = require("fs");
 
@@ -34,16 +33,15 @@ app.use((req, res, next) => {
 });
 
 // ==========================================
-//  CORREÇÃO APLICADA AQUI (LINHA DA CONEXÃO)
+//  CONEXÃO AO MONGODB
 // ==========================================
-// Removemos as opções antigas para funcionar com o Mongoose novo
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Conectado ao MongoDB"))
   .catch(err => console.error("❌ Erro ao conectar ao MongoDB:", err));
 
 
 // ==========================================
-//    CORREÇÃO NUCLEAR DE CACHE
+//    CORREÇÃO NUCLEAR DE CACHE (Modelos)
 // ==========================================
 if (mongoose.models.Usuario) delete mongoose.models.Usuario;
 if (mongoose.models.Grupo) delete mongoose.models.Grupo;
@@ -121,7 +119,6 @@ const GrupoSchema = new mongoose.Schema({
     interdependence: { type: Number, default: 100 },
     engagement: { type: Number, default: 100 }
   },
-  // NOVOS CAMPOS
   isLocked: { type: Boolean, default: false },
   photoUrl: { type: String }
 }, { timestamps: true });
@@ -296,9 +293,54 @@ app.post("/transfer-funds", async (req, res) => {
   } catch (error) { res.status(500).json({ success: false }); }
 });
 
+// === ROTAS DE LISTAGEM E CRIAÇÃO (CORRIGIDO) ===
+
 app.get("/games", async (req, res) => { const games = await Game.find({}); res.json({ success: true, games }); });
+
 app.get("/companies/list", async (req, res) => { const c = await Cliente.find({}); res.json({ success: true, companies: c }); });
+
 app.get("/regionals/list", async (req, res) => { const r = await Regional.find({}); res.json({ success: true, regionals: r }); });
+
+// --- Rota para Criar Nova Empresa ---
+app.post("/companies", async (req, res) => {
+  try {
+    const { nome } = req.body;
+    if (!nome) return res.status(400).json({ success: false, message: "Nome obrigatório" });
+
+    // Verifica se já existe
+    const existe = await Cliente.findOne({ nome });
+    if (existe) return res.status(400).json({ success: false, message: "Empresa já existe." });
+
+    const novaEmpresa = new Cliente({ nome });
+    await novaEmpresa.save();
+
+    const todas = await Cliente.find({});
+    res.json({ success: true, message: "Cliente adicionado!", newClientId: novaEmpresa._id, companies: todas });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Erro ao criar empresa." });
+  }
+});
+
+// --- Rota para Criar Nova Regional ---
+app.post("/regionals", async (req, res) => {
+  try {
+    const { nome } = req.body;
+    if (!nome) return res.status(400).json({ success: false, message: "Nome obrigatório" });
+
+    const existe = await Regional.findOne({ nome });
+    if (existe) return res.status(400).json({ success: false, message: "Regional já existe." });
+
+    const novaRegional = new Regional({ nome });
+    await novaRegional.save();
+
+    const todas = await Regional.find({});
+    res.json({ success: true, message: "Regional adicionada!", newRegionalId: novaRegional._id, regionals: todas });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Erro ao criar regional." });
+  }
+});
+
+// ==========================================
 
 app.get("/check-email", async (req, res) => {
   try {
