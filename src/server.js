@@ -600,14 +600,52 @@ app.put("/update-user-by-email", normalizeEmail, async (req, res) => {
   }
 });
 
+// ==========================================
+//  CORREÇÃO CRÍTICA: AUTORIZAÇÃO "IMÃ"
+// ==========================================
 app.post("/users/authorize-by-game", async (req, res) => {
   try {
     const { gameNumber } = req.body;
-    if (!gameNumber) return res.status(400).json({ success: false });
-    const resUpdate = await Usuario.updateMany({ gameNumber }, { $set: { autorizado: true } });
-    res.json({ success: true, updatedCount: resUpdate.modifiedCount });
+    if (!gameNumber) return res.status(400).json({ success: false, message: "Número do jogo inválido." });
+
+    // 1. Descobrir qual Empresa e Regional estão neste Game
+    const game = await Game.findOne({ gameNumber });
+    if (!game || !game.clienteId || !game.regionalId) {
+      return res.status(400).json({ success: false, message: "Jogo não possui Cliente ou Regional configurados." });
+    }
+
+    // 2. Pegar os NOMES (String) do Cliente e Regional
+    const cliente = await Cliente.findById(game.clienteId);
+    const regional = await Regional.findById(game.regionalId);
+
+    if (!cliente || !regional) {
+      return res.status(400).json({ success: false, message: "Cliente ou Regional não encontrados no banco." });
+    }
+
+    // 3. Atualizar TODOS os usuários que pertencem a essa Empresa e Regional
+    // Isso conserta usuários que estavam sem gameNumber ou com número antigo
+    const resUpdate = await Usuario.updateMany(
+      {
+        empresa: cliente.nome,
+        regional: regional.nome
+      },
+      {
+        $set: {
+          autorizado: true,
+          gameNumber: gameNumber // Traz o usuário para o jogo atual
+        }
+      }
+    );
+
+    res.json({
+      success: true,
+      updatedCount: resUpdate.modifiedCount,
+      message: `Sucesso! ${resUpdate.modifiedCount} jogadores da empresa ${cliente.nome} foram vinculados ao Game ${gameNumber} e autorizados.`
+    });
+
   } catch (error) {
-    res.status(500).json({ success: false });
+    console.error("Erro ao autorizar:", error);
+    res.status(500).json({ success: false, message: "Erro interno ao autorizar jogadores." });
   }
 });
 
