@@ -24,20 +24,21 @@ app.use(cors({
   credentials: true
 }));
 
-// Servir arquivos estáticos (Fotos) [CITE: uploaded:server.js]
+// Servir arquivos estáticos (Fotos)
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
-// Logger de requisições [CITE: uploaded:server.js]
+// Logger de requisições
 app.use((req, res, next) => {
   console.log(`🔍 ${req.method} ${req.url}`);
   next();
 });
 
-// Conexão MongoDB [CITE: uploaded:server.js]
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log("✅ Conectado ao MongoDB"))
+// ==========================================
+//  CORREÇÃO APLICADA AQUI (LINHA DA CONEXÃO)
+// ==========================================
+// Removemos as opções antigas para funcionar com o Mongoose novo
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("✅ Conectado ao MongoDB"))
   .catch(err => console.error("❌ Erro ao conectar ao MongoDB:", err));
 
 
