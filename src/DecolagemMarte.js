@@ -154,8 +154,6 @@ const DecolagemMarte = () => {
   const [processadorO2, setProcessadorO2] = useState(0);
   const [travelTime, setTravelTime] = useState(0);
   const [teamPhotoUrl, setTeamPhotoUrl] = useState(null);
-
-  // === ESTADOS DO S.O.S ===
   const [isSosMinervaActive, setIsSosMinervaActive] = useState(false);
   const [activeSosSignal, setActiveSosSignal] = useState(null);
 
@@ -181,49 +179,69 @@ const DecolagemMarte = () => {
   const [telemetry, setTelemetry] = useState(telemetryRef.current);
   const cockpitRef = useRef(null);
 
-  // Trazemos também isAudioUnlocked para monitorar
-  const { playTrack, playSound, stopAllAudio, isAudioUnlocked } = useAudio();
+  // AQUI É IMPORTANTE: Trazemos unlockAudio também
+  const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
 
-  // === LÓGICA DO TIMER DO S.O.S (A CADA 3 MINUTOS) ===
-  useEffect(() => {
-    // Só inicia o timer se a nave já tiver partido OU se já estivermos numa etapa avançada
-    if (!travelStarted && routeIndex === 0) return;
+  const hasStartedAudioRef = useRef(false);
 
+  // --- CORREÇÃO 1: UseEffect EXCLUSIVO para iniciar a missão ---
+  // Este efeito não tem cleanup que para o áudio, evitando o problema do abort
+  useEffect(() => {
+    // Tenta desbloquear caso não tenha vindo da tela anterior (segurança extra)
+    unlockAudio();
+
+    if (!hasStartedAudioRef.current) {
+      hasStartedAudioRef.current = true;
+      console.log("🚀 DecolagemMarte: Iniciando sequência de áudio...");
+      playTrack('/sounds/Decolagem.mp3', { loop: false, isPrimary: true });
+    }
+
+    const travelStartTimer = setTimeout(() => { if (!isPaused) setTravelStarted(true); }, 12000);
+    const monitorTimer1 = setTimeout(() => { if (!isPaused) setMainDisplayState('clouds'); }, 13000);
+    const monitorTimer2 = setTimeout(() => { if (!isPaused) { setMainDisplayState('static'); setMonitorState('static'); } }, 23000);
+    const monitorTimer3 = setTimeout(() => { if (!isPaused) { setMainDisplayState('stars'); setMonitorState('on'); } }, 45000);
+
+    return () => {
+      // Limpa APENAS os timers, NÃO PARA O ÁUDIO aqui para evitar cortes durante re-renders
+      clearTimeout(travelStartTimer);
+      clearTimeout(monitorTimer1);
+      clearTimeout(monitorTimer2);
+      clearTimeout(monitorTimer3);
+    };
+  }, [playTrack, unlockAudio]); // Dependências seguras
+
+  // --- CORREÇÃO 2: UseEffect EXCLUSIVO para limpeza final ---
+  // Este efeito só roda quando o componente MORRE (sai da tela)
+  useEffect(() => {
+    return () => {
+      console.log("🛑 DecolagemMarte: Desmontando e parando áudio.");
+      stopAllAudio();
+    };
+  }, [stopAllAudio]);
+
+
+  // ... (RESTO DO CÓDIGO MANTIDO IGUAL) ...
+  // Copie daqui para baixo todo o resto do seu arquivo original,
+  // começando do useEffect do SOS (linha ~115 no original) até o final.
+
+  // PARA FACILITAR, VOU REPETIR O RESTANTE DO CÓDIGO ABAIXO:
+
+  useEffect(() => {
+    if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
-      // 1. Tocar Áudio
       const audio = new Audio('/sounds/sos-minerva.mp4');
       audio.play().catch(e => console.log("Erro ao tocar áudio SOS:", e));
-
-      // 2. Mostrar Vídeo no Monitor (por 5 segundos)
       setIsSosMinervaActive(true);
-      setTimeout(() => {
-        setIsSosMinervaActive(false);
-      }, 5000);
-
-      // 3. Gerar Dados do SOS (Coordenadas Aleatórias)
+      setTimeout(() => { setIsSosMinervaActive(false); }, 5000);
       const randomPlanet = PLANET_DATA_FOR_SOS[Math.floor(Math.random() * PLANET_DATA_FOR_SOS.length)];
       const offsetRadius = randomPlanet.orbitRadius + (Math.random() > 0.5 ? 4 : -4);
       const offsetAngle = Math.random() * 360;
-
-      const newSignal = {
-        name: `S.O.S próximo a ${randomPlanet.name}`,
-        hostName: randomPlanet.name,
-        angle: offsetAngle,
-        orbitRadius: offsetRadius,
-        distanceText: `Desconhecido`
-      };
-
+      const newSignal = { name: `S.O.S próximo a ${randomPlanet.name}`, hostName: randomPlanet.name, angle: offsetAngle, orbitRadius: offsetRadius, distanceText: `Desconhecido` };
       setActiveSosSignal(newSignal);
-
-      // Remove o sinal do mapa após 5 minutos se não for atendido
-      setTimeout(() => {
-        setActiveSosSignal(null);
-      }, 300000);
+      setTimeout(() => { setActiveSosSignal(null); }, 300000);
     };
-
-    const interval = setInterval(triggerSosEvent, 180000); // 180.000 ms = 3 minutos
-
+    const interval = setInterval(triggerSosEvent, 180000);
     return () => clearInterval(interval);
   }, [travelStarted, routeIndex]);
 
@@ -466,22 +484,6 @@ const DecolagemMarte = () => {
     const interval = setInterval(checkMinervaHighlight, 60000);
     return () => clearInterval(interval);
   }, [groupId, isPaused, isMinervaHighlighted, API_BASE_URL]);
-
-  useEffect(() => {
-    // Como a tela anterior já desbloqueou o áudio, chamamos o playTrack normalmente.
-    // O AudioManager vai verificar se isAudioUnlocked é true e tocar.
-    playTrack('/sounds/Decolagem.mp3', { loop: false, isPrimary: true });
-
-    const travelStartTimer = setTimeout(() => { if (!isPaused) setTravelStarted(true); }, 12000);
-    const monitorTimer1 = setTimeout(() => { if (!isPaused) setMainDisplayState('clouds'); }, 13000);
-    const monitorTimer2 = setTimeout(() => { if (!isPaused) { setMainDisplayState('static'); setMonitorState('static'); } }, 23000);
-    const monitorTimer3 = setTimeout(() => { if (!isPaused) { setMainDisplayState('stars'); setMonitorState('on'); } }, 45000);
-    return () => {
-      clearTimeout(travelStartTimer);
-      clearTimeout(monitorTimer1); clearTimeout(monitorTimer2); clearTimeout(monitorTimer3);
-      stopAllAudio();
-    };
-  }, [playTrack, stopAllAudio]);
 
   useEffect(() => {
     if (isPaused) return;
