@@ -136,6 +136,7 @@ const SelecaoRotaPrep = () => {
         navigate("/SelecaoRota");
     };
 
+
     return (
         <div className="background_rota_prep">
             <canvas ref={canvasRef} className="stars_rota_prep"></canvas>
