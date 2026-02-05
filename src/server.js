@@ -389,6 +389,7 @@ app.post("/save-team-name", async (req, res) => {
     const finalUser = await Usuario.findById(userId).populate('grupo');
     res.json({ success: true, user: finalUser });
   } catch (error) {
+    console.error("ERRO CRÍTICO SAVE TEAM:", error); // <--- ADICIONADO PARA DEBUG
     if (error.code === 11000) return res.status(409).json({ success: false, message: "Nome em uso." });
     res.status(500).json({ success: false });
   }
