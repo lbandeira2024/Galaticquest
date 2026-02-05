@@ -16,7 +16,8 @@ const SelecaoNave = () => {
 
   // Navigation and audio hooks
   const navigate = useNavigate();
-  const { playSound } = useAudio();
+  // CORREÇÃO: Adicionado playTrack para manter a música tocando
+  const { playTrack, playSound } = useAudio();
   const { user, login } = useAuth();
 
   // Refs and ship selection states
@@ -31,6 +32,12 @@ const SelecaoNave = () => {
     { id: 4, code: "STRATUSV", name: "Stratus V", image: "/images/Naves/04.StratusV.png", year: "2187", description: "Nave de luxo para viagens interestelares curtas. Mais conforto que eficiência.", speed: "194.266.053 km/h", capacity: "60 passageiros", fuel: "Ruim – consome energia rapidamente para manter suporte de vida e entretenimento.", autonomy: "1 ano", weightLimit: "200 toneladas", recommendedSpeed: "0.18c (54.000 km/s)", fuelCapacity: "80 toneladas", oxygenCapacity: "18.4 toneladas", provisionsCapacity: "32.9 toneladas" },
     { id: 5, code: "NEOECLIPSE", name: "Neon Eclipse", image: "/images/Naves/05.Neo_Eclipse.png", year: "2213", description: "Nave mais recente, com motor de dobra parcial. Incrivelmente rápida, mas altamente ineficiente.", speed: "539.627.925 km/h (com impulsos breves de dobra espacial)", capacity: "20 passageiros", fuel: "Péssima – requer recarga constante de matéria exótica.", autonomy: "9 meses", weightLimit: "100 toneladas", recommendedSpeed: "0.5c (150.000 km/s)", fuelCapacity: "30 toneladas", oxygenCapacity: "4.5 toneladas", provisionsCapacity: "8.1 toneladas", }
   ];
+
+  // CORREÇÃO: Hook para garantir que a música continue tocando (igual ao CadastroForm)
+  useEffect(() => {
+    const currentMusic = "/sounds/trilha_galatica_v1.mp3";
+    playTrack(currentMusic, { loop: true, isPrimary: false });
+  }, [playTrack]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -100,7 +107,6 @@ const SelecaoNave = () => {
         return;
       }
 
-      // API_BASE_URL agora é uma constante segura
       try {
         playSound("/sounds/03.system-selection.mp3");
 

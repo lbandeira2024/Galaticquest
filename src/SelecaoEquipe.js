@@ -14,15 +14,21 @@ const SelecaoEquipe = () => {
   const [showAnimatedGif, setShowAnimatedGif] = useState(false);
   const [showGif, setShowGif] = useState(true);
   const navigate = useNavigate();
-  const { playSound } = useAudio();
+  // CORREÇÃO: Adicionado playTrack
+  const { playTrack, playSound } = useAudio();
   const canvasRef = useRef(null);
 
   const { user, login } = useAuth();
-  // API_BASE_URL já definido acima como constante
 
   const [selectedShip, setSelectedShip] = useState(null);
   const [shipConfirmed, setShipConfirmed] = useState(false);
   const [activeStep, setActiveStep] = useState(2);
+
+  // CORREÇÃO: Hook para manter a música tocando
+  useEffect(() => {
+    const currentMusic = "/sounds/trilha_galatica_v1.mp3";
+    playTrack(currentMusic, { loop: true, isPrimary: false });
+  }, [playTrack]);
 
   const ships = [
     { id: 1, name: "Andrômeda-X", code: "NX-728", year: "2145", description: "Nave de exploração de longo alcance com sistemas avançados de mapeamento estelar.", speed: "0.8c", capacity: "8 tripulantes", fuel: "Núcleo de fusão ZPM", autonomy: "15 anos", note: "Equipada com escudos de última geração" },
@@ -84,7 +90,6 @@ const SelecaoEquipe = () => {
         return;
       }
 
-      // API_BASE_URL agora é seguro
       try {
         const response = await axios.put(`${API_BASE_URL}/select-team`, {
           userId: user._id,

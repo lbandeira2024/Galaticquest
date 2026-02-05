@@ -13,7 +13,8 @@ const CompraDeMaterial = () => {
     // 1. Configuração da API via Constante (sem useConfig)
     const { user, login } = useAuth();
     const navigate = useNavigate();
-    const { playSound } = useAudio();
+    // CORREÇÃO: Adicionado playTrack
+    const { playTrack, playSound } = useAudio();
     const canvasRef = useRef(null);
 
     // 2. Estados Iniciais com verificação de segurança
@@ -57,6 +58,12 @@ const CompraDeMaterial = () => {
             setPersonalInventory(user.grupo.personalInventory || []);
         }
     }, [user]);
+
+    // CORREÇÃO: Hook para manter a música tocando
+    useEffect(() => {
+        const currentMusic = "/sounds/trilha_galatica_v1.mp3";
+        playTrack(currentMusic, { loop: true, isPrimary: false });
+    }, [playTrack]);
 
     // 5. Função de Som Segura
     const safePlaySound = (path) => {
