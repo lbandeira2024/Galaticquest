@@ -4,16 +4,13 @@ import { usePause } from './PauseContext';
 const AudioContext = createContext();
 
 export const AudioProvider = ({ children }) => {
-  // Canais separados para evitar conflitos
-  const musicAudioRef = useRef(new Audio());   // Apenas Música de fundo
-  const primaryAudioRef = useRef(new Audio()); // Vozes e Efeitos Importantes (Decolagem)
+  const musicAudioRef = useRef(new Audio());
+  const primaryAudioRef = useRef(new Audio());
 
-  const soundsRef = useRef([]); // Efeitos sonoros "tiros/interface" (fire and forget)
+  const soundsRef = useRef([]);
   const [activeAudioRef, setActiveAudioRef] = useState(null);
 
   const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
-
-  // Filas separadas: Música e SFX não devem competir pelo mesmo slot
   const [queuedMusic, setQueuedMusic] = useState(null);
   const [queuedSFX, setQueuedSFX] = useState(null);
 
@@ -26,7 +23,6 @@ export const AudioProvider = ({ children }) => {
       if (context.state === 'suspended') context.resume();
     }
 
-    // Toca som silencioso para liberar o navegador
     const silentSound = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
     silentSound.play().then(() => {
       silentSound.pause();
@@ -37,26 +33,22 @@ export const AudioProvider = ({ children }) => {
     });
   }, [isAudioUnlocked]);
 
-  // Efeito que processa a fila assim que desbloqueia
   useEffect(() => {
     if (isAudioUnlocked) {
-      // 1. Se tiver música na fila, toca
       if (queuedMusic) {
         console.log("🎵 Fila Música processada:", queuedMusic.src);
         playTrack(queuedMusic.src, queuedMusic.options);
         setQueuedMusic(null);
       }
-      // 2. Se tiver efeito importante (Decolagem) na fila, toca também
       if (queuedSFX) {
         console.log("🚀 Fila SFX processada:", queuedSFX.src);
         playTrack(queuedSFX.src, queuedSFX.options);
         setQueuedSFX(null);
       }
     }
-  }, [isAudioUnlocked, queuedMusic, queuedSFX]); // Adicionado queuedSFX e playTrack removido do deps para evitar loop
+  }, [isAudioUnlocked, queuedMusic, queuedSFX]);
 
   const playTrack = useCallback((src, options = { loop: true, isPrimary: false }) => {
-    // Se estiver bloqueado, salva na fila correta
     if (!isAudioUnlocked) {
       if (options.isPrimary) {
         console.warn("🔒 Decolagem/Primário na fila:", src);
@@ -71,25 +63,24 @@ export const AudioProvider = ({ children }) => {
     const targetAudioRef = options.isPrimary ? primaryAudioRef : musicAudioRef;
     const otherAudioRef = options.isPrimary ? musicAudioRef : primaryAudioRef;
 
-    // === LÓGICA DE DUCKING (BAIXAR VOLUME) ===
-    // Em vez de pausar a música (que causa erro), baixamos o volume dela
+    // === LÓGICA DE DUCKING E VOLUME ===
     if (options.isPrimary) {
+      // Garante que a Decolagem esteja no volume MÁXIMO
+      targetAudioRef.current.volume = 1.0;
+
       if (!otherAudioRef.current.paused) {
         console.log("🔉 Baixando volume da música para som Primário.");
-        // Baixa o volume da música suavemente
         otherAudioRef.current.volume = 0.2;
       }
     } else {
-      // Se for música tocando, garante volume normal
+      // Se for música, volume normal
       targetAudioRef.current.volume = 1.0;
     }
 
     const currentFullSrc = decodeURI(targetAudioRef.current.src);
     const newCleanSrc = src.split("?")[0];
 
-    // Evita reiniciar se for a mesma trilha
     if (currentFullSrc.includes(newCleanSrc) && !targetAudioRef.current.paused) {
-      // Se for a música voltando e o volume estava baixo, restaura
       if (!options.isPrimary) targetAudioRef.current.volume = 1.0;
       return;
     }
@@ -97,25 +88,33 @@ export const AudioProvider = ({ children }) => {
     targetAudioRef.current.src = src;
     targetAudioRef.current.loop = options.loop;
 
+    // --- DIAGNÓSTICO E PREPARAÇÃO ---
+    // Adiciona listeners para sabermos a verdade no console
+    targetAudioRef.current.onplay = () => console.log(`▶️ Iniciou reprodução: ${newCleanSrc}`);
+    targetAudioRef.current.onerror = (e) => console.error(`❌ Erro no arquivo: ${newCleanSrc}`, e);
+
+    // Força o carregamento para limpar buffer antigo
+    targetAudioRef.current.load();
+
     const playPromise = targetAudioRef.current.play();
     if (playPromise !== undefined) {
       playPromise.catch(error => {
-        if (error.name === 'AbortError') return; // Ignora erros de interrupção
+        if (error.name === 'AbortError') return;
         console.error("Erro no playTrack:", error);
       });
     }
 
-    // Se o som primário acabar, restaura o volume da música
+    // Restaura volume da música ao fim do som primário
     if (options.isPrimary) {
       targetAudioRef.current.onended = () => {
-        console.log("🔊 Restaurando volume da música.");
+        console.log("🔊 Fim do Primário. Restaurando música.");
         musicAudioRef.current.volume = 1.0;
       };
     }
 
     setActiveAudioRef(targetAudioRef);
 
-  }, [isAudioUnlocked]); // Remove playTrack da dependência do useEffect para evitar re-render loops
+  }, [isAudioUnlocked]);
 
   const playSound = useCallback((src) => {
     if (!isAudioUnlocked) return;
@@ -145,11 +144,8 @@ export const AudioProvider = ({ children }) => {
     if (isPaused) {
       refs.forEach(ref => ref && !ref.paused && ref.pause());
       soundsRef.current.forEach(s => s.pause());
-    } else if (isAudioUnlocked) {
-      // Tenta retomar se não estiver pausado manualmente
-      // (Lógica simplificada para evitar complexidade)
     }
-  }, [isPaused, isAudioUnlocked]);
+  }, [isPaused]);
 
   const value = { unlockAudio, playTrack, playSound, stopAllAudio, primaryAudioRef, musicAudioRef, isAudioUnlocked };
 
