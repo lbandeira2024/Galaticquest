@@ -183,7 +183,7 @@ const SelecaoEquipe = () => {
           <div className={`team-photo-container_equipe ${hoveredTeam ? 'visible_equipe' : ''}`}>
             {hoveredTeam && (
               <>
-                <img src={`/images/astronautas/E${hoveredTeam.id}/Equipe${hoveredTeam.id}.gif`} alt={`Equipe ${hoveredTeam.code}`} className="team-photo_equipe" />
+                <img src={`/images/Astronautas/E${hoveredTeam.id}/Equipe${hoveredTeam.id}.gif`} alt={`Equipe ${hoveredTeam.code}`} className="team-photo_equipe" />
                 <div className="team-photo-caption_equipe">Equipe {hoveredTeam.code}</div>
               </>
             )}
@@ -212,7 +212,7 @@ const SelecaoEquipe = () => {
                 <div className="team-header_equipe">{team.code}</div>
                 {team.members.map((member, index) => (
                   <div key={index} className="team-member_equipe">
-                    <img src={`/images/astronautas/${team.code}/${getMemberImage(team.code, index)}.png`} alt={member.name} className="team-member-avatar" />
+                    <img src={`/images/Astronautas/${team.code}/${getMemberImage(team.code, index)}.png`} alt={member.name} className="team-member-avatar" />
                     <div className="team-member-details">
                       <div className="team-member-role">{member.role}</div>
                       <div className="team-member-name-container">
