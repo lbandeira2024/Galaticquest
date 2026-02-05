@@ -7,6 +7,9 @@ export const AudioProvider = ({ children }) => {
   const musicAudioRef = useRef(new Audio());
   const primaryAudioRef = useRef(new Audio());
 
+  // Ref para saber se o som primário está ATIVO no momento
+  const isPrimaryActiveRef = useRef(false);
+
   const soundsRef = useRef([]);
   const [activeAudioRef, setActiveAudioRef] = useState(null);
 
@@ -36,12 +39,10 @@ export const AudioProvider = ({ children }) => {
   useEffect(() => {
     if (isAudioUnlocked) {
       if (queuedMusic) {
-        console.log("🎵 Fila Música:", queuedMusic.src);
         playTrack(queuedMusic.src, queuedMusic.options);
         setQueuedMusic(null);
       }
       if (queuedSFX) {
-        console.log("🚀 Fila SFX:", queuedSFX.src);
         playTrack(queuedSFX.src, queuedSFX.options);
         setQueuedSFX(null);
       }
@@ -51,75 +52,84 @@ export const AudioProvider = ({ children }) => {
   const playTrack = useCallback((src, options = { loop: true, isPrimary: false }) => {
     if (!isAudioUnlocked) {
       if (options.isPrimary) {
-        console.warn("🔒 Decolagem na fila:", src);
         setQueuedSFX({ src, options });
       } else {
-        console.warn("🔒 Música na fila:", src);
         setQueuedMusic({ src, options });
       }
       return;
     }
 
-    // === MUDANÇA CRÍTICA AQUI ===
-    // Se for som Primário (Decolagem), NÃO reutilizamos o ref. Criamos um novo.
+    // === LÓGICA DE SOM PRIMÁRIO (DECOLAGEM) ===
     if (options.isPrimary) {
-      // Mata o anterior se existir
+      isPrimaryActiveRef.current = true; // ATIVA A TRAVA
+
+      // Cria nova instância para garantir som limpo
       if (primaryAudioRef.current) {
         primaryAudioRef.current.pause();
         primaryAudioRef.current.src = "";
       }
-      // Cria um player novinho em folha
-      console.log("🆕 Criando nova instância de áudio para:", src);
+      console.log("🆕 Iniciando Som Primário:", src);
       primaryAudioRef.current = new Audio(src);
-    }
 
-    // Referências atualizadas
-    const targetAudioRef = options.isPrimary ? primaryAudioRef : musicAudioRef;
-    const otherAudioRef = options.isPrimary ? musicAudioRef : primaryAudioRef;
+      const target = primaryAudioRef.current;
+      target.volume = 1.0;
+      target.loop = options.loop;
 
-    // === LÓGICA DE DUCKING ===
-    if (options.isPrimary) {
-      targetAudioRef.current.volume = 1.0; // Garante volume máx
-      if (!otherAudioRef.current.paused) {
-        console.log("🔉 Baixando volume da música.");
-        otherAudioRef.current.volume = 0.2;
+      // Abaixa a música imediatamente
+      if (musicAudioRef.current && !musicAudioRef.current.paused) {
+        console.log("🔉 Baixando música para 20%.");
+        musicAudioRef.current.volume = 0.2;
       }
-    } else {
-      // Se for música
-      if (targetAudioRef.current.src !== src) {
-        targetAudioRef.current.src = src;
-      }
-      targetAudioRef.current.volume = 1.0;
-    }
 
-    const currentCleanSrc = src.split("?")[0];
-
-    targetAudioRef.current.loop = options.loop;
-
-    // Listeners
-    targetAudioRef.current.onplay = () => console.log(`▶️ PLAY INICIADO: ${currentCleanSrc}`);
-    targetAudioRef.current.onerror = (e) => console.error(`❌ ERRO NO PLAYER: ${currentCleanSrc}`, e);
-
-    // Tenta tocar
-    const playPromise = targetAudioRef.current.play();
-    if (playPromise !== undefined) {
-      playPromise.then(() => {
-        console.log(`🔊 SUCESSO ABSOLUTO: Ouvindo ${currentCleanSrc}`);
-      }).catch(error => {
-        if (error.name === 'AbortError') return;
-        console.error(`⚠️ Falha na Promessa (${currentCleanSrc}):`, error);
-      });
-    }
-
-    // Restaura música ao fim
-    if (options.isPrimary) {
-      targetAudioRef.current.onended = () => {
-        console.log("🔊 Fim do Primário. Restaurando música.");
-        musicAudioRef.current.volume = 1.0;
+      // Listeners
+      target.onplay = () => console.log(`🚀 DECOLAGEM TOCANDO: ${src}`);
+      target.onerror = (e) => console.error(`❌ ERRO NA DECOLAGEM:`, e);
+      target.onended = () => {
+        console.log("🏁 Decolagem acabou. Restaurando música.");
+        isPrimaryActiveRef.current = false; // SOLTA A TRAVA
+        if (musicAudioRef.current) musicAudioRef.current.volume = 1.0;
       };
+
+      target.load();
+      const p = target.play();
+      if (p !== undefined) {
+        p.catch(e => {
+          if (e.name !== 'AbortError') console.error("⚠️ Erro play primário:", e);
+        });
+      }
+      setActiveAudioRef(primaryAudioRef);
+      return;
     }
 
-    setActiveAudioRef(targetAudioRef);
+    // === LÓGICA DE MÚSICA DE FUNDO ===
+    // Se chegou aqui, é música.
+    const target = musicAudioRef.current;
+    const currentSrc = decodeURI(target.src);
+    const newSrc = src.split("?")[0];
+
+    // Se já está tocando a mesma música, apenas ajusta volume e sai
+    if (currentSrc.includes(newSrc) && !target.paused) {
+      // SÓ AUMENTA O VOLUME SE NÃO TIVER DECOLAGEM ROLANDO
+      if (!isPrimaryActiveRef.current) {
+        target.volume = 1.0;
+      } else {
+        console.log("🛡️ Tentativa de aumentar música bloqueada pela Decolagem.");
+        target.volume = 0.2;
+      }
+      return;
+    }
+
+    target.src = src;
+    target.loop = options.loop;
+
+    // Respeita a Decolagem ao iniciar
+    target.volume = isPrimaryActiveRef.current ? 0.2 : 1.0;
+
+    const p = target.play();
+    if (p !== undefined) {
+      p.then(() => console.log(`🎵 Música iniciada (${src})`))
+        .catch(e => { if (e.name !== 'AbortError') console.error("⚠️ Erro música:", e); });
+    }
 
   }, [isAudioUnlocked]);
 
@@ -128,9 +138,7 @@ export const AudioProvider = ({ children }) => {
     const sound = new Audio(src);
     soundsRef.current.push(sound);
     sound.volume = 1.0;
-
-    sound.play().catch(e => { if (e.name !== 'AbortError') console.error("Erro SFX:", e); });
-
+    sound.play().catch(e => { });
     sound.onended = () => {
       soundsRef.current = soundsRef.current.filter(s => s !== sound);
     };
@@ -143,6 +151,7 @@ export const AudioProvider = ({ children }) => {
         ref.currentTime = 0;
       }
     });
+    isPrimaryActiveRef.current = false; // Reseta trava ao parar tudo
     soundsRef.current.forEach(s => s.pause());
     soundsRef.current = [];
   }, []);
@@ -154,8 +163,10 @@ export const AudioProvider = ({ children }) => {
     if (isPaused) {
       refs.forEach(ref => ref && !ref.paused && ref.pause());
       soundsRef.current.forEach(s => s.pause());
+    } else if (isAudioUnlocked) {
+      // Opcional: Retomar áudio se desejar
     }
-  }, [isPaused]);
+  }, [isPaused, isAudioUnlocked]);
 
   const value = { unlockAudio, playTrack, playSound, stopAllAudio, primaryAudioRef, musicAudioRef, isAudioUnlocked };
 
