@@ -15,24 +15,37 @@ export const AudioProvider = ({ children }) => {
 
   const unlockAudio = useCallback(() => {
     if (isAudioUnlocked) return;
+
+    // Tenta retomar o AudioContext do navegador se estiver suspenso (comum em produção/HTTPS)
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const context = new AudioCtx();
+      if (context.state === 'suspended') {
+        context.resume();
+      }
+    }
+
+    // Toca um som silencioso para forçar o desbloqueio
     const silentSound = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
     silentSound.play().then(() => {
       silentSound.pause();
-      console.log("✅ Contexto de Áudio desbloqueado.");
+      console.log("✅ Contexto de Áudio desbloqueado com sucesso.");
       setIsAudioUnlocked(true);
-    }).catch(e => console.error("Desbloqueio falhou", e));
+    }).catch(e => console.error("O navegador bloqueou o desbloqueio automático. Requer clique.", e));
   }, [isAudioUnlocked]);
 
   useEffect(() => {
     if (isAudioUnlocked && queuedMusic) {
+      console.log("Reproduzindo música da fila:", queuedMusic.src);
       playTrack(queuedMusic.src, queuedMusic.options);
       setQueuedMusic(null);
     }
   }, [isAudioUnlocked, queuedMusic]);
 
   const playTrack = useCallback((src, options = { loop: true, isPrimary: false }) => {
+    // Se não estiver desbloqueado, coloca na fila e espera
     if (!isAudioUnlocked) {
-      console.warn("🔒 Áudio bloqueado. Na fila:", src);
+      console.warn("🔒 Áudio bloqueado. Adicionado à fila:", src);
       setQueuedMusic({ src, options });
       return;
     }
@@ -40,40 +53,24 @@ export const AudioProvider = ({ children }) => {
     const targetAudioRef = options.isPrimary ? primaryAudioRef : musicAudioRef;
     const otherAudioRef = options.isPrimary ? musicAudioRef : primaryAudioRef;
 
-    // Pausa o outro canal (ex: se tocar música primária, pausa a secundária)
+    // Pausa o outro canal
     otherAudioRef.current.pause();
 
     // =========================================================
-    // LÓGICA DE CONTINUIDADE INTELIGENTE (COM LOGS)
+    // LÓGICA DE CONTINUIDADE INTELIGENTE
     // =========================================================
-
-    // 1. URL atual que está a tocar (limpa de ?t=...)
     const currentFullSrc = decodeURI(targetAudioRef.current.src);
     const currentCleanSrc = currentFullSrc.split("?")[0];
-
-    // 2. Nova URL pedida (limpa de ?t=...)
     const newCleanSrc = src.split("?")[0];
 
-    // LOG DE DEBUG (Para vermos no Console o que está a acontecer)
-    console.log(`🎵 [AudioManager] Comparando:
-      TOCANDO AGORA: "${currentCleanSrc}"
-      NOVO PEDIDO:   "${newCleanSrc}"
-      ESTÁ PAUSADO?: ${targetAudioRef.current.paused}`);
-
-    // 3. A comparação
-    // Verifica se a URL atual TERMINA com a nova URL (ignora http://localhost...)
-    // E verifica se NÃO está pausado.
+    // Verifica se é a mesma música e se está tocando
     if (currentCleanSrc.endsWith(newCleanSrc) && !targetAudioRef.current.paused) {
-      console.log("✅ [AudioManager] Música igual detectada. Mantendo a atual.");
-      return; // SAAI DA FUNÇÃO, MANTÉM A MÚSICA
+      return;
     }
 
-    console.warn("🔄 [AudioManager] Música diferente (ou pausada). Reiniciando...");
-
-    // Se chegou aqui, troca a música
-    targetAudioRef.current.src = src; // Usa o src original
+    targetAudioRef.current.src = src;
     targetAudioRef.current.loop = options.loop;
-    targetAudioRef.current.play().catch(e => console.error("Erro ao tocar:", e));
+    targetAudioRef.current.play().catch(e => console.error("Erro ao tocar trilha:", e));
     setActiveAudioRef(targetAudioRef);
 
   }, [isAudioUnlocked]);
@@ -109,7 +106,8 @@ export const AudioProvider = ({ children }) => {
     }
   }, [isPaused, activeAudioRef, isAudioUnlocked]);
 
-  const value = { unlockAudio, playTrack, playSound, stopAllAudio, primaryAudioRef, musicAudioRef };
+  // Exportamos unlockAudio e isAudioUnlocked para uso nos componentes
+  const value = { unlockAudio, playTrack, playSound, stopAllAudio, primaryAudioRef, musicAudioRef, isAudioUnlocked };
 
   return <AudioContext.Provider value={value}>{children}</AudioContext.Provider>;
 };

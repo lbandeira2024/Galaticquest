@@ -180,7 +180,9 @@ const DecolagemMarte = () => {
 
   const [telemetry, setTelemetry] = useState(telemetryRef.current);
   const cockpitRef = useRef(null);
-  const { playTrack, playSound, stopAllAudio } = useAudio();
+
+  // Trazemos também isAudioUnlocked para monitorar
+  const { playTrack, playSound, stopAllAudio, isAudioUnlocked } = useAudio();
   const { isPaused, togglePause } = usePause();
 
   // === LÓGICA DO TIMER DO S.O.S (A CADA 3 MINUTOS) ===
@@ -466,7 +468,10 @@ const DecolagemMarte = () => {
   }, [groupId, isPaused, isMinervaHighlighted, API_BASE_URL]);
 
   useEffect(() => {
+    // Como a tela anterior já desbloqueou o áudio, chamamos o playTrack normalmente.
+    // O AudioManager vai verificar se isAudioUnlocked é true e tocar.
     playTrack('/sounds/Decolagem.mp3', { loop: false, isPrimary: true });
+
     const travelStartTimer = setTimeout(() => { if (!isPaused) setTravelStarted(true); }, 12000);
     const monitorTimer1 = setTimeout(() => { if (!isPaused) setMainDisplayState('clouds'); }, 13000);
     const monitorTimer2 = setTimeout(() => { if (!isPaused) { setMainDisplayState('static'); setMonitorState('static'); } }, 23000);
@@ -879,7 +884,6 @@ const DecolagemMarte = () => {
     setIsDeparting(true);
 
     setTimeout(async () => {
-      // CORREÇÃO: Reseta a distância para longe ANTES de mudar o estado de chegada
       setDistanceKm(300000000);
 
       setProgress(0);
@@ -928,7 +932,6 @@ const DecolagemMarte = () => {
     } else {
       playSound('/sounds/empuxo.wav'); setIsDeparting(true); setShowStoreModal(false);
       setTimeout(async () => {
-        // CORREÇÃO: Reseta a distância aqui também
         setDistanceKm(300000000);
 
         await saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
@@ -964,10 +967,7 @@ const DecolagemMarte = () => {
     }
   }, [playSound, saveTelemetryData]);
 
-  // FUNÇÃO DE CALLBACK PARA QUANDO UM SOS FOR DETECTADO NO MAPA
   const handleSosDetected = useCallback(() => {
-    // SÓ ATIVA SE A NAVE JÁ PARTIU (travelStarted) OU SE JÁ ESTAMOS EM UMA ETAPA AVANÇADA (routeIndex > 0)
-    // Se não partiu E está no índice 0, ignora completamente
     if (!travelStarted && routeIndex === 0) return;
 
     setIsSosMinervaActive(true);

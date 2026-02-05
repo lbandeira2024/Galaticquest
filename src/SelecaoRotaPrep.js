@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef, lazy, Suspense } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAudio } from "./AudioManager";
 import "./SelecaoRotaPrep.css";
-import transferDistances from './Planejamento-Rota/fixed_transfer_distances.json';
-// NOVO: Importar hooks para obter o ID do usuário e a URL da API
 import { useAuth } from './AuthContext';
 import { useConfig } from './ConfigContext';
 
@@ -15,21 +13,19 @@ const SelecaoRotaPrep = () => {
     const [plannedRoute, setPlannedRoute] = useState(null);
     const [routeConfirmed, setRouteConfirmed] = useState(false);
     const navigate = useNavigate();
-    const { playTrack, playSound } = useAudio();
+
+    // IMPORTANTE: Trazemos o unlockAudio aqui
+    const { playTrack, playSound, unlockAudio } = useAudio();
+
     const canvasRef = useRef(null);
-    const [activeStep, setActiveStep] = useState(4);
     const [routePlanned, setRoutePlanned] = useState(false);
 
-    // NOVO: Obter usuário e URL da API
     const { user } = useAuth();
     const { apiBaseUrl } = useConfig();
     const API_BASE_URL = apiBaseUrl;
 
-    // Animação do campo de estrelas e música
     useEffect(() => {
-        // CORREÇÃO: Removido o timestamp para manter a música contínua
         const currentMusic = "/sounds/trilha_galatica_v1.mp3";
-
         playTrack(currentMusic, { loop: true, isPrimary: false });
 
         const canvas = canvasRef.current;
@@ -80,20 +76,18 @@ const SelecaoRotaPrep = () => {
         setPlannedRoute(route);
     };
 
-    // NOVO: Função para salvar a rota inicial no backend
     const saveInitialRoute = async (route) => {
         if (!user?._id || !API_BASE_URL) {
-            console.error("Usuário ou URL da API não definidos. Não é possível salvar a rota.");
+            console.error("Usuário ou URL da API não definidos.");
             return false;
         }
 
         const dataToSave = {
-            rotaPlanejada: route.steps, // A rota completa do StellarMapPlan
-            routeIndex: 0 // Inicia a missão no índice 0 (Terra)
+            rotaPlanejada: route.steps,
+            routeIndex: 0
         };
 
         try {
-            // Usando o endpoint existente de 'server.js'
             const response = await fetch(`${API_BASE_URL}/${user._id}/update-gamedata`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -101,10 +95,8 @@ const SelecaoRotaPrep = () => {
             });
 
             if (response.ok) {
-                console.log("Rota inicial salva com sucesso!");
                 return true;
             } else {
-                console.error("Falha ao salvar rota inicial:", await response.json());
                 return false;
             }
         } catch (error) {
@@ -113,22 +105,21 @@ const SelecaoRotaPrep = () => {
         }
     };
 
-    // MODIFICADO: handleStartMission agora é 'async' e salva a rota
     const handleStartMission = async () => {
         if (routePlanned && plannedRoute?.steps?.length > 1) {
 
-            // 1. Salva a rota no backend ANTES de navegar
+            // --- CRÍTICO PARA O AMPLIFY ---
+            // Este clique libera o áudio para todo o domínio.
+            // A próxima tela (Decolagem) herdará essa permissão.
+            unlockAudio();
+
             const saveSuccess = await saveInitialRoute(plannedRoute);
 
             if (saveSuccess) {
-                // MODIFICAÇÃO: Limpa o tempo da missão anterior
                 sessionStorage.removeItem('missionTime');
-
-                // 2. Navega para DecolagemMarte SEM passar estado.
-                // DecolagemMarte irá buscar a rota salva em seu próprio 'fetchGameData'.
                 navigate("/decolagem-marte");
             } else {
-                alert("Erro ao salvar a rota no servidor. Não é possível iniciar a missão.");
+                alert("Erro ao salvar a rota no servidor. Tente novamente.");
             }
         }
     };
@@ -137,7 +128,6 @@ const SelecaoRotaPrep = () => {
         playSound("/sounds/03.system-selection.mp3");
         navigate("/SelecaoRota");
     };
-
 
     return (
         <div className="background_rota_prep">
@@ -158,8 +148,6 @@ const SelecaoRotaPrep = () => {
             <div className="selection-container_rota_prep">
                 <div className="stellar-map-container">
                     <Suspense fallback={<div className="loading-map">Carregando Mapa Estelar...</div>}>
-                        {/* MODIFICADO: 'allowSos={false}' garante que o SOS NUNCA ocorra nesta tela.
-                        */}
                         <StellarMapPlan
                             onRouteComplete={handleConfirmRoute}
                             onRouteReset={handleResetRoute}
