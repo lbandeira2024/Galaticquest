@@ -129,7 +129,8 @@ const SelecaoRota = () => {
   };
 
   useEffect(() => {
-    const currentMusic = "/sounds/01. Intro_To_the_Stars.mp3";
+    // CORREÇÃO: Nome atualizado para coincidir com os outros arquivos e evitar reinício do áudio
+    const currentMusic = "/sounds/trilha_galatica_v1.mp3";
     playTrack(currentMusic, { loop: true, isPrimary: false });
 
     const canvas = canvasRef.current;
