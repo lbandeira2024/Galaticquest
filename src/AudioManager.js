@@ -13,32 +13,26 @@ export const AudioProvider = ({ children }) => {
   const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
   const [queuedMusic, setQueuedMusic] = useState(null);
 
-  // Função para ser chamada na primeira interação do utilizador
   const unlockAudio = useCallback(() => {
     if (isAudioUnlocked) return;
-
-    // Toca e pausa um som silencioso para "acordar" o contexto de áudio
     const silentSound = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
     silentSound.play().then(() => {
       silentSound.pause();
-      console.log("✅ Contexto de Áudio desbloqueado pelo utilizador.");
+      console.log("✅ Contexto de Áudio desbloqueado.");
       setIsAudioUnlocked(true);
-    }).catch(e => console.error("Desbloqueio de áudio falhou", e));
+    }).catch(e => console.error("Desbloqueio falhou", e));
   }, [isAudioUnlocked]);
 
-  // Efeito que toca a música em fila assim que o áudio for desbloqueado
   useEffect(() => {
     if (isAudioUnlocked && queuedMusic) {
       playTrack(queuedMusic.src, queuedMusic.options);
-      setQueuedMusic(null); // Limpa a fila
+      setQueuedMusic(null);
     }
   }, [isAudioUnlocked, queuedMusic]);
 
-
   const playTrack = useCallback((src, options = { loop: true, isPrimary: false }) => {
-    // Se o áudio não estiver desbloqueado, coloca a música na fila e aguarda.
     if (!isAudioUnlocked) {
-      console.warn("Áudio bloqueado. A colocar música na fila.");
+      console.warn("🔒 Áudio bloqueado. Na fila:", src);
       setQueuedMusic({ src, options });
       return;
     }
@@ -46,30 +40,40 @@ export const AudioProvider = ({ children }) => {
     const targetAudioRef = options.isPrimary ? primaryAudioRef : musicAudioRef;
     const otherAudioRef = options.isPrimary ? musicAudioRef : primaryAudioRef;
 
+    // Pausa o outro canal (ex: se tocar música primária, pausa a secundária)
     otherAudioRef.current.pause();
 
-    // =====================================================================
-    // CORREÇÃO INTELIGENTE DE CONTINUIDADE
-    // =====================================================================
-    // 1. Pega a URL que está tocando agora e remove qualquer "?t=..."
-    const currentSrc = decodeURI(targetAudioRef.current.src).split("?")[0];
+    // =========================================================
+    // LÓGICA DE CONTINUIDADE INTELIGENTE (COM LOGS)
+    // =========================================================
 
-    // 2. Pega a URL nova que foi pedida e também remove qualquer "?t=..."
-    const newSrc = src.split("?")[0];
+    // 1. URL atual que está a tocar (limpa de ?t=...)
+    const currentFullSrc = decodeURI(targetAudioRef.current.src);
+    const currentCleanSrc = currentFullSrc.split("?")[0];
 
-    // 3. Compara apenas os nomes limpos. Se for igual e não estiver pausado, IGNORA.
-    if (currentSrc.endsWith(newSrc) && !targetAudioRef.current.paused) {
-      return; // É a mesma música! Mantém tocando.
+    // 2. Nova URL pedida (limpa de ?t=...)
+    const newCleanSrc = src.split("?")[0];
+
+    // LOG DE DEBUG (Para vermos no Console o que está a acontecer)
+    console.log(`🎵 [AudioManager] Comparando:
+      TOCANDO AGORA: "${currentCleanSrc}"
+      NOVO PEDIDO:   "${newCleanSrc}"
+      ESTÁ PAUSADO?: ${targetAudioRef.current.paused}`);
+
+    // 3. A comparação
+    // Verifica se a URL atual TERMINA com a nova URL (ignora http://localhost...)
+    // E verifica se NÃO está pausado.
+    if (currentCleanSrc.endsWith(newCleanSrc) && !targetAudioRef.current.paused) {
+      console.log("✅ [AudioManager] Música igual detectada. Mantendo a atual.");
+      return; // SAAI DA FUNÇÃO, MANTÉM A MÚSICA
     }
-    // =====================================================================
 
-    // Se chegou aqui, é porque a música é realmente diferente. Troca a fonte.
-    if (!currentSrc.endsWith(newSrc)) {
-      targetAudioRef.current.src = src;
-    }
+    console.warn("🔄 [AudioManager] Música diferente (ou pausada). Reiniciando...");
 
+    // Se chegou aqui, troca a música
+    targetAudioRef.current.src = src; // Usa o src original
     targetAudioRef.current.loop = options.loop;
-    targetAudioRef.current.play().catch(e => console.error("Audio play falhou", e));
+    targetAudioRef.current.play().catch(e => console.error("Erro ao tocar:", e));
     setActiveAudioRef(targetAudioRef);
 
   }, [isAudioUnlocked]);
@@ -78,7 +82,7 @@ export const AudioProvider = ({ children }) => {
     if (!isAudioUnlocked) return;
     const sound = new Audio(src);
     soundsRef.current.push(sound);
-    sound.play().catch(error => console.log('Sound play prevented:', error));
+    sound.play().catch(error => console.log('Erro som:', error));
     sound.onended = () => {
       soundsRef.current = soundsRef.current.filter(s => s !== sound);
     };
@@ -95,34 +99,19 @@ export const AudioProvider = ({ children }) => {
   const { isPaused } = usePause();
   useEffect(() => {
     const activeAudioEl = activeAudioRef?.current;
-
     if (isPaused) {
-      if (activeAudioEl && !activeAudioEl.paused) {
-        activeAudioEl.pause();
-      }
+      if (activeAudioEl && !activeAudioEl.paused) activeAudioEl.pause();
       soundsRef.current.forEach(s => s.pause());
     } else {
       if (activeAudioEl && activeAudioEl.paused && isAudioUnlocked) {
-        activeAudioEl.play().catch(e => console.error("Audio resume falhou", e));
+        activeAudioEl.play().catch(e => console.error("Resume falhou", e));
       }
     }
   }, [isPaused, activeAudioRef, isAudioUnlocked]);
 
+  const value = { unlockAudio, playTrack, playSound, stopAllAudio, primaryAudioRef, musicAudioRef };
 
-  const value = {
-    unlockAudio,
-    playTrack,
-    playSound,
-    stopAllAudio,
-    primaryAudioRef,
-    musicAudioRef
-  };
-
-  return (
-    <AudioContext.Provider value={value}>
-      {children}
-    </AudioContext.Provider>
-  );
+  return <AudioContext.Provider value={value}>{children}</AudioContext.Provider>;
 };
 
 export const useAudio = () => useContext(AudioContext);
