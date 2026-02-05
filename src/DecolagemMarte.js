@@ -466,7 +466,7 @@ const DecolagemMarte = () => {
   }, [groupId, isPaused, isMinervaHighlighted, API_BASE_URL]);
 
   useEffect(() => {
-    playTrack('/sounds/Decolagem.wav', { loop: false, isPrimary: true });
+    playTrack('/sounds/Decolagem.mp3', { loop: false, isPrimary: true });
     const travelStartTimer = setTimeout(() => { if (!isPaused) setTravelStarted(true); }, 12000);
     const monitorTimer1 = setTimeout(() => { if (!isPaused) setMainDisplayState('clouds'); }, 13000);
     const monitorTimer2 = setTimeout(() => { if (!isPaused) { setMainDisplayState('static'); setMonitorState('static'); } }, 23000);
