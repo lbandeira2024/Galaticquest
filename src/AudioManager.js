@@ -16,7 +16,6 @@ export const AudioProvider = ({ children }) => {
   const unlockAudio = useCallback(() => {
     if (isAudioUnlocked) return;
 
-    // Tenta retomar o AudioContext do navegador se estiver suspenso (comum em produção/HTTPS)
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (AudioCtx) {
       const context = new AudioCtx();
@@ -25,13 +24,20 @@ export const AudioProvider = ({ children }) => {
       }
     }
 
-    // Toca um som silencioso para forçar o desbloqueio
     const silentSound = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
-    silentSound.play().then(() => {
-      silentSound.pause();
-      console.log("✅ Contexto de Áudio desbloqueado com sucesso.");
-      setIsAudioUnlocked(true);
-    }).catch(e => console.error("O navegador bloqueou o desbloqueio automático. Requer clique.", e));
+
+    // Tratamento de promessa no desbloqueio
+    const playPromise = silentSound.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        silentSound.pause();
+        console.log("✅ Contexto de Áudio desbloqueado com sucesso.");
+        setIsAudioUnlocked(true);
+      }).catch(e => {
+        // Ignora erro de autoplay se ainda não houve interação
+        console.warn("Aguardando interação para desbloqueio.");
+      });
+    }
   }, [isAudioUnlocked]);
 
   useEffect(() => {
@@ -43,7 +49,6 @@ export const AudioProvider = ({ children }) => {
   }, [isAudioUnlocked, queuedMusic]);
 
   const playTrack = useCallback((src, options = { loop: true, isPrimary: false }) => {
-    // Se não estiver desbloqueado, coloca na fila e espera
     if (!isAudioUnlocked) {
       console.warn("🔒 Áudio bloqueado. Adicionado à fila:", src);
       setQueuedMusic({ src, options });
@@ -53,11 +58,13 @@ export const AudioProvider = ({ children }) => {
     const targetAudioRef = options.isPrimary ? primaryAudioRef : musicAudioRef;
     const otherAudioRef = options.isPrimary ? musicAudioRef : primaryAudioRef;
 
-    // Pausa o outro canal
-    otherAudioRef.current.pause();
+    // Pausa o outro canal com segurança
+    if (!otherAudioRef.current.paused) {
+      otherAudioRef.current.pause();
+    }
 
     // =========================================================
-    // LÓGICA DE CONTINUIDADE INTELIGENTE
+    // LÓGICA DE CONTINUIDADE E TRATAMENTO DE ABORT ERROR
     // =========================================================
     const currentFullSrc = decodeURI(targetAudioRef.current.src);
     const currentCleanSrc = currentFullSrc.split("?")[0];
@@ -70,7 +77,21 @@ export const AudioProvider = ({ children }) => {
 
     targetAudioRef.current.src = src;
     targetAudioRef.current.loop = options.loop;
-    targetAudioRef.current.play().catch(e => console.error("Erro ao tocar trilha:", e));
+
+    // A CORREÇÃO PRINCIPAL ESTÁ AQUI:
+    const playPromise = targetAudioRef.current.play();
+
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        // Se o erro for 'AbortError', significa que o áudio foi pausado 
+        // antes de começar (comum em trocas rápidas de tela). Ignoramos.
+        if (error.name === 'AbortError') {
+          return;
+        }
+        console.error("Erro ao tocar trilha:", error);
+      });
+    }
+
     setActiveAudioRef(targetAudioRef);
 
   }, [isAudioUnlocked]);
@@ -79,21 +100,40 @@ export const AudioProvider = ({ children }) => {
     if (!isAudioUnlocked) return;
     const sound = new Audio(src);
     soundsRef.current.push(sound);
-    sound.play().catch(error => console.log('Erro som:', error));
+
+    // Tratamento de erro também para efeitos sonoros
+    const playPromise = sound.play();
+    if (playPromise !== undefined) {
+      playPromise.catch(error => {
+        if (error.name === 'AbortError') return;
+        console.log('Erro som:', error);
+      });
+    }
+
     sound.onended = () => {
       soundsRef.current = soundsRef.current.filter(s => s !== sound);
     };
   }, [isAudioUnlocked]);
 
   const stopAllAudio = useCallback(() => {
-    musicAudioRef.current.pause();
-    primaryAudioRef.current.pause();
-    soundsRef.current.forEach(sound => sound.pause());
+    // Pausa segura para Music Ref
+    if (musicAudioRef.current && !musicAudioRef.current.paused) {
+      musicAudioRef.current.pause();
+    }
+    // Pausa segura para Primary Ref
+    if (primaryAudioRef.current && !primaryAudioRef.current.paused) {
+      primaryAudioRef.current.pause();
+    }
+
+    soundsRef.current.forEach(sound => {
+      if (!sound.paused) sound.pause();
+    });
     soundsRef.current = [];
     setActiveAudioRef(null);
   }, []);
 
   const { isPaused } = usePause();
+
   useEffect(() => {
     const activeAudioEl = activeAudioRef?.current;
     if (isPaused) {
@@ -101,12 +141,17 @@ export const AudioProvider = ({ children }) => {
       soundsRef.current.forEach(s => s.pause());
     } else {
       if (activeAudioEl && activeAudioEl.paused && isAudioUnlocked) {
-        activeAudioEl.play().catch(e => console.error("Resume falhou", e));
+        const playPromise = activeAudioEl.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(e => {
+            if (e.name === 'AbortError') return;
+            console.error("Resume falhou", e);
+          });
+        }
       }
     }
   }, [isPaused, activeAudioRef, isAudioUnlocked]);
 
-  // Exportamos unlockAudio e isAudioUnlocked para uso nos componentes
   const value = { unlockAudio, playTrack, playSound, stopAllAudio, primaryAudioRef, musicAudioRef, isAudioUnlocked };
 
   return <AudioContext.Provider value={value}>{children}</AudioContext.Provider>;
