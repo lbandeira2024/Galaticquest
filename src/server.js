@@ -13,20 +13,16 @@ const app = express();
 // CONFIGURAÇÃO DO EXPRESS
 // ==================================================================
 
-// Limite aumentado para aceitar fotos em Base64
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Configuração do CORS
 app.use(cors({
   origin: config.frontendUrl,
   credentials: true
 }));
 
-// Servir arquivos estáticos (Fotos)
 app.use('/images', express.static(path.join(__dirname, 'public/images')));
 
-// Logger de requisições
 app.use((req, res, next) => {
   console.log(`🔍 ${req.method} ${req.url}`);
   next();
@@ -123,12 +119,7 @@ const GrupoSchema = new mongoose.Schema({
   photoUrl: { type: String }
 }, { timestamps: true });
 
-GrupoSchema.pre('save', function (next) {
-  if (this.isModified('teamName')) {
-    this.normalizedTeamName = this.teamName.toLowerCase().trim();
-  }
-  next();
-});
+// --- REMOVIDO: O Hook "pre save" que causava o erro foi deletado daqui ---
 
 const Grupo = mongoose.model("Grupo", GrupoSchema);
 
@@ -293,54 +284,37 @@ app.post("/transfer-funds", async (req, res) => {
   } catch (error) { res.status(500).json({ success: false }); }
 });
 
-// === ROTAS DE LISTAGEM E CRIAÇÃO ===
-
 app.get("/games", async (req, res) => { const games = await Game.find({}); res.json({ success: true, games }); });
 
 app.get("/companies/list", async (req, res) => { const c = await Cliente.find({}); res.json({ success: true, companies: c }); });
 
 app.get("/regionals/list", async (req, res) => { const r = await Regional.find({}); res.json({ success: true, regionals: r }); });
 
-// --- Rota para Criar Nova Empresa ---
 app.post("/companies", async (req, res) => {
   try {
     const { nome } = req.body;
     if (!nome) return res.status(400).json({ success: false, message: "Nome obrigatório" });
-
-    // Verifica se já existe
     const existe = await Cliente.findOne({ nome });
     if (existe) return res.status(400).json({ success: false, message: "Empresa já existe." });
-
     const novaEmpresa = new Cliente({ nome });
     await novaEmpresa.save();
-
     const todas = await Cliente.find({});
     res.json({ success: true, message: "Cliente adicionado!", newClientId: novaEmpresa._id, companies: todas });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Erro ao criar empresa." });
-  }
+  } catch (error) { res.status(500).json({ success: false, message: "Erro ao criar empresa." }); }
 });
 
-// --- Rota para Criar Nova Regional ---
 app.post("/regionals", async (req, res) => {
   try {
     const { nome } = req.body;
     if (!nome) return res.status(400).json({ success: false, message: "Nome obrigatório" });
-
     const existe = await Regional.findOne({ nome });
     if (existe) return res.status(400).json({ success: false, message: "Regional já existe." });
-
     const novaRegional = new Regional({ nome });
     await novaRegional.save();
-
     const todas = await Regional.find({});
     res.json({ success: true, message: "Regional adicionada!", newRegionalId: novaRegional._id, regionals: todas });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Erro ao criar regional." });
-  }
+  } catch (error) { res.status(500).json({ success: false, message: "Erro ao criar regional." }); }
 });
-
-// ==========================================
 
 app.get("/check-email", async (req, res) => {
   try {
@@ -355,19 +329,20 @@ app.post("/register", normalizeEmail, async (req, res) => {
   try {
     if (await Usuario.findOne({ email: req.body.email })) return res.status(400).json({ success: false, message: "E-mail em uso" });
     const novoUsuario = new Usuario({ ...req.body, dataNascimento: req.body.dataNascimento || new Date('1900-01-01'), autorizado: false });
-
     const referencia = await Usuario.findOne({ empresa: novoUsuario.empresa, setor: novoUsuario.setor, regional: novoUsuario.regional, grupo: { $exists: true } });
     if (referencia) {
       novoUsuario.grupo = referencia.grupo;
       await Grupo.findByIdAndUpdate(referencia.grupo, { $addToSet: { membros: novoUsuario._id } });
     }
-
     await novoUsuario.save();
     const finalUser = await Usuario.findById(novoUsuario._id).populate('grupo');
     res.status(201).json({ success: true, usuario: finalUser });
   } catch (error) { res.status(500).json({ success: false, details: error.message }); }
 });
 
+// ===============================================
+// ROTA CORRIGIDA: SAVE-TEAM-NAME (Manual)
+// ===============================================
 app.post("/save-team-name", async (req, res) => {
   try {
     const { userId, teamName } = req.body;
@@ -383,15 +358,26 @@ app.post("/save-team-name", async (req, res) => {
     const membros = await Usuario.find({ empresa: criador.empresa, setor: criador.setor, regional: criador.regional, grupo: { $exists: false } });
     const ids = membros.map(u => u._id);
 
-    const novoGrupo = await Grupo.create({ teamName: teamName.trim(), membros: ids, loginon: 1, isLocked: false });
+    // CORREÇÃO: Normalização MANUAL para evitar o erro do Mongoose Hook
+    const tName = teamName.trim();
+
+    const novoGrupo = await Grupo.create({
+      teamName: tName,
+      normalizedTeamName: tName.toLowerCase(), // <--- Definido manualmente aqui
+      membros: ids,
+      loginon: 1,
+      isLocked: false
+    });
+
     await Usuario.updateMany({ _id: { $in: ids } }, { $set: { grupo: novoGrupo._id } });
 
     const finalUser = await Usuario.findById(userId).populate('grupo');
     res.json({ success: true, user: finalUser });
+
   } catch (error) {
-    console.error("ERRO CRÍTICO SAVE TEAM:", error); // <--- ADICIONADO PARA DEBUG
+    console.error("ERRO CRÍTICO SAVE TEAM:", error);
     if (error.code === 11000) return res.status(409).json({ success: false, message: "Nome em uso." });
-    res.status(500).json({ success: false });
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
@@ -422,55 +408,39 @@ app.post("/save-planned-route", async (req, res) => {
     await Grupo.findByIdAndUpdate(groupId, { rotaPlanejada: routeSteps });
     const user = await Usuario.findById(userId).populate('grupo');
     res.json({ success: true, usuario: user });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.get('/group/:groupId/all-cds-challenges', async (req, res) => {
   try {
     const desafios = await CDS.find({ grupo: req.params.groupId });
     res.json({ success: true, challenges: desafios.map(d => ({ desafioId: d.desafioId, escolhaIdLetter: d.escolha.id, timestamp: d.timestamp })) });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.get('/group/:groupId/check-recent-cds', async (req, res) => {
   try {
     const recent = await CDS.findOne({ grupo: req.params.groupId, createdAt: { $gte: new Date(Date.now() - 86400000) } });
     res.json({ success: true, hasRecentEntry: !!recent });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.post("/record-choice", async (req, res) => {
   try {
     const { userId, desafioId, escolha, impactos, newBalance } = req.body;
     const user = await Usuario.findById(userId);
-    const novaEscolha = new CDS({
-      grupo: user.grupo, usuario: user._id, desafioId, escolha: { id: escolha.id, texto: escolha.texto }, impactos
-    });
+    const novaEscolha = new CDS({ grupo: user.grupo, usuario: user._id, desafioId, escolha: { id: escolha.id, texto: escolha.texto }, impactos });
     await novaEscolha.save();
-
-    if (newBalance !== undefined) {
-      await Grupo.findByIdAndUpdate(user.grupo, { spaceCoins: newBalance });
-    }
-
+    if (newBalance !== undefined) await Grupo.findByIdAndUpdate(user.grupo, { spaceCoins: newBalance });
     res.status(201).json({ success: true, data: novaEscolha });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.get("/games/next-number", async (req, res) => {
   try {
     const last = await Game.findOne().sort({ gameNumber: -1 });
     res.json({ success: true, nextGameNumber: (last ? last.gameNumber : 0) + 1 });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.post("/games", async (req, res) => {
@@ -480,9 +450,7 @@ app.post("/games", async (req, res) => {
     const newGame = new Game({ gameNumber: (last ? last.gameNumber : 0) + 1, startDate, endDate });
     await newGame.save();
     res.status(201).json({ success: true, game: newGame });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.put("/games/:gameNumber/config", async (req, res) => {
@@ -494,9 +462,7 @@ app.put("/games/:gameNumber/config", async (req, res) => {
     const game = await Game.findOneAndUpdate({ gameNumber }, { $set: updateFields }, { new: true });
     if (!game) return res.status(404).json({ success: false });
     res.json({ success: true, game });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.get("/games/:gameNumber/config", async (req, res) => {
@@ -505,9 +471,7 @@ app.get("/games/:gameNumber/config", async (req, res) => {
     const game = await Game.findOne({ gameNumber });
     if (!game) return res.status(404).json({ success: false });
     res.json({ success: true, ...game.toObject() });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.put("/games/:gameNumber/dates", async (req, res) => {
@@ -516,9 +480,7 @@ app.put("/games/:gameNumber/dates", async (req, res) => {
     const { startDate, endDate } = req.body;
     const game = await Game.findOneAndUpdate({ gameNumber }, { $set: { startDate, endDate } }, { new: true });
     res.json({ success: true, game });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.delete("/games/:gameNumber", async (req, res) => {
@@ -526,9 +488,7 @@ app.delete("/games/:gameNumber", async (req, res) => {
     const result = await Game.findOneAndDelete({ gameNumber: req.params.gameNumber });
     if (!result) return res.status(404).json({ success: false });
     res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.post("/games/:gameNumber/toggle-pause", async (req, res) => {
@@ -537,9 +497,7 @@ app.post("/games/:gameNumber/toggle-pause", async (req, res) => {
     const game = await Game.findOneAndUpdate({ gameNumber: req.params.gameNumber }, { $set: { isPaused } }, { new: true });
     if (!game) return res.status(404).json({ success: false });
     res.json({ success: true, isPaused: game.isPaused });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.get("/games/:gameNumber/pause-status", async (req, res) => {
@@ -547,9 +505,7 @@ app.get("/games/:gameNumber/pause-status", async (req, res) => {
     const game = await Game.findOne({ gameNumber: req.params.gameNumber }, 'isPaused');
     if (!game) return res.status(404).json({ success: false });
     res.json({ success: true, isPaused: game.isPaused });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.delete("/users/:email", async (req, res) => {
@@ -559,9 +515,7 @@ app.delete("/users/:email", async (req, res) => {
     if (!result) return res.status(404).json({ success: false, message: "Usuário não encontrado." });
     if (result.grupo) await Grupo.findByIdAndUpdate(result.grupo, { $pull: { membros: result._id } });
     res.json({ success: true, message: "Usuário deletado." });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Erro interno." });
-  }
+  } catch (error) { res.status(500).json({ success: false, message: "Erro interno." }); }
 });
 
 app.get("/users/by-company", async (req, res) => {
@@ -570,9 +524,7 @@ app.get("/users/by-company", async (req, res) => {
     if (!company) return res.status(400).json({ success: false, message: "Empresa obrigatória." });
     const users = await Usuario.find({ empresa: company }, 'nome email setor regional cargo tempoLideranca').lean();
     res.json({ success: true, users });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.get("/user-by-email", async (req, res) => {
@@ -582,9 +534,7 @@ app.get("/user-by-email", async (req, res) => {
     const usuario = await Usuario.findOne({ email: email.toLowerCase().trim() }).select('-senha').lean();
     if (!usuario) return res.status(404).json({ success: false });
     res.json({ success: true, usuario });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 app.put("/update-user-by-email", normalizeEmail, async (req, res) => {
@@ -592,188 +542,84 @@ app.put("/update-user-by-email", normalizeEmail, async (req, res) => {
     const { email, ...updateFields } = req.body;
     if (!email) return res.status(400).json({ success: false });
     Object.keys(updateFields).forEach(key => (updateFields[key] == null) && delete updateFields[key]);
-
     const updatedUser = await Usuario.findOneAndUpdate({ email: email }, { $set: updateFields }, { new: true, runValidators: true }).select('-senha');
     if (!updatedUser) return res.status(404).json({ success: false });
     res.json({ success: true, message: "Atualizado.", usuario: updatedUser });
-  } catch (error) {
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
-// ==========================================
-//  ROTA CORRIGIDA: BUSCA FLEXÍVEL (IGNORA ESPAÇOS E MAIÚSCULAS)
-// ==========================================
 app.post("/users/authorize-by-game", async (req, res) => {
   console.log("🚀 [AUTORIZAR] Iniciando autorização...");
   try {
     const { gameNumber } = req.body;
-
     if (!gameNumber) return res.status(400).json({ success: false, message: "Número do jogo inválido." });
-
     const game = await Game.findOne({ gameNumber });
-    if (!game || !game.clienteId || !game.regionalId) {
-      return res.status(400).json({ success: false, message: "Jogo sem Cliente/Regional configurados." });
-    }
-
+    if (!game || !game.clienteId || !game.regionalId) return res.status(400).json({ success: false, message: "Jogo sem Cliente/Regional configurados." });
     const cliente = await Cliente.findById(game.clienteId);
     const regional = await Regional.findById(game.regionalId);
-
-    if (!cliente || !regional) {
-      return res.status(400).json({ success: false, message: "Cliente ou Regional não existem no banco." });
-    }
-
-    // Limpa espaços extras dos nomes para a busca
+    if (!cliente || !regional) return res.status(400).json({ success: false, message: "Cliente ou Regional não existem no banco." });
     const nomeEmpresa = cliente.nome.trim();
     const nomeRegional = regional.nome.trim();
-
-    console.log(`🎯 [AUTORIZAR] Buscando por: '${nomeEmpresa}' e '${nomeRegional}'`);
-
-    // Busca Flexível: Ignora maiúsculas (i) e busca como parte do texto
-    const query = {
-      empresa: { $regex: new RegExp(nomeEmpresa, 'i') },
-      regional: { $regex: new RegExp(nomeRegional, 'i') }
-    };
-
+    const query = { empresa: { $regex: new RegExp(nomeEmpresa, 'i') }, regional: { $regex: new RegExp(nomeRegional, 'i') } };
     const countCheck = await Usuario.countDocuments(query);
-    console.log(`👥 [AUTORIZAR] Usuários encontrados: ${countCheck}`);
-
-    if (countCheck === 0) {
-      // Retorna FALSE para forçar o erro aparecer na tela vermelha
-      return res.json({
-        success: false,
-        message: `⚠️ Nenhum jogador encontrado! \n\nO sistema buscou por: "${nomeEmpresa}" e "${nomeRegional}".\nVerifique se os usuários não estão com o nome da empresa escrito diferente.`
-      });
-    }
-
-    const resUpdate = await Usuario.updateMany(query, {
-      $set: {
-        autorizado: true,
-        gameNumber: gameNumber
-      }
-    });
-
-    res.json({
-      success: true,
-      updatedCount: resUpdate.modifiedCount,
-      message: `✅ Sucesso! ${resUpdate.modifiedCount} jogadores encontrados e autorizados!`
-    });
-
-  } catch (error) {
-    console.error("❌ [ERRO AUTORIZAR]:", error);
-    res.status(500).json({ success: false, message: "Erro interno no servidor." });
-  }
+    if (countCheck === 0) return res.json({ success: false, message: `⚠️ Nenhum jogador encontrado!` });
+    const resUpdate = await Usuario.updateMany(query, { $set: { autorizado: true, gameNumber: gameNumber } });
+    res.json({ success: true, updatedCount: resUpdate.modifiedCount, message: `✅ Sucesso! ${resUpdate.modifiedCount} jogadores encontrados e autorizados!` });
+  } catch (error) { res.status(500).json({ success: false, message: "Erro interno no servidor." }); }
 });
 
-// ======================================================================================
-//    NOVAS ROTAS: LOBBY, FOTOS E MOVIMENTAÇÃO
-// ======================================================================================
-
-// 1. Rota para Salvar Foto do Grupo (Com nome personalizado)
 app.post("/group/save-photo", async (req, res) => {
-  console.log("📸 [FOTO] Recebendo solicitação de registro...");
   try {
     const { gameNumber, teamName, image } = req.body;
-
-    if (!gameNumber || !teamName || !image) {
-      return res.status(400).json({ success: false, message: "Dados incompletos." });
-    }
-
-    // Sanitizar nome para criar pasta e arquivo seguros
+    if (!gameNumber || !teamName || !image) return res.status(400).json({ success: false, message: "Dados incompletos." });
     const safeGameFolder = `game_${gameNumber}`;
     const safeTeamName = teamName.trim().replace(/[^a-z0-9]/gi, '_').toLowerCase();
-
-    // Caminho físico
     const dirPath = path.join(__dirname, 'public', 'images', 'grupos', safeGameFolder, safeTeamName);
-
-    // Criar pastas recursivamente
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true });
-    }
-
-    // Converter Base64 e Salvar
+    if (!fs.existsSync(dirPath)) fs.mkdirSync(dirPath, { recursive: true });
     const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
     const buffer = Buffer.from(base64Data, 'base64');
-
-    // NOME DO ARQUIVO: registro_equipe_NomeDoGrupo.jpg
     const fileName = `registro_equipe_${safeTeamName}.jpg`;
-
     fs.writeFileSync(path.join(dirPath, fileName), buffer);
-
-    // Atualizar no Banco
     const photoUrl = `/images/grupos/${safeGameFolder}/${safeTeamName}/${fileName}`;
     await Grupo.findOneAndUpdate({ teamName: teamName }, { photoUrl });
-
-    console.log(`✅ [FOTO] Salva: ${photoUrl}`);
     res.json({ success: true, url: photoUrl });
-
-  } catch (error) {
-    console.error("❌ [ERRO FOTO]:", error);
-    res.status(500).json({ success: false, message: "Erro ao salvar imagem no servidor." });
-  }
+  } catch (error) { res.status(500).json({ success: false, message: "Erro ao salvar imagem no servidor." }); }
 });
 
-// 2. Rota para Trancar/Destrancar Grupo
 app.post("/group/toggle-lock", async (req, res) => {
   try {
     const { groupId } = req.body;
     const grupo = await Grupo.findById(groupId);
     if (!grupo) return res.status(404).json({ success: false, message: "Grupo não encontrado" });
-
     grupo.isLocked = !grupo.isLocked;
     await grupo.save();
-
     res.json({ success: true, isLocked: grupo.isLocked });
-  } catch (e) {
-    console.error(e);
-    res.status(500).json({ success: false });
-  }
+  } catch (e) { res.status(500).json({ success: false }); }
 });
 
-// 3. Rota para Mover Membro entre Grupos
 app.post("/group/move-member", async (req, res) => {
   try {
     const { memberId, targetGroupId } = req.body;
-
-    // Verificações de Trava
     const targetGroup = await Grupo.findById(targetGroupId);
     if (targetGroup.isLocked) return res.status(400).json({ success: false, message: "O grupo de destino está trancado." });
-
     const user = await Usuario.findById(memberId);
     const sourceGroup = await Grupo.findById(user.grupo);
-
     if (sourceGroup.isLocked) return res.status(400).json({ success: false, message: "O grupo de origem está trancado." });
-
-    // Executar Movimentação
     await Grupo.findByIdAndUpdate(sourceGroup._id, { $pull: { membros: memberId } });
     await Grupo.findByIdAndUpdate(targetGroupId, { $addToSet: { membros: memberId } });
     await Usuario.findByIdAndUpdate(memberId, { grupo: targetGroupId });
-
     res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Erro ao mover membro." });
-  }
+  } catch (error) { res.status(500).json({ success: false, message: "Erro ao mover membro." }); }
 });
 
-// 4. Rota para Obter Detalhes dos Grupos no Lobby (CORRIGIDA: FILTRO POR GAME NUMBER)
 app.get("/games/:gameNumber/groups-details", async (req, res) => {
   try {
     const { gameNumber } = req.params;
-
-    // 1. Encontrar todos os usuários que estão no jogo solicitado
     const usersInGame = await Usuario.find({ gameNumber: parseInt(gameNumber) }).select('_id');
     const userIds = usersInGame.map(u => u._id);
-
-    // 2. Buscar apenas os grupos que contêm esses usuários
-    const groups = await Grupo.find({
-      membros: { $in: userIds }
-    }).populate('membros');
-
+    const groups = await Grupo.find({ membros: { $in: userIds } }).populate('membros');
     res.json({ success: true, groups: groups });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false });
-  }
+  } catch (error) { res.status(500).json({ success: false }); }
 });
 
 const PORT = process.env.PORT || config.serverPort || 5000;
