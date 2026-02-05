@@ -36,12 +36,12 @@ export const AudioProvider = ({ children }) => {
   useEffect(() => {
     if (isAudioUnlocked) {
       if (queuedMusic) {
-        console.log("🎵 Fila Música processada:", queuedMusic.src);
+        console.log("🎵 Processando Fila Música:", queuedMusic.src);
         playTrack(queuedMusic.src, queuedMusic.options);
         setQueuedMusic(null);
       }
       if (queuedSFX) {
-        console.log("🚀 Fila SFX processada:", queuedSFX.src);
+        console.log("🚀 Processando Fila SFX:", queuedSFX.src);
         playTrack(queuedSFX.src, queuedSFX.options);
         setQueuedSFX(null);
       }
@@ -51,7 +51,7 @@ export const AudioProvider = ({ children }) => {
   const playTrack = useCallback((src, options = { loop: true, isPrimary: false }) => {
     if (!isAudioUnlocked) {
       if (options.isPrimary) {
-        console.warn("🔒 Decolagem/Primário na fila:", src);
+        console.warn("🔒 Decolagem na fila:", src);
         setQueuedSFX({ src, options });
       } else {
         console.warn("🔒 Música na fila:", src);
@@ -63,51 +63,59 @@ export const AudioProvider = ({ children }) => {
     const targetAudioRef = options.isPrimary ? primaryAudioRef : musicAudioRef;
     const otherAudioRef = options.isPrimary ? musicAudioRef : primaryAudioRef;
 
-    // === LÓGICA DE DUCKING E VOLUME ===
+    // === LÓGICA DE DUCKING (Prioridade) ===
     if (options.isPrimary) {
-      // Garante que a Decolagem esteja no volume MÁXIMO
-      targetAudioRef.current.volume = 1.0;
-
+      // Se for Decolagem, abaixa a música
       if (!otherAudioRef.current.paused) {
-        console.log("🔉 Baixando volume da música para som Primário.");
+        console.log("🔉 Baixando volume da música.");
         otherAudioRef.current.volume = 0.2;
       }
+      // Garante volume máximo para a Decolagem
+      targetAudioRef.current.volume = 1.0;
     } else {
-      // Se for música, volume normal
       targetAudioRef.current.volume = 1.0;
     }
 
     const currentFullSrc = decodeURI(targetAudioRef.current.src);
     const newCleanSrc = src.split("?")[0];
 
-    if (currentFullSrc.includes(newCleanSrc) && !targetAudioRef.current.paused) {
-      if (!options.isPrimary) targetAudioRef.current.volume = 1.0;
+    // Se for música e já estiver tocando, ignora. 
+    // SE FOR PRIMARY (Decolagem), SEMPRE TOCA DE NOVO (removemos o return)
+    if (!options.isPrimary && currentFullSrc.includes(newCleanSrc) && !targetAudioRef.current.paused) {
+      targetAudioRef.current.volume = 1.0;
       return;
     }
 
+    // --- CONFIGURAÇÃO AGRESSIVA DE PLAYBACK ---
     targetAudioRef.current.src = src;
     targetAudioRef.current.loop = options.loop;
+    targetAudioRef.current.currentTime = 0; // Reseta o tempo para o início
 
-    // --- DIAGNÓSTICO E PREPARAÇÃO ---
-    // Adiciona listeners para sabermos a verdade no console
-    targetAudioRef.current.onplay = () => console.log(`▶️ Iniciou reprodução: ${newCleanSrc}`);
-    targetAudioRef.current.onerror = (e) => console.error(`❌ Erro no arquivo: ${newCleanSrc}`, e);
+    // Listeners para diagnóstico no console
+    const handlePlay = () => console.log(`▶️ TENTANDO TOCAR: ${newCleanSrc}`);
+    const handleError = (e) => console.error(`❌ ERRO FATAL no arquivo: ${newCleanSrc}`, e);
 
-    // Força o carregamento para limpar buffer antigo
+    // Limpa listeners antigos para não acumular
+    targetAudioRef.current.onplay = handlePlay;
+    targetAudioRef.current.onerror = handleError;
+
+    // FORÇA O CARREGAMENTO (Isso resolve 99% dos casos de "som fantasma")
     targetAudioRef.current.load();
 
     const playPromise = targetAudioRef.current.play();
     if (playPromise !== undefined) {
-      playPromise.catch(error => {
+      playPromise.then(() => {
+        console.log(`🔊 SUCESSO: Áudio tocando (${newCleanSrc})`);
+      }).catch(error => {
         if (error.name === 'AbortError') return;
-        console.error("Erro no playTrack:", error);
+        console.error(`⚠️ Falha na Promessa de Áudio (${newCleanSrc}):`, error);
       });
     }
 
-    // Restaura volume da música ao fim do som primário
+    // Quando acabar o som primário, restaura o volume da música
     if (options.isPrimary) {
       targetAudioRef.current.onended = () => {
-        console.log("🔊 Fim do Primário. Restaurando música.");
+        console.log("🔊 Restaurando volume da música.");
         musicAudioRef.current.volume = 1.0;
       };
     }
@@ -121,6 +129,7 @@ export const AudioProvider = ({ children }) => {
     const sound = new Audio(src);
     soundsRef.current.push(sound);
     sound.volume = 1.0;
+    sound.currentTime = 0;
 
     sound.play().catch(e => { if (e.name !== 'AbortError') console.error("Erro SFX:", e); });
 
