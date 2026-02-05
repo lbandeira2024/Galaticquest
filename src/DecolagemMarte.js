@@ -466,7 +466,7 @@ const DecolagemMarte = () => {
   }, [groupId, isPaused, isMinervaHighlighted, API_BASE_URL]);
 
   useEffect(() => {
-    playTrack('/sounds/decolagem.wav', { loop: false, isPrimary: true });
+    playTrack('/sounds/Decolagem.wav', { loop: false, isPrimary: true });
     const travelStartTimer = setTimeout(() => { if (!isPaused) setTravelStarted(true); }, 12000);
     const monitorTimer1 = setTimeout(() => { if (!isPaused) setMainDisplayState('clouds'); }, 13000);
     const monitorTimer2 = setTimeout(() => { if (!isPaused) { setMainDisplayState('static'); setMonitorState('static'); } }, 23000);
@@ -771,7 +771,7 @@ const DecolagemMarte = () => {
       if (!isMoon && distanceKm <= approachDistanceThreshold && !isFinalApproachRef.current) {
         setIsFinalApproach(true);
         setIsBoostingTo60k(false);
-        approachSoundSoundPlayed.current = true;
+        approachSoundPlayed.current = true;
       } else {
         setIsBoostingTo60k(true);
       }
@@ -1037,7 +1037,7 @@ const DecolagemMarte = () => {
                 <>
                   {showWarpDisabledMessage ? (<div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#ff0', textAlign: 'center', padding: '10px', fontSize: '0.9em', textShadow: '0 0 5px rgba(255, 255, 0, 0.7)' }}>Distancia Orbital máxima alcançada.<br />Dobra desativada!</div>) : showMinervaOnMonitor ? (<img src="/images/Minerva/Minerva-Informando-velocidade.gif" alt="Aviso de Velocidade" className="monitor-image" />) : (
                     <>
-                      {monitorState === 'on' && <img src="/Images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
+                      {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
                       {monitorState === 'static' && <img src={`/images/No_Signal.png?seed=${staticScreenSeed}`} alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
                     </>
                   )}
@@ -1053,7 +1053,7 @@ const DecolagemMarte = () => {
                 <div className="monitor-text-display"><p><span className="dialogue-character-name">{currentCharacterData.nome}: </span>{highlightKeywords(currentDialogueStep.texto, currentDialogueStep.palavras_chave)}</p></div>
               ) : (
                 <>
-                  {monitorState === 'on' && <img src="/Images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
+                  {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
                   {monitorState === 'static' && <img src={`/images/No_Signal.png?seed=${staticScreenSeed}`} alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
                 </>
               )}
@@ -1090,7 +1090,7 @@ const DecolagemMarte = () => {
         </div>
         <div className="cockpit-overlay"></div>
         <div className="main-display">
-          {mainDisplayState === 'acee' && (<img src="/Images/ACEE.png" alt="ACEE" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />)}
+          {mainDisplayState === 'acee' && (<img src="/images/ACEE.png" alt="ACEE" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />)}
           {mainDisplayState === 'clouds' && (<video src="/images/Clouds.webm" className="cloud-animation-video" autoPlay muted loop playsInline preload="auto" />)}
           {mainDisplayState === 'static' && <div className="static-animation"></div>}
           {isDobraAtivada ? (<video src="/images/Vluz-Dobra.webm" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />) : (mainDisplayState === 'stars' && (<SpaceView distance={distanceKm} forceLarge={arrivedAtMars} isWarpActive={false} isPaused={isPaused} selectedPlanet={selectedPlanet} onChallengeEnd={handleChallengeEnd} isDeparting={isDeparting} />))}
