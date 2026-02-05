@@ -48,11 +48,23 @@ export const AudioProvider = ({ children }) => {
 
     otherAudioRef.current.pause();
 
-    if (decodeURI(targetAudioRef.current.src).endsWith(src) && !targetAudioRef.current.paused) {
-      return;
-    }
+    // =====================================================================
+    // CORREÇÃO INTELIGENTE DE CONTINUIDADE
+    // =====================================================================
+    // 1. Pega a URL que está tocando agora e remove qualquer "?t=..."
+    const currentSrc = decodeURI(targetAudioRef.current.src).split("?")[0];
 
-    if (!decodeURI(targetAudioRef.current.src).endsWith(src)) {
+    // 2. Pega a URL nova que foi pedida e também remove qualquer "?t=..."
+    const newSrc = src.split("?")[0];
+
+    // 3. Compara apenas os nomes limpos. Se for igual e não estiver pausado, IGNORA.
+    if (currentSrc.endsWith(newSrc) && !targetAudioRef.current.paused) {
+      return; // É a mesma música! Mantém tocando.
+    }
+    // =====================================================================
+
+    // Se chegou aqui, é porque a música é realmente diferente. Troca a fonte.
+    if (!currentSrc.endsWith(newSrc)) {
       targetAudioRef.current.src = src;
     }
 
@@ -98,12 +110,12 @@ export const AudioProvider = ({ children }) => {
 
 
   const value = {
-    unlockAudio, // Exporta a nova função
+    unlockAudio,
     playTrack,
     playSound,
     stopAllAudio,
     primaryAudioRef,
-    musicAudioRef // <--- NOVO: Exporta a referência da música
+    musicAudioRef
   };
 
   return (
