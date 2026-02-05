@@ -330,21 +330,21 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
 
                     <div className="resources-ultimate">
                         <div className="resource-ultimate fuel-ultimate">
-                            <img src="/images/plan/Combustivel-port.png" alt="Fuel" className="resource-icon-ultimate" />
+                            <img src="/images/Plan/Combustivel-port.png" alt="Fuel" className="resource-icon-ultimate" />
                             <div className="resource-value-ultimate">{Math.round(plannedRoute.fuelPercentage)}%</div>
                             <div className={`resource-warning ${getWarningClass(plannedRoute.fuel, MAX_FUEL)}`} style={{ display: getWarning(plannedRoute.fuel, MAX_FUEL, 'combustível') ? 'block' : 'none' }}>
                                 {getWarning(plannedRoute.fuel, MAX_FUEL, 'combustível')}
                             </div>
                         </div>
                         <div className="resource-ultimate oxygen-ultimate">
-                            <img src="/images/plan/Oxigenio-port.png" alt="O2" className="resource-icon-ultimate" />
+                            <img src="/images/Plan/Oxigenio-port.png" alt="O2" className="resource-icon-ultimate" />
                             <div className="resource-value-ultimate">{Math.round(plannedRoute.oxygenPercentage)}%</div>
                             <div className={`resource-warning ${getWarningClass(plannedRoute.oxygen, MAX_OXYGEN)}`} style={{ display: getWarning(plannedRoute.oxygen, MAX_OXYGEN, 'oxigênio') ? 'block' : 'none' }}>
                                 {getWarning(plannedRoute.oxygen, MAX_OXYGEN, 'oxigênio')}
                             </div>
                         </div>
                         <div className="resource-ultimate food-ultimate">
-                            <img src="/images/plan/Comida-port.png" alt="Food" className="resource-icon-ultimate" />
+                            <img src="/images/Plan/Comida-port.png" alt="Food" className="resource-icon-ultimate" />
                             <div className="resource-value-ultimate">{Math.round(plannedRoute.foodPercentage)}%</div>
                             <div className={`resource-warning ${getWarningClass(plannedRoute.food, MAX_FOOD)}`} style={{ display: getWarning(plannedRoute.food, MAX_FOOD, 'provisões') ? 'block' : 'none' }}>
                                 {getWarning(plannedRoute.food, MAX_FOOD, 'provisões')}

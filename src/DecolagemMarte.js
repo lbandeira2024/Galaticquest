@@ -1091,7 +1091,7 @@ const DecolagemMarte = () => {
         <div className="cockpit-overlay"></div>
         <div className="main-display">
           {mainDisplayState === 'acee' && (<img src="/images/ACEE.png" alt="ACEE" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />)}
-          {mainDisplayState === 'clouds' && (<video src="/images/Clouds.webm" className="cloud-animation-video" autoPlay muted loop playsInline preload="auto" />)}
+          {mainDisplayState === 'clouds' && (<video src="/images/clouds.webm" className="cloud-animation-video" autoPlay muted loop playsInline preload="auto" />)}
           {mainDisplayState === 'static' && <div className="static-animation"></div>}
           {isDobraAtivada ? (<video src="/images/Vluz-Dobra.webm" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />) : (mainDisplayState === 'stars' && (<SpaceView distance={distanceKm} forceLarge={arrivedAtMars} isWarpActive={false} isPaused={isPaused} selectedPlanet={selectedPlanet} onChallengeEnd={handleChallengeEnd} isDeparting={isDeparting} />))}
           {showStoreModal && <LojaEspacial
