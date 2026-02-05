@@ -27,7 +27,7 @@ const SelecaoRotaPrep = () => {
 
     // Animação do campo de estrelas e música
     useEffect(() => {
-        const currentMusic = "/sounds/01. Intro_To_the_Stars.mp3";
+        const currentMusic = "/sounds/trilha_galatica_v1.mp3";
         playTrack(currentMusic, { loop: true, isPrimary: false });
 
         const canvas = canvasRef.current;
