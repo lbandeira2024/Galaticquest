@@ -27,8 +27,9 @@ const SelecaoRotaPrep = () => {
 
     // Animação do campo de estrelas e música
     useEffect(() => {
-        // ADICIONADO: Truque para evitar cache
-        const currentMusic = `/sounds/trilha_galatica_v1.mp3?t=${Date.now()}`;
+        // CORREÇÃO: Removido o timestamp para manter a música contínua
+        const currentMusic = "/sounds/trilha_galatica_v1.mp3";
+
         playTrack(currentMusic, { loop: true, isPrimary: false });
 
         const canvas = canvasRef.current;
