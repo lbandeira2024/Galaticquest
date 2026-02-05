@@ -179,22 +179,26 @@ const DecolagemMarte = () => {
   const [telemetry, setTelemetry] = useState(telemetryRef.current);
   const cockpitRef = useRef(null);
 
-  // AQUI É IMPORTANTE: Trazemos unlockAudio também
+  // Trazemos unlockAudio para garantir o desbloqueio
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
 
   const hasStartedAudioRef = useRef(false);
 
-  // --- CORREÇÃO 1: UseEffect EXCLUSIVO para iniciar a missão ---
-  // Este efeito não tem cleanup que para o áudio, evitando o problema do abort
+  // --- CORREÇÃO: UseEffect EXCLUSIVO para iniciar a missão com Cache Buster ---
   useEffect(() => {
-    // Tenta desbloquear caso não tenha vindo da tela anterior (segurança extra)
+    // Tenta desbloquear caso não tenha vindo da tela anterior
     unlockAudio();
 
     if (!hasStartedAudioRef.current) {
       hasStartedAudioRef.current = true;
-      console.log("🚀 DecolagemMarte: Iniciando sequência de áudio...");
-      playTrack('/sounds/Decolagem.mp3', { loop: false, isPrimary: true });
+
+      // --- TRUQUE DO CARIMBO DE TEMPO ---
+      // ?t=Date.now() obriga o navegador a baixar uma cópia nova do áudio
+      const audioUrl = `/sounds/Decolagem.mp3?t=${Date.now()}`;
+
+      console.log("🚀 DecolagemMarte: Solicitando áudio fresco:", audioUrl);
+      playTrack(audioUrl, { loop: false, isPrimary: true });
     }
 
     const travelStartTimer = setTimeout(() => { if (!isPaused) setTravelStarted(true); }, 12000);
@@ -203,29 +207,21 @@ const DecolagemMarte = () => {
     const monitorTimer3 = setTimeout(() => { if (!isPaused) { setMainDisplayState('stars'); setMonitorState('on'); } }, 45000);
 
     return () => {
-      // Limpa APENAS os timers, NÃO PARA O ÁUDIO aqui para evitar cortes durante re-renders
+      // Limpa APENAS os timers, NÃO PARA O ÁUDIO aqui
       clearTimeout(travelStartTimer);
       clearTimeout(monitorTimer1);
       clearTimeout(monitorTimer2);
       clearTimeout(monitorTimer3);
     };
-  }, [playTrack, unlockAudio]); // Dependências seguras
+  }, [playTrack, unlockAudio]);
 
-  // --- CORREÇÃO 2: UseEffect EXCLUSIVO para limpeza final ---
-  // Este efeito só roda quando o componente MORRE (sai da tela)
+  // --- CORREÇÃO: UseEffect EXCLUSIVO para limpeza final ---
   useEffect(() => {
     return () => {
       console.log("🛑 DecolagemMarte: Desmontando e parando áudio.");
       stopAllAudio();
     };
   }, [stopAllAudio]);
-
-
-  // ... (RESTO DO CÓDIGO MANTIDO IGUAL) ...
-  // Copie daqui para baixo todo o resto do seu arquivo original,
-  // começando do useEffect do SOS (linha ~115 no original) até o final.
-
-  // PARA FACILITAR, VOU REPETIR O RESTANTE DO CÓDIGO ABAIXO:
 
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
