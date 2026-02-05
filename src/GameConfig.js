@@ -535,6 +535,7 @@ const GameConfig = () => {
             return;
         }
 
+        // Feedback visual imediato
         setClientMessage({ type: 'info', text: 'Conectando ao servidor...' });
 
         try {
@@ -542,7 +543,8 @@ const GameConfig = () => {
                 gameNumber: Number(gameNumber)
             });
 
-            // Se o servidor retorna success: true (achou jogadores)
+            // CORREÇÃO: Verificar explicitamente se houve sucesso
+            // Se response.data.success for TRUE, mostra verde
             if (response.data.success) {
                 let successMessage = response.data.message || `Jogo ${gameNumber} iniciado com sucesso.`;
                 if (response.data.updatedCount !== undefined) {
@@ -550,7 +552,7 @@ const GameConfig = () => {
                 }
                 setClientMessage({ type: 'success', text: successMessage });
             }
-            // Se o servidor retorna success: false (0 jogadores), agora mostramos o erro!
+            // Se response.data.success for FALSE (0 jogadores), agora mostra VERMELHO
             else {
                 setClientMessage({ type: 'error', text: response.data.message });
             }
