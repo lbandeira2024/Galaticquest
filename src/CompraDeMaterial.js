@@ -4,14 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAudio } from './AudioManager';
 import { useAuth } from './AuthContext';
-import { useConfig } from './ConfigContext';
 import './CompraDeMaterial.css';
 
-const CompraDeMaterial = () => {
-    // 1. Configuração da API via Contexto
-    const { apiBaseUrl } = useConfig();
-    const API_BASE_URL = apiBaseUrl;
+// CORREÇÃO: Usar rota relativa para Proxy
+const API_BASE_URL = "/api";
 
+const CompraDeMaterial = () => {
+    // 1. Configuração da API via Constante (sem useConfig)
     const { user, login } = useAuth();
     const navigate = useNavigate();
     const { playSound } = useAudio();

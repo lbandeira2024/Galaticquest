@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAudio } from "./AudioManager";
 import { useAuth } from "./AuthContext";
-import { useConfig } from './ConfigContext'; // ADIÇÃO: Importa o config
 import axios from "axios";
 import "./selecao.css";
 
-// REMOÇÃO: A linha da API_BASE_URL foi removida daqui
+// CORREÇÃO: Usar rota relativa para Proxy
+const API_BASE_URL = "/api";
 
 const SelecaoNave = () => {
   // Animation control states
@@ -18,8 +18,6 @@ const SelecaoNave = () => {
   const navigate = useNavigate();
   const { playSound } = useAudio();
   const { user, login } = useAuth();
-  const { apiBaseUrl } = useConfig(); // ADIÇÃO: Obtém a URL do contexto
-  const API_BASE_URL = apiBaseUrl;   // ADIÇÃO: Atribui à constante
 
   // Refs and ship selection states
   const canvasRef = useRef(null);
@@ -88,7 +86,6 @@ const SelecaoNave = () => {
     }
   };
 
-  // **** INÍCIO DA CORREÇÃO ****
   const handleConfirmation = async () => {
     if (selectedShip && !shipConfirmed) {
       if (!user) {
@@ -97,31 +94,23 @@ const SelecaoNave = () => {
         return;
       }
 
-      // Verifica se o usuário já tem um grupo. Se não, algo está errado no fluxo.
       if (!user.grupo) {
         alert("❌ Erro: Grupo não definido. Por favor, retorne à tela de boas-vindas para nomear sua equipe.");
         navigate("/boasvindas");
         return;
       }
 
-      // ADIÇÃO: Verifica se a URL da API foi carregada
-      if (!API_BASE_URL) {
-        alert("❌ Erro de configuração: A URL da API não foi encontrada.");
-        return;
-      }
-
+      // API_BASE_URL agora é uma constante segura
       try {
         playSound("/sounds/03.system-selection.mp3");
-        // MODIFICAÇÃO: A URL agora vem do contexto
+
         const response = await axios.put(`${API_BASE_URL}/select-ship`, {
           userId: user._id,
           shipId: selectedShip.code
         });
 
-        // A API agora retorna o usuário atualizado.
         if (response.data.success && response.data.user) {
           console.log("✅ Nave salva com sucesso no banco de dados!");
-          // Atualiza o contexto com os dados mais recentes.
           login(response.data.user);
           setShipConfirmed(true);
         } else {
@@ -132,11 +121,9 @@ const SelecaoNave = () => {
         alert(`❌ Ocorreu um erro de comunicação ao salvar sua escolha: ${error.response?.data?.message || error.message}`);
       }
     } else if (shipConfirmed) {
-      // Se a nave já está confirmada, o clique na seta leva para a próxima tela.
       navigate("/SelecaoEquipe");
     }
   };
-  // **** FIM DA CORREÇÃO ****
 
   return (
     <div className="background">

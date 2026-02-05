@@ -2,11 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAudio } from "./AudioManager";
 import { useAuth } from "./AuthContext";
-import { useConfig } from './ConfigContext'; // ADIÇÃO: Importa o config
 import axios from "axios";
 import "./selecaoequipe.css";
 
-// REMOÇÃO: A linha da API_BASE_URL foi removida daqui
+// CORREÇÃO: Usar rota relativa para Proxy
+const API_BASE_URL = "/api";
 
 const SelecaoEquipe = () => {
   const [gifFinished, setGifFinished] = useState(false);
@@ -18,8 +18,7 @@ const SelecaoEquipe = () => {
   const canvasRef = useRef(null);
 
   const { user, login } = useAuth();
-  const { apiBaseUrl } = useConfig(); // ADIÇÃO: Obtém a URL do contexto
-  const API_BASE_URL = apiBaseUrl;   // ADIÇÃO: Atribui à constante
+  // API_BASE_URL já definido acima como constante
 
   const [selectedShip, setSelectedShip] = useState(null);
   const [shipConfirmed, setShipConfirmed] = useState(false);
@@ -72,7 +71,6 @@ const SelecaoEquipe = () => {
     };
   }, []);
 
-  // **** INÍCIO DA CORREÇÃO ****
   const handleConfirmation = async () => {
     if (selectedTeam) {
       if (!user) {
@@ -80,21 +78,14 @@ const SelecaoEquipe = () => {
         return navigate("/");
       }
 
-      // Verifica se o usuário já tem um grupo.
       if (!user.grupo) {
         alert("❌ Erro: Grupo não definido. Por favor, retorne à tela de boas-vindas para nomear sua equipe.");
         navigate("/boasvindas");
         return;
       }
 
-      // ADIÇÃO: Verifica se a URL da API foi carregada
-      if (!API_BASE_URL) {
-        alert("❌ Erro de configuração: A URL da API não foi encontrada.");
-        return;
-      }
-
+      // API_BASE_URL agora é seguro
       try {
-        // MODIFICAÇÃO: A URL agora vem do contexto
         const response = await axios.put(`${API_BASE_URL}/select-team`, {
           userId: user._id,
           teamCode: selectedTeam.code
@@ -102,9 +93,7 @@ const SelecaoEquipe = () => {
 
         if (response.data.success && response.data.user) {
           console.log("✅ Equipe salva com sucesso no banco de dados!");
-          // Atualiza o contexto com os dados mais recentes.
           login(response.data.user);
-          // Navega para a próxima tela
           navigate("/CompraDeMaterial");
         } else {
           alert(`❌ Falha ao salvar a equipe: ${response.data.message}`);
@@ -115,7 +104,6 @@ const SelecaoEquipe = () => {
       }
     }
   };
-  // **** FIM DA CORREÇÃO ****
 
   const handleStepNavigation = (step) => {
     if ((step === 1 && !shipConfirmed) || (step === 2 && shipConfirmed) || (step === 3 && selectedTeam)) {
@@ -143,7 +131,6 @@ const SelecaoEquipe = () => {
   };
 
   const getMemberImage = (teamCode, index) => {
-    // ... (função sem alterações)
     switch (teamCode) {
       case 'E1': return index === 0 ? 'Sisifo' : index === 1 ? 'neo_steves' : index === 2 ? 'tamara' : index === 3 ? 'ares' : 'mae';
       case 'E2': return index === 0 ? 'Aletheia' : index === 1 ? 'Capitao_Kirk' : index === 2 ? 'Dr_Maureen' : index === 3 ? 'Hazza_Ali' : 'Illa_Ramon';
@@ -155,7 +142,6 @@ const SelecaoEquipe = () => {
   };
 
   const getFlagImage = (country) => {
-    // ... (função sem alterações)
     const countryMap = { "Espanha": "spain", "Americano": "usa", "Americana": "usa", "Romena": "romania", "Canadense": "canada", "Árabe": "saudi-arabia", "Israelense": "israel", "Mexicano": "mexico", "Tcheco": "czech-republic", "Polonesa": "poland", "Brasileira": "brazil", "Russo": "russia", "Russa": "russia", "Chinesa": "china", "Grego": "greece", "Italiano": "italy", "Japonês": "japan", "Japonesa": "japan", "Ítalo-russo": "italy" };
     return countryMap[country] || "unknown";
   };
@@ -170,7 +156,6 @@ const SelecaoEquipe = () => {
           Cada grupo possui experiências diferentes e características únicas.
         </p>
         <div className="mission-steps_equipe">
-          {/* A navegação dos steps pode ser ajustada conforme a lógica de avanço de tela */}
           <div className={`step-container_equipe step-inactive_equipe`} onClick={() => navigate('/selecaonave')}>
             <div className="step-circle_equipe">1</div>
             <div className="step-text_equipe">Seleção de Nave</div>

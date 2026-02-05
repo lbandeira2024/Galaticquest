@@ -4,11 +4,9 @@ import { useAuth } from "./AuthContext";
 import "./BoasVindas.css";
 import axios from "axios";
 
-// Importar o ficheiro config.json
-import config from './config.json';
-
-// Usar a URL do ficheiro de configuração
-const API_URL = config.apiBaseUrl;
+// CORREÇÃO: Usar rota relativa para funcionar com o Proxy (HTTPS)
+// Isso evita o erro de Mixed Content que ocorria ao chamar http://IP:5000 diretamente
+const API_URL = "/api";
 
 const BoasVindas = () => {
     const navigate = useNavigate();
@@ -21,7 +19,7 @@ const BoasVindas = () => {
     useEffect(() => {
         if (user?.grupo) {
             console.log("Redirect: Usuário já tem grupo. Saindo de BoasVindas -> /LobbyGrupos");
-            navigate("/LobbyGrupos"); // <--- (CORRIGIDO) Redireciona para o Lobby
+            navigate("/LobbyGrupos");
         }
     }, [user, navigate]);
 
@@ -77,6 +75,7 @@ const BoasVindas = () => {
         setErrorMessage("");
 
         try {
+            // A URL agora será /api/save-team-name, que o proxy redireciona corretamente
             const response = await axios.post(
                 `${API_URL}/save-team-name`,
                 { userId: user._id, teamName },
@@ -88,7 +87,7 @@ const BoasVindas = () => {
 
                 if (response.data.user?.grupo?.teamName) {
                     saveTeamName(response.data.user.grupo.teamName);
-                    navigate("/LobbyGrupos"); // <--- (CORRIGIDO) Redireciona para o Lobby
+                    navigate("/LobbyGrupos");
                 } else {
                     console.error("Inconsistência de dados: O servidor indicou sucesso mas os dados do grupo estão ausentes.", response.data);
                     setErrorMessage("Não foi possível obter os detalhes do seu grupo. Tente fazer login novamente para atualizar seus dados.");
@@ -99,7 +98,7 @@ const BoasVindas = () => {
         } catch (error) {
             console.error("Erro ao salvar nome do grupo:", error);
             // Tenta pegar a mensagem de erro específica do nosso servidor.
-            // Se não houver (ex: falha de rede), exibe uma mensagem genérica em português.
+            // Se não houver (ex: falha de rede), exibe uma mensagem genérica.
             const message = error.response?.data?.message || "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.";
             setErrorMessage(message);
         } finally {

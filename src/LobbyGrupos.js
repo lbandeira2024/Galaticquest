@@ -3,9 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
 import axios from "axios";
 import "./LobbyGrupos.css";
-import config from './config.json';
 
-const API_URL = config.apiBaseUrl;
+// CORREÇÃO: Usar rota relativa para Proxy
+const API_URL = "/api";
 
 const LobbyGrupos = () => {
     const navigate = useNavigate();
