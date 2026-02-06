@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './MandalaVirtudes.css';
+import { useConfig } from './ConfigContext'; // <--- IMPORTAÇÃO CORRETA
 
 // --- Dados estáticos movidos para fora do componente para otimização ---
 
@@ -534,6 +535,9 @@ const VIRTUE_RULES = {
 };
 
 const MandalaVirtudes = ({ onClose, groupId }) => {
+    // --- CORREÇÃO: Hook chamado no nível superior ---
+    const { apiBaseUrl } = useConfig();
+
     const [virtueStates, setVirtueStates] = useState({});
     const [csdSpecificLetter, setCsdSpecificLetter] = useState(null);
     const [showCupertinoImage, setShowCupertinoImage] = useState(false);
@@ -549,12 +553,10 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
         setQuizzChallenges([]);
         const fetchAllChallenges = async () => {
             try {
-                // Ajuste de URL: Usa o endpoint do backend corretamente
-                const { apiBaseUrl } = require('./ConfigContext').useConfig ? require('./ConfigContext').useConfig() : { apiBaseUrl: 'http://localhost:5000' };
+                // --- CORREÇÃO: Uso da variável obtida pelo hook ---
                 const response = await fetch(`${apiBaseUrl}/group/${groupId}/all-cds-challenges`);
                 const data = await response.json();
                 if (data.success && Array.isArray(data.challenges)) {
-                    console.log("Desafios carregados:", data.challenges);
                     setQuizzChallenges(data.challenges);
                 } else {
                     setQuizzChallenges([]);
@@ -565,7 +567,7 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
             }
         };
         fetchAllChallenges();
-    }, [groupId]);
+    }, [groupId, apiBaseUrl]); // Adicionada dependência apiBaseUrl
 
     useEffect(() => {
         const updateSize = () => {
@@ -581,7 +583,7 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
         return () => window.removeEventListener('resize', updateSize);
     }, []);
 
-    // CORREÇÃO: Função auxiliar para normalizar IDs (remover espaços, uppercase) para garantir match
+    // --- CORREÇÃO: Normaliza ID para garantir correspondência (Maiúsculas e sem espaços) ---
     const normalizeId = (id) => id ? id.toString().toUpperCase().replace(/\s/g, '') : '';
 
     const challengesMap = useMemo(() => {
@@ -621,7 +623,6 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
                 }
             });
         } else {
-            // Se não houver regra específica, mantém neutro ou define um padrão
             ALL_VIRTUE_IDS.forEach(id => {
                 newStates[id] = 'blue';
             });
@@ -672,8 +673,9 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
                     </div>
                     <div className="quizz-link-container">
                         {Array.from({ length: 25 }).map((_, index) => {
-                            // CORREÇÃO: Normaliza também o ID esperado
                             const expectedChallengeId = `CSD${index + 1}`;
+
+                            // --- CORREÇÃO: Busca normalizada no mapa ---
                             const normalizedExpectedId = normalizeId(expectedChallengeId);
                             const challenge = challengesMap.get(normalizedExpectedId);
 
