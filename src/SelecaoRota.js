@@ -1,22 +1,25 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAudio } from "./AudioManager";
+import { useConfig } from "./ConfigContext"; // <--- NOVO IMPORT
 import "./selecaorota.css";
 import distanceData from './Planejamento-Rota/fixed_transfer_distances.json';
 
 const SelecaoRota = () => {
   const navigate = useNavigate();
   const { playTrack, playSound } = useAudio();
+
+  // <--- CORREÇÃO 1: Usando a URL dinâmica da configuração global
+  const { apiBaseUrl } = useConfig();
+
   const canvasRef = useRef(null);
   const [selectedPlanet, setSelectedPlanet] = useState(null);
   const [showRouteSelection, setShowRouteSelection] = useState(false);
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    // ################## CORREÇÃO APLICADA ##################
-    // Altera de sessionStorage para localStorage para corresponder ao login.js
+    // Mantendo a correção de sessionStorage para localStorage
     const storedUser = JSON.parse(localStorage.getItem('user'));
-    // #######################################################
     if (storedUser && storedUser._id) {
       setUserId(storedUser._id);
     }
@@ -69,14 +72,21 @@ const SelecaoRota = () => {
     return Math.round(baseFuel * fuelFactors[typeKey]);
   };
 
+  // <--- CORREÇÃO 2: Função agora retorna true/false para controlar fluxo
   const saveInitialRoute = async (routeSteps) => {
     if (!userId) {
       console.error("User ID não disponível. Não é possível salvar a rota.");
-      return;
+      return false;
+    }
+
+    if (!apiBaseUrl) {
+      console.error("API URL não definida.");
+      return false;
     }
 
     try {
-      const response = await fetch('http://localhost:5000/save-planned-route', {
+      // Substituído localhost por apiBaseUrl
+      const response = await fetch(`${apiBaseUrl}/save-planned-route`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -88,11 +98,14 @@ const SelecaoRota = () => {
 
       if (data.success) {
         console.log("Rota inicial salva com sucesso no banco de dados:", data.usuario.rotaPlanejada);
+        return true; // Sucesso
       } else {
         console.error("Erro ao salvar rota inicial:", data.message);
+        return false; // Falha lógica
       }
     } catch (error) {
       console.error("Erro de rede ao salvar rota inicial:", error);
+      return false; // Falha de rede
     }
   };
 
@@ -107,12 +120,19 @@ const SelecaoRota = () => {
         { name: selectedPlanet.nome, distance: distanceKm, fuel: fuel, from: "Terra" }
       ];
 
-      await saveInitialRoute(routeSteps);
+      // <--- CORREÇÃO 3: Aguarda (await) a confirmação do banco antes de mudar de tela
+      const saveSuccess = await saveInitialRoute(routeSteps);
 
-      // MODIFICAÇÃO: Limpa o tempo da missão anterior antes de iniciar uma nova.
-      sessionStorage.removeItem('missionTime');
+      if (saveSuccess) {
+        // Limpa o tempo da missão anterior antes de iniciar uma nova.
+        sessionStorage.removeItem('missionTime');
 
-      navigate("/decolagem-marte", { state: { selectedPlanet, distanceKm } });
+        // Só navega se salvou com sucesso
+        navigate("/decolagem-marte", { state: { selectedPlanet, distanceKm } });
+      } else {
+        alert("Houve um erro ao salvar sua rota. Tente novamente.");
+      }
+
     } else {
       console.error("É necessário selecionar um planeta e estar logado para iniciar a missão.");
     }
@@ -129,7 +149,6 @@ const SelecaoRota = () => {
   };
 
   useEffect(() => {
-    // CORREÇÃO: Nome atualizado para coincidir com os outros arquivos e evitar reinício do áudio
     const currentMusic = "/sounds/trilha_galatica_v1.mp3";
     playTrack(currentMusic, { loop: true, isPrimary: false });
 
