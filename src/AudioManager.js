@@ -3,53 +3,39 @@ import { usePause } from "./PauseContext";
 
 const AudioContext = createContext();
 
-// 🔒 Bloqueio explícito do arquivo que está causando 404 e potencial efeito colateral
 const BLOCKED_SOUNDS = new Set([
   "/sounds/02.ui-hover.mp3",
   "sounds/02.ui-hover.mp3",
   "02.ui-hover.mp3",
 ]);
 
-const normalizeSrc = (src = "") => {
-  try {
-    // remove querystring para comparar
-    return String(src).split("?")[0];
-  } catch {
-    return String(src || "");
-  }
-};
+const normalizeSrc = (src = "") => String(src).split("?")[0];
 
 const isBlockedSound = (src = "") => {
   const clean = normalizeSrc(src);
   if (BLOCKED_SOUNDS.has(clean)) return true;
-  // fallback: se a string contiver o nome, bloqueia também
   return clean.toLowerCase().includes("02.ui-hover.mp3");
 };
 
 export const AudioProvider = ({ children }) => {
-  // Música de fundo
   const musicAudioRef = useRef(new Audio());
-
-  // Primário (decolagem)
   const primaryAudioRef = useRef(new Audio());
 
-  // Se o primário está ativo, baixamos música e protegemos contra “auto-up volume”
   const isPrimaryActiveRef = useRef(false);
-
-  // SFX curtos
   const soundsRef = useRef([]);
-
-  // opcional: depuração
   const [activeAudioEl, setActiveAudioEl] = useState(null);
 
   const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
 
-  // Filas para quando estiver pausado ou antes de unlock
   const [queuedMusic, setQueuedMusic] = useState(null);
   const [queuedPrimary, setQueuedPrimary] = useState(null);
   const [queuedSFX, setQueuedSFX] = useState(null);
 
   const { isPaused } = usePause();
+
+  // ✅ NOVO: guardar estado da música para retomar depois do primário
+  const musicWasPlayingRef = useRef(false);
+  const musicLastTimeRef = useRef(0);
 
   const unlockAudio = useCallback(() => {
     if (isAudioUnlocked) return;
@@ -60,7 +46,6 @@ export const AudioProvider = ({ children }) => {
       if (context.state === "suspended") context.resume();
     }
 
-    // “ping” silencioso para destravar autoplay
     const silentSound = new Audio(
       "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"
     );
@@ -77,25 +62,41 @@ export const AudioProvider = ({ children }) => {
       });
   }, [isAudioUnlocked]);
 
-  // util: baixar música
-  const lowerMusic = useCallback(() => {
+  // ✅ NOVO: pausa a música e guarda posição
+  const pauseMusicForPrimary = useCallback(() => {
     const bg = musicAudioRef.current;
-    if (bg && !bg.paused) {
-      console.log("🔉 Baixando música para 20%.");
-      bg.volume = 0.2;
+    if (!bg) return;
+
+    musicWasPlayingRef.current = !bg.paused;
+    musicLastTimeRef.current = Number.isFinite(bg.currentTime) ? bg.currentTime : 0;
+
+    if (!bg.paused) {
+      console.log("⏸ Pausando música durante o primário.");
+      bg.pause();
     }
   }, []);
 
-  // util: restaurar música
-  const restoreMusic = useCallback(() => {
+  // ✅ NOVO: retoma música do ponto onde parou (se estava tocando)
+  const resumeMusicAfterPrimary = useCallback(() => {
     const bg = musicAudioRef.current;
     if (!bg) return;
-    if (!isPrimaryActiveRef.current) bg.volume = 1.0;
-    else bg.volume = 0.2;
+
+    if (!musicWasPlayingRef.current) return;
+
+    try {
+      bg.currentTime = musicLastTimeRef.current || 0;
+    } catch { }
+
+    const p = bg.play();
+    if (p !== undefined) {
+      p.then(() => console.log("▶️ Música retomada após o primário."))
+        .catch(() => {
+          // Se falhar (policy/gesto), não quebra o fluxo
+        });
+    }
   }, []);
 
-  // diagnóstico do primário
-  const attachPrimaryDiagnostics = useCallback((audioEl, src) => {
+  const attachPrimaryDiagnostics = (audioEl, src) => {
     audioEl.onplay = () => console.log(`🚀 PRIMARY onplay: ${src}`);
     audioEl.onpause = () => console.log(`⏸ PRIMARY onpause: ${src}`);
     audioEl.oncanplaythrough = () =>
@@ -120,9 +121,8 @@ export const AudioProvider = ({ children }) => {
         networkState: audioEl.networkState,
       });
     }, 200);
-  }, []);
+  };
 
-  // ✅ tocar primário usando SEMPRE o mesmo elemento (mais estável)
   const playPrimaryNow = useCallback(
     (src, options) => {
       if (isBlockedSound(src)) {
@@ -132,7 +132,7 @@ export const AudioProvider = ({ children }) => {
 
       const target = primaryAudioRef.current;
 
-      // intercepta pause() para descobrir QUEM está pausando
+      // Intercepta pause() para rastrear chamadas externas
       if (!target.__pauseIntercepted) {
         const originalPause = target.pause.bind(target);
         target.pause = () => {
@@ -153,28 +153,27 @@ export const AudioProvider = ({ children }) => {
       target.preload = "auto";
       target.loop = !!options.loop;
 
-      // força audibilidade
       target.volume = 1.0;
       target.muted = false;
 
-      // protege a música durante o primário
+      // ✅ AQUI: em vez de “baixar para 20%”, PAUSA a música
       isPrimaryActiveRef.current = true;
-      lowerMusic();
+      pauseMusicForPrimary();
 
       attachPrimaryDiagnostics(target, src);
 
       target.onended = () => {
-        console.log("🏁 Primário acabou. Restaurando música.");
+        console.log("🏁 Primário acabou. Retomando música.");
         isPrimaryActiveRef.current = false;
-        restoreMusic();
+        resumeMusicAfterPrimary();
       };
 
       const originalOnError = target.onerror;
       target.onerror = () => {
         if (originalOnError) originalOnError();
-        console.log("🧯 Primário falhou. Restaurando música.");
+        console.log("🧯 Primário falhou. Retomando música.");
         isPrimaryActiveRef.current = false;
-        restoreMusic();
+        resumeMusicAfterPrimary();
       };
 
       setActiveAudioEl(target);
@@ -185,32 +184,30 @@ export const AudioProvider = ({ children }) => {
         p.then(() => console.log("✅ primary play() ok:", src)).catch((e) => {
           console.error("❌ primary play() falhou:", e?.name, e);
           isPrimaryActiveRef.current = false;
-          restoreMusic();
+          resumeMusicAfterPrimary();
         });
       }
     },
-    [attachPrimaryDiagnostics, lowerMusic, restoreMusic]
+    [pauseMusicForPrimary, resumeMusicAfterPrimary]
   );
 
-  // tocar música de fundo
   const playMusicNow = useCallback((src, options) => {
     if (isBlockedSound(src)) {
       console.warn("🚫 Som bloqueado (música) ignorado:", src);
       return;
     }
 
-    const target = musicAudioRef.current;
+    // ✅ Se primário estiver ativo, não iniciar música
+    if (isPrimaryActiveRef.current) {
+      console.log("🛡️ Música não inicia: primário ativo.");
+      return;
+    }
 
+    const target = musicAudioRef.current;
     const currentSrc = decodeURI(target.src || "");
     const newSrc = normalizeSrc(src);
 
-    // Se já é a mesma música, apenas ajuste volume respeitando primário
     if (currentSrc.includes(newSrc) && !target.paused) {
-      if (!isPrimaryActiveRef.current) target.volume = 1.0;
-      else {
-        console.log("🛡️ Tentativa de aumentar música bloqueada pelo Primário.");
-        target.volume = 0.2;
-      }
       setActiveAudioEl(target);
       return;
     }
@@ -219,8 +216,7 @@ export const AudioProvider = ({ children }) => {
     target.preload = "auto";
     target.loop = !!options.loop;
     target.muted = false;
-
-    target.volume = isPrimaryActiveRef.current ? 0.2 : 1.0;
+    target.volume = 1.0;
 
     setActiveAudioEl(target);
 
@@ -232,7 +228,6 @@ export const AudioProvider = ({ children }) => {
     }
   }, []);
 
-  // API pública: playTrack (música ou primário)
   const playTrack = useCallback(
     (src, options = { loop: true, isPrimary: false }) => {
       if (isBlockedSound(src)) {
@@ -240,14 +235,12 @@ export const AudioProvider = ({ children }) => {
         return;
       }
 
-      // 1) sem unlock: fila
       if (!isAudioUnlocked) {
         if (options.isPrimary) setQueuedPrimary({ src, options });
         else setQueuedMusic({ src, options });
         return;
       }
 
-      // 2) se pausado: enfileira e não tenta tocar
       if (isPaused) {
         if (options.isPrimary) setQueuedPrimary({ src, options });
         else setQueuedMusic({ src, options });
@@ -255,7 +248,6 @@ export const AudioProvider = ({ children }) => {
         return;
       }
 
-      // 3) toca agora
       if (options.isPrimary) {
         playPrimaryNow(src, options);
         return;
@@ -266,7 +258,6 @@ export const AudioProvider = ({ children }) => {
     [isAudioUnlocked, isPaused, playPrimaryNow, playMusicNow]
   );
 
-  // API pública: playSound (SFX)
   const playSound = useCallback(
     (src) => {
       if (isBlockedSound(src)) {
@@ -276,7 +267,6 @@ export const AudioProvider = ({ children }) => {
 
       if (!isAudioUnlocked) return;
 
-      // se pausado: enfileira só o último SFX (para não spammar)
       if (isPaused) {
         setQueuedSFX({ src, options: { loop: false, isPrimary: false } });
         console.log("⏸️ SFX em pausa — enfileirando:", src);
@@ -303,7 +293,6 @@ export const AudioProvider = ({ children }) => {
     [isAudioUnlocked, isPaused]
   );
 
-  // ✅ stopAllAudio com stack trace
   const stopAllAudio = useCallback(() => {
     console.trace("🛑 stopAllAudio() chamado. Stack:");
 
@@ -330,12 +319,14 @@ export const AudioProvider = ({ children }) => {
     soundsRef.current = [];
     isPrimaryActiveRef.current = false;
 
+    musicWasPlayingRef.current = false;
+    musicLastTimeRef.current = 0;
+
     setQueuedMusic(null);
     setQueuedPrimary(null);
     setQueuedSFX(null);
   }, []);
 
-  // Ao desbloquear e NÃO estar pausado: toca o que estiver na fila
   useEffect(() => {
     if (!isAudioUnlocked) return;
     if (isPaused) return;
@@ -366,7 +357,6 @@ export const AudioProvider = ({ children }) => {
     }
   }, [isAudioUnlocked, isPaused, queuedPrimary, queuedMusic, queuedSFX, playPrimaryNow, playMusicNow]);
 
-  // Se pausar, pausa tudo (sem limpar src aqui)
   useEffect(() => {
     if (!isPaused) return;
 
