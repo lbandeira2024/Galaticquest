@@ -44,10 +44,10 @@ const SelecaoRota = () => {
   ];
 
   const planetas = [
-    { id: 1, nome: "Marte", imagem: "/images/Planets/marte.png", cor: "laranja", descricao: "Marte, o Planeta Vermelho, possui condições relativamente favoráveis para estabelecimento humano.", transferencia: "Transferência de Hohmann" },
-    { id: 2, nome: "Mercurio", imagem: "/images/Planets/mercurio.png", cor: "purpura", descricao: "Mercúrio oferece desafios extremos de temperatura mas recursos minerais valiosos.", transferencia: "Assistência gravitacional" },
-    { id: 3, nome: "Venus", imagem: "/images/Planets/venus.png", cor: "laranja", descricao: "Vênus representa um desafio científico e tecnológico com sua atmosfera densa.", transferencia: "Transferência de Hohmann" },
-    { id: 4, nome: "Lua", imagem: "/images/Planets/lua.png", cor: "azul", descricao: "Nossa Lua serve como base para missões mais distantes.", transferencia: "Transferência direta" }
+    { id: 1, nome: "Marte", imagem: "/images/Planets/Marte.png", cor: "laranja", descricao: "Marte, o Planeta Vermelho, possui condições relativamente favoráveis para estabelecimento humano.", transferencia: "Transferência de Hohmann" },
+    { id: 2, nome: "Mercurio", imagem: "/images/Planets/Mercurio.png", cor: "purpura", descricao: "Mercúrio oferece desafios extremos de temperatura mas recursos minerais valiosos.", transferencia: "Assistência gravitacional" },
+    { id: 3, nome: "Venus", imagem: "/images/Planets/Venus.png", cor: "laranja", descricao: "Vênus representa um desafio científico e tecnológico com sua atmosfera densa.", transferencia: "Transferência de Hohmann" },
+    { id: 4, nome: "Lua", imagem: "/images/Planets/Lua.png", cor: "azul", descricao: "Nossa Lua serve como base para missões mais distantes.", transferencia: "Transferência direta" }
   ];
 
   const handlePlanetSelect = (planeta) => {
