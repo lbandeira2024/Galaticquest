@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "./AuthContext";
 import "./FullscreenWarning.css";
 
@@ -7,28 +7,28 @@ import "./FullscreenWarning.css";
 import CadastroForm from "./CadastroForm";
 import Login from "./login";
 import TelaPlaneta from "./TelaPlaneta";
-import DecolagemMarte from './DecolagemMarte';
+import DecolagemMarte from "./DecolagemMarte";
 // import StellarMap from './stellar-map/StellarMap'; // <--- (COMENTADO PARA CORRIGIR ERRO)
-import SelecaoNave from './SelecaoNave';
-import SelecaoEquipe from './SelecaoEquipe';
-import SelecaoRota from './SelecaoRota';
-import PlanejamentoRota from './Planejamento-Rota/StellarMapPlan';
-import MandalaVirtudes from './MandalaVirtudes';
-import Inventario from './CompraDeMaterial';
-import SelecaoRotaPrep from './SelecaoRotaPrep';
-import PlanejamentoRotaPrep from './Planejamento-Rota/StellarMapPlanPrep';
-import BoasVindas from './BoasVindas';
-import LobbyGrupos from './LobbyGrupos';
-import ContadorRegressivo from './ContadorRegressivo';
-import AdminPage from './AdminPage';
-import GameConfig from './GameConfig';
+import SelecaoNave from "./SelecaoNave";
+import SelecaoEquipe from "./SelecaoEquipe";
+import SelecaoRota from "./SelecaoRota";
+import PlanejamentoRota from "./Planejamento-Rota/StellarMapPlan";
+import MandalaVirtudes from "./MandalaVirtudes";
+import Inventario from "./CompraDeMaterial";
+import SelecaoRotaPrep from "./SelecaoRotaPrep";
+import PlanejamentoRotaPrep from "./Planejamento-Rota/StellarMapPlanPrep";
+import BoasVindas from "./BoasVindas";
+import LobbyGrupos from "./LobbyGrupos";
+import ContadorRegressivo from "./ContadorRegressivo";
+import AdminPage from "./AdminPage";
+import GameConfig from "./GameConfig";
 
 // Context Providers
-import { AudioProvider, useAudio } from './AudioManager';
-import { PauseProvider } from './PauseContext';
-import { AuthProvider } from './AuthContext';
-import { SpaceCoinsProvider } from './SpaceCoinsContext';
-import { ConfigProvider, useConfig } from './ConfigContext';
+import { AudioProvider, useAudio } from "./AudioManager";
+import { PauseProvider } from "./PauseContext";
+import { AuthProvider } from "./AuthContext";
+import { SpaceCoinsProvider } from "./SpaceCoinsContext";
+import { ConfigProvider, useConfig } from "./ConfigContext";
 
 /**
  * Novo componente Wrapper (Inicializador).
@@ -84,6 +84,9 @@ function AppContent() {
   const { user } = useAuth();
   const [showFullscreenWarning, setShowFullscreenWarning] = useState(false);
 
+  // Guardamos a rota anterior para decidir ações de entrada/saída
+  const prevPathRef = useRef(location.pathname);
+
   const enterFullScreen = () => {
     const element = document.documentElement;
     if (element.requestFullscreen) {
@@ -105,11 +108,11 @@ function AppContent() {
     };
 
     if (user) {
-      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      document.addEventListener("fullscreenchange", handleFullscreenChange);
     }
 
     return () => {
-      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
     };
   }, [user]);
 
@@ -122,10 +125,26 @@ function AppContent() {
     setShowFullscreenWarning(false);
   };
 
+  /**
+   * ✅ CORREÇÃO:
+   * Antes você fazia:
+   *   if (location.pathname === '/decolagem-marte') stopAllAudio();
+   * Isso interrompe o play() do áudio primário, gerando AbortError.
+   *
+   * Agora:
+   * - NÃO paramos áudio ao ENTRAR em /decolagem-marte
+   * - Paramos áudio ao SAIR de /decolagem-marte (opcional, mas recomendado)
+   */
   useEffect(() => {
-    if (location.pathname === '/decolagem-marte') {
+    const prev = prevPathRef.current;
+    const curr = location.pathname;
+
+    // Se saiu da rota de decolagem, limpa tudo
+    if (prev === "/decolagem-marte" && curr !== "/decolagem-marte") {
       stopAllAudio();
     }
+
+    prevPathRef.current = curr;
   }, [location.pathname, stopAllAudio]);
 
   return (
@@ -163,8 +182,12 @@ function AppContent() {
             <h2>Modo Janela Ativado</h2>
             <p>Para garantir a melhor imersão no jogo, recomendamos permanecer em tela cheia.</p>
             <div className="fullscreen-warning-buttons">
-              <button onClick={handleExit} className="button-exit">Sair</button>
-              <button onClick={handleStay} className="button-stay">Permanecer</button>
+              <button onClick={handleExit} className="button-exit">
+                Sair
+              </button>
+              <button onClick={handleStay} className="button-stay">
+                Permanecer
+              </button>
             </div>
           </div>
         </div>
