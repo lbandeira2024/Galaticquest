@@ -3,7 +3,7 @@ import { usePause } from "./PauseContext";
 
 const AudioContext = createContext();
 
-// Bloqueio explícito de assets inexistentes/indesejados (evita 404 + efeitos colaterais)
+// Bloqueios simples para evitar 404 e ruídos indesejados
 const BLOCKED_SOUNDS = new Set([
   "/sounds/02.ui-hover.mp3",
   "sounds/02.ui-hover.mp3",
@@ -19,33 +19,54 @@ const isBlockedSound = (src = "") => {
 };
 
 export const AudioProvider = ({ children }) => {
-  // Música de fundo (trilha)
+  // Trilha (música de fundo)
   const musicAudioRef = useRef(new Audio());
-
   // Som primário (decolagem)
   const primaryAudioRef = useRef(new Audio());
 
-  // Estado/refs de controle
+  // Controle
   const isPrimaryActiveRef = useRef(false);
-
-  // SFX curtos
   const soundsRef = useRef([]);
-
   const [activeAudioEl, setActiveAudioEl] = useState(null);
+
   const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
 
-  // Filas gerais (antes de unlock / em pausa)
+  // Filas (antes do unlock / pausa)
   const [queuedMusic, setQueuedMusic] = useState(null);
   const [queuedPrimary, setQueuedPrimary] = useState(null);
   const [queuedSFX, setQueuedSFX] = useState(null);
 
-  // ✅ Fila pós-primário (o que foi pedido durante a decolagem)
-  // - Música pós-primário: first-wins (preserva a música do SpaceView)
+  // ✅ Fila pós-primário (pedidos feitos durante a decolagem)
+  // Música pós-primário: first-wins (preserva a primeira música pedida, tipicamente a do SpaceView)
   const queuedMusicAfterPrimaryRef = useRef(null);
-  // - SFX pós-primário: mantém ordem de chegada
+  // SFX pós-primário: mantém ordem
   const queuedSfxAfterPrimaryRef = useRef([]);
 
+  // ✅ Preloader para reduzir gap ao iniciar música após a decolagem
+  const preloadedRef = useRef(new Map());
+
   const { isPaused } = usePause();
+
+  const preloadAudio = useCallback((src) => {
+    const key = normalizeSrc(src);
+    if (!key) return;
+    if (preloadedRef.current.has(key)) return;
+
+    try {
+      const a = new Audio();
+      a.preload = "auto";
+      a.src = src;
+      a.loop = false;
+      a.muted = true; // mute só para preload (não toca)
+      a.load();
+      preloadedRef.current.set(key, a);
+      // Desmuta para caso seja reutilizado por engano (não deveria tocar mesmo)
+      a.muted = false;
+      console.log("📦 Preload iniciado:", src);
+    } catch {
+      // silencioso
+    }
+  }, []);
 
   const unlockAudio = useCallback(() => {
     if (isAudioUnlocked) return;
@@ -72,7 +93,6 @@ export const AudioProvider = ({ children }) => {
       });
   }, [isAudioUnlocked]);
 
-  // ✅ Para apenas a trilha (sem interferir no primário)
   const stopMusic = useCallback(() => {
     const bg = musicAudioRef.current;
     if (!bg) return;
@@ -86,17 +106,6 @@ export const AudioProvider = ({ children }) => {
     console.log("🛑 Música de fundo parada (stopMusic).");
   }, []);
 
-  // Debug do primário
-  const attachPrimaryDiagnostics = (audioEl, src) => {
-    audioEl.onplay = () => console.log(`🚀 PRIMARY onplay: ${src}`);
-    audioEl.onpause = () => console.log(`⏸ PRIMARY onpause: ${src}`);
-    audioEl.onwaiting = () => console.log(`⚠️ PRIMARY waiting ${src}`);
-    audioEl.oncanplaythrough = () =>
-      console.log("✅ PRIMARY canplaythrough", src, "dur=", audioEl.duration);
-    audioEl.onerror = () => console.error("❌ PRIMARY media error", src, audioEl.error);
-  };
-
-  // ✅ SFX: sempre sem loop
   const playSfxNow = useCallback((src) => {
     const sound = new Audio(src);
     sound.preload = "auto";
@@ -117,51 +126,60 @@ export const AudioProvider = ({ children }) => {
     };
   }, []);
 
-  // ✅ Música: toca agora (se primário ativo, enfileira para pós-primário)
-  const playMusicNow = useCallback((src, options) => {
-    if (isBlockedSound(src)) {
-      console.warn("🚫 Som bloqueado (música) ignorado:", src);
-      return;
-    }
-
-    if (isPrimaryActiveRef.current) {
-      // ✅ first-wins: preserva a primeira música pedida (SpaceView)
-      if (!queuedMusicAfterPrimaryRef.current) {
-        queuedMusicAfterPrimaryRef.current = { src, options };
-        console.log("🧾 Música enfileirada para pós-primário (first-wins):", src);
-      } else {
-        console.log("🧾 Música ignorada (já existe música pós-primário):", src);
+  const playMusicNow = useCallback(
+    (src, options = { loop: true, isPrimary: false }) => {
+      if (isBlockedSound(src)) {
+        console.warn("🚫 Som bloqueado (música) ignorado:", src);
+        return;
       }
-      return;
-    }
 
-    const target = musicAudioRef.current;
-    const currentSrc = decodeURI(target.src || "");
-    const newSrc = normalizeSrc(src);
+      // Se primário ativo, NÃO toca agora — enfileira + preload para reduzir delay
+      if (isPrimaryActiveRef.current) {
+        preloadAudio(src);
 
-    // já está tocando a mesma trilha
-    if (currentSrc.includes(newSrc) && !target.paused) {
+        if (!queuedMusicAfterPrimaryRef.current) {
+          queuedMusicAfterPrimaryRef.current = { src, options };
+          console.log("🧾 Música enfileirada para pós-primário (first-wins):", src);
+        } else {
+          console.log("🧾 Música ignorada (já existe música pós-primário):", src);
+        }
+        return;
+      }
+
+      const target = musicAudioRef.current;
+      const currentSrc = decodeURI(target.src || "");
+      const newSrc = normalizeSrc(src);
+
+      // Se já está tocando a mesma trilha, garante volume e sai
+      if (currentSrc.includes(newSrc) && !target.paused) {
+        target.volume = 1.0;
+        setActiveAudioEl(target);
+        return;
+      }
+
+      try {
+        target.pause();
+        target.currentTime = 0;
+      } catch { }
+
+      target.src = src;
+      target.preload = "auto";
+      target.loop = !!options.loop;
+      target.muted = false;
+      target.volume = 1.0;
+
       setActiveAudioEl(target);
-      return;
-    }
 
-    target.src = src;
-    target.preload = "auto";
-    target.loop = !!options.loop;
-    target.muted = false;
-    target.volume = 1.0;
+      const p = target.play();
+      if (p !== undefined) {
+        p.then(() => console.log(`🎵 Música iniciada (${src})`)).catch((e) => {
+          if (e?.name !== "AbortError") console.error("⚠️ Erro música:", e?.name, e);
+        });
+      }
+    },
+    [preloadAudio]
+  );
 
-    setActiveAudioEl(target);
-
-    const p = target.play();
-    if (p !== undefined) {
-      p.then(() => console.log(`🎵 Música iniciada (${src})`)).catch((e) => {
-        if (e?.name !== "AbortError") console.error("⚠️ Erro música:", e?.name, e);
-      });
-    }
-  }, []);
-
-  // ✅ Flush pós-primário: música primeiro, depois SFX enfileirados
   const flushAfterPrimary = useCallback(() => {
     const qm = queuedMusicAfterPrimaryRef.current;
     queuedMusicAfterPrimaryRef.current = null;
@@ -178,9 +196,17 @@ export const AudioProvider = ({ children }) => {
     }
   }, [playMusicNow, playSfxNow]);
 
-  // ✅ Primário (decolagem) — desliga trilha ao iniciar; ao terminar libera flush
+  const attachPrimaryDiagnostics = (audioEl, src) => {
+    audioEl.onplay = () => console.log(`🚀 PRIMARY onplay: ${src}`);
+    audioEl.onpause = () => console.log(`⏸ PRIMARY onpause: ${src}`);
+    audioEl.onwaiting = () => console.log(`⚠️ PRIMARY waiting ${src}`);
+    audioEl.oncanplaythrough = () =>
+      console.log("✅ PRIMARY canplaythrough", src, "dur=", audioEl.duration);
+    audioEl.onerror = () => console.error("❌ PRIMARY media error", src, audioEl.error);
+  };
+
   const playPrimaryNow = useCallback(
-    (src, options) => {
+    (src, options = { loop: false, isPrimary: true }) => {
       if (isBlockedSound(src)) {
         console.warn("🚫 Som bloqueado (primário) ignorado:", src);
         return;
@@ -188,7 +214,7 @@ export const AudioProvider = ({ children }) => {
 
       const target = primaryAudioRef.current;
 
-      // Intercepta pause para rastrear chamadas externas (debug)
+      // Intercepta pause para debug de aborts
       if (!target.__pauseIntercepted) {
         const originalPause = target.pause.bind(target);
         target.pause = () => {
@@ -211,7 +237,7 @@ export const AudioProvider = ({ children }) => {
       target.volume = 1.0;
       target.muted = false;
 
-      // Regra: ao entrar em decolagem, trilha deve parar
+      // Regra: durante primário, música deve estar off
       isPrimaryActiveRef.current = true;
       stopMusic();
 
@@ -246,7 +272,7 @@ export const AudioProvider = ({ children }) => {
     [stopMusic, flushAfterPrimary]
   );
 
-  // API pública: playTrack (música/trilha ou primário)
+  // API pública (música/trilha ou primário)
   const playTrack = useCallback(
     (src, options = { loop: true, isPrimary: false }) => {
       if (isBlockedSound(src)) {
@@ -254,14 +280,14 @@ export const AudioProvider = ({ children }) => {
         return;
       }
 
-      // Se ainda não desbloqueou, enfileira
+      // Sem unlock: fila
       if (!isAudioUnlocked) {
         if (options.isPrimary) setQueuedPrimary({ src, options });
         else setQueuedMusic({ src, options });
         return;
       }
 
-      // Se pausado, enfileira
+      // Pausado: fila
       if (isPaused) {
         if (options.isPrimary) setQueuedPrimary({ src, options });
         else setQueuedMusic({ src, options });
@@ -279,7 +305,7 @@ export const AudioProvider = ({ children }) => {
     [isAudioUnlocked, isPaused, playPrimaryNow, playMusicNow]
   );
 
-  // API pública: playSound (SFX one-shot)
+  // API pública (SFX)
   const playSound = useCallback(
     (src) => {
       if (isBlockedSound(src)) {
@@ -289,13 +315,14 @@ export const AudioProvider = ({ children }) => {
 
       if (!isAudioUnlocked) return;
 
-      // Se primário está ativo: NÃO perde o evento — enfileira para tocar depois
+      // Se primário ativo: enfileira para pós-primário (não perde timing/ordem)
       if (isPrimaryActiveRef.current) {
         queuedSfxAfterPrimaryRef.current.push(src);
         console.log("🧾 SFX enfileirado para pós-primário:", src);
         return;
       }
 
+      // Se pausado: fila simples
       if (isPaused) {
         setQueuedSFX({ src, options: { loop: false, isPrimary: false } });
         console.log("⏸️ SFX em pausa — enfileirando:", src);
@@ -387,6 +414,7 @@ export const AudioProvider = ({ children }) => {
     playSound,
     stopAllAudio,
     stopMusic,
+    preloadAudio, // ✅ opcional: se quiser chamar direto de outros componentes
     primaryAudioRef,
     musicAudioRef,
     isAudioUnlocked,
