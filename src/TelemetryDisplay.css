@@ -226,29 +226,18 @@
 /* === CONFIGURAÇÕES DO MAPA ESTELAR FLUTUANTE === */
 .stellar-map-floating {
   position: fixed;
-
-  /* Posição Vertical: Subiu de 35% para 20% (conforme solicitado: "subir mais 20%") */
   top: -80%;
-
-  /* Posição Horizontal: Ajustado para 37.5% (metade de 75vw) para manter borda esquerda visível */
   left: 37.5%;
-
   transform: translate(-50%, -50%);
   z-index: 2000;
-
-  /* Largura aumentada de 70vw para 80vw */
   width: 80vw;
   max-width: 1500px;
-
-  /* Altura mantida em 90vh */
   height: 90vh;
   max-height: 95vh;
-
   background: rgba(0, 30, 60, 0.98);
   border: 2px solid rgba(0, 200, 255, 0.6);
   border-radius: 12px;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
-
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -340,11 +329,17 @@
   text-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
 }
 
+/* --- CORREÇÃO DA POSIÇÃO DA MODAL DE TRANSFERÊNCIA --- */
 .transfer-modal {
   position: fixed;
-  top: 50%;
+  /* Anula o top anterior para usar bottom como referência */
+  top: auto;
+  /* Empurra a modal para o meio da tela, calculando a partir do painel pai */
+  bottom: 50vh;
   left: 50%;
-  transform: translate(-50%, -50%);
+  /* Move 50% para baixo para centralizar exatamente no meio vertical */
+  transform: translate(-50%, 50%);
+
   z-index: 9999;
   width: 90%;
   max-width: 800px;
