@@ -179,25 +179,23 @@ const DecolagemMarte = () => {
   const [telemetry, setTelemetry] = useState(telemetryRef.current);
   const cockpitRef = useRef(null);
 
-  // Trazemos unlockAudio para garantir o desbloqueio
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
 
   const hasStartedAudioRef = useRef(false);
 
-  // --- CORREÇÃO: UseEffect EXCLUSIVO para iniciar a missão com Cache Buster ---
+  // --- CORREÇÃO FINAL: Usar MINÚSCULO e Cache Buster ---
   useEffect(() => {
-    // Tenta desbloquear caso não tenha vindo da tela anterior
     unlockAudio();
 
     if (!hasStartedAudioRef.current) {
       hasStartedAudioRef.current = true;
 
-      // --- TRUQUE DO CARIMBO DE TEMPO ---
-      // ?t=Date.now() obriga o navegador a baixar uma cópia nova do áudio
-      const audioUrl = `/sounds/Decolagem.mp3?t=${Date.now()}`;
+      // MUDANÇA AQUI: "decolagem.mp3" (minúsculo)
+      // Verifique se o arquivo na pasta public/sounds também está minúsculo!
+      const audioUrl = `/sounds/decolagem.mp3?t=${Date.now()}`;
 
-      console.log("🚀 DecolagemMarte: Solicitando áudio fresco:", audioUrl);
+      console.log("🚀 DecolagemMarte: Solicitando áudio (lowercase):", audioUrl);
       playTrack(audioUrl, { loop: false, isPrimary: true });
     }
 
@@ -207,7 +205,6 @@ const DecolagemMarte = () => {
     const monitorTimer3 = setTimeout(() => { if (!isPaused) { setMainDisplayState('stars'); setMonitorState('on'); } }, 45000);
 
     return () => {
-      // Limpa APENAS os timers, NÃO PARA O ÁUDIO aqui
       clearTimeout(travelStartTimer);
       clearTimeout(monitorTimer1);
       clearTimeout(monitorTimer2);
@@ -215,7 +212,7 @@ const DecolagemMarte = () => {
     };
   }, [playTrack, unlockAudio]);
 
-  // --- CORREÇÃO: UseEffect EXCLUSIVO para limpeza final ---
+  // --- Limpeza Exclusiva ao Sair da Página ---
   useEffect(() => {
     return () => {
       console.log("🛑 DecolagemMarte: Desmontando e parando áudio.");
@@ -223,6 +220,7 @@ const DecolagemMarte = () => {
     };
   }, [stopAllAudio]);
 
+  // ... (O RESTANTE DO CÓDIGO É O MESMO DE SEMPRE) ...
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
