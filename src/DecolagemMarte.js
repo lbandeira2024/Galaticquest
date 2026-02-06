@@ -237,7 +237,8 @@ const DecolagemMarte = () => {
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
-      const audio = new Audio('/sounds/sos-minerva.mp4');
+      // CORREÇÃO: Áudio atualizado conforme solicitado
+      const audio = new Audio('/sounds/minervaSOS.mp3');
       audio.play().catch(e => console.log("Erro ao tocar áudio SOS:", e));
       setIsSosMinervaActive(true);
       setTimeout(() => { setIsSosMinervaActive(false); }, 5000);
@@ -716,7 +717,6 @@ const DecolagemMarte = () => {
       if (newDistance <= 5000 && isDobraAtivada) {
         if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
 
-        // --- CORREÇÃO AQUI: Parar o áudio da dobra ao chegar ---
         stopAllAudio();
 
         isDobraAtivadaRef.current = false; setIsDobraAtivada(false); saveTelemetryData(); setShowWarpDisabledMessage(true); setMinervaImage('/images/Minerva/Minerva_Active.gif'); playSound('/sounds/power-down-Warp.mp3'); setTimeout(() => setShowWarpDisabledMessage(false), 10000);
@@ -1028,14 +1028,11 @@ const DecolagemMarte = () => {
             </div>
             <div className="monitor-screen">
               {isSosMinervaActive ? (
-                <video
-                  src="/images/minerva/Minerva-Informando%20velocidade.mp4"
+                // CORREÇÃO: Substituído <video> por <img> usando o GIF de velocidade
+                <img
+                  src="/images/Minerva/Minerva-Informando-velocidade.gif"
+                  alt="Alerta S.O.S Minerva"
                   className="monitor-image"
-                  autoPlay
-                  muted
-                  playsInline
-                  loop={false}
-                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                 />
               ) : isForcedMapEdit ? (
                 <div className="monitor-text-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'rgba(50, 0, 0, 0.5)' }}>
