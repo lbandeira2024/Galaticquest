@@ -184,18 +184,19 @@ const DecolagemMarte = () => {
 
   const hasStartedAudioRef = useRef(false);
 
-  // --- CORREÇÃO FINAL: Usar MINÚSCULO e Cache Buster ---
+  // --- CORREÇÃO FINAL: Usando Maiúsculo (Decolagem.mp3) + Cache Buster ---
+  // A imagem 1 provou que "Decolagem.mp3" funciona. Então vamos usar esse.
   useEffect(() => {
     unlockAudio();
 
     if (!hasStartedAudioRef.current) {
       hasStartedAudioRef.current = true;
 
-      // MUDANÇA AQUI: "decolagem.mp3" (minúsculo)
-      // Verifique se o arquivo na pasta public/sounds também está minúsculo!
-      const audioUrl = `/sounds/decolagem.mp3?t=${Date.now()}`;
+      // MUDANÇA: Voltamos para "Decolagem.mp3" (Maiúsculo)
+      // Isso vai bater com o arquivo que já está funcionando no servidor.
+      const audioUrl = `/sounds/Decolagem.wav?t=${Date.now()}`;
 
-      console.log("🚀 DecolagemMarte: Solicitando áudio (lowercase):", audioUrl);
+      console.log("🚀 DecolagemMarte: Solicitando áudio (Uppercase):", audioUrl);
       playTrack(audioUrl, { loop: false, isPrimary: true });
     }
 
@@ -220,7 +221,7 @@ const DecolagemMarte = () => {
     };
   }, [stopAllAudio]);
 
-  // ... (O RESTANTE DO CÓDIGO É O MESMO DE SEMPRE) ...
+  // ... (RESTO DO CÓDIGO PERMANECE IDÊNTICO) ...
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
