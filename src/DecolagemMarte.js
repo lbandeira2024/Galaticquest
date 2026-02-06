@@ -184,35 +184,55 @@ const DecolagemMarte = () => {
 
   const hasStartedAudioRef = useRef(false);
 
-  // --- CORREÇÃO FINAL: Usando Maiúsculo (Decolagem.mp3) + Cache Buster + Correção de Sintaxe ---
+  // --- CORREÇÃO APLICADA: Sincronia de Velocidade e Áudio ---
   useEffect(() => {
     unlockAudio();
 
     if (!hasStartedAudioRef.current) {
       hasStartedAudioRef.current = true;
-
-      // MUDANÇA: Voltamos para "Decolagem.mp3" (Maiúsculo)
       const audioUrl = `/sounds/decolagem.mp3?t=${Date.now()}`;
 
       console.log("🚀 DecolagemMarte: Solicitando áudio (Uppercase):", audioUrl);
       playTrack(audioUrl, {
         loop: false,
         isPrimary: true,
-        onEnded: () => { if (!isPaused) setTravelStarted(true); }
+        // REMOVIDO: onEnded não controla mais o start da viagem para evitar lag no gauge
       });
     }
 
-    // Os timers agora estão DENTRO do useEffect
-    const monitorTimer1 = setTimeout(() => { if (!isPaused) setMainDisplayState('clouds'); }, 13000);
-    const monitorTimer2 = setTimeout(() => { if (!isPaused) { setMainDisplayState('static'); setMonitorState('static'); } }, 23000);
-    const monitorTimer3 = setTimeout(() => { if (!isPaused) { setMainDisplayState('stars'); setMonitorState('on'); } }, 45000);
+    // Timer 1 (13s): Nuvens + INÍCIO DA ACELERAÇÃO
+    const monitorTimer1 = setTimeout(() => {
+      if (!isPaused) {
+        setMainDisplayState('clouds');
+        setTravelStarted(true); // <--- MUDANÇA: A física inicia visualmente na decolagem
+      }
+    }, 13000);
+
+    // Timer 2 (23s): Estática
+    const monitorTimer2 = setTimeout(() => {
+      if (!isPaused) {
+        setMainDisplayState('static');
+        setMonitorState('static');
+      }
+    }, 23000);
+
+    // Timer 3 (45s): Espaço + CORREÇÃO DA MÚSICA
+    const monitorTimer3 = setTimeout(() => {
+      if (!isPaused) {
+        // MUDANÇA: Forçamos a parada do som de decolagem para a música do SpaceView entrar SEM DELAY
+        stopAllAudio();
+
+        setMainDisplayState('stars');
+        setMonitorState('on');
+      }
+    }, 45000);
 
     return () => {
       clearTimeout(monitorTimer1);
       clearTimeout(monitorTimer2);
       clearTimeout(monitorTimer3);
     };
-  }, [playTrack, unlockAudio, isPaused]); // Fechamento correto do useEffect
+  }, [playTrack, unlockAudio, isPaused, stopAllAudio]);
 
   // --- Limpeza Exclusiva ao Sair da Página ---
   useEffect(() => {
