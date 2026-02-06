@@ -200,7 +200,7 @@ const DecolagemMarte = () => {
       playTrack(audioUrl, { loop: false, isPrimary: true });
     }
 
-    const travelStartTimer = setTimeout(() => { if (!isPaused) setTravelStarted(true); }, 12000);
+    const travelStartTimer = setTimeout(() => { if (!isPaused) setTravelStarted(true); }, 90000);
     const monitorTimer1 = setTimeout(() => { if (!isPaused) setMainDisplayState('clouds'); }, 13000);
     const monitorTimer2 = setTimeout(() => { if (!isPaused) { setMainDisplayState('static'); setMonitorState('static'); } }, 23000);
     const monitorTimer3 = setTimeout(() => { if (!isPaused) { setMainDisplayState('stars'); setMonitorState('on'); } }, 45000);

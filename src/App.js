@@ -80,11 +80,10 @@ function AppInitializer() {
 
 function AppContent() {
   const location = useLocation();
-  const { stopAllAudio } = useAudio();
+  const { stopAllAudio, stopMusic } = useAudio();
   const { user } = useAuth();
   const [showFullscreenWarning, setShowFullscreenWarning] = useState(false);
 
-  // Guardamos a rota anterior para decidir ações de entrada/saída
   const prevPathRef = useRef(location.pathname);
 
   const enterFullScreen = () => {
@@ -125,27 +124,22 @@ function AppContent() {
     setShowFullscreenWarning(false);
   };
 
-  /**
-   * ✅ CORREÇÃO:
-   * Antes você fazia:
-   *   if (location.pathname === '/decolagem-marte') stopAllAudio();
-   * Isso interrompe o play() do áudio primário, gerando AbortError.
-   *
-   * Agora:
-   * - NÃO paramos áudio ao ENTRAR em /decolagem-marte
-   * - Paramos áudio ao SAIR de /decolagem-marte (opcional, mas recomendado)
-   */
   useEffect(() => {
     const prev = prevPathRef.current;
     const curr = location.pathname;
 
-    // Se saiu da rota de decolagem, limpa tudo
+    // Ao ENTRAR na decolagem: pare apenas a trilha (não mata o primário)
+    if (curr === "/decolagem-marte" && prev !== "/decolagem-marte") {
+      stopMusic();
+    }
+
+    // Ao SAIR da decolagem: limpa tudo para não vazar sons entre telas
     if (prev === "/decolagem-marte" && curr !== "/decolagem-marte") {
       stopAllAudio();
     }
 
     prevPathRef.current = curr;
-  }, [location.pathname, stopAllAudio]);
+  }, [location.pathname, stopAllAudio, stopMusic]);
 
   return (
     <>

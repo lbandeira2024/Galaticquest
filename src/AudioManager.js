@@ -3,6 +3,7 @@ import { usePause } from "./PauseContext";
 
 const AudioContext = createContext();
 
+// Bloqueio explícito de assets inexistentes/indesejados (evita 404 + efeitos colaterais)
 const BLOCKED_SOUNDS = new Set([
   "/sounds/02.ui-hover.mp3",
   "sounds/02.ui-hover.mp3",
@@ -17,35 +18,32 @@ const isBlockedSound = (src = "") => {
   return clean.toLowerCase().includes("02.ui-hover.mp3");
 };
 
-// Heurística simples: se for "música de navegação" você quer tocar como trilha (não como SFX).
-// Ajuste nomes aqui se quiser.
-const isNavigationMusic = (src = "") => {
-  const s = normalizeSrc(src).toLowerCase();
-  return (
-    s.includes("velinterplanetaria") ||
-    s.includes("minerva") ||
-    s.includes("mineva-velinterplanetaria")
-  );
-};
-
 export const AudioProvider = ({ children }) => {
+  // Música de fundo (trilha)
   const musicAudioRef = useRef(new Audio());
+
+  // Som primário (decolagem)
   const primaryAudioRef = useRef(new Audio());
 
+  // Estado/refs de controle
   const isPrimaryActiveRef = useRef(false);
+
+  // SFX curtos
   const soundsRef = useRef([]);
 
   const [activeAudioEl, setActiveAudioEl] = useState(null);
   const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
 
-  // Filas (antes do unlock/pausa)
+  // Filas gerais (antes de unlock / em pausa)
   const [queuedMusic, setQueuedMusic] = useState(null);
   const [queuedPrimary, setQueuedPrimary] = useState(null);
   const [queuedSFX, setQueuedSFX] = useState(null);
 
-  // ✅ NOVO: Fila pós-primário (sons que chegaram enquanto decolagem estava tocando)
-  const queuedMusicAfterPrimaryRef = useRef(null); // guarda 1 trilha (a última solicitada)
-  const queuedSfxAfterPrimaryRef = useRef([]);     // guarda SFX na ordem
+  // ✅ Fila pós-primário (o que foi pedido durante a decolagem)
+  // - Música pós-primário: first-wins (preserva a música do SpaceView)
+  const queuedMusicAfterPrimaryRef = useRef(null);
+  // - SFX pós-primário: mantém ordem de chegada
+  const queuedSfxAfterPrimaryRef = useRef([]);
 
   const { isPaused } = usePause();
 
@@ -74,6 +72,7 @@ export const AudioProvider = ({ children }) => {
       });
   }, [isAudioUnlocked]);
 
+  // ✅ Para apenas a trilha (sem interferir no primário)
   const stopMusic = useCallback(() => {
     const bg = musicAudioRef.current;
     if (!bg) return;
@@ -87,39 +86,60 @@ export const AudioProvider = ({ children }) => {
     console.log("🛑 Música de fundo parada (stopMusic).");
   }, []);
 
+  // Debug do primário
   const attachPrimaryDiagnostics = (audioEl, src) => {
     audioEl.onplay = () => console.log(`🚀 PRIMARY onplay: ${src}`);
     audioEl.onpause = () => console.log(`⏸ PRIMARY onpause: ${src}`);
+    audioEl.onwaiting = () => console.log(`⚠️ PRIMARY waiting ${src}`);
     audioEl.oncanplaythrough = () =>
       console.log("✅ PRIMARY canplaythrough", src, "dur=", audioEl.duration);
-
-    audioEl.onstalled = () => console.log("⚠️ PRIMARY stalled", src);
-    audioEl.onwaiting = () => console.log("⚠️ PRIMARY waiting", src);
-
-    audioEl.onerror = () => {
-      console.error("❌ PRIMARY media error", src, audioEl.error);
-    };
+    audioEl.onerror = () => console.error("❌ PRIMARY media error", src, audioEl.error);
   };
 
-  // ✅ toca música (trilha)
+  // ✅ SFX: sempre sem loop
+  const playSfxNow = useCallback((src) => {
+    const sound = new Audio(src);
+    sound.preload = "auto";
+    sound.volume = 1.0;
+    sound.muted = false;
+    sound.loop = false;
+
+    soundsRef.current.push(sound);
+
+    const p = sound.play();
+    if (p !== undefined) p.catch(() => { });
+
+    sound.onended = () => {
+      soundsRef.current = soundsRef.current.filter((s) => s !== sound);
+    };
+    sound.onerror = () => {
+      soundsRef.current = soundsRef.current.filter((s) => s !== sound);
+    };
+  }, []);
+
+  // ✅ Música: toca agora (se primário ativo, enfileira para pós-primário)
   const playMusicNow = useCallback((src, options) => {
     if (isBlockedSound(src)) {
       console.warn("🚫 Som bloqueado (música) ignorado:", src);
       return;
     }
 
-    // Se primário ainda ativo, enfileira para pós-primário
     if (isPrimaryActiveRef.current) {
-      queuedMusicAfterPrimaryRef.current = { src, options };
-      console.log("🧾 Música enfileirada para pós-primário:", src);
+      // ✅ first-wins: preserva a primeira música pedida (SpaceView)
+      if (!queuedMusicAfterPrimaryRef.current) {
+        queuedMusicAfterPrimaryRef.current = { src, options };
+        console.log("🧾 Música enfileirada para pós-primário (first-wins):", src);
+      } else {
+        console.log("🧾 Música ignorada (já existe música pós-primário):", src);
+      }
       return;
     }
 
     const target = musicAudioRef.current;
-
     const currentSrc = decodeURI(target.src || "");
     const newSrc = normalizeSrc(src);
 
+    // já está tocando a mesma trilha
     if (currentSrc.includes(newSrc) && !target.paused) {
       setActiveAudioEl(target);
       return;
@@ -141,41 +161,24 @@ export const AudioProvider = ({ children }) => {
     }
   }, []);
 
-  // ✅ toca SFX
-  const playSfxNow = useCallback((src) => {
-    const sound = new Audio(src);
-    sound.preload = "auto";
-    sound.volume = 1.0;
-    sound.muted = false;
-
-    soundsRef.current.push(sound);
-
-    const p = sound.play();
-    if (p !== undefined) p.catch(() => { });
-
-    sound.onended = () => {
-      soundsRef.current = soundsRef.current.filter((s) => s !== sound);
-    };
-    sound.onerror = () => {
-      soundsRef.current = soundsRef.current.filter((s) => s !== sound);
-    };
-  }, []);
-
-  // ✅ flush pós-primário: música primeiro, depois SFX na ordem
+  // ✅ Flush pós-primário: música primeiro, depois SFX enfileirados
   const flushAfterPrimary = useCallback(() => {
     const qm = queuedMusicAfterPrimaryRef.current;
+    queuedMusicAfterPrimaryRef.current = null;
+
     if (qm) {
-      queuedMusicAfterPrimaryRef.current = null;
       playMusicNow(qm.src, qm.options || { loop: true, isPrimary: false });
     }
 
     const sfxQueue = queuedSfxAfterPrimaryRef.current;
+    queuedSfxAfterPrimaryRef.current = [];
+
     if (sfxQueue.length) {
-      queuedSfxAfterPrimaryRef.current = [];
       sfxQueue.forEach((s) => playSfxNow(s));
     }
   }, [playMusicNow, playSfxNow]);
 
+  // ✅ Primário (decolagem) — desliga trilha ao iniciar; ao terminar libera flush
   const playPrimaryNow = useCallback(
     (src, options) => {
       if (isBlockedSound(src)) {
@@ -185,6 +188,7 @@ export const AudioProvider = ({ children }) => {
 
       const target = primaryAudioRef.current;
 
+      // Intercepta pause para rastrear chamadas externas (debug)
       if (!target.__pauseIntercepted) {
         const originalPause = target.pause.bind(target);
         target.pause = () => {
@@ -207,7 +211,7 @@ export const AudioProvider = ({ children }) => {
       target.volume = 1.0;
       target.muted = false;
 
-      // Regra: ao iniciar primário, música deve estar OFF
+      // Regra: ao entrar em decolagem, trilha deve parar
       isPrimaryActiveRef.current = true;
       stopMusic();
 
@@ -216,8 +220,6 @@ export const AudioProvider = ({ children }) => {
       target.onended = () => {
         console.log("🏁 Primário acabou.");
         isPrimaryActiveRef.current = false;
-
-        // ✅ Ao terminar o primário: toca a música de navegação e depois libera SFX
         flushAfterPrimary();
       };
 
@@ -244,7 +246,7 @@ export const AudioProvider = ({ children }) => {
     [stopMusic, flushAfterPrimary]
   );
 
-  // API pública: playTrack (música ou primário)
+  // API pública: playTrack (música/trilha ou primário)
   const playTrack = useCallback(
     (src, options = { loop: true, isPrimary: false }) => {
       if (isBlockedSound(src)) {
@@ -252,14 +254,14 @@ export const AudioProvider = ({ children }) => {
         return;
       }
 
-      // sem unlock: fila
+      // Se ainda não desbloqueou, enfileira
       if (!isAudioUnlocked) {
         if (options.isPrimary) setQueuedPrimary({ src, options });
         else setQueuedMusic({ src, options });
         return;
       }
 
-      // pausado: fila
+      // Se pausado, enfileira
       if (isPaused) {
         if (options.isPrimary) setQueuedPrimary({ src, options });
         else setQueuedMusic({ src, options });
@@ -272,13 +274,12 @@ export const AudioProvider = ({ children }) => {
         return;
       }
 
-      // ✅ música normal: se primário ativo, enfileira pós-primário
       playMusicNow(src, options);
     },
     [isAudioUnlocked, isPaused, playPrimaryNow, playMusicNow]
   );
 
-  // API pública: playSound (SFX)
+  // API pública: playSound (SFX one-shot)
   const playSound = useCallback(
     (src) => {
       if (isBlockedSound(src)) {
@@ -288,17 +289,10 @@ export const AudioProvider = ({ children }) => {
 
       if (!isAudioUnlocked) return;
 
-      // ✅ Se primário ativo:
-      // - se for "música de navegação" chamada via playSound, trate como trilha pós-primário
-      // - caso contrário, enfileire SFX pós-primário na ordem
+      // Se primário está ativo: NÃO perde o evento — enfileira para tocar depois
       if (isPrimaryActiveRef.current) {
-        if (isNavigationMusic(src)) {
-          queuedMusicAfterPrimaryRef.current = { src, options: { loop: true, isPrimary: false } };
-          console.log("🧾 Navegação enfileirada (via playSound) para pós-primário:", src);
-        } else {
-          queuedSfxAfterPrimaryRef.current.push(src);
-          console.log("🧾 SFX enfileirado para pós-primário:", src);
-        }
+        queuedSfxAfterPrimaryRef.current.push(src);
+        console.log("🧾 SFX enfileirado para pós-primário:", src);
         return;
       }
 
@@ -308,7 +302,6 @@ export const AudioProvider = ({ children }) => {
         return;
       }
 
-      // tocar agora
       playSfxNow(src);
     },
     [isAudioUnlocked, isPaused, playSfxNow]
@@ -348,7 +341,7 @@ export const AudioProvider = ({ children }) => {
     setQueuedSFX(null);
   }, []);
 
-  // flush das filas pós-unlock (respeitando primário)
+  // Flush das filas pós-unlock (respeitando primário)
   useEffect(() => {
     if (!isAudioUnlocked) return;
     if (isPaused) return;
@@ -365,7 +358,6 @@ export const AudioProvider = ({ children }) => {
     }
 
     if (queuedSFX) {
-      // se primário ativo, vira pós-primário; senão toca agora
       if (isPrimaryActiveRef.current) {
         queuedSfxAfterPrimaryRef.current.push(queuedSFX.src);
         console.log("🧾 SFX enfileirado (fila unlock) para pós-primário:", queuedSFX.src);
@@ -376,6 +368,7 @@ export const AudioProvider = ({ children }) => {
     }
   }, [isAudioUnlocked, isPaused, queuedPrimary, queuedMusic, queuedSFX, playPrimaryNow, playMusicNow, playSfxNow]);
 
+  // Pausa global
   useEffect(() => {
     if (!isPaused) return;
 
