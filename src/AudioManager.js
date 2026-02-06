@@ -1,27 +1,26 @@
-import { createContext, useContext, useRef, useEffect, useCallback, useState } from 'react';
-import { usePause } from './PauseContext';
+import { createContext, useContext, useRef, useEffect, useCallback, useState } from "react";
+import { usePause } from "./PauseContext";
 
 const AudioContext = createContext();
 
 export const AudioProvider = ({ children }) => {
-  // Música de fundo
   const musicAudioRef = useRef(new Audio());
-
-  // Som primário (ex.: decolagem)
   const primaryAudioRef = useRef(new Audio());
 
-  // Trava para impedir que a música volte ao volume cheio durante o primário
+  // Ref para saber se o som primário está ATIVO no momento
   const isPrimaryActiveRef = useRef(false);
 
-  // SFX avulsos (curtos)
   const soundsRef = useRef([]);
-
-  // Elemento de áudio ativo (para debug/inspeção, se necessário)
   const [activeAudioEl, setActiveAudioEl] = useState(null);
 
   const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
+
+  // Filas: se pedir play durante pausa / antes de unlock
   const [queuedMusic, setQueuedMusic] = useState(null);
+  const [queuedPrimary, setQueuedPrimary] = useState(null);
   const [queuedSFX, setQueuedSFX] = useState(null);
+
+  const { isPaused } = usePause();
 
   const unlockAudio = useCallback(() => {
     if (isAudioUnlocked) return;
@@ -29,57 +28,58 @@ export const AudioProvider = ({ children }) => {
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     if (AudioCtx) {
       const context = new AudioCtx();
-      if (context.state === 'suspended') context.resume();
+      if (context.state === "suspended") context.resume();
     }
 
-    // “Ping” silencioso para destravar autoplay em navegadores
     const silentSound = new Audio(
-      'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA'
+      "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"
     );
 
-    silentSound.play()
+    silentSound
+      .play()
       .then(() => {
         silentSound.pause();
-        console.log('✅ Contexto de Áudio desbloqueado.');
+        console.log("✅ Contexto de Áudio desbloqueado.");
         setIsAudioUnlocked(true);
       })
       .catch(() => {
-        console.warn('Aguardando clique para desbloquear...');
+        console.warn("Aguardando clique para desbloquear.");
       });
   }, [isAudioUnlocked]);
 
-  useEffect(() => {
-    if (!isAudioUnlocked) return;
-
-    if (queuedMusic) {
-      playTrack(queuedMusic.src, queuedMusic.options);
-      setQueuedMusic(null);
+  // Util: abaixa música
+  const lowerMusic = () => {
+    const bg = musicAudioRef.current;
+    if (bg && !bg.paused) {
+      console.log("🔉 Baixando música para 20%.");
+      bg.volume = 0.2;
     }
+  };
 
-    if (queuedSFX) {
-      playTrack(queuedSFX.src, queuedSFX.options);
-      setQueuedSFX(null);
-    }
-  }, [isAudioUnlocked, queuedMusic, queuedSFX]);
+  // Util: restaura música (se não houver primário ativo)
+  const restoreMusic = () => {
+    const bg = musicAudioRef.current;
+    if (!bg) return;
+    if (!isPrimaryActiveRef.current) bg.volume = 1.0;
+    else bg.volume = 0.2;
+  };
 
+  // Util: diagnóstico do primário
   const attachPrimaryDiagnostics = (audioEl, src) => {
-    audioEl.oncanplaythrough = () =>
-      console.log('✅ PRIMARY canplaythrough', src, 'dur=', audioEl.duration);
-
-    audioEl.onstalled = () => console.log('⚠️ PRIMARY stalled', src);
-    audioEl.onwaiting = () => console.log('⚠️ PRIMARY waiting', src);
-
     audioEl.onplay = () => console.log(`🚀 PRIMARY onplay: ${src}`);
     audioEl.onpause = () => console.log(`⏸ PRIMARY onpause: ${src}`);
+    audioEl.oncanplaythrough = () =>
+      console.log("✅ PRIMARY canplaythrough", src, "dur=", audioEl.duration);
+
+    audioEl.onstalled = () => console.log("⚠️ PRIMARY stalled", src);
+    audioEl.onwaiting = () => console.log("⚠️ PRIMARY waiting", src);
 
     audioEl.onerror = () => {
-      // MediaError: 1 aborted, 2 network, 3 decode, 4 src not supported
-      console.error('❌ PRIMARY media error', src, audioEl.error);
+      console.error("❌ PRIMARY media error", src, audioEl.error);
     };
 
-    // Snapshot curto depois de tentar play (muito útil quando “toca mas não ouve”)
     setTimeout(() => {
-      console.log('🎛 PRIMARY snapshot (200ms)', {
+      console.log("🎛 PRIMARY snapshot (200ms)", {
         src,
         paused: audioEl.paused,
         currentTime: audioEl.currentTime,
@@ -92,165 +92,158 @@ export const AudioProvider = ({ children }) => {
     }, 200);
   };
 
-  const safeLowerMusic = () => {
-    const bg = musicAudioRef.current;
-    if (bg && !bg.paused) {
-      console.log('🔉 Baixando música para 20%.');
-      bg.volume = 0.2;
-    }
-  };
+  const playPrimaryNow = useCallback(
+    (src, options) => {
+      // encerra instância anterior do primário
+      if (primaryAudioRef.current) {
+        try {
+          primaryAudioRef.current.pause();
+          primaryAudioRef.current.currentTime = 0;
+          primaryAudioRef.current.src = "";
+        } catch { }
+      }
 
-  const safeRestoreMusic = () => {
-    const bg = musicAudioRef.current;
-    if (!bg) return;
-    if (!isPrimaryActiveRef.current) {
-      bg.volume = 1.0;
-    } else {
-      // Se por algum motivo ainda estiver marcado como primário ativo,
-      // nunca deixe a música subir aqui.
-      bg.volume = 0.2;
-    }
-  };
+      console.log("🆕 Iniciando Som Primário:", src);
 
+      const target = new Audio(src);
+      target.preload = "auto";
+      target.loop = !!options.loop;
+
+      // força audibilidade
+      target.volume = 1.0;
+      target.muted = false;
+      target.currentTime = 0;
+
+      // baixa música imediatamente
+      isPrimaryActiveRef.current = true;
+      lowerMusic();
+
+      attachPrimaryDiagnostics(target, src);
+
+      target.onended = () => {
+        console.log("🏁 Primário acabou. Restaurando música.");
+        isPrimaryActiveRef.current = false;
+        restoreMusic();
+      };
+
+      const originalOnError = target.onerror;
+      target.onerror = () => {
+        if (originalOnError) originalOnError();
+        console.log("🧯 Primário falhou. Restaurando música.");
+        isPrimaryActiveRef.current = false;
+        restoreMusic();
+      };
+
+      primaryAudioRef.current = target;
+      setActiveAudioEl(target);
+
+      target.load();
+      const p = target.play();
+      if (p !== undefined) {
+        p.then(() => console.log("✅ primary play() ok:", src)).catch((e) => {
+          console.error("❌ primary play() falhou:", e?.name, e);
+          isPrimaryActiveRef.current = false;
+          restoreMusic();
+        });
+      }
+    },
+    [lowerMusic]
+  );
+
+  const playMusicNow = useCallback((src, options) => {
+    const target = musicAudioRef.current;
+
+    const currentSrc = decodeURI(target.src || "");
+    const newSrc = (src || "").split("?")[0];
+
+    // Se já está tocando a mesma música, apenas ajusta volume e sai
+    if (currentSrc.includes(newSrc) && !target.paused) {
+      if (!isPrimaryActiveRef.current) target.volume = 1.0;
+      else {
+        console.log("🛡️ Tentativa de aumentar música bloqueada pelo Primário.");
+        target.volume = 0.2;
+      }
+      setActiveAudioEl(target);
+      return;
+    }
+
+    target.src = src;
+    target.preload = "auto";
+    target.loop = !!options.loop;
+    target.muted = false;
+
+    // respeita primário
+    target.volume = isPrimaryActiveRef.current ? 0.2 : 1.0;
+
+    setActiveAudioEl(target);
+
+    const p = target.play();
+    if (p !== undefined) {
+      p.then(() => console.log(`🎵 Música iniciada (${src})`)).catch((e) => {
+        if (e?.name !== "AbortError") console.error("⚠️ Erro música:", e?.name, e);
+      });
+    }
+  }, []);
+
+  // API pública
   const playTrack = useCallback(
     (src, options = { loop: true, isPrimary: false }) => {
+      // 1) sem unlock: fila
       if (!isAudioUnlocked) {
-        if (options.isPrimary) setQueuedSFX({ src, options });
+        if (options.isPrimary) setQueuedPrimary({ src, options });
         else setQueuedMusic({ src, options });
         return;
       }
 
-      // =========================
-      // SOM PRIMÁRIO (DECOLAGEM)
-      // =========================
+      // 2) se pausado: NÃO tente tocar (evita AbortError); fila
+      if (isPaused) {
+        if (options.isPrimary) setQueuedPrimary({ src, options });
+        else setQueuedMusic({ src, options });
+        console.log("⏸️ Áudio em pausa — enfileirando:", src);
+        return;
+      }
+
+      // 3) toca agora
       if (options.isPrimary) {
-        isPrimaryActiveRef.current = true;
-
-        // encerra instância anterior do primário
-        if (primaryAudioRef.current) {
-          primaryAudioRef.current.pause();
-          primaryAudioRef.current.currentTime = 0;
-          primaryAudioRef.current.src = '';
-        }
-
-        console.log('🆕 Iniciando Som Primário:', src);
-
-        const target = new Audio(src);
-        target.preload = 'auto';
-        target.loop = !!options.loop;
-
-        // força audibilidade
-        target.volume = 1.0;
-        target.muted = false;
-        target.currentTime = 0;
-
-        // abaixa a música imediatamente
-        safeLowerMusic();
-
-        // listeners + diagnóstico
-        attachPrimaryDiagnostics(target, src);
-
-        // ao terminar, restaura música e solta trava
-        target.onended = () => {
-          console.log('🏁 Primário acabou. Restaurando música.');
-          isPrimaryActiveRef.current = false;
-          safeRestoreMusic();
-        };
-
-        // se der erro, também restaura música e solta trava
-        const originalOnError = target.onerror;
-        target.onerror = () => {
-          if (originalOnError) originalOnError();
-          console.log('🧯 Primário falhou. Restaurando música.');
-          isPrimaryActiveRef.current = false;
-          safeRestoreMusic();
-        };
-
-        primaryAudioRef.current = target;
-        setActiveAudioEl(target);
-
-        target.load();
-        const p = target.play();
-        if (p !== undefined) {
-          p.then(() => console.log('✅ primary play() ok:', src))
-            .catch((e) => {
-              // NotAllowedError é o clássico de autoplay/política de gesto
-              console.error('❌ primary play() falhou:', e?.name, e);
-              // Se falhou, solte trava e restaure para não ficar música presa em 20%
-              isPrimaryActiveRef.current = false;
-              safeRestoreMusic();
-            });
-        }
+        playPrimaryNow(src, options);
         return;
       }
 
-      // =========================
-      // MÚSICA DE FUNDO
-      // =========================
-      const target = musicAudioRef.current;
-
-      const currentSrc = decodeURI(target.src || '');
-      const newSrc = (src || '').split('?')[0];
-
-      // Se já está tocando a mesma música, só ajusta volume respeitando o primário
-      if (currentSrc.includes(newSrc) && !target.paused) {
-        if (!isPrimaryActiveRef.current) target.volume = 1.0;
-        else {
-          console.log('🛡️ Tentativa de aumentar música bloqueada pelo Primário.');
-          target.volume = 0.2;
-        }
-        setActiveAudioEl(target);
-        return;
-      }
-
-      target.src = src;
-      target.preload = 'auto';
-      target.loop = !!options.loop;
-
-      // respeita o primário ao iniciar
-      target.volume = isPrimaryActiveRef.current ? 0.2 : 1.0;
-      target.muted = false;
-
-      setActiveAudioEl(target);
-
-      const p = target.play();
-      if (p !== undefined) {
-        p.then(() => console.log(`🎵 Música iniciada (${src})`))
-          .catch((e) => {
-            if (e?.name !== 'AbortError') console.error('⚠️ Erro música:', e?.name, e);
-          });
-      }
+      playMusicNow(src, options);
     },
-    [isAudioUnlocked]
+    [isAudioUnlocked, isPaused, playPrimaryNow, playMusicNow]
   );
 
   const playSound = useCallback(
     (src) => {
       if (!isAudioUnlocked) return;
 
+      // Se pausado, você pode escolher: ignorar ou enfileirar.
+      // Aqui eu enfileiro 1 SFX (último), para não spammar.
+      if (isPaused) {
+        setQueuedSFX({ src, options: { loop: false, isPrimary: false } });
+        console.log("⏸️ SFX em pausa — enfileirando:", src);
+        return;
+      }
+
       const sound = new Audio(src);
-      sound.preload = 'auto';
+      sound.preload = "auto";
       sound.volume = 1.0;
       sound.muted = false;
 
       soundsRef.current.push(sound);
 
       const p = sound.play();
-      if (p !== undefined) {
-        p.catch(() => {
-          // SFX normalmente você não quer poluir logs, mas pode logar se quiser
-        });
-      }
+      if (p !== undefined) p.catch(() => { });
 
       sound.onended = () => {
         soundsRef.current = soundsRef.current.filter((s) => s !== sound);
       };
-
       sound.onerror = () => {
         soundsRef.current = soundsRef.current.filter((s) => s !== sound);
       };
     },
-    [isAudioUnlocked]
+    [isAudioUnlocked, isPaused]
   );
 
   const stopAllAudio = useCallback(() => {
@@ -262,37 +255,60 @@ export const AudioProvider = ({ children }) => {
       try {
         el.pause();
         el.currentTime = 0;
-        // limpar src ajuda a evitar estados “travados” entre rotas
-        el.src = '';
+        el.src = "";
       } catch { }
     });
-
-    isPrimaryActiveRef.current = false;
 
     soundsRef.current.forEach((s) => {
       try {
         s.pause();
         s.currentTime = 0;
-        s.src = '';
+        s.src = "";
       } catch { }
     });
     soundsRef.current = [];
+
+    isPrimaryActiveRef.current = false;
+    setQueuedMusic(null);
+    setQueuedPrimary(null);
+    setQueuedSFX(null);
   }, []);
 
-  const { isPaused } = usePause();
-
+  // Quando desbloquear, tenta tocar o que estava na fila (se não estiver pausado)
   useEffect(() => {
-    const bg = musicAudioRef.current;
-    const primary = primaryAudioRef.current;
+    if (!isAudioUnlocked) return;
+    if (isPaused) return;
 
-    if (isPaused) {
-      [bg, primary].forEach((el) => el && !el.paused && el.pause());
-      soundsRef.current.forEach((s) => s.pause());
+    if (queuedPrimary) {
+      playPrimaryNow(queuedPrimary.src, queuedPrimary.options);
+      setQueuedPrimary(null);
       return;
     }
 
-    // Se quiser retomar automaticamente ao despausar,
-    // implemente aqui de forma explícita para não “surpreender” o usuário.
+    if (queuedMusic) {
+      playMusicNow(queuedMusic.src, queuedMusic.options);
+      setQueuedMusic(null);
+    }
+
+    if (queuedSFX) {
+      const s = new Audio(queuedSFX.src);
+      s.preload = "auto";
+      s.volume = 1.0;
+      s.muted = false;
+      const p = s.play();
+      if (p !== undefined) p.catch(() => { });
+      setQueuedSFX(null);
+    }
+  }, [isAudioUnlocked, isPaused, queuedPrimary, queuedMusic, queuedSFX, playPrimaryNow, playMusicNow]);
+
+  // Se pausar, pausa tudo (mas sem “quebrar” o estado; não limpa src aqui)
+  useEffect(() => {
+    const refs = [musicAudioRef.current, primaryAudioRef.current];
+
+    if (isPaused) {
+      refs.forEach((ref) => ref && !ref.paused && ref.pause());
+      soundsRef.current.forEach((s) => s.pause());
+    }
   }, [isPaused]);
 
   const value = {
