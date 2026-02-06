@@ -10,7 +10,19 @@ const BLOCKED_SOUNDS = new Set([
   "02.ui-hover.mp3",
 ]);
 
+// Remove query params (?t=...)
 const normalizeSrc = (src = "") => String(src).split("?")[0];
+
+// Converte caminho relativo para absoluto para comparação segura
+// Ex: "/sounds/music.mp3" vira "http://localhost:3000/sounds/music.mp3"
+const toAbsolute = (src) => {
+  if (!src) return "";
+  try {
+    return new URL(src, window.location.href).href;
+  } catch (e) {
+    return src;
+  }
+};
 
 const isBlockedSound = (src = "") => {
   const clean = normalizeSrc(src);
@@ -73,11 +85,12 @@ export const AudioProvider = ({ children }) => {
     const bg = musicAudioRef.current;
     if (!bg) return;
 
-    const current = normalizeSrc(bg.src || "");
-    const incoming = normalizeSrc(src);
+    // Comparação absoluta no warmup também
+    const currentAbs = toAbsolute(normalizeSrc(bg.src || ""));
+    const incomingAbs = toAbsolute(normalizeSrc(src));
 
     // Só aquece se ainda não está com a mesma fonte
-    if (current !== incoming) {
+    if (currentAbs !== incomingAbs) {
       try {
         bg.pause();
       } catch { }
@@ -173,29 +186,31 @@ export const AudioProvider = ({ children }) => {
       }
 
       const target = musicAudioRef.current;
-      const currentClean = normalizeSrc(decodeURI(target.src || ""));
-      const newClean = normalizeSrc(src);
 
-      // Se já é a mesma fonte
-      const alreadySame = currentClean === newClean;
+      // --- CORREÇÃO DE COMPARAÇÃO DE URL ---
+      // 1. Pega URL atual do player (absoluta) e remove params
+      const currentAbs = toAbsolute(normalizeSrc(target.src || ""));
+      // 2. Pega nova URL (pode ser relativa), converte para absoluta e remove params
+      const newAbs = toAbsolute(normalizeSrc(src));
+
+      const alreadySame = currentAbs === newAbs && newAbs !== "";
       const hasBuffer = target.readyState >= 3; // HAVE_FUTURE_DATA
 
-      // --- CORREÇÃO AQUI: Se for a mesma música, NÃO reinicia. ---
+      // Se é EXATAMENTE a mesma música (URL absoluta), mantém tocando
       if (alreadySame) {
-        // Atualiza apenas se o loop mudou
         target.loop = !!options.loop;
 
-        // Se por acaso estava pausada (mas não pelo pause global), retoma
+        // Se estava pausada por algum motivo (mas não pelo pause global), retoma
         if (target.paused && !isPaused) {
           const p = target.play();
           if (p !== undefined) p.catch(() => { });
         }
 
-        console.log(`🎵 Música já está tocando (mantendo fluxo): ${src}`);
-        return; // Retorna imediatamente para manter o áudio contínuo
+        // Retorna silenciosamente para não reiniciar
+        return;
       }
 
-      // Se não for a mesma, faz o processo de troca padrão
+      // Se for música diferente, faz a troca
       try {
         target.pause();
         target.currentTime = 0;
@@ -252,7 +267,6 @@ export const AudioProvider = ({ children }) => {
 
       const target = primaryAudioRef.current;
 
-      // Intercepta pause para debug de aborts
       if (!target.__pauseIntercepted) {
         const originalPause = target.pause.bind(target);
         target.pause = () => {
@@ -269,7 +283,6 @@ export const AudioProvider = ({ children }) => {
 
       console.log("🆕 Iniciando Som Primário:", src);
 
-      // Guarda callback de finalização (para sincronizar eventos sem setTimeout)
       primaryEndedCallbackRef.current = typeof options?.onEnded === "function" ? options.onEnded : null;
 
       target.src = src;
@@ -278,7 +291,6 @@ export const AudioProvider = ({ children }) => {
       target.volume = 1.0;
       target.muted = false;
 
-      // Regra: durante primário, música deve estar off
       isPrimaryActiveRef.current = true;
       stopMusic();
 
@@ -316,7 +328,6 @@ export const AudioProvider = ({ children }) => {
       if (p !== undefined) {
         p.then(() => console.log("✅ primary play() ok:", src)).catch((e) => {
           console.error("❌ primary play() falhou:", e?.name, e);
-          // falhou => libera fluxo
           isPrimaryActiveRef.current = false;
           flushAfterPrimary();
         });
@@ -325,7 +336,6 @@ export const AudioProvider = ({ children }) => {
     [stopMusic, flushAfterPrimary]
   );
 
-  // API pública (música/trilha ou primário)
   const playTrack = useCallback(
     (src, options = { loop: true, isPrimary: false, onEnded: null }) => {
       if (isBlockedSound(src)) {
@@ -333,14 +343,12 @@ export const AudioProvider = ({ children }) => {
         return;
       }
 
-      // Sem unlock: fila
       if (!isAudioUnlocked) {
         if (options.isPrimary) setQueuedPrimary({ src, options });
         else setQueuedMusic({ src, options });
         return;
       }
 
-      // Pausado: fila
       if (isPaused) {
         if (options.isPrimary) setQueuedPrimary({ src, options });
         else setQueuedMusic({ src, options });
@@ -358,7 +366,6 @@ export const AudioProvider = ({ children }) => {
     [isAudioUnlocked, isPaused, playPrimaryNow, playMusicNow]
   );
 
-  // API pública (SFX)
   const playSound = useCallback(
     (src) => {
       if (isBlockedSound(src)) {
@@ -368,14 +375,12 @@ export const AudioProvider = ({ children }) => {
 
       if (!isAudioUnlocked) return;
 
-      // Se primário ativo: enfileira para pós-primário (mantém ordem, sem tocar agora)
       if (isPrimaryActiveRef.current) {
         queuedSfxAfterPrimaryRef.current.push(src);
         console.log("🧾 SFX enfileirado para pós-primário:", src);
         return;
       }
 
-      // Se pausado: fila simples
       if (isPaused) {
         setQueuedSFX({ src, options: { loop: false, isPrimary: false } });
         console.log("⏸️ SFX em pausa — enfileirando:", src);
@@ -421,7 +426,6 @@ export const AudioProvider = ({ children }) => {
     setQueuedSFX(null);
   }, []);
 
-  // Flush das filas pós-unlock (respeitando primário)
   useEffect(() => {
     if (!isAudioUnlocked) return;
     if (isPaused) return;
@@ -448,7 +452,6 @@ export const AudioProvider = ({ children }) => {
     }
   }, [isAudioUnlocked, isPaused, queuedPrimary, queuedMusic, queuedSFX, playPrimaryNow, playMusicNow, playSfxNow]);
 
-  // Pausa global
   useEffect(() => {
     if (!isPaused) return;
 
@@ -468,7 +471,7 @@ export const AudioProvider = ({ children }) => {
     stopAllAudio,
     stopMusic,
     preloadAudio,
-    warmBackgroundForAfterPrimary, // ✅ exposto opcionalmente
+    warmBackgroundForAfterPrimary,
     primaryAudioRef,
     musicAudioRef,
     isAudioUnlocked,
