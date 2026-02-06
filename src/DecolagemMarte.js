@@ -157,6 +157,8 @@ const DecolagemMarte = () => {
   const [isSosMinervaActive, setIsSosMinervaActive] = useState(false);
   const [activeSosSignal, setActiveSosSignal] = useState(null);
 
+  const [showO2Modal, setShowO2Modal] = useState(false);
+
   const telemetryRef = useRef({
     velocity: { kmh: 0, ms: 0, rel: '0.0c' },
     altitude: 0,
@@ -230,7 +232,6 @@ const DecolagemMarte = () => {
       clearTimeout(monitorTimer2);
       clearTimeout(monitorTimer3);
     };
-    // CORREÇÃO: Usando disable genérico para evitar erro de "rule not found" no build
     // eslint-disable-next-line
   }, []);
 
@@ -241,9 +242,16 @@ const DecolagemMarte = () => {
     };
   }, [stopAllAudio]);
 
+  const isDobraAtivadaRef = useRef(isDobraAtivada);
+  useEffect(() => { isDobraAtivadaRef.current = isDobraAtivada; }, [isDobraAtivada]);
+
+  // --- EFEITO S.O.S ---
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
+      // CORREÇÃO: Não dispara S.O.S se estiver em Dobra Espacial
+      if (isDobraAtivadaRef.current) return;
+
       const audio = new Audio('/sounds/minervaSOS.mp3');
       audio.play().catch(e => console.log("Erro ao tocar áudio SOS:", e));
       setIsSosMinervaActive(true);
@@ -258,9 +266,6 @@ const DecolagemMarte = () => {
     const interval = setInterval(triggerSosEvent, 180000);
     return () => clearInterval(interval);
   }, [travelStarted, routeIndex]);
-
-  const isDobraAtivadaRef = useRef(isDobraAtivada);
-  useEffect(() => { isDobraAtivadaRef.current = isDobraAtivada; }, [isDobraAtivada]);
 
   const isBoostingTo60kRef = useRef(isBoostingTo60k);
   useEffect(() => { isBoostingTo60kRef.current = isBoostingTo60k; }, [isBoostingTo60k]);
@@ -341,6 +346,12 @@ const DecolagemMarte = () => {
       console.error("ERRO: Falha ao salvar nova rota:", error);
     }
   }, [userId, API_BASE_URL]);
+
+  const handleOpenO2Modal = () => {
+    if (isPaused || processadorO2 === 0) return;
+    setShowO2Modal(true);
+    playSound('/sounds/ui-click.mp3');
+  };
 
   const isO2TransferDisabled = isPaused || processadorO2 === 0;
 
@@ -1020,7 +1031,7 @@ const DecolagemMarte = () => {
           <div className="o2-processor-display">
             <span className="o2-processor-label">PROCESSADOR O2</span>
             <div className="o2-meter-visual">{[1, 2, 3, 4, 5].map(unit => (<div key={unit} className={`o2-unit ${processadorO2 >= unit ? 'filled' : ''}`}></div>))}</div>
-            <button className={`o2-transfer-button ${isO2TransferDisabled ? 'disabled' : ''}`} onClick={handleTransferO2} disabled={isO2TransferDisabled} style={{ zIndex: 100 }}>TRANSFERIR ({processadorO2})</button>
+            <button className={`o2-transfer-button ${isO2TransferDisabled ? 'disabled' : ''}`} onClick={handleOpenO2Modal} disabled={isO2TransferDisabled} style={{ zIndex: 100 }}>TRANSFERIR ({processadorO2})</button>
           </div>
         </div>
         <div className="right-panel-3d">
@@ -1161,6 +1172,34 @@ const DecolagemMarte = () => {
             <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '30px' }}>
               <button onClick={handleCancelSOS} style={{ padding: '10px 20px', background: 'linear-gradient(145deg, #ff8c00, #e67300)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold', fontSize: '1em' }}>Cancelar</button>
               <button onClick={handleConfirmSOS} style={{ padding: '10px 20px', background: 'linear-gradient(145deg, #00a800, #008500)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold', fontSize: '1em' }}>OK</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showO2Modal && (
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '500px', textAlign: 'center', fontFamily: "'Courier New', monospace", color: '#fff', border: '2px solid #0bf', boxShadow: '0 0 20px #0bf' }}>
+            <h3 style={{ textShadow: '0 0 10px #0bf' }}>TRANSFERÊNCIA DE OXIGÊNIO</h3>
+            <p style={{ fontSize: '1.1em', margin: '20px 0' }}>
+              Deseja transferir <strong style={{ color: '#0bf' }}>{processadorO2} unidades</strong> do Processador de O2 para o suporte de vida da nave?
+            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '30px' }}>
+              <button
+                onClick={() => setShowO2Modal(false)}
+                style={{ padding: '10px 20px', background: '#444', color: 'white', border: '1px solid #777', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold' }}
+              >
+                CANCELAR
+              </button>
+              <button
+                onClick={() => {
+                  handleTransferO2();
+                  setShowO2Modal(false);
+                }}
+                style={{ padding: '10px 20px', background: 'linear-gradient(145deg, #0055ff, #0033cc)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold', boxShadow: '0 0 10px #0055ff' }}
+              >
+                CONFIRMAR
+              </button>
             </div>
           </div>
         </div>
