@@ -32,7 +32,7 @@ const QUIZZ_NAMES = {
     'CSD24': 'CSD Encelado', 'CSD25': 'CSD Gaminedes',
 };
 
-// --- Regras de negócio centralizadas, extraídas do arquivo PPT fornecido ---
+// --- Regras de negócio centralizadas ---
 const VIRTUE_RULES = {
     'CSD1-A': {
         special: ['agir-verdade', 'humildade', 'generosidade', 'paixao-pessoas', 'simplicidade', 'protagonismo', 'respeito-diversidade'],
@@ -549,9 +549,12 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
         setQuizzChallenges([]);
         const fetchAllChallenges = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/group/${groupId}/all-cds-challenges`);
+                // Ajuste de URL: Usa o endpoint do backend corretamente
+                const { apiBaseUrl } = require('./ConfigContext').useConfig ? require('./ConfigContext').useConfig() : { apiBaseUrl: 'http://localhost:5000' };
+                const response = await fetch(`${apiBaseUrl}/group/${groupId}/all-cds-challenges`);
                 const data = await response.json();
                 if (data.success && Array.isArray(data.challenges)) {
+                    console.log("Desafios carregados:", data.challenges);
                     setQuizzChallenges(data.challenges);
                 } else {
                     setQuizzChallenges([]);
@@ -578,7 +581,19 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
         return () => window.removeEventListener('resize', updateSize);
     }, []);
 
-    const challengesMap = useMemo(() => new Map(quizzChallenges.map(c => [c.desafioId, c])), [quizzChallenges]);
+    // CORREÇÃO: Função auxiliar para normalizar IDs (remover espaços, uppercase) para garantir match
+    const normalizeId = (id) => id ? id.toString().toUpperCase().replace(/\s/g, '') : '';
+
+    const challengesMap = useMemo(() => {
+        const map = new Map();
+        quizzChallenges.forEach(c => {
+            if (c.desafioId) {
+                // Armazena no mapa usando a chave normalizada
+                map.set(normalizeId(c.desafioId), c);
+            }
+        });
+        return map;
+    }, [quizzChallenges]);
 
     const getQuizzLinkText = (desafioId) => QUIZZ_NAMES[desafioId] || `QUIZZ ${desafioId.replace('CSD', '')}`;
 
@@ -606,6 +621,7 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
                 }
             });
         } else {
+            // Se não houver regra específica, mantém neutro ou define um padrão
             ALL_VIRTUE_IDS.forEach(id => {
                 newStates[id] = 'blue';
             });
@@ -656,8 +672,11 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
                     </div>
                     <div className="quizz-link-container">
                         {Array.from({ length: 25 }).map((_, index) => {
+                            // CORREÇÃO: Normaliza também o ID esperado
                             const expectedChallengeId = `CSD${index + 1}`;
-                            const challenge = challengesMap.get(expectedChallengeId);
+                            const normalizedExpectedId = normalizeId(expectedChallengeId);
+                            const challenge = challengesMap.get(normalizedExpectedId);
+
                             return (
                                 <div
                                     key={index}
