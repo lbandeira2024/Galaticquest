@@ -184,7 +184,6 @@ const DecolagemMarte = () => {
 
   const hasStartedAudioRef = useRef(false);
 
-  // --- CORREÇÃO APLICADA: Sincronia de Velocidade e Áudio ---
   useEffect(() => {
     unlockAudio();
 
@@ -195,20 +194,17 @@ const DecolagemMarte = () => {
       console.log("🚀 DecolagemMarte: Solicitando áudio (Uppercase):", audioUrl);
       playTrack(audioUrl, {
         loop: false,
-        isPrimary: true,
-        // REMOVIDO: onEnded não controla mais o start da viagem para evitar lag no gauge
+        isPrimary: true
       });
     }
 
-    // Timer 1 (13s): Nuvens + INÍCIO DA ACELERAÇÃO
     const monitorTimer1 = setTimeout(() => {
       if (!isPaused) {
         setMainDisplayState('clouds');
-        setTravelStarted(true); // <--- MUDANÇA: A física inicia visualmente na decolagem
+        setTravelStarted(true);
       }
     }, 13000);
 
-    // Timer 2 (23s): Estática
     const monitorTimer2 = setTimeout(() => {
       if (!isPaused) {
         setMainDisplayState('static');
@@ -216,12 +212,9 @@ const DecolagemMarte = () => {
       }
     }, 23000);
 
-    // Timer 3 (45s): Espaço + CORREÇÃO DA MÚSICA
     const monitorTimer3 = setTimeout(() => {
       if (!isPaused) {
-        // MUDANÇA: Forçamos a parada do som de decolagem para a música do SpaceView entrar SEM DELAY
         stopAllAudio();
-
         setMainDisplayState('stars');
         setMonitorState('on');
       }
@@ -234,7 +227,6 @@ const DecolagemMarte = () => {
     };
   }, [playTrack, unlockAudio, isPaused, stopAllAudio]);
 
-  // --- Limpeza Exclusiva ao Sair da Página ---
   useEffect(() => {
     return () => {
       console.log("🛑 DecolagemMarte: Desmontando e parando áudio.");
@@ -723,6 +715,10 @@ const DecolagemMarte = () => {
       setDistanceKm(newDistance);
       if (newDistance <= 5000 && isDobraAtivada) {
         if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
+
+        // --- CORREÇÃO AQUI: Parar o áudio da dobra ao chegar ---
+        stopAllAudio();
+
         isDobraAtivadaRef.current = false; setIsDobraAtivada(false); saveTelemetryData(); setShowWarpDisabledMessage(true); setMinervaImage('/images/Minerva/Minerva_Active.gif'); playSound('/sounds/power-down-Warp.mp3'); setTimeout(() => setShowWarpDisabledMessage(false), 10000);
         const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
         const approachDistanceThreshold = 800000;
@@ -758,7 +754,7 @@ const DecolagemMarte = () => {
       setProgress(progressPercentage);
     }, 1000);
     return () => clearInterval(interval);
-  }, [travelStarted, arrivedAtMars, isDobraAtivada, isPaused, playSound, distanceKm, plannedRoute, routeIndex, handleChallengeEnd, saveTelemetryData, selectedPlanet, saveCurrentProgress, API_BASE_URL, userId, processadorO2]);
+  }, [travelStarted, arrivedAtMars, isDobraAtivada, isPaused, playSound, distanceKm, plannedRoute, routeIndex, handleChallengeEnd, saveTelemetryData, selectedPlanet, saveCurrentProgress, API_BASE_URL, userId, processadorO2, stopAllAudio]);
 
   useEffect(() => {
     if ((monitorState !== 'static' && mainDisplayState !== 'static') || isPaused) return;
