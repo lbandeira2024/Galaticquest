@@ -194,7 +194,7 @@ const DecolagemMarte = () => {
 
       // MUDANÇA: Voltamos para "Decolagem.mp3" (Maiúsculo)
       // Isso vai bater com o arquivo que já está funcionando no servidor.
-      const audioUrl = `/sounds/Decolagem.wav?t=${Date.now()}`;
+      const audioUrl = `/sounds/decolagem.mp3?t=${Date.now()}`;
 
       console.log("🚀 DecolagemMarte: Solicitando áudio (Uppercase):", audioUrl);
       playTrack(audioUrl, { loop: false, isPrimary: true });
