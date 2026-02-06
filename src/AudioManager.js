@@ -176,24 +176,33 @@ export const AudioProvider = ({ children }) => {
       const currentClean = normalizeSrc(decodeURI(target.src || ""));
       const newClean = normalizeSrc(src);
 
-      // Se já é a mesma fonte e já tem buffer, não reseta (evita perder o warmup)
+      // Se já é a mesma fonte
       const alreadySame = currentClean === newClean;
       const hasBuffer = target.readyState >= 3; // HAVE_FUTURE_DATA
 
-      if (!alreadySame) {
-        try {
-          target.pause();
-          target.currentTime = 0;
-        } catch { }
-        target.src = src;
-        target.preload = "auto";
-      } else {
-        // garante que começa do início sem trocar src
-        try {
-          target.currentTime = 0;
-        } catch { }
+      // --- CORREÇÃO AQUI: Se for a mesma música, NÃO reinicia. ---
+      if (alreadySame) {
+        // Atualiza apenas se o loop mudou
+        target.loop = !!options.loop;
+
+        // Se por acaso estava pausada (mas não pelo pause global), retoma
+        if (target.paused && !isPaused) {
+          const p = target.play();
+          if (p !== undefined) p.catch(() => { });
+        }
+
+        console.log(`🎵 Música já está tocando (mantendo fluxo): ${src}`);
+        return; // Retorna imediatamente para manter o áudio contínuo
       }
 
+      // Se não for a mesma, faz o processo de troca padrão
+      try {
+        target.pause();
+        target.currentTime = 0;
+      } catch { }
+
+      target.src = src;
+      target.preload = "auto";
       target.loop = !!options.loop;
       target.muted = false;
       target.volume = 1.0;
@@ -202,12 +211,12 @@ export const AudioProvider = ({ children }) => {
 
       const p = target.play();
       if (p !== undefined) {
-        p.then(() => console.log(`🎵 Música iniciada (${src})${alreadySame && hasBuffer ? " [warm]" : ""}`)).catch((e) => {
+        p.then(() => console.log(`🎵 Música iniciada (${src})`)).catch((e) => {
           if (e?.name !== "AbortError") console.error("⚠️ Erro música:", e?.name, e);
         });
       }
     },
-    [preloadAudio, warmBackgroundForAfterPrimary]
+    [preloadAudio, warmBackgroundForAfterPrimary, isPaused]
   );
 
   const flushAfterPrimary = useCallback(() => {
