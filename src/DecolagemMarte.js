@@ -182,8 +182,16 @@ const DecolagemMarte = () => {
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
 
+  // CORREÇÃO 1: Criar uma ref para isPaused para usar dentro do useEffect sem disparar re-render
+  const isPausedRef = useRef(isPaused);
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
+
   const hasStartedAudioRef = useRef(false);
 
+  // CORREÇÃO 2: Dependências removidas e uso de isPausedRef. 
+  // Isso garante que a intro só rode UMA vez na montagem e não reinicie quando o state mudar.
   useEffect(() => {
     unlockAudio();
 
@@ -199,21 +207,23 @@ const DecolagemMarte = () => {
     }
 
     const monitorTimer1 = setTimeout(() => {
-      if (!isPaused) {
+      // Usa .current para ver o valor atual sem reativar o efeito
+      if (!isPausedRef.current) {
         setMainDisplayState('clouds');
         setTravelStarted(true);
       }
     }, 13000);
 
     const monitorTimer2 = setTimeout(() => {
-      if (!isPaused) {
+      if (!isPausedRef.current) {
         setMainDisplayState('static');
         setMonitorState('static');
       }
     }, 23000);
 
     const monitorTimer3 = setTimeout(() => {
-      if (!isPaused) {
+      if (!isPausedRef.current) {
+        // Se possível, evite chamar funções externas aqui se elas mudam a cada render
         stopAllAudio();
         setMainDisplayState('stars');
         setMonitorState('on');
@@ -225,7 +235,9 @@ const DecolagemMarte = () => {
       clearTimeout(monitorTimer2);
       clearTimeout(monitorTimer3);
     };
-  }, [playTrack, unlockAudio, isPaused, stopAllAudio]);
+    // Dependências vazias para rodar apenas no Mount e Unmount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -237,7 +249,6 @@ const DecolagemMarte = () => {
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
-      // CORREÇÃO: Áudio atualizado conforme solicitado
       const audio = new Audio('/sounds/minervaSOS.mp3');
       audio.play().catch(e => console.log("Erro ao tocar áudio SOS:", e));
       setIsSosMinervaActive(true);
