@@ -19,7 +19,7 @@ const isBlockedSound = (src = "") => {
 };
 
 export const AudioProvider = ({ children }) => {
-  // Trilha (música de fundo)
+  // Música de fundo
   const musicAudioRef = useRef(new Audio());
   // Som primário (decolagem)
   const primaryAudioRef = useRef(new Audio());
@@ -28,7 +28,6 @@ export const AudioProvider = ({ children }) => {
   const isPrimaryActiveRef = useRef(false);
   const soundsRef = useRef([]);
   const [activeAudioEl, setActiveAudioEl] = useState(null);
-
   const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
 
   // Filas (antes do unlock / pausa)
@@ -36,14 +35,17 @@ export const AudioProvider = ({ children }) => {
   const [queuedPrimary, setQueuedPrimary] = useState(null);
   const [queuedSFX, setQueuedSFX] = useState(null);
 
-  // ✅ Fila pós-primário (pedidos feitos durante a decolagem)
-  // Música pós-primário: first-wins (preserva a primeira música pedida, tipicamente a do SpaceView)
+  // ✅ Pedidos feitos durante o primário
+  // Música pós-primário: first-wins (SpaceView geralmente é a primeira)
   const queuedMusicAfterPrimaryRef = useRef(null);
   // SFX pós-primário: mantém ordem
   const queuedSfxAfterPrimaryRef = useRef([]);
 
-  // ✅ Preloader para reduzir gap ao iniciar música após a decolagem
+  // ✅ Preloader simples (cache warming)
   const preloadedRef = useRef(new Map());
+
+  // ✅ Callback do primário (para sincronizar lógica/UX sem timeout fixo)
+  const primaryEndedCallbackRef = useRef(null);
 
   const { isPaused } = usePause();
 
@@ -57,14 +59,37 @@ export const AudioProvider = ({ children }) => {
       a.preload = "auto";
       a.src = src;
       a.loop = false;
-      a.muted = true; // mute só para preload (não toca)
       a.load();
       preloadedRef.current.set(key, a);
-      // Desmuta para caso seja reutilizado por engano (não deveria tocar mesmo)
-      a.muted = false;
       console.log("📦 Preload iniciado:", src);
     } catch {
       // silencioso
+    }
+  }, []);
+
+  // ✅ Warmup mais forte: usa o PRÓPRIO player de música (musicAudioRef) para baixar buffer
+  // sem tocar (muted + volume 0). Isso reduz MUITO o gap pós-decolagem.
+  const warmBackgroundForAfterPrimary = useCallback((src, options = { loop: true }) => {
+    const bg = musicAudioRef.current;
+    if (!bg) return;
+
+    const current = normalizeSrc(bg.src || "");
+    const incoming = normalizeSrc(src);
+
+    // Só aquece se ainda não está com a mesma fonte
+    if (current !== incoming) {
+      try {
+        bg.pause();
+      } catch { }
+      bg.src = src;
+      bg.preload = "auto";
+      bg.loop = !!options.loop;
+      bg.volume = 0;
+      bg.muted = true;
+      try {
+        bg.load();
+      } catch { }
+      console.log("🔥 Warmup BG iniciado:", src);
     }
   }, []);
 
@@ -118,12 +143,12 @@ export const AudioProvider = ({ children }) => {
     const p = sound.play();
     if (p !== undefined) p.catch(() => { });
 
-    sound.onended = () => {
+    const cleanup = () => {
       soundsRef.current = soundsRef.current.filter((s) => s !== sound);
     };
-    sound.onerror = () => {
-      soundsRef.current = soundsRef.current.filter((s) => s !== sound);
-    };
+
+    sound.onended = cleanup;
+    sound.onerror = cleanup;
   }, []);
 
   const playMusicNow = useCallback(
@@ -133,9 +158,10 @@ export const AudioProvider = ({ children }) => {
         return;
       }
 
-      // Se primário ativo, NÃO toca agora — enfileira + preload para reduzir delay
+      // Se primário ativo, NÃO toca agora — enfileira + aquece o buffer do BG
       if (isPrimaryActiveRef.current) {
         preloadAudio(src);
+        warmBackgroundForAfterPrimary(src, options);
 
         if (!queuedMusicAfterPrimaryRef.current) {
           queuedMusicAfterPrimaryRef.current = { src, options };
@@ -147,23 +173,27 @@ export const AudioProvider = ({ children }) => {
       }
 
       const target = musicAudioRef.current;
-      const currentSrc = decodeURI(target.src || "");
-      const newSrc = normalizeSrc(src);
+      const currentClean = normalizeSrc(decodeURI(target.src || ""));
+      const newClean = normalizeSrc(src);
 
-      // Se já está tocando a mesma trilha, garante volume e sai
-      if (currentSrc.includes(newSrc) && !target.paused) {
-        target.volume = 1.0;
-        setActiveAudioEl(target);
-        return;
+      // Se já é a mesma fonte e já tem buffer, não reseta (evita perder o warmup)
+      const alreadySame = currentClean === newClean;
+      const hasBuffer = target.readyState >= 3; // HAVE_FUTURE_DATA
+
+      if (!alreadySame) {
+        try {
+          target.pause();
+          target.currentTime = 0;
+        } catch { }
+        target.src = src;
+        target.preload = "auto";
+      } else {
+        // garante que começa do início sem trocar src
+        try {
+          target.currentTime = 0;
+        } catch { }
       }
 
-      try {
-        target.pause();
-        target.currentTime = 0;
-      } catch { }
-
-      target.src = src;
-      target.preload = "auto";
       target.loop = !!options.loop;
       target.muted = false;
       target.volume = 1.0;
@@ -172,12 +202,12 @@ export const AudioProvider = ({ children }) => {
 
       const p = target.play();
       if (p !== undefined) {
-        p.then(() => console.log(`🎵 Música iniciada (${src})`)).catch((e) => {
+        p.then(() => console.log(`🎵 Música iniciada (${src})${alreadySame && hasBuffer ? " [warm]" : ""}`)).catch((e) => {
           if (e?.name !== "AbortError") console.error("⚠️ Erro música:", e?.name, e);
         });
       }
     },
-    [preloadAudio]
+    [preloadAudio, warmBackgroundForAfterPrimary]
   );
 
   const flushAfterPrimary = useCallback(() => {
@@ -200,13 +230,12 @@ export const AudioProvider = ({ children }) => {
     audioEl.onplay = () => console.log(`🚀 PRIMARY onplay: ${src}`);
     audioEl.onpause = () => console.log(`⏸ PRIMARY onpause: ${src}`);
     audioEl.onwaiting = () => console.log(`⚠️ PRIMARY waiting ${src}`);
-    audioEl.oncanplaythrough = () =>
-      console.log("✅ PRIMARY canplaythrough", src, "dur=", audioEl.duration);
+    audioEl.oncanplaythrough = () => console.log("✅ PRIMARY canplaythrough", src, "dur=", audioEl.duration);
     audioEl.onerror = () => console.error("❌ PRIMARY media error", src, audioEl.error);
   };
 
   const playPrimaryNow = useCallback(
-    (src, options = { loop: false, isPrimary: true }) => {
+    (src, options = { loop: false, isPrimary: true, onEnded: null }) => {
       if (isBlockedSound(src)) {
         console.warn("🚫 Som bloqueado (primário) ignorado:", src);
         return;
@@ -231,6 +260,9 @@ export const AudioProvider = ({ children }) => {
 
       console.log("🆕 Iniciando Som Primário:", src);
 
+      // Guarda callback de finalização (para sincronizar eventos sem setTimeout)
+      primaryEndedCallbackRef.current = typeof options?.onEnded === "function" ? options.onEnded : null;
+
       target.src = src;
       target.preload = "auto";
       target.loop = !!options.loop;
@@ -243,18 +275,29 @@ export const AudioProvider = ({ children }) => {
 
       attachPrimaryDiagnostics(target, src);
 
-      target.onended = () => {
-        console.log("🏁 Primário acabou.");
+      const handlePrimaryFinish = () => {
+        try {
+          if (primaryEndedCallbackRef.current) primaryEndedCallbackRef.current();
+        } catch (e) {
+          console.error("⚠️ Erro callback onEnded do primário:", e);
+        } finally {
+          primaryEndedCallbackRef.current = null;
+        }
+
         isPrimaryActiveRef.current = false;
         flushAfterPrimary();
+      };
+
+      target.onended = () => {
+        console.log("🏁 Primário acabou.");
+        handlePrimaryFinish();
       };
 
       const originalOnError = target.onerror;
       target.onerror = () => {
         if (originalOnError) originalOnError();
         console.log("🧯 Primário falhou.");
-        isPrimaryActiveRef.current = false;
-        flushAfterPrimary();
+        handlePrimaryFinish();
       };
 
       setActiveAudioEl(target);
@@ -264,6 +307,7 @@ export const AudioProvider = ({ children }) => {
       if (p !== undefined) {
         p.then(() => console.log("✅ primary play() ok:", src)).catch((e) => {
           console.error("❌ primary play() falhou:", e?.name, e);
+          // falhou => libera fluxo
           isPrimaryActiveRef.current = false;
           flushAfterPrimary();
         });
@@ -274,7 +318,7 @@ export const AudioProvider = ({ children }) => {
 
   // API pública (música/trilha ou primário)
   const playTrack = useCallback(
-    (src, options = { loop: true, isPrimary: false }) => {
+    (src, options = { loop: true, isPrimary: false, onEnded: null }) => {
       if (isBlockedSound(src)) {
         console.warn("🚫 Som bloqueado (track) ignorado:", src);
         return;
@@ -315,7 +359,7 @@ export const AudioProvider = ({ children }) => {
 
       if (!isAudioUnlocked) return;
 
-      // Se primário ativo: enfileira para pós-primário (não perde timing/ordem)
+      // Se primário ativo: enfileira para pós-primário (mantém ordem, sem tocar agora)
       if (isPrimaryActiveRef.current) {
         queuedSfxAfterPrimaryRef.current.push(src);
         console.log("🧾 SFX enfileirado para pós-primário:", src);
@@ -414,7 +458,8 @@ export const AudioProvider = ({ children }) => {
     playSound,
     stopAllAudio,
     stopMusic,
-    preloadAudio, // ✅ opcional: se quiser chamar direto de outros componentes
+    preloadAudio,
+    warmBackgroundForAfterPrimary, // ✅ exposto opcionalmente
     primaryAudioRef,
     musicAudioRef,
     isAudioUnlocked,

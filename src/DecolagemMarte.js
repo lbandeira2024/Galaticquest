@@ -184,8 +184,7 @@ const DecolagemMarte = () => {
 
   const hasStartedAudioRef = useRef(false);
 
-  // --- CORREÇÃO FINAL: Usando Maiúsculo (Decolagem.mp3) + Cache Buster ---
-  // A imagem 1 provou que "Decolagem.mp3" funciona. Então vamos usar esse.
+  // --- CORREÇÃO FINAL: Usando Maiúsculo (Decolagem.mp3) + Cache Buster + Correção de Sintaxe ---
   useEffect(() => {
     unlockAudio();
 
@@ -193,25 +192,27 @@ const DecolagemMarte = () => {
       hasStartedAudioRef.current = true;
 
       // MUDANÇA: Voltamos para "Decolagem.mp3" (Maiúsculo)
-      // Isso vai bater com o arquivo que já está funcionando no servidor.
       const audioUrl = `/sounds/decolagem.mp3?t=${Date.now()}`;
 
       console.log("🚀 DecolagemMarte: Solicitando áudio (Uppercase):", audioUrl);
-      playTrack(audioUrl, { loop: false, isPrimary: true });
+      playTrack(audioUrl, {
+        loop: false,
+        isPrimary: true,
+        onEnded: () => { if (!isPaused) setTravelStarted(true); }
+      });
     }
 
-    const travelStartTimer = setTimeout(() => { if (!isPaused) setTravelStarted(true); }, 90000);
+    // Os timers agora estão DENTRO do useEffect
     const monitorTimer1 = setTimeout(() => { if (!isPaused) setMainDisplayState('clouds'); }, 13000);
     const monitorTimer2 = setTimeout(() => { if (!isPaused) { setMainDisplayState('static'); setMonitorState('static'); } }, 23000);
     const monitorTimer3 = setTimeout(() => { if (!isPaused) { setMainDisplayState('stars'); setMonitorState('on'); } }, 45000);
 
     return () => {
-      clearTimeout(travelStartTimer);
       clearTimeout(monitorTimer1);
       clearTimeout(monitorTimer2);
       clearTimeout(monitorTimer3);
     };
-  }, [playTrack, unlockAudio]);
+  }, [playTrack, unlockAudio, isPaused]); // Fechamento correto do useEffect
 
   // --- Limpeza Exclusiva ao Sair da Página ---
   useEffect(() => {
@@ -221,7 +222,6 @@ const DecolagemMarte = () => {
     };
   }, [stopAllAudio]);
 
-  // ... (RESTO DO CÓDIGO PERMANECE IDÊNTICO) ...
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
