@@ -280,7 +280,7 @@ const DecolagemMarte = () => {
   // ------------------------------------------
 
   // =========================================================================
-  // HANDLERS (DEFINIDOS ANTES DE USAR PARA EVITAR TDZ/INIT ERRORS)
+  // HANDLERS (DEFINIDOS ANTES DE USAR PARA EVITAR REFERENCE ERROR)
   // =========================================================================
 
   const constructPhotoUrl = (gameNumber, teamName) => {
@@ -383,7 +383,6 @@ const DecolagemMarte = () => {
 
   const handleChallengeEnd = useCallback(() => {
     // Implemente a lógica necessária se houver ações ao fim de um desafio
-    // Por enquanto, apenas um placeholder se não houver lógica complexa
   }, []);
 
   const handleMudarRota = () => {
@@ -669,6 +668,16 @@ const DecolagemMarte = () => {
 
   const isDobraAtivadaRef = useRef(isDobraAtivada);
   useEffect(() => { isDobraAtivadaRef.current = isDobraAtivada; }, [isDobraAtivada]);
+
+  // --- NOVO EFEITO: Monitorar velocidade para habilitar Dobra ---
+  useEffect(() => {
+    // Se a velocidade chegou a ~60.000, a dobra não está ativa e não está habilitada, e temos distância
+    if (telemetry.velocity.kmh >= 59500 && !isDobraEnabled && !isDobraAtivada && distanceKm > 500000) {
+      setIsDobraEnabled(true);
+      // Opcional: playSound('/sounds/ready-notification.mp3'); 
+    }
+  }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm]);
+  // ------------------------------------------------------------------
 
   // --- EFEITO S.O.S (Geração de novos sinais no mapa) ---
   useEffect(() => {
@@ -1038,7 +1047,8 @@ const DecolagemMarte = () => {
       }
 
       // --- LÓGICA DE DOBRA E CHEGADA PADRÃO ---
-      if (newDistance <= 5000 && isDobraAtivada) {
+      // AUMENTADO DE 5000 PARA 150000 PARA EVITAR QUE A NAVE PULE O DESTINO
+      if (newDistance <= 150000 && isDobraAtivada) {
         if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
         stopAllAudio();
         isDobraAtivadaRef.current = false; setIsDobraAtivada(false); saveTelemetryData(); setShowWarpDisabledMessage(true); setMinervaImage('/images/Minerva/Minerva_Active.gif'); playSound('/sounds/power-down-Warp.mp3'); setTimeout(() => setShowWarpDisabledMessage(false), 10000);
