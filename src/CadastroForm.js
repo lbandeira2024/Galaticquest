@@ -69,7 +69,7 @@ const CadastroForm = () => {
   const [emailChecked, setEmailChecked] = useState(false);
   const canvasRef = useRef(null);
 
-  // --- NOVA FUNÇÃO: BUSCAR LISTAS ---
+  // --- BUSCAR LISTAS ---
   useEffect(() => {
     const fetchLists = async () => {
       try {
@@ -91,7 +91,6 @@ const CadastroForm = () => {
       }
     };
 
-    // Só busca se estiver na tela de cadastro
     if (isRegistering) {
       fetchLists();
     }
@@ -144,6 +143,20 @@ const CadastroForm = () => {
       setPasswordError("");
     }
   }, [registerData.senha, confirmSenha, isRegistering, t]);
+
+  // CORREÇÃO: Listener para limpar estado caso o Fullscreen bugue
+  useEffect(() => {
+    const handleScreenChange = () => {
+      if (!document.fullscreenElement) {
+        // Força um reflow leve caso saia do fullscreen
+        window.dispatchEvent(new Event('resize'));
+      }
+    };
+    document.addEventListener('fullscreenchange', handleScreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleScreenChange);
+    };
+  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -238,20 +251,29 @@ const CadastroForm = () => {
       if (!API_BASE_URL) throw new Error("API URL não configurada");
       const response = await axios.post(`${API_BASE_URL}/login`, loginData);
       if (response.data.success) {
+
+        // Ativa Fullscreen
         enterFullScreen();
+
         const loggedInUser = response.data.usuario;
         login(loggedInUser);
-        if (loggedInUser.administrador === true) {
-          navigate("/admin");
-        } else {
-          redirectToNextStep(loggedInUser);
-        }
+
+        // CORREÇÃO: Adiciona um pequeno delay para garantir que o navegador 
+        // processe o Fullscreen antes de desmontar o componente atual
+        setTimeout(() => {
+          if (loggedInUser.administrador === true) {
+            navigate("/admin");
+          } else {
+            redirectToNextStep(loggedInUser);
+          }
+        }, 150);
+
       } else {
         alert(`❌ ${response.data.message}`);
+        setIsLaunching(false);
       }
     } catch (error) {
       alert(`❌ Erro ao fazer login!`);
-    } finally {
       setIsLaunching(false);
     }
   };
@@ -342,7 +364,6 @@ const CadastroForm = () => {
 
             <input type="text" name="nome" placeholder={t('namePlaceholder')} value={registerData.nome} onChange={handleRegisterChange} readOnly={isUpdateMode} required />
 
-            {/* --- CORREÇÃO: SELECT PARA EMPRESA --- */}
             {isUpdateMode ? (
               <input type="text" name="empresa" value={registerData.empresa} readOnly className="input-readonly" />
             ) : (
@@ -360,7 +381,6 @@ const CadastroForm = () => {
               <p style={{ color: 'yellow', fontSize: '12px', margin: '-5px 0 5px 0' }}>E-mail não pode ser alterado.</p>
             )}
 
-            {/* --- CORREÇÃO: SELECT PARA REGIONAL --- */}
             {isUpdateMode ? (
               <input type="text" name="regional" value={registerData.regional} readOnly className="input-readonly" />
             ) : (
