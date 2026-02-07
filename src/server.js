@@ -119,8 +119,6 @@ const GrupoSchema = new mongoose.Schema({
   photoUrl: { type: String }
 }, { timestamps: true });
 
-// --- REMOVIDO: O Hook "pre save" que causava o erro foi deletado daqui ---
-
 const Grupo = mongoose.model("Grupo", GrupoSchema);
 
 const ClienteSchema = new mongoose.Schema({ nome: { type: String, required: true, unique: true } });
@@ -228,17 +226,31 @@ app.post("/:userId/update-gamedata", async (req, res) => {
   } catch (error) { res.status(500).json({ success: false }); }
 });
 
+// --- ROTA CORRIGIDA PARA EVITAR 404 NO CONSOLE ---
 app.get("/:userId/game-data", async (req, res) => {
   try {
     const usuario = await Usuario.findById(req.params.userId).populate('grupo');
-    if (!usuario || !usuario.grupo) return res.status(404).json({ success: false });
+
+    // Se não achar o usuário, aí sim é 404
+    if (!usuario) return res.status(404).json({ success: false, message: "Usuário não encontrado" });
+
     let isPaused = false;
     if (usuario.gameNumber) {
       const game = await Game.findOne({ gameNumber: usuario.gameNumber });
       if (game) isPaused = game.isPaused;
     }
+
+    // Se o usuário não tem grupo (ex: Admin ou recém-criado), retorna sucesso com dados nulos
+    // Isso evita o erro vermelho "404" no console do navegador
+    if (!usuario.grupo) {
+      return res.json({ success: true, isPaused, group: null, noGroup: true });
+    }
+
+    // Se tiver grupo, retorna os dados normais
     res.json({ success: true, ...usuario.grupo.toObject(), isPaused });
-  } catch (error) { res.status(500).json({ success: false }); }
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Erro interno" });
+  }
 });
 
 app.get("/games/:gameNumber/online-ships", async (req, res) => {
@@ -340,9 +352,6 @@ app.post("/register", normalizeEmail, async (req, res) => {
   } catch (error) { res.status(500).json({ success: false, details: error.message }); }
 });
 
-// ===============================================
-// ROTA CORRIGIDA: SAVE-TEAM-NAME (Manual)
-// ===============================================
 app.post("/save-team-name", async (req, res) => {
   try {
     const { userId, teamName } = req.body;
@@ -357,20 +366,17 @@ app.post("/save-team-name", async (req, res) => {
 
     const membros = await Usuario.find({ empresa: criador.empresa, setor: criador.setor, regional: criador.regional, grupo: { $exists: false } });
     const ids = membros.map(u => u._id);
-
-    // CORREÇÃO: Normalização MANUAL para evitar o erro do Mongoose Hook
     const tName = teamName.trim();
 
     const novoGrupo = await Grupo.create({
       teamName: tName,
-      normalizedTeamName: tName.toLowerCase(), // <--- Definido manualmente aqui
+      normalizedTeamName: tName.toLowerCase(),
       membros: ids,
       loginon: 1,
       isLocked: false
     });
 
     await Usuario.updateMany({ _id: { $in: ids } }, { $set: { grupo: novoGrupo._id } });
-
     const finalUser = await Usuario.findById(userId).populate('grupo');
     res.json({ success: true, user: finalUser });
 
@@ -518,11 +524,13 @@ app.delete("/users/:email", async (req, res) => {
   } catch (error) { res.status(500).json({ success: false, message: "Erro interno." }); }
 });
 
+// --- ROTA CORRIGIDA: INCLUSÃO DE gameNumber e numeroLiderados NO SELECT ---
 app.get("/users/by-company", async (req, res) => {
   try {
     const { company } = req.query;
     if (!company) return res.status(400).json({ success: false, message: "Empresa obrigatória." });
-    const users = await Usuario.find({ empresa: company }, 'nome email setor regional cargo tempoLideranca').lean();
+    // Adicionado gameNumber e numeroLiderados para o frontend conseguir filtrar
+    const users = await Usuario.find({ empresa: company }, 'nome email setor regional cargo tempoLideranca gameNumber numeroLiderados').lean();
     res.json({ success: true, users });
   } catch (error) { res.status(500).json({ success: false }); }
 });
