@@ -7,7 +7,7 @@ import { encryptData } from './crypto';
 import './GameConfig.css';
 import { useConfig } from './ConfigContext';
 
-// ... (Funções auxiliares formatDate, parseDate, dateToInputFormat) ...
+// --- Funções Auxiliares ---
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     try {
@@ -36,8 +36,7 @@ const dateToInputFormat = (date) => {
     }
 };
 
-
-// ... (Componente PlayersTable) ...
+// --- Componente PlayersTable ---
 const PlayersTable = ({ players, onDelete, onCopyLink, setPlayerMessage }) => {
     const { frontendUrl } = useConfig();
 
@@ -67,7 +66,7 @@ const PlayersTable = ({ players, onDelete, onCopyLink, setPlayerMessage }) => {
     };
 
     if (players.length === 0) {
-        return <p className="player-list-placeholder">Nenhum jogador cadastrado para este cliente.</p>;
+        return <p className="player-list-placeholder">Nenhum jogador cadastrado para este GAME.</p>;
     }
 
     return (
@@ -115,8 +114,7 @@ const PlayersTable = ({ players, onDelete, onCopyLink, setPlayerMessage }) => {
     );
 };
 
-
-// ... (Componente MiniCalendar) ...
+// --- Componente MiniCalendar ---
 const MiniCalendar = ({ currentDate, scheduledGames, onDateSelect, selectedDates, onMonthChange, title }) => {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -179,7 +177,7 @@ const MiniCalendar = ({ currentDate, scheduledGames, onDateSelect, selectedDates
     );
 };
 
-
+// --- Componente Principal GameConfig ---
 const GameConfig = () => {
     const { apiBaseUrl } = useConfig();
     const { gameNumber } = useParams();
@@ -215,7 +213,7 @@ const GameConfig = () => {
     const [scheduledGames, setScheduledGames] = useState([]);
     const [isAddingNewPlayer, setIsAddingNewPlayer] = useState(false);
 
-    // --- CORREÇÃO 1: Adicionado numeroLiderados ao estado ---
+    // Estado do formulário de novo jogador (incluindo numeroLiderados)
     const [newPlayerForm, setNewPlayerForm] = useState({
         nome: '',
         email: '',
@@ -223,12 +221,11 @@ const GameConfig = () => {
         setor: '',
         cargo: '',
         tempoLideranca: '',
-        numeroLiderados: '', // Novo campo obrigatório
+        numeroLiderados: '',
     });
 
     const [playerMessage, setPlayerMessage] = useState({ type: '', text: '' });
     const [playersList, setPlayersList] = useState([]);
-
 
     const fetchGames = async () => {
         if (!apiBaseUrl) return;
@@ -248,15 +245,24 @@ const GameConfig = () => {
         }
     };
 
+    // --- FUNÇÃO ATUALIZADA: Filtra estritamente pelo gameNumber ---
     const fetchPlayers = useCallback(async (clientName) => {
         if (!clientName || !apiBaseUrl) {
             setPlayersList([]);
             return;
         }
         try {
+            // Busca todos os usuários da empresa
             const response = await axios.get(`${apiBaseUrl}/users/by-company?company=${encodeURIComponent(clientName)}`);
+
             if (response.data.success) {
-                const playersWithCompany = response.data.users.map(player => ({
+                // FILTRO CRUCIAL: Mantém apenas usuários cujo gameNumber corresponde ao Game atual
+                const currentGameNumber = Number(gameNumber);
+                const playersOfThisGame = response.data.users.filter(player =>
+                    Number(player.gameNumber) === currentGameNumber
+                );
+
+                const playersWithCompany = playersOfThisGame.map(player => ({
                     ...player,
                     empresa: clientName
                 }));
@@ -268,7 +274,7 @@ const GameConfig = () => {
             console.error("Erro ao buscar lista de jogadores:", error);
             setPlayersList([]);
         }
-    }, [apiBaseUrl]);
+    }, [apiBaseUrl, gameNumber]); // gameNumber adicionado às dependências
 
     const fetchClients = useCallback(async () => {
         if (!apiBaseUrl) return;
@@ -525,7 +531,6 @@ const GameConfig = () => {
         }
     };
 
-    // --- CORREÇÃO PRINCIPAL AQUI ---
     const handleStartGame = async () => {
         if (!window.confirm(`Tem certeza que deseja INICIAR o GAME ${gameNumber}? \n\nIsso autorizará o acesso de todos os jogadores cadastrados para este Jogo.`)) {
             return;
@@ -535,7 +540,6 @@ const GameConfig = () => {
             return;
         }
 
-        // Feedback visual imediato
         setClientMessage({ type: 'info', text: 'Conectando ao servidor...' });
 
         try {
@@ -543,17 +547,13 @@ const GameConfig = () => {
                 gameNumber: Number(gameNumber)
             });
 
-            // CORREÇÃO: Verificar explicitamente se houve sucesso
-            // Se response.data.success for TRUE, mostra verde
             if (response.data.success) {
                 let successMessage = response.data.message || `Jogo ${gameNumber} iniciado com sucesso.`;
                 if (response.data.updatedCount !== undefined) {
                     successMessage += ` ${response.data.updatedCount} jogadores foram autorizados.`;
                 }
                 setClientMessage({ type: 'success', text: successMessage });
-            }
-            // Se response.data.success for FALSE (0 jogadores), agora mostra VERMELHO
-            else {
+            } else {
                 setClientMessage({ type: 'error', text: response.data.message });
             }
 
@@ -703,7 +703,6 @@ const GameConfig = () => {
         setPlayerMessage({ type: '', text: '' });
         if (!apiBaseUrl) return;
 
-        // --- CORREÇÃO 2: Validação atualizada com numeroLiderados ---
         if (!newPlayerForm.nome || !newPlayerForm.email || !newPlayerForm.setor || !newPlayerForm.cargo || !newPlayerForm.tempoLideranca || !newPlayerForm.numeroLiderados) {
             setPlayerMessage({ type: 'error', text: 'Por favor, preencha todos os campos obrigatórios.' });
             return;
@@ -720,7 +719,7 @@ const GameConfig = () => {
             setor: newPlayerForm.setor,
             cargo: newPlayerForm.cargo,
             tempoLideranca: newPlayerForm.tempoLideranca,
-            numeroLiderados: Number(newPlayerForm.numeroLiderados), // Conversão para número
+            numeroLiderados: Number(newPlayerForm.numeroLiderados),
             regional: currentRegionalName,
             empresa: currentClientName,
             autorizado: false,
@@ -738,6 +737,7 @@ const GameConfig = () => {
                 cargo: newUser.cargo,
                 tempoLideranca: newUser.tempoLideranca,
                 empresa: currentClientName,
+                gameNumber: newUser.gameNumber // Importante para consistência local
             };
             setPlayersList(prevList => [...prevList, playerToAdd]);
             setPlayerMessage({
@@ -745,7 +745,6 @@ const GameConfig = () => {
                 text: `${newUser.nome} registrado com sucesso! (Senha: ${newPlayerForm.senha})`
             });
 
-            // --- CORREÇÃO 3: Reset do estado incluindo numeroLiderados ---
             setNewPlayerForm({
                 nome: '',
                 email: '',
@@ -1187,7 +1186,6 @@ const GameConfig = () => {
                                             <div className="form-field">
                                                 <input id="tempoLideranca" name="tempoLideranca" type="text" className="terminal-input" value={newPlayerForm.tempoLideranca} onChange={handlePlayerFormChange} placeholder="Tempo de Liderança *" />
                                             </div>
-                                            {/* --- CORREÇÃO 4: Input visual para Nº Liderados --- */}
                                             <div className="form-field">
                                                 <input
                                                     id="numeroLiderados"

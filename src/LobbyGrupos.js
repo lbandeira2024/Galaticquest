@@ -29,6 +29,9 @@ const LobbyGrupos = () => {
     const [capturedImage, setCapturedImage] = useState(null);
     const [isSavingPhoto, setIsSavingPhoto] = useState(false);
 
+    // NOVO: Estado para controlar a exibição imediata do botão após salvar
+    const [localPhotoConfirmed, setLocalPhotoConfirmed] = useState(false);
+
     // Efeito Visual de Estrelas (Background)
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -83,6 +86,13 @@ const LobbyGrupos = () => {
             const response = await axios.get(`${API_URL}/games/${user.gameNumber}/groups-details`);
             if (response.data.success) {
                 setGroups(response.data.groups);
+
+                // Verifica se o meu grupo já tem foto salva no banco para atualizar o estado local
+                const myGroup = response.data.groups.find(g => g._id === user?.grupo?._id);
+                // Assume que o backend retorna a propriedade 'foto' ou 'photo' ou 'teamPhoto'
+                if (myGroup && (myGroup.foto || myGroup.photo || myGroup.teamPhoto)) {
+                    setLocalPhotoConfirmed(true);
+                }
             }
         } catch (error) {
             console.error("Erro ao carregar grupos:", error);
@@ -202,8 +212,15 @@ const LobbyGrupos = () => {
                 image: capturedImage
             });
 
+            // IMPORTANTE: Atualiza o estado local para mostrar o botão imediatamente
+            setLocalPhotoConfirmed(true);
+
+            // Atualiza os dados do servidor para persistência
+            await fetchGroups();
+
             closeCamera();
-            alert("Foto da equipe registrada com sucesso!");
+            // Feedback opcional ou apenas fecha silenciosamente para mostrar o botão do Hangar
+            // alert("Foto da equipe registrada com sucesso!"); 
         } catch (error) {
             console.error(error);
             alert("Erro ao salvar a foto. Tente novamente.");
@@ -230,6 +247,12 @@ const LobbyGrupos = () => {
         return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
     };
 
+    // Identifica o grupo atual do usuário e status
+    const userGroup = groups.find(g => g._id === user?.grupo?._id);
+
+    // Lógica para liberar o botão: Grupo Trancado AND (Foto salva localmente OU Foto vinda do banco)
+    const canProceedToHangar = userGroup?.isLocked && (localPhotoConfirmed || userGroup?.foto || userGroup?.photo || userGroup?.teamPhoto);
+
     return (
         <div className="background">
             <canvas ref={canvasRef} className="stars"></canvas>
@@ -246,7 +269,11 @@ const LobbyGrupos = () => {
 
                 <div className="lobby-content-area">
                     <h2 className="lobby-subtitle">Organização Tática</h2>
-                    <p className="lobby-description">Ajuste os esquadrões. Apenas o líder da equipe pode trancar a formação.</p>
+                    <p className="lobby-description">
+                        {canProceedToHangar
+                            ? "Equipe pronta! Autorização para o Hangar concedida."
+                            : "Ajuste os esquadrões. Tranque o grupo e registre a equipe para prosseguir."}
+                    </p>
 
                     {loading ? (
                         <div className="loading-container">
@@ -308,16 +335,19 @@ const LobbyGrupos = () => {
                     )}
 
                     <div className="lobby-footer-section">
-                        {/* Botão extra para abrir câmera manualmente se já estiver trancado */}
-                        {user?.grupo && groups.find(g => g._id === user.grupo._id)?.isLocked && (
-                            <button onClick={startCamera} className="submit-button photo-btn-extra" style={{ marginRight: '15px', background: '#e91e63' }}>
-                                📸 Refazer Foto
+                        {/* Botão extra para abrir câmera manualmente se já estiver trancado, mas sem foto (ou se quiser refazer) */}
+                        {userGroup?.isLocked && (
+                            <button onClick={startCamera} className="submit-button photo-btn-extra" style={{ marginRight: '15px', background: canProceedToHangar ? '#555' : '#e91e63' }}>
+                                {canProceedToHangar ? "📸 Refazer Foto" : "📸 Registrar Foto Obrigatória"}
                             </button>
                         )}
 
-                        <button onClick={handleContinue} className="submit-button lobby-btn">
-                            Prosseguir para Hangar
-                        </button>
+                        {/* O botão só aparece se estiver trancado E com foto confirmada */}
+                        {canProceedToHangar && (
+                            <button onClick={handleContinue} className="submit-button lobby-btn">
+                                Prosseguir para Hangar
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
