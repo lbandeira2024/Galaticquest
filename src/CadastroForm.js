@@ -231,6 +231,18 @@ const CadastroForm = () => {
   const redirectToNextStep = (user) => {
     if (!user.autorizado) { navigate("/ContadorRegressivo"); return; }
     if (!user.grupo) { navigate("/BoasVindas"); return; }
+
+    // --- NOVA LÓGICA: VERIFICAÇÃO DA FOTO ---
+    // Verifica se existe alguma propriedade de foto no objeto do grupo.
+    const hasGroupPhoto = user.grupo.foto || user.grupo.photo || user.grupo.teamPhoto;
+
+    // Se o grupo existe mas NÃO tem foto, força o redirecionamento para o Lobby
+    if (!hasGroupPhoto) {
+      navigate("/LobbyGrupos");
+      return;
+    }
+    // ----------------------------------------
+
     if (!user.grupo.naveEscolhida) { navigate("/SelecaoNave"); return; }
     if (!user.grupo.equipeEscolhida) { navigate("/SelecaoEquipe"); return; }
     navigate("/CompraDeMaterial");
