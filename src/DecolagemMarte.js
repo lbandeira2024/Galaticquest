@@ -18,6 +18,7 @@ import ModalDesafio from './ModalDesafio';
 import ModalConfirmacaoViagem from './ModalConfirmacaoViagem';
 import { useConfig } from './ConfigContext';
 import LojaEspacial from './LojaEspacial';
+import SosSurpriseModal from './SosSurpriseModal'; // NOVO IMPORT
 
 const GalacticVirtudesPage = lazy(() => import('./GalacticVirtudesPage').catch(() => ({
   default: () => <div className="map-fallback">Glossário Indisponível</div>
@@ -36,6 +37,34 @@ const PLANET_DATA_FOR_SOS = [
   { name: "Plutao", orbitRadius: 150 },
   { name: "Ceres", orbitRadius: 60 },
   { name: "Eris", orbitRadius: 165 }
+];
+
+// LISTA DE EVENTOS SOS SURPRESA (NOVO)
+const SOS_EVENTS_LIST = [
+  {
+    id: 1,
+    name: 'Piratas Espaciais',
+    description: 'ALERTA! O sinal era uma isca. Piratas interceptaram a nave. Prepare-se para um possível confronto ou negociação hostil.',
+    image: '/images/pirates.png'
+  },
+  {
+    id: 2,
+    name: 'Astronauta Morto',
+    description: 'Encontramos um traje à deriva. Infelizmente, não há sinais vitais. Podemos recuperar equipamentos e dados da missão dele.',
+    image: '/images/dead_astronaut.png'
+  },
+  {
+    id: 3,
+    name: 'Nave Destruída',
+    description: 'Destroços de uma antiga batalha ou acidente. Há muita sucata valiosa e contêineres que podem conter recursos úteis.',
+    image: '/images/destroyed_ship.png'
+  },
+  {
+    id: 4,
+    name: 'Sinal Fantasma',
+    description: 'Chegamos às coordenadas, mas... nada. Apenas o vazio. O sinal deve ter sido uma anomalia magnética ou eco de radar.',
+    image: '/images/static_signal.png'
+  }
 ];
 
 const hasWaterList = new Set([
@@ -159,6 +188,10 @@ const DecolagemMarte = () => {
 
   const [showO2Modal, setShowO2Modal] = useState(false);
 
+  // --- NOVOS ESTADOS PARA O SOS SURPRESA ---
+  const [sosSurpriseEvent, setSosSurpriseEvent] = useState(null);
+  const [showSosSurprise, setShowSosSurprise] = useState(false);
+
   const telemetryRef = useRef({
     velocity: { kmh: 0, ms: 0, rel: '0.0c' },
     altitude: 0,
@@ -245,11 +278,10 @@ const DecolagemMarte = () => {
   const isDobraAtivadaRef = useRef(isDobraAtivada);
   useEffect(() => { isDobraAtivadaRef.current = isDobraAtivada; }, [isDobraAtivada]);
 
-  // --- EFEITO S.O.S ---
+  // --- EFEITO S.O.S (Geração de novos sinais no mapa) ---
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
-      // CORREÇÃO: Não dispara S.O.S se estiver em Dobra Espacial
       if (isDobraAtivadaRef.current) return;
 
       const audio = new Audio('/sounds/minervaSOS.mp3');
@@ -622,11 +654,15 @@ const DecolagemMarte = () => {
     return () => { if (restoreIntervalRef.current) clearInterval(restoreIntervalRef.current); };
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
 
+  // =========================================================================
+  // LOOP PRINCIPAL DO JOGO (ATUALIZADO PARA LÓGICA DE SOS SURPRESA)
+  // =========================================================================
   useEffect(() => {
     const gameLoop = (timestamp) => {
       if (isPaused) { lastUpdateTime.current = timestamp; animationFrameId.current = requestAnimationFrame(gameLoop); return; }
       if (lastUpdateTime.current === 0) lastUpdateTime.current = timestamp;
       const deltaTime = timestamp - lastUpdateTime.current;
+
       if (deltaTime >= telemetryInterval) {
         lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
         const dobraAtiva = isDobraAtivadaRef.current;
@@ -638,6 +674,7 @@ const DecolagemMarte = () => {
         if (dobraAtiva) newKmh = currentSpeed + 2260;
         else if (currentSpeed > maxSpeed) newKmh = Math.max(currentSpeed - 200000, maxSpeed);
         else newKmh = Math.min(currentSpeed + speedChange, maxSpeed);
+
         if (travelStarted) {
           const SPEED_OF_LIGHT_KMH = 1079252848.8;
           telemetryRef.current = { ...telemetryRef.current, velocity: { kmh: newKmh, ms: newKmh / 3.6, rel: `${(newKmh / SPEED_OF_LIGHT_KMH).toFixed(7)}c` } };
@@ -650,97 +687,52 @@ const DecolagemMarte = () => {
     return () => cancelAnimationFrame(animationFrameId.current);
   }, [isPaused, travelStarted, chosenShip]);
 
-  const handleSpendCoins = async (cost, reviewType) => {
-    if ((spaceCoins || 0) < cost) { alert("Spacecoins insuficientes."); return; }
-    setSpaceCoins(prev => (prev || 0) - cost);
-    setShowEscolhaModal(false);
-    setIsReviewing(true);
-    if (reviewType === 'all') setShowDesafioModal(true);
-    else if (reviewType === 'options') { setModalEscolhaKey(prev => prev + 1); setShowEscolhaModal(true); }
-  };
 
-  const handleCloseEscolhaModal = useCallback(() => setShowEscolhaModal(false), []);
-
-  const handleChallengeEnd = useCallback(() => {
-    if (isDobraAtivada) return;
-    const planetName = (selectedPlanet?.nome || '').toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
-    if (!planetName) return;
-    const challenge = desafiosData.desafios.find(d => d.planeta.toLowerCase() === planetName);
-    if (challenge) { setActiveChallengeData(challenge); setShowDesafioModal(true); }
-  }, [isDobraAtivada, selectedPlanet]);
-
-  const handleReplayDialogue = () => {
-    if (isPaused || !isDialogueFinished) return;
-    playSound('/sounds/ui-click.mp3');
-    setDialogueIndex(0);
-    setIsDialogueFinished(false);
-    setIsTransmissionStarting(true);
-  };
-
-  useEffect(() => {
-    if (!isTransmissionStarting || !activeChallengeData?.dialogo) return;
-    if (isPaused) return;
-    const dialogueSteps = activeChallengeData.dialogo;
-    if (dialogueIndex >= dialogueSteps.length) { setIsTransmissionStarting(false); setIsDialogueFinished(true); setShowEscolhaModal(true); return; }
-    const currentStep = dialogueSteps[dialogueIndex];
-    if (currentStep.audio) playSound(currentStep.audio);
-    const delay = currentStep.duracao || 5000;
-    const timer = setTimeout(() => setDialogueIndex(prev => prev + 1), delay);
-    return () => clearTimeout(timer);
-  }, [isTransmissionStarting, dialogueIndex, activeChallengeData, isPaused, playSound]);
-
-  useEffect(() => {
-    if (distanceKm <= 2000000 && isDobraAtivada) setMinervaImage('/images/Minerva/Minerva_Active.gif');
-  }, [distanceKm, isDobraAtivada]);
-
-  useEffect(() => {
-    if (dobraCooldownEnd === 0 || Date.now() >= dobraCooldownEnd) { if (!isCooldownOver) setIsCooldownOver(true); return; }
-    setIsCooldownOver(false);
-    const interval = setInterval(() => { if (Date.now() >= dobraCooldownEnd) { setIsCooldownOver(true); clearInterval(interval); } }, 1000);
-    return () => clearInterval(interval);
-  }, [dobraCooldownEnd, isCooldownOver]);
-
-  useEffect(() => {
-    if (isPaused || isDobraAtivada) { if (isDobraEnabled) setIsDobraEnabled(false); wasPaused.current = isPaused; return; }
-    const conditionsMet = telemetry.velocity.kmh >= 60000;
-    const isDestinationValid = selectedPlanet?.nome?.toLowerCase() !== 'lua';
-    const canEnable = conditionsMet && isDestinationValid && isCooldownOver;
-    if (canEnable && !isDobraEnabled) { if (!wasPaused.current) playSound('/sounds/05.Dobra-Active.mp3'); setIsDobraEnabled(true); }
-    else if (!canEnable && isDobraEnabled) { setIsDobraEnabled(false); }
-    wasPaused.current = isPaused;
-  }, [telemetry.velocity.kmh, isPaused, isDobraAtivada, selectedPlanet, isDobraEnabled, playSound, isCooldownOver]);
-
-  const isStationPlanet = useMemo(() => {
-    const name = (selectedPlanet?.nome || '').toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
-    return stationList.has(name);
-  }, [selectedPlanet]);
-
-  useEffect(() => {
-    if (arrivedAtMars && isStationPlanet && !showDesafioModal && !showEscolhaModal && !showConfirmacaoModal) {
-      const storeTimer = setTimeout(() => { setShowStoreModal(true); playSound('/sounds/inventory-open.mp3'); }, 13000);
-      return () => clearTimeout(storeTimer);
-    } else if (!isStationPlanet && showStoreModal) { setShowStoreModal(false); }
-  }, [arrivedAtMars, isStationPlanet, showDesafioModal, showEscolhaModal, showConfirmacaoModal, playSound]);
-
+  // =========================================================================
+  // ATUALIZAÇÃO DE DISTÂNCIA E CHECKS DE S.O.S
+  // =========================================================================
   useEffect(() => {
     if (!travelStarted || isPaused) return;
+
     const interval = setInterval(() => {
       let distanceToDecrease;
       const currentSpeedKmh = telemetryRef.current.velocity.kmh;
       if (currentSpeedKmh >= 60000) distanceToDecrease = (currentSpeedKmh * 9172) / 3000;
       else distanceToDecrease = 7172;
+
       const newDistance = distanceKm > 0 ? distanceKm - Math.round(distanceToDecrease) : 0;
       setDistanceKm(newDistance);
+
+      // --- VERIFICAÇÃO DE S.O.S SURPRESA ---
+      const isSosDestination = selectedPlanet && selectedPlanet.nome && selectedPlanet.nome.startsWith("S.O.S");
+
+      if (isSosDestination) {
+        // Gatilho 1: Sortear evento aos 1000km
+        if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEvent) {
+          const randIndex = Math.floor(Math.random() * 4);
+          setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
+        }
+
+        // Gatilho 2: Exibir modal aos 0km
+        if (newDistance <= 0 && !arrivedAtMars) {
+          setArrivedAtMars(true);
+          setSpeed(0);
+          setShowSosSurprise(true);
+          // Não executa lógica padrão de chegada (O2, save) aqui
+          return;
+        }
+      }
+
+      // --- LÓGICA DE DOBRA E CHEGADA PADRÃO ---
       if (newDistance <= 5000 && isDobraAtivada) {
         if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
-
         stopAllAudio();
-
         isDobraAtivadaRef.current = false; setIsDobraAtivada(false); saveTelemetryData(); setShowWarpDisabledMessage(true); setMinervaImage('/images/Minerva/Minerva_Active.gif'); playSound('/sounds/power-down-Warp.mp3'); setTimeout(() => setShowWarpDisabledMessage(false), 10000);
         const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
         const approachDistanceThreshold = 800000;
         if (!isMoon && newDistance <= approachDistanceThreshold && !isFinalApproachRef.current) { setIsFinalApproach(true); approachSoundPlayed.current = true; } else { setIsBoostingTo60k(false); }
       } else if (newDistance <= 0 && !arrivedAtMars) {
+        // CHEGADA PADRÃO (PLANETA/ESTAÇÃO)
         setArrivedAtMars(true); setSpeed(45000);
         let newProcessadorO2Value = processadorO2;
         const planetNameInput = selectedPlanet?.nome || '';
@@ -764,6 +756,8 @@ const DecolagemMarte = () => {
         };
         saveArrival();
       }
+
+      // Atualiza barra de progresso
       const destinationStepIndex = routeIndex + 1;
       const initialDistanceForLeg = (plannedRoute && plannedRoute[destinationStepIndex] ? plannedRoute[destinationStepIndex].distance : null) || newDistance || 1;
       const distanceTraveled = initialDistanceForLeg - newDistance;
@@ -771,7 +765,7 @@ const DecolagemMarte = () => {
       setProgress(progressPercentage);
     }, 1000);
     return () => clearInterval(interval);
-  }, [travelStarted, arrivedAtMars, isDobraAtivada, isPaused, playSound, distanceKm, plannedRoute, routeIndex, handleChallengeEnd, saveTelemetryData, selectedPlanet, saveCurrentProgress, API_BASE_URL, userId, processadorO2, stopAllAudio]);
+  }, [travelStarted, arrivedAtMars, isDobraAtivada, isPaused, playSound, distanceKm, plannedRoute, routeIndex, handleChallengeEnd, saveTelemetryData, selectedPlanet, saveCurrentProgress, API_BASE_URL, userId, processadorO2, stopAllAudio, sosSurpriseEvent]);
 
   useEffect(() => {
     if ((monitorState !== 'static' && mainDisplayState !== 'static') || isPaused) return;
@@ -910,6 +904,11 @@ const DecolagemMarte = () => {
     if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
+
+    // --- RESET SOS ---
+    setShowSosSurprise(false);
+    setSosSurpriseEvent(null);
+
     playSound('/sounds/empuxo.wav');
     setIsDeparting(true);
 
@@ -943,6 +942,10 @@ const DecolagemMarte = () => {
     setIsForcedMapEdit(false);
     setShowStellarMap(false);
 
+    // Reset SOS
+    setShowSosSurprise(false);
+    setSosSurpriseEvent(null);
+
     const { newPlannedRoute, newRouteIndex } = newRouteData;
     const isInFlight = !arrivedAtMars && travelStarted;
 
@@ -974,6 +977,9 @@ const DecolagemMarte = () => {
   const handleMudarRota = () => {
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
+    // Reset SOS para permitir edição mas mantendo estado se cancelar
+    setShowSosSurprise(false);
+
     setIsForcedMapEdit(true);
     setShowStellarMap(true);
   };
@@ -1121,6 +1127,8 @@ const DecolagemMarte = () => {
           {mainDisplayState === 'clouds' && (<video src="/images/clouds.webm" className="cloud-animation-video" autoPlay muted loop playsInline preload="auto" />)}
           {mainDisplayState === 'static' && <div className="static-animation"></div>}
           {isDobraAtivada ? (<video src="/images/Vluz-Dobra.webm" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />) : (mainDisplayState === 'stars' && (<SpaceView distance={distanceKm} forceLarge={arrivedAtMars} isWarpActive={false} isPaused={isPaused} selectedPlanet={selectedPlanet} onChallengeEnd={handleChallengeEnd} isDeparting={isDeparting} />))}
+
+          {/* Modal da Loja Padrão */}
           {showStoreModal && <LojaEspacial
             onClose={() => setShowStoreModal(false)}
             currentTelemetry={telemetry}
@@ -1131,6 +1139,16 @@ const DecolagemMarte = () => {
             currentStation={selectedPlanet?.nome}
             hasRoute={plannedRoute && (routeIndex + 1) < plannedRoute.length}
           />}
+
+          {/* NOVO: Modal de SOS Surpresa */}
+          {showSosSurprise && sosSurpriseEvent && (
+            <SosSurpriseModal
+              event={sosSurpriseEvent}
+              onMudarRota={handleMudarRota}
+              onSeguirPlano={handleSeguirPlano}
+            />
+          )}
+
         </div>
         <TelemetryDisplay
           data={telemetry}
