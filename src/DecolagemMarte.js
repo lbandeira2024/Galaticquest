@@ -279,6 +279,336 @@ const DecolagemMarte = () => {
   }, []);
   // ------------------------------------------
 
+  // =========================================================================
+  // HANDLERS (DEFINIDOS ANTES DE USAR PARA EVITAR TDZ/INIT ERRORS)
+  // =========================================================================
+
+  const constructPhotoUrl = (gameNumber, teamName) => {
+    if (!gameNumber || !teamName) return null;
+    const safeGame = `game_${gameNumber}`;
+    const safeTeam = teamName.trim().replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    return `/images/grupos/${safeGame}/${safeTeam}/registro_equipe_${safeTeam}.jpg`;
+  };
+
+  const handleInventoryTelemetryUpdate = useCallback((updates) => {
+    if (updates.nuclearPropulsion !== undefined) telemetryRef.current.propulsion.powerOutput = updates.nuclearPropulsion;
+    if (updates.oxygen !== undefined) telemetryRef.current.atmosphere.o2 = updates.oxygen;
+    if (updates.productivity !== undefined) telemetryRef.current.productivity = updates.productivity;
+    if (updates.engagement !== undefined) telemetryRef.current.engagement = updates.engagement;
+    if (updates.interdependence !== undefined) telemetryRef.current.interdependence = updates.interdependence;
+    if (updates.stability !== undefined) telemetryRef.current.stability = updates.stability;
+    if (updates.direction !== undefined) telemetryRef.current.direction = updates.direction;
+    setTelemetry({ ...telemetryRef.current });
+    setLastImpactTimestamp(Date.now());
+  }, []);
+
+  const saveTelemetryData = useCallback(async () => {
+    if (!userId || !API_BASE_URL) return;
+    const dataToSave = {
+      telemetryState: {
+        oxygen: telemetryRef.current.atmosphere.o2,
+        nuclearPropulsion: telemetryRef.current.propulsion.powerOutput,
+        direction: telemetryRef.current.direction,
+        stability: telemetryRef.current.stability,
+        productivity: telemetryRef.current.productivity,
+        interdependence: telemetryRef.current.interdependence,
+        engagement: telemetryRef.current.engagement
+      }
+    };
+    try {
+      await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSave),
+      });
+    } catch (error) {
+      console.error("ERRO: Falha ao salvar dados de telemetria:", error);
+    }
+  }, [userId, API_BASE_URL]);
+
+  const saveCurrentProgress = useCallback(async (currentIndex) => {
+    if (!userId || !API_BASE_URL) return;
+    try {
+      await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ routeIndex: currentIndex }),
+      });
+    } catch (error) {
+      console.error("ERRO: Falha ao salvar progresso da rota:", error);
+    }
+  }, [userId, API_BASE_URL]);
+
+  const saveNewRouteAndProgress = useCallback(async (currentIndex, newRouteArray) => {
+    if (!userId || !API_BASE_URL) return;
+    const dataToSave = { routeIndex: currentIndex, rotaPlanejada: newRouteArray };
+    try {
+      await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSave),
+      });
+    } catch (error) {
+      console.error("ERRO: Falha ao salvar nova rota:", error);
+    }
+  }, [userId, API_BASE_URL]);
+
+  // --- Handlers movidos para cima para evitar ReferenceError ---
+
+  const handleStoreChallengeImpact = useCallback((item) => {
+    playSound('/sounds/data-updates-telemetry.mp3');
+    if (item.effects || item.value) {
+      const impactos = item.effects ? item.effects.reduce((acc, effect) => ({ ...acc, [effect.field]: effect.value }), {}) : { [item.telemetryField]: item.value };
+      const applyImpact = (currentVal, change) => Math.max(0, Math.min(100, currentVal + (change || 0)));
+      if (impactos.nuclearPropulsion !== undefined) telemetryRef.current.propulsion.powerOutput = applyImpact(telemetryRef.current.propulsion.powerOutput, impactos.nuclearPropulsion);
+      if (impactos.oxygen !== undefined) telemetryRef.current.atmosphere.o2 = applyImpact(telemetryRef.current.atmosphere.o2, impactos.oxygen);
+      if (impactos.direction !== undefined) telemetryRef.current.direction = applyImpact(telemetryRef.current.direction, impactos.direction);
+      if (impactos.stability !== undefined) telemetryRef.current.stability = applyImpact(telemetryRef.current.stability, impactos.stability);
+      if (impactos.productivity !== undefined) telemetryRef.current.productivity = applyImpact(telemetryRef.current.productivity, impactos.productivity);
+      if (impactos.engagement !== undefined) telemetryRef.current.engagement = applyImpact(telemetryRef.current.engagement, impactos.engagement);
+      if (impactos.interdependence !== undefined) telemetryRef.current.interdependence = applyImpact(telemetryRef.current.interdependence, impactos.interdependence);
+      setTelemetry({ ...telemetryRef.current });
+      setLastImpactTimestamp(Date.now()); saveTelemetryData();
+    }
+  }, [playSound, saveTelemetryData]);
+
+  const handleSosDetected = useCallback(() => {
+    if (!travelStarted && routeIndex === 0) return;
+
+    setIsSosMinervaActive(true);
+    setTimeout(() => {
+      setIsSosMinervaActive(false);
+    }, 5000);
+  }, [travelStarted, routeIndex]);
+
+  const handleChallengeEnd = useCallback(() => {
+    // Implemente a lógica necessária se houver ações ao fim de um desafio
+    // Por enquanto, apenas um placeholder se não houver lógica complexa
+  }, []);
+
+  const handleMudarRota = () => {
+    setShowConfirmacaoModal(false);
+    setShowStoreModal(false);
+    // Reset SOS para permitir edição mas mantendo estado se cancelar
+    setShowSosSurprise(false);
+
+    setIsForcedMapEdit(true);
+    setShowStellarMap(true);
+  };
+
+  const handleSeguirPlano = () => {
+    if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
+    setShowConfirmacaoModal(false);
+    setShowStoreModal(false);
+
+    // --- RESET SOS ---
+    setShowSosSurprise(false);
+    setSosSurpriseEvent(null);
+
+    playSound('/sounds/empuxo.wav');
+    setIsDeparting(true);
+
+    setTimeout(async () => {
+      setDistanceKm(300000000);
+
+      setProgress(0);
+      setArrivedAtMars(false);
+      setIsFinalApproach(false);
+      approachSoundPlayed.current = false;
+      minervaEventTriggered.current = false;
+      setIsBoostingTo60k(false);
+      setActiveChallengeData(null);
+      setIsDialogueFinished(false);
+      setTravelStarted(true);
+      setDobraCooldownEnd(0);
+      setProcessadorO2(0);
+      setRefetchTrigger(prev => prev + 1);
+      setIsDeparting(false);
+    }, 4000);
+  };
+
+  const handleRouteChanged = useCallback((newRouteData) => {
+    if (!newRouteData || !newRouteData.newPlannedRoute || newRouteData.newRouteIndex === undefined) {
+      if (!isForcedMapEdit) {
+        setShowStellarMap(false);
+      }
+      return;
+    }
+
+    setIsForcedMapEdit(false);
+    setShowStellarMap(false);
+
+    // Reset SOS
+    setShowSosSurprise(false);
+    setSosSurpriseEvent(null);
+
+    const { newPlannedRoute, newRouteIndex } = newRouteData;
+    const isInFlight = !arrivedAtMars && travelStarted;
+
+    if (isInFlight) {
+      saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
+      setPlannedRoute(newPlannedRoute); setRouteIndex(newRouteIndex);
+      const newOriginStep = newPlannedRoute[newRouteIndex];
+      const newDestinationStep = newPlannedRoute[newRouteIndex + 1];
+      if (newOriginStep && newDestinationStep) {
+        setOriginPlanet({ nome: newOriginStep.name }); setSelectedPlanet({ nome: newDestinationStep.name });
+        const originalDistance = (plannedRoute && plannedRoute[routeIndex + 1] ? plannedRoute[routeIndex + 1].distance : null) || 1;
+        const distanceTraveled = originalDistance - distanceKm;
+        const newTotalDistance = newDestinationStep.distance;
+        const newRemainingDistance = Math.max(0, newTotalDistance - distanceTraveled);
+        setDistanceKm(newRemainingDistance);
+      }
+    } else {
+      playSound('/sounds/empuxo.wav'); setIsDeparting(true); setShowStoreModal(false);
+      setTimeout(async () => {
+        setDistanceKm(300000000);
+
+        await saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
+        setProgress(0); setArrivedAtMars(false); setIsFinalApproach(false); approachSoundPlayed.current = false; minervaEventTriggered.current = false; setIsBoostingTo60k(false); setActiveChallengeData(null); setIsDialogueFinished(false); setTravelStarted(true); setDobraCooldownEnd(0); setProcessadorO2(0);
+        setRefetchTrigger(prev => prev + 1); setIsDeparting(false);
+      }, 4000);
+    }
+  }, [saveNewRouteAndProgress, playSound, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit]);
+
+  const handleEscolha = async (opcao, desafioId, impactos) => {
+    setIsTransmissionStarting(false); setIsDialogueFinished(false);
+    const coinsReward = Number(opcao.spaceCoins || 0);
+    const currentCoins = Number(spaceCoins) || 0;
+    const newBalance = currentCoins + coinsReward;
+    if (coinsReward !== 0) setSpaceCoins(newBalance);
+    if (impactos) {
+      const applyImpact = (currentVal, change) => Math.max(0, Math.min(100, currentVal + (change || 0)));
+      if (impactos.nuclearPropulsion !== undefined) telemetryRef.current.propulsion.powerOutput = applyImpact(telemetryRef.current.propulsion.powerOutput, impactos.nuclearPropulsion);
+      if (impactos.oxygen !== undefined) telemetryRef.current.atmosphere.o2 = applyImpact(telemetryRef.current.atmosphere.o2, impactos.oxygen);
+      if (impactos.direction !== undefined) telemetryRef.current.direction = applyImpact(telemetryRef.current.direction, impactos.direction);
+      if (impactos.stability !== undefined) telemetryRef.current.stability = applyImpact(telemetryRef.current.stability, impactos.stability);
+      if (impactos.productivity !== undefined) telemetryRef.current.productivity = applyImpact(telemetryRef.current.productivity, impactos.productivity);
+      if (impactos.engagement !== undefined) telemetryRef.current.engagement = applyImpact(telemetryRef.current.engagement, impactos.engagement);
+      if (impactos.interdependence !== undefined) telemetryRef.current.interdependence = applyImpact(telemetryRef.current.interdependence, impactos.interdependence);
+      setTelemetry(prev => ({
+        ...prev, propulsion: { ...prev.propulsion, powerOutput: telemetryRef.current.propulsion.powerOutput },
+        atmosphere: { ...prev.atmosphere, o2: telemetryRef.current.atmosphere.o2 },
+        direction: telemetryRef.current.direction, stability: telemetryRef.current.stability, productivity: telemetryRef.current.productivity, engagement: telemetryRef.current.engagement, interdependence: telemetryRef.current.interdependence
+      }));
+      setLastImpactTimestamp(Date.now()); saveTelemetryData();
+    }
+    if (!userId || !desafioId || !API_BASE_URL) return;
+    try {
+      await fetch(`${API_BASE_URL}/record-choice`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, desafioId, escolha: opcao, impactos: impactos, newBalance: newBalance }),
+      });
+    } catch (error) { console.error("ERRO: Falha ao registrar escolha:", error); }
+    setShowEscolhaModal(false); setShowConfirmacaoModal(true);
+  };
+
+  const handleDobraEspacial = () => {
+    if (!isDobraEnabled || isDobraAtivada || isPaused) return;
+
+    stopAllAudio();
+    setIsDobraAtivada(true);
+    setIsDobraEnabled(false);
+
+    setMinervaImage('/images/Minerva/Minerva-Vluz.gif');
+
+    // Áudio curto de ativação
+    playSound('/sounds/05.Dobra-Active.mp3');
+
+    // CORREÇÃO: Uso direto da URL (sem timestamp) para aproveitar o cache e evitar delay
+    playTrack('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3', {
+      loop: true,
+      isPrimary: true
+    });
+
+    const TWO_MINUTES_IN_MS = 2 * 60 * 1000;
+    setDobraCooldownEnd(Date.now() + TWO_MINUTES_IN_MS);
+    const DOBRA_DURATION_IN_MS = 100 * 1000;
+
+    if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
+    dobraTimerRef.current = setTimeout(() => {
+      isDobraAtivadaRef.current = false;
+      setIsDobraAtivada(false);
+      saveTelemetryData();
+      stopAllAudio();
+      const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
+      const approachDistanceThreshold = 800000;
+      playSound('/sounds/power-down-Warp.mp3');
+      setShowWarpDisabledMessage(true);
+      setMinervaImage('/images/Minerva/Minerva_Active.gif');
+      setTimeout(() => setShowWarpDisabledMessage(false), 10000);
+      if (!isMoon && distanceKm <= approachDistanceThreshold && !isFinalApproachRef.current) {
+        setIsFinalApproach(true);
+        setIsBoostingTo60k(false);
+        approachSoundPlayed.current = true;
+      } else {
+        setIsBoostingTo60k(true);
+      }
+    }, DOBRA_DURATION_IN_MS);
+
+    if (minervaTimeoutRef.current) clearTimeout(minervaTimeoutRef.current);
+    minervaTimeoutRef.current = setTimeout(() => { setMinervaImage('/images/Minerva/Minerva_Active.gif'); }, DOBRA_DURATION_IN_MS + 3000);
+  };
+
+  const handleInventory = () => { if (!isPaused) { setShowInventory(true); playSound('/sounds/inventory-open.mp3'); } };
+
+  const handleTransferO2 = async () => {
+    if (isPaused || processadorO2 === 0 || !userId || !API_BASE_URL) return;
+
+    const amountToAdd = processadorO2;
+    const currentO2 = telemetryRef.current.atmosphere.o2;
+    const newO2 = Math.min(100, currentO2 + amountToAdd);
+
+    telemetryRef.current.atmosphere.o2 = newO2;
+
+    setTelemetry(prev => ({
+      ...prev,
+      atmosphere: {
+        ...prev.atmosphere,
+        o2: newO2
+      }
+    }));
+
+    setLastImpactTimestamp(Date.now());
+
+    playSound('/sounds/data-updates-telemetry.mp3');
+
+    try {
+      await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          processadorO2: 0,
+          telemetryState: {
+            ...telemetryRef.current,
+            oxygen: newO2,
+            nuclearPropulsion: telemetryRef.current.propulsion.powerOutput,
+            direction: telemetryRef.current.direction,
+            stability: telemetryRef.current.stability,
+            productivity: telemetryRef.current.productivity,
+            interdependence: telemetryRef.current.interdependence,
+            engagement: telemetryRef.current.engagement
+          }
+        }),
+      });
+      setProcessadorO2(0);
+    } catch (error) {
+      console.error("ERRO: Falha ao transferir O2 e salvar dados:", error);
+    }
+  };
+
+  const handleMinervaClick = () => { if (!isPaused) { setShowMandala(true); if (isMinervaHighlighted) setIsMinervaHighlighted(false); } };
+
+  const handleOpenO2Modal = () => {
+    if (isPaused || processadorO2 === 0) return;
+    setShowO2Modal(true);
+    playSound('/sounds/ui-click.mp3');
+  };
+
+  const isO2TransferDisabled = isPaused || processadorO2 === 0;
+
+  // =========================================================================
+  // FIM HANDLERS MOVIDOS
+  // =========================================================================
+
   const isPausedRef = useRef(isPaused);
   useEffect(() => {
     isPausedRef.current = isPaused;
@@ -370,84 +700,6 @@ const DecolagemMarte = () => {
   const animationFrameId = useRef();
   const lastUpdateTime = useRef(0);
   const telemetryInterval = 100;
-
-  const constructPhotoUrl = (gameNumber, teamName) => {
-    if (!gameNumber || !teamName) return null;
-    const safeGame = `game_${gameNumber}`;
-    const safeTeam = teamName.trim().replace(/[^a-z0-9]/gi, '_').toLowerCase();
-    return `/images/grupos/${safeGame}/${safeTeam}/registro_equipe_${safeTeam}.jpg`;
-  };
-
-  const handleInventoryTelemetryUpdate = useCallback((updates) => {
-    if (updates.nuclearPropulsion !== undefined) telemetryRef.current.propulsion.powerOutput = updates.nuclearPropulsion;
-    if (updates.oxygen !== undefined) telemetryRef.current.atmosphere.o2 = updates.oxygen;
-    if (updates.productivity !== undefined) telemetryRef.current.productivity = updates.productivity;
-    if (updates.engagement !== undefined) telemetryRef.current.engagement = updates.engagement;
-    if (updates.interdependence !== undefined) telemetryRef.current.interdependence = updates.interdependence;
-    if (updates.stability !== undefined) telemetryRef.current.stability = updates.stability;
-    if (updates.direction !== undefined) telemetryRef.current.direction = updates.direction;
-    setTelemetry({ ...telemetryRef.current });
-    setLastImpactTimestamp(Date.now());
-  }, []);
-
-  const saveTelemetryData = useCallback(async () => {
-    if (!userId || !API_BASE_URL) return;
-    const dataToSave = {
-      telemetryState: {
-        oxygen: telemetryRef.current.atmosphere.o2,
-        nuclearPropulsion: telemetryRef.current.propulsion.powerOutput,
-        direction: telemetryRef.current.direction,
-        stability: telemetryRef.current.stability,
-        productivity: telemetryRef.current.productivity,
-        interdependence: telemetryRef.current.interdependence,
-        engagement: telemetryRef.current.engagement
-      }
-    };
-    try {
-      await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSave),
-      });
-    } catch (error) {
-      console.error("ERRO: Falha ao salvar dados de telemetria:", error);
-    }
-  }, [userId, API_BASE_URL]);
-
-  const saveCurrentProgress = useCallback(async (currentIndex) => {
-    if (!userId || !API_BASE_URL) return;
-    try {
-      await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ routeIndex: currentIndex }),
-      });
-    } catch (error) {
-      console.error("ERRO: Falha ao salvar progresso da rota:", error);
-    }
-  }, [userId, API_BASE_URL]);
-
-  const saveNewRouteAndProgress = useCallback(async (currentIndex, newRouteArray) => {
-    if (!userId || !API_BASE_URL) return;
-    const dataToSave = { routeIndex: currentIndex, rotaPlanejada: newRouteArray };
-    try {
-      await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSave),
-      });
-    } catch (error) {
-      console.error("ERRO: Falha ao salvar nova rota:", error);
-    }
-  }, [userId, API_BASE_URL]);
-
-  const handleOpenO2Modal = () => {
-    if (isPaused || processadorO2 === 0) return;
-    setShowO2Modal(true);
-    playSound('/sounds/ui-click.mp3');
-  };
-
-  const isO2TransferDisabled = isPaused || processadorO2 === 0;
 
   useEffect(() => {
     const saveIndexForCorrection = async (currentIndex) => {
@@ -835,100 +1087,6 @@ const DecolagemMarte = () => {
     return () => clearInterval(interval);
   }, [monitorState, mainDisplayState, isPaused]);
 
-  const handleDobraEspacial = () => {
-    if (!isDobraEnabled || isDobraAtivada || isPaused) return;
-
-    stopAllAudio();
-    setIsDobraAtivada(true);
-    setIsDobraEnabled(false);
-
-    setMinervaImage('/images/Minerva/Minerva-Vluz.gif');
-
-    // Áudio curto de ativação
-    playSound('/sounds/05.Dobra-Active.mp3');
-
-    // CORREÇÃO: Uso direto da URL (sem timestamp) para aproveitar o cache e evitar delay
-    playTrack('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3', {
-      loop: true,
-      isPrimary: true
-    });
-
-    const TWO_MINUTES_IN_MS = 2 * 60 * 1000;
-    setDobraCooldownEnd(Date.now() + TWO_MINUTES_IN_MS);
-    const DOBRA_DURATION_IN_MS = 100 * 1000;
-
-    if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
-    dobraTimerRef.current = setTimeout(() => {
-      isDobraAtivadaRef.current = false;
-      setIsDobraAtivada(false);
-      saveTelemetryData();
-      stopAllAudio();
-      const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
-      const approachDistanceThreshold = 800000;
-      playSound('/sounds/power-down-Warp.mp3');
-      setShowWarpDisabledMessage(true);
-      setMinervaImage('/images/Minerva/Minerva_Active.gif');
-      setTimeout(() => setShowWarpDisabledMessage(false), 10000);
-      if (!isMoon && distanceKm <= approachDistanceThreshold && !isFinalApproachRef.current) {
-        setIsFinalApproach(true);
-        setIsBoostingTo60k(false);
-        approachSoundPlayed.current = true;
-      } else {
-        setIsBoostingTo60k(true);
-      }
-    }, DOBRA_DURATION_IN_MS);
-
-    if (minervaTimeoutRef.current) clearTimeout(minervaTimeoutRef.current);
-    minervaTimeoutRef.current = setTimeout(() => { setMinervaImage('/images/Minerva/Minerva_Active.gif'); }, DOBRA_DURATION_IN_MS + 3000);
-  };
-
-  const handleInventory = () => { if (!isPaused) { setShowInventory(true); playSound('/sounds/inventory-open.mp3'); } };
-
-  const handleTransferO2 = async () => {
-    if (isPaused || processadorO2 === 0 || !userId || !API_BASE_URL) return;
-
-    const amountToAdd = processadorO2;
-    const currentO2 = telemetryRef.current.atmosphere.o2;
-    const newO2 = Math.min(100, currentO2 + amountToAdd);
-
-    telemetryRef.current.atmosphere.o2 = newO2;
-
-    setTelemetry(prev => ({
-      ...prev,
-      atmosphere: {
-        ...prev.atmosphere,
-        o2: newO2
-      }
-    }));
-
-    setLastImpactTimestamp(Date.now());
-
-    playSound('/sounds/data-updates-telemetry.mp3');
-
-    try {
-      await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          processadorO2: 0,
-          telemetryState: {
-            ...telemetryRef.current,
-            oxygen: newO2,
-            nuclearPropulsion: telemetryRef.current.propulsion.powerOutput,
-            direction: telemetryRef.current.direction,
-            stability: telemetryRef.current.stability,
-            productivity: telemetryRef.current.productivity,
-            interdependence: telemetryRef.current.interdependence,
-            engagement: telemetryRef.current.engagement
-          }
-        }),
-      });
-      setProcessadorO2(0);
-    } catch (error) {
-      console.error("ERRO: Falha ao transferir O2 e salvar dados:", error);
-    }
-  };
-
   const currentMaxSpeed = useMemo(() => {
     if (isDobraAtivada) return 100000000;
     if (isBoostingTo60k) return 60000;
@@ -940,155 +1098,6 @@ const DecolagemMarte = () => {
   const currentDialogueStep = activeChallengeData?.dialogo?.[dialogueIndex];
   const currentCharacterId = currentDialogueStep?.personagemId;
   const currentCharacterData = currentCharacterId ? desafiosData.personagens[currentCharacterId] : null;
-
-  const handleEscolha = async (opcao, desafioId, impactos) => {
-    setIsTransmissionStarting(false); setIsDialogueFinished(false);
-    const coinsReward = Number(opcao.spaceCoins || 0);
-    const currentCoins = Number(spaceCoins) || 0;
-    const newBalance = currentCoins + coinsReward;
-    if (coinsReward !== 0) setSpaceCoins(newBalance);
-    if (impactos) {
-      const applyImpact = (currentVal, change) => Math.max(0, Math.min(100, currentVal + (change || 0)));
-      if (impactos.nuclearPropulsion !== undefined) telemetryRef.current.propulsion.powerOutput = applyImpact(telemetryRef.current.propulsion.powerOutput, impactos.nuclearPropulsion);
-      if (impactos.oxygen !== undefined) telemetryRef.current.atmosphere.o2 = applyImpact(telemetryRef.current.atmosphere.o2, impactos.oxygen);
-      if (impactos.direction !== undefined) telemetryRef.current.direction = applyImpact(telemetryRef.current.direction, impactos.direction);
-      if (impactos.stability !== undefined) telemetryRef.current.stability = applyImpact(telemetryRef.current.stability, impactos.stability);
-      if (impactos.productivity !== undefined) telemetryRef.current.productivity = applyImpact(telemetryRef.current.productivity, impactos.productivity);
-      if (impactos.engagement !== undefined) telemetryRef.current.engagement = applyImpact(telemetryRef.current.engagement, impactos.engagement);
-      if (impactos.interdependence !== undefined) telemetryRef.current.interdependence = applyImpact(telemetryRef.current.interdependence, impactos.interdependence);
-      setTelemetry(prev => ({
-        ...prev, propulsion: { ...prev.propulsion, powerOutput: telemetryRef.current.propulsion.powerOutput },
-        atmosphere: { ...prev.atmosphere, o2: telemetryRef.current.atmosphere.o2 },
-        direction: telemetryRef.current.direction, stability: telemetryRef.current.stability, productivity: telemetryRef.current.productivity, engagement: telemetryRef.current.engagement, interdependence: telemetryRef.current.interdependence
-      }));
-      setLastImpactTimestamp(Date.now()); saveTelemetryData();
-    }
-    if (!userId || !desafioId || !API_BASE_URL) return;
-    try {
-      await fetch(`${API_BASE_URL}/record-choice`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, desafioId, escolha: opcao, impactos: impactos, newBalance: newBalance }),
-      });
-    } catch (error) { console.error("ERRO: Falha ao registrar escolha:", error); }
-    setShowEscolhaModal(false); setShowConfirmacaoModal(true);
-  };
-
-  const handleSeguirPlano = () => {
-    if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
-    setShowConfirmacaoModal(false);
-    setShowStoreModal(false);
-
-    // --- RESET SOS ---
-    setShowSosSurprise(false);
-    setSosSurpriseEvent(null);
-
-    playSound('/sounds/empuxo.wav');
-    setIsDeparting(true);
-
-    setTimeout(async () => {
-      setDistanceKm(300000000);
-
-      setProgress(0);
-      setArrivedAtMars(false);
-      setIsFinalApproach(false);
-      approachSoundPlayed.current = false;
-      minervaEventTriggered.current = false;
-      setIsBoostingTo60k(false);
-      setActiveChallengeData(null);
-      setIsDialogueFinished(false);
-      setTravelStarted(true);
-      setDobraCooldownEnd(0);
-      setProcessadorO2(0);
-      setRefetchTrigger(prev => prev + 1);
-      setIsDeparting(false);
-    }, 4000);
-  };
-
-  const handleRouteChanged = useCallback((newRouteData) => {
-    if (!newRouteData || !newRouteData.newPlannedRoute || newRouteData.newRouteIndex === undefined) {
-      if (!isForcedMapEdit) {
-        setShowStellarMap(false);
-      }
-      return;
-    }
-
-    setIsForcedMapEdit(false);
-    setShowStellarMap(false);
-
-    // Reset SOS
-    setShowSosSurprise(false);
-    setSosSurpriseEvent(null);
-
-    const { newPlannedRoute, newRouteIndex } = newRouteData;
-    const isInFlight = !arrivedAtMars && travelStarted;
-
-    if (isInFlight) {
-      saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
-      setPlannedRoute(newPlannedRoute); setRouteIndex(newRouteIndex);
-      const newOriginStep = newPlannedRoute[newRouteIndex];
-      const newDestinationStep = newPlannedRoute[newRouteIndex + 1];
-      if (newOriginStep && newDestinationStep) {
-        setOriginPlanet({ nome: newOriginStep.name }); setSelectedPlanet({ nome: newDestinationStep.name });
-        const originalDistance = (plannedRoute && plannedRoute[routeIndex + 1] ? plannedRoute[routeIndex + 1].distance : null) || 1;
-        const distanceTraveled = originalDistance - distanceKm;
-        const newTotalDistance = newDestinationStep.distance;
-        const newRemainingDistance = Math.max(0, newTotalDistance - distanceTraveled);
-        setDistanceKm(newRemainingDistance);
-      }
-    } else {
-      playSound('/sounds/empuxo.wav'); setIsDeparting(true); setShowStoreModal(false);
-      setTimeout(async () => {
-        setDistanceKm(300000000);
-
-        await saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
-        setProgress(0); setArrivedAtMars(false); setIsFinalApproach(false); approachSoundPlayed.current = false; minervaEventTriggered.current = false; setIsBoostingTo60k(false); setActiveChallengeData(null); setIsDialogueFinished(false); setTravelStarted(true); setDobraCooldownEnd(0); setProcessadorO2(0);
-        setRefetchTrigger(prev => prev + 1); setIsDeparting(false);
-      }, 4000);
-    }
-  }, [saveNewRouteAndProgress, playSound, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit]);
-
-  const handleMudarRota = () => {
-    setShowConfirmacaoModal(false);
-    setShowStoreModal(false);
-    // Reset SOS para permitir edição mas mantendo estado se cancelar
-    setShowSosSurprise(false);
-
-    setIsForcedMapEdit(true);
-    setShowStellarMap(true);
-  };
-
-  const handleMinervaClick = () => { if (!isPaused) { setShowMandala(true); if (isMinervaHighlighted) setIsMinervaHighlighted(false); } };
-
-  const handleStoreChallengeImpact = useCallback((item) => {
-    playSound('/sounds/data-updates-telemetry.mp3');
-    if (item.effects || item.value) {
-      const impactos = item.effects ? item.effects.reduce((acc, effect) => ({ ...acc, [effect.field]: effect.value }), {}) : { [item.telemetryField]: item.value };
-      const applyImpact = (currentVal, change) => Math.max(0, Math.min(100, currentVal + (change || 0)));
-      if (impactos.nuclearPropulsion !== undefined) telemetryRef.current.propulsion.powerOutput = applyImpact(telemetryRef.current.propulsion.powerOutput, impactos.nuclearPropulsion);
-      if (impactos.oxygen !== undefined) telemetryRef.current.atmosphere.o2 = applyImpact(telemetryRef.current.atmosphere.o2, impactos.oxygen);
-      if (impactos.direction !== undefined) telemetryRef.current.direction = applyImpact(telemetryRef.current.direction, impactos.direction);
-      if (impactos.stability !== undefined) telemetryRef.current.stability = applyImpact(telemetryRef.current.stability, impactos.stability);
-      if (impactos.productivity !== undefined) telemetryRef.current.productivity = applyImpact(telemetryRef.current.productivity, impactos.productivity);
-      if (impactos.engagement !== undefined) telemetryRef.current.engagement = applyImpact(telemetryRef.current.engagement, impactos.engagement);
-      if (impactos.interdependence !== undefined) telemetryRef.current.interdependence = applyImpact(telemetryRef.current.interdependence, impactos.interdependence);
-      setTelemetry({ ...telemetryRef.current });
-      setLastImpactTimestamp(Date.now()); saveTelemetryData();
-    }
-  }, [playSound, saveTelemetryData]);
-
-  const handleSosDetected = useCallback(() => {
-    if (!travelStarted && routeIndex === 0) return;
-
-    setIsSosMinervaActive(true);
-    setTimeout(() => {
-      setIsSosMinervaActive(false);
-    }, 5000);
-  }, [travelStarted, routeIndex]);
-
-  // Função para lidar com fim de desafios (usada no SpaceView)
-  const handleChallengeEnd = useCallback(() => {
-    // Implemente a lógica necessária se houver ações ao fim de um desafio
-    // Por enquanto, apenas um placeholder se não houver lógica complexa
-  }, []);
 
   // Handler para modal de escolha fechar
   const handleCloseEscolhaModal = useCallback(() => {
