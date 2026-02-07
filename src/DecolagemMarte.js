@@ -18,7 +18,7 @@ import ModalDesafio from './ModalDesafio';
 import ModalConfirmacaoViagem from './ModalConfirmacaoViagem';
 import { useConfig } from './ConfigContext';
 import LojaEspacial from './LojaEspacial';
-import SosSurpriseModal from './SosSurpriseModal'; // NOVO IMPORT
+import SosSurpriseModal from './SosSurpriseModal';
 
 const GalacticVirtudesPage = lazy(() => import('./GalacticVirtudesPage').catch(() => ({
   default: () => <div className="map-fallback">Glossário Indisponível</div>
@@ -39,7 +39,7 @@ const PLANET_DATA_FOR_SOS = [
   { name: "Eris", orbitRadius: 165 }
 ];
 
-// LISTA DE EVENTOS SOS SURPRESA (NOVO)
+// LISTA DE EVENTOS SOS SURPRESA
 const SOS_EVENTS_LIST = [
   {
     id: 1,
@@ -188,7 +188,7 @@ const DecolagemMarte = () => {
 
   const [showO2Modal, setShowO2Modal] = useState(false);
 
-  // --- NOVOS ESTADOS PARA O SOS SURPRESA ---
+  // Estados para o SOS Surpresa
   const [sosSurpriseEvent, setSosSurpriseEvent] = useState(null);
   const [showSosSurprise, setShowSosSurprise] = useState(false);
 
@@ -216,6 +216,14 @@ const DecolagemMarte = () => {
 
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
+
+  // --- PRÉ-CARREGAMENTO DO ÁUDIO DA DOBRA ---
+  useEffect(() => {
+    // Carrega o áudio silenciosamente para evitar delay no clique
+    const audioPreload = new Audio('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3');
+    audioPreload.preload = 'auto';
+  }, []);
+  // ------------------------------------------
 
   const isPausedRef = useRef(isPaused);
   useEffect(() => {
@@ -655,7 +663,7 @@ const DecolagemMarte = () => {
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
 
   // =========================================================================
-  // LOOP PRINCIPAL DO JOGO (ATUALIZADO PARA LÓGICA DE SOS SURPRESA)
+  // LOOP PRINCIPAL DO JOGO
   // =========================================================================
   useEffect(() => {
     const gameLoop = (timestamp) => {
@@ -775,12 +783,22 @@ const DecolagemMarte = () => {
 
   const handleDobraEspacial = () => {
     if (!isDobraEnabled || isDobraAtivada || isPaused) return;
+
     stopAllAudio();
     setIsDobraAtivada(true);
     setIsDobraEnabled(false);
+
     setMinervaImage('/images/Minerva/Minerva-Vluz.gif');
+
+    // Áudio curto de ativação
     playSound('/sounds/05.Dobra-Active.mp3');
-    playTrack(`/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3?t=${Date.now()}`, { loop: true, isPrimary: true });
+
+    // CORREÇÃO: Uso direto da URL (sem timestamp) para aproveitar o cache e evitar delay
+    playTrack('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3', {
+      loop: true,
+      isPrimary: true
+    });
+
     const TWO_MINUTES_IN_MS = 2 * 60 * 1000;
     setDobraCooldownEnd(Date.now() + TWO_MINUTES_IN_MS);
     const DOBRA_DURATION_IN_MS = 100 * 1000;
@@ -1012,6 +1030,26 @@ const DecolagemMarte = () => {
     }, 5000);
   }, [travelStarted, routeIndex]);
 
+  // Função para lidar com fim de desafios (usada no SpaceView)
+  const handleChallengeEnd = useCallback(() => {
+    // Implemente a lógica necessária se houver ações ao fim de um desafio
+    // Por enquanto, apenas um placeholder se não houver lógica complexa
+  }, []);
+
+  // Handler para modal de escolha fechar
+  const handleCloseEscolhaModal = useCallback(() => {
+    setShowEscolhaModal(false);
+  }, []);
+
+  const handleSpendCoins = useCallback((amount) => {
+    setSpaceCoins(prev => (prev || 0) - amount);
+  }, [setSpaceCoins]);
+
+  // Handler para replay de diálogo
+  const handleReplayDialogue = () => {
+    // Lógica de replay se necessário
+  };
+
   if (isLoadingRoute) return <div className="tela-decolagem" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5em', color: '#00aaff', textShadow: '0 0 10px #00aaff' }}>Buscando dados da missão...</div>;
 
   return (
@@ -1051,7 +1089,7 @@ const DecolagemMarte = () => {
             </div>
             <div className="monitor-screen">
               {isSosMinervaActive ? (
-                // CORREÇÃO: Substituído <video> por <img> usando o GIF de velocidade
+                // Substituído <video> por <img> usando o GIF de velocidade
                 <img
                   src="/images/Minerva/Minerva-Informando-velocidade.gif"
                   alt="Alerta S.O.S Minerva"
