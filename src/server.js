@@ -115,6 +115,9 @@ const GrupoSchema = new mongoose.Schema({
     interdependence: { type: Number, default: 100 },
     engagement: { type: Number, default: 100 }
   },
+  // --- ATUALIZAÇÃO: Campo gameNumber adicionado ---
+  gameNumber: { type: Number },
+  // ------------------------------------------------
   isLocked: { type: Boolean, default: false },
   photoUrl: { type: String }
 }, { timestamps: true });
@@ -226,12 +229,10 @@ app.post("/:userId/update-gamedata", async (req, res) => {
   } catch (error) { res.status(500).json({ success: false }); }
 });
 
-// --- ROTA CORRIGIDA PARA EVITAR 404 NO CONSOLE ---
 app.get("/:userId/game-data", async (req, res) => {
   try {
     const usuario = await Usuario.findById(req.params.userId).populate('grupo');
 
-    // Se não achar o usuário, aí sim é 404
     if (!usuario) return res.status(404).json({ success: false, message: "Usuário não encontrado" });
 
     let isPaused = false;
@@ -240,13 +241,10 @@ app.get("/:userId/game-data", async (req, res) => {
       if (game) isPaused = game.isPaused;
     }
 
-    // Se o usuário não tem grupo (ex: Admin ou recém-criado), retorna sucesso com dados nulos
-    // Isso evita o erro vermelho "404" no console do navegador
     if (!usuario.grupo) {
       return res.json({ success: true, isPaused, group: null, noGroup: true });
     }
 
-    // Se tiver grupo, retorna os dados normais
     res.json({ success: true, ...usuario.grupo.toObject(), isPaused });
   } catch (error) {
     res.status(500).json({ success: false, message: "Erro interno" });
@@ -373,7 +371,10 @@ app.post("/save-team-name", async (req, res) => {
       normalizedTeamName: tName.toLowerCase(),
       membros: ids,
       loginon: 1,
-      isLocked: false
+      isLocked: false,
+      // --- ATUALIZAÇÃO: Gravando o gameNumber no grupo ---
+      gameNumber: criador.gameNumber
+      // ---------------------------------------------------
     });
 
     await Usuario.updateMany({ _id: { $in: ids } }, { $set: { grupo: novoGrupo._id } });
@@ -524,7 +525,6 @@ app.delete("/users/:email", async (req, res) => {
   } catch (error) { res.status(500).json({ success: false, message: "Erro interno." }); }
 });
 
-// --- ROTA CORRIGIDA: INCLUSÃO DE gameNumber e numeroLiderados NO SELECT ---
 app.get("/users/by-company", async (req, res) => {
   try {
     const { company } = req.query;
