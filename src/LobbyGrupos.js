@@ -1,37 +1,34 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
-import { useConfig } from "./ConfigContext"; // Importação do Contexto de Configuração
+import { useConfig } from "./ConfigContext";
 import axios from "axios";
 import "./LobbyGrupos.css";
 
 const LobbyGrupos = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { apiBaseUrl } = useConfig(); // Obtém a URL correta do backend (AWS ou Local)
+    const { apiBaseUrl } = useConfig();
 
     // Referências
-    const canvasRef = useRef(null); // Para o fundo de estrelas
-    const videoRef = useRef(null);  // Para o vídeo da câmera
+    const canvasRef = useRef(null);
+    const videoRef = useRef(null);
 
-    // Estados de Dados
+    // Estados
     const [groups, setGroups] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [errorMsg, setErrorMsg] = useState(""); // Estado para mensagens de erro/aviso
 
-    // Estados de Movimentação de Membros
+    // Estados de Movimentação e Câmera
     const [moveModalOpen, setMoveModalOpen] = useState(false);
     const [selectedMember, setSelectedMember] = useState(null);
-
-    // Estados da Câmera / Foto
     const [showPhotoModal, setShowPhotoModal] = useState(false);
     const [stream, setStream] = useState(null);
     const [capturedImage, setCapturedImage] = useState(null);
     const [isSavingPhoto, setIsSavingPhoto] = useState(false);
-
-    // Estado para controlar a exibição imediata do botão após salvar
     const [localPhotoConfirmed, setLocalPhotoConfirmed] = useState(false);
 
-    // Efeito Visual de Estrelas (Background)
+    // Efeito Visual de Estrelas
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -78,45 +75,67 @@ const LobbyGrupos = () => {
         };
     }, []);
 
-    // Função para buscar dados com FILTRAGEM RIGOROSA DO GAME
+    // Função Principal de Busca
     const fetchGroups = async () => {
-        if (!user?.gameNumber || !apiBaseUrl) return;
+        // Validação inicial para evitar chamada sem dados
+        if (!apiBaseUrl) return;
+        if (!user) {
+            console.warn("Usuário não encontrado no contexto.");
+            return;
+        }
 
         try {
-            const response = await axios.get(`${apiBaseUrl}/games/${user.gameNumber}/groups-details`);
+            // Se o usuário não tiver gameNumber, usamos "1" como fallback ou tentamos buscar sem filtro específico na URL
+            const gameNum = user.gameNumber || 1;
+
+            console.log(`Buscando grupos para Game: ${gameNum} na URL: ${apiBaseUrl}`);
+
+            const response = await axios.get(`${apiBaseUrl}/games/${gameNum}/groups-details`);
+
             if (response.data.success) {
+                let fetchedGroups = response.data.groups;
 
-                // --- LÓGICA DE FILTRAGEM ADICIONADA ---
-                // Garante que apenas grupos com o mesmo gameNumber do usuário sejam exibidos
-                const filteredGroups = response.data.groups.filter(group =>
-                    Number(group.gameNumber) === Number(user.gameNumber)
-                );
+                // FILTRO: Se o usuário tiver gameNumber definido, filtramos rigorosamente.
+                // Se não, mostramos o que veio da API (fallback).
+                if (user.gameNumber) {
+                    fetchedGroups = fetchedGroups.filter(g =>
+                        // Compara convertendo para número para evitar erros de string "1" vs número 1
+                        Number(g.gameNumber) === Number(user.gameNumber)
+                    );
+                }
 
-                setGroups(filteredGroups);
+                if (fetchedGroups.length === 0) {
+                    setErrorMsg(`Nenhum grupo encontrado para o Game ${user.gameNumber || 'Atual'}.`);
+                } else {
+                    setErrorMsg(""); // Limpa erro se achou grupos
+                }
 
-                // Verifica se o meu grupo já tem foto salva no banco para atualizar o estado local
-                const myGroup = filteredGroups.find(g => g._id === user?.grupo?._id);
-                // Verifica propriedades comuns onde a foto pode estar salva
+                setGroups(fetchedGroups);
+
+                // Verifica foto do meu grupo
+                const myGroup = fetchedGroups.find(g => g._id === user?.grupo?._id);
                 if (myGroup && (myGroup.foto || myGroup.photo || myGroup.teamPhoto)) {
                     setLocalPhotoConfirmed(true);
                 }
+            } else {
+                setErrorMsg("A API retornou sucesso: false.");
             }
         } catch (error) {
             console.error("Erro ao carregar grupos:", error);
+            setErrorMsg("Erro de conexão ao buscar grupos.");
         } finally {
             setLoading(false);
         }
     };
 
-    // Polling de dados (Atualiza a cada 2 segundos)
+    // Polling
     useEffect(() => {
         fetchGroups();
-        const interval = setInterval(fetchGroups, 2000);
+        const interval = setInterval(fetchGroups, 3000); // Aumentado para 3s para aliviar rede
         return () => clearInterval(interval);
-    }, [user, apiBaseUrl]); // Adicionado apiBaseUrl nas dependências
+    }, [user, apiBaseUrl]);
 
-    // --- FUNÇÕES DE LÓGICA DE GRUPO ---
-
+    // Lógica de Bloqueio
     const handleToggleLock = async (groupId) => {
         if (!apiBaseUrl) return;
         try {
@@ -124,12 +143,9 @@ const LobbyGrupos = () => {
                 userId: user._id,
                 groupId: groupId
             });
-
-            // Se a operação foi bem sucedida e o grupo agora está trancado, abre a câmera
             if (response.data.success) {
-                fetchGroups(); // Atualiza a lista
+                fetchGroups();
                 if (response.data.isLocked) {
-                    // Pequeno delay para UX
                     setTimeout(() => startCamera(), 500);
                 }
             }
@@ -138,6 +154,7 @@ const LobbyGrupos = () => {
         }
     };
 
+    // Lógica de Movimento
     const openMoveModal = (member, sourceGroup) => {
         if (sourceGroup.isLocked) return;
         setSelectedMember({ ...member, sourceGroupId: sourceGroup._id });
@@ -161,16 +178,13 @@ const LobbyGrupos = () => {
         }
     };
 
-    // --- FUNÇÕES DA CÂMERA ---
-
+    // Lógica da Câmera
     const startCamera = async () => {
         try {
             const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
             setStream(mediaStream);
             setShowPhotoModal(true);
             setCapturedImage(null);
-
-            // Aguarda o render do modal para anexar o stream ao vídeo
             setTimeout(() => {
                 if (videoRef.current) {
                     videoRef.current.srcObject = mediaStream;
@@ -178,99 +192,68 @@ const LobbyGrupos = () => {
             }, 100);
         } catch (err) {
             alert("Não foi possível acessar a câmera. Verifique as permissões.");
-            console.error(err);
         }
     };
 
     const takePhoto = () => {
         if (!videoRef.current) return;
-
         const canvas = document.createElement("canvas");
         canvas.width = videoRef.current.videoWidth;
         canvas.height = videoRef.current.videoHeight;
-
         const ctx = canvas.getContext("2d");
-        // Espelhar a imagem horizontalmente para ficar mais natural (opcional)
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
         ctx.drawImage(videoRef.current, 0, 0);
-
-        const imageSrc = canvas.toDataURL("image/jpeg");
-        setCapturedImage(imageSrc);
-    };
-
-    const retakePhoto = () => {
-        setCapturedImage(null);
-        // O stream ainda deve estar ativo, apenas reatribuir ao videoRef se necessário
-        setTimeout(() => {
-            if (videoRef.current && stream) {
-                videoRef.current.srcObject = stream;
-            }
-        }, 100);
+        setCapturedImage(canvas.toDataURL("image/jpeg"));
     };
 
     const savePhotoAndClose = async () => {
         if (!capturedImage || !apiBaseUrl) return;
         setIsSavingPhoto(true);
-
         try {
+            // Verifica gameNumber antes de salvar
+            const gameNum = user.gameNumber || 1;
             await axios.post(`${apiBaseUrl}/group/save-photo`, {
-                gameNumber: user.gameNumber,
+                gameNumber: gameNum,
                 teamName: user.grupo.teamName,
                 image: capturedImage
             });
-
-            // IMPORTANTE: Atualiza o estado local para mostrar o botão imediatamente
             setLocalPhotoConfirmed(true);
-
-            // Atualiza os dados do servidor para persistência
             await fetchGroups();
-
             closeCamera();
         } catch (error) {
             console.error(error);
-            alert("Erro ao salvar a foto. Tente novamente.");
+            alert("Erro ao salvar a foto.");
         } finally {
             setIsSavingPhoto(false);
         }
     };
 
     const closeCamera = () => {
-        if (stream) {
-            stream.getTracks().forEach(track => track.stop());
-        }
+        if (stream) stream.getTracks().forEach(track => track.stop());
         setStream(null);
         setShowPhotoModal(false);
         setCapturedImage(null);
     };
 
-    const handleContinue = () => {
-        navigate("/SelecaoNave");
-    };
+    // Utilitários
+    const handleContinue = () => navigate("/SelecaoNave");
+    const getInitials = (name) => name ? name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() : "?";
 
-    const getInitials = (name) => {
-        if (!name) return "?";
-        return name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
-    };
-
-    // Identifica o grupo atual do usuário e status
     const userGroup = groups.find(g => g._id === user?.grupo?._id);
-
-    // Lógica para liberar o botão: Grupo Trancado AND (Foto salva localmente OU Foto vinda do banco)
     const canProceedToHangar = userGroup?.isLocked && (localPhotoConfirmed || userGroup?.foto || userGroup?.photo || userGroup?.teamPhoto);
 
     return (
-        <div className="lobby-background"> {/* Corrigido classe CSS para lobby-background se estiver usando LobbyGrupos.css */}
-            <canvas ref={canvasRef} className="lobby-stars"></canvas> {/* Corrigido classe CSS */}
+        <div className="lobby-background">
+            <canvas ref={canvasRef} className="lobby-stars"></canvas>
 
             <div className="lobby-container-visual">
-                {/* CABEÇALHO */}
                 <div className="logo-section">
-                    <img src="/images/clientes/santander.png" alt="Santander Logo" className="logo-image logo-client" />
+                    <img src="/images/clientes/santander.png" alt="Logo Cliente" className="logo-image logo-client" />
                     <div className="title-container">
                         <h2>Missão Interestelar ACEE</h2>
                     </div>
-                    <img src="/images/ACEE.png" alt="ACEE Logo" className="logo-image logo-acee" />
+                    <img src="/images/ACEE.png" alt="Logo ACEE" className="logo-image logo-acee" />
                 </div>
 
                 <div className="lobby-content-area">
@@ -287,68 +270,70 @@ const LobbyGrupos = () => {
                             <p>Carregando dados da frota...</p>
                         </div>
                     ) : (
-                        <div className="groups-grid">
-                            {groups.map((group) => {
-                                const isMyGroup = user?.grupo?._id === group._id;
-                                const isLocked = group.isLocked;
+                        <>
+                            {/* Mensagem de Aviso se a lista estiver vazia */}
+                            {groups.length === 0 && (
+                                <div style={{ textAlign: "center", marginTop: "50px", color: "#ff4444" }}>
+                                    <h3>{errorMsg || "Nenhum grupo encontrado."}</h3>
+                                    <p>Verifique se o seu usuário possui um Game Number válido.</p>
+                                </div>
+                            )}
 
-                                return (
-                                    <div key={group._id} className={`group-card-visual ${isMyGroup ? 'my-group-visual' : ''} ${isLocked ? 'locked-group' : ''}`}>
-                                        <div className="group-header-visual">
-                                            <div className="header-info">
-                                                <h3>{group.teamName}</h3>
+                            <div className="groups-grid">
+                                {groups.map((group) => {
+                                    const isMyGroup = user?.grupo?._id === group._id;
+                                    const isLocked = group.isLocked;
 
-                                                {/* Botão de Lock */}
-                                                <button
-                                                    className={`lock-btn ${isLocked ? 'closed' : 'open'} ${!isMyGroup ? 'disabled-lock' : ''}`}
-                                                    onClick={() => isMyGroup && handleToggleLock(group._id)}
-                                                    disabled={!isMyGroup}
-                                                    title={isMyGroup ? "Clique para Trancar/Destrancar" : "Apenas membros podem trancar este grupo"}
-                                                >
-                                                    {isLocked ? "🔒 Trancado" : "🔓 Aberto"}
-                                                </button>
-                                            </div>
-                                            <span className="member-badge">{group.membros.length} Trip.</span>
-                                        </div>
-
-                                        <div className="members-list-visual">
-                                            {group.membros.map((member) => (
-                                                <div key={member._id} className="member-row">
-                                                    <div className="avatar-circle">{getInitials(member.nome)}</div>
-                                                    <div className="member-details">
-                                                        <span className="name-text">
-                                                            {member.nome} {user?._id === member._id && <span className="you-tag">(Você)</span>}
-                                                        </span>
-                                                        <span className="role-text">{member.cargo}</span>
-                                                    </div>
-
-                                                    {!isLocked && (
-                                                        <button
-                                                            className="move-icon-btn"
-                                                            onClick={() => openMoveModal(member, group)}
-                                                            title="Mover tripulante"
-                                                        >
-                                                            ⇄
-                                                        </button>
-                                                    )}
+                                    return (
+                                        <div key={group._id} className={`group-card-visual ${isMyGroup ? 'my-group-visual' : ''} ${isLocked ? 'locked-group' : ''}`}>
+                                            <div className="group-header-visual">
+                                                <div className="header-info">
+                                                    <h3>{group.teamName}</h3>
+                                                    <button
+                                                        className={`lock-btn ${isLocked ? 'closed' : 'open'} ${!isMyGroup ? 'disabled-lock' : ''}`}
+                                                        onClick={() => isMyGroup && handleToggleLock(group._id)}
+                                                        disabled={!isMyGroup}
+                                                    >
+                                                        {isLocked ? "🔒 Trancado" : "🔓 Aberto"}
+                                                    </button>
                                                 </div>
-                                            ))}
+                                                <span className="member-badge">{group.membros.length} Trip.</span>
+                                            </div>
+
+                                            <div className="members-list-visual">
+                                                {group.membros.map((member) => (
+                                                    <div key={member._id} className="member-row">
+                                                        <div className="avatar-circle">{getInitials(member.nome)}</div>
+                                                        <div className="member-details">
+                                                            <span className="name-text">
+                                                                {member.nome} {user?._id === member._id && <span className="you-tag">(Você)</span>}
+                                                            </span>
+                                                            <span className="role-text">{member.cargo}</span>
+                                                        </div>
+                                                        {!isLocked && (
+                                                            <button
+                                                                className="move-icon-btn"
+                                                                onClick={() => openMoveModal(member, group)}
+                                                            >
+                                                                ⇄
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
                     )}
 
                     <div className="lobby-footer-section">
-                        {/* Botão extra para abrir câmera manualmente se já estiver trancado, mas sem foto (ou se quiser refazer) */}
                         {userGroup?.isLocked && (
                             <button onClick={startCamera} className="submit-button photo-btn-extra" style={{ marginRight: '15px', background: canProceedToHangar ? '#555' : '#e91e63' }}>
                                 {canProceedToHangar ? "📸 Refazer Foto" : "📸 Registrar Foto Obrigatória"}
                             </button>
                         )}
-
-                        {/* O botão só aparece se estiver trancado E com foto confirmada */}
                         {canProceedToHangar && (
                             <button onClick={handleContinue} className="submit-button lobby-btn">
                                 Prosseguir para Hangar
@@ -358,7 +343,7 @@ const LobbyGrupos = () => {
                 </div>
             </div>
 
-            {/* MODAL DE TRANSFERÊNCIA DE MEMBRO */}
+            {/* MODAL MOVER */}
             {moveModalOpen && selectedMember && (
                 <div className="modal-overlay-move">
                     <div className="modal-move-content">
@@ -372,50 +357,41 @@ const LobbyGrupos = () => {
                                     onClick={() => !g.isLocked && handleMoveMember(g._id)}
                                     disabled={g.isLocked}
                                 >
-                                    {g.teamName}
-                                    {g.isLocked && <span className="lock-icon-small">🔒</span>}
+                                    {g.teamName} {g.isLocked && "🔒"}
                                 </button>
                             ))}
-                            {groups.length <= 1 && <p className="no-targets">Nenhum outro grupo disponível.</p>}
                         </div>
                         <button className="cancel-move-btn" onClick={() => setMoveModalOpen(false)}>Cancelar</button>
                     </div>
                 </div>
             )}
 
-            {/* MODAL DA CÂMERA / FOTO */}
+            {/* MODAL FOTO */}
             {showPhotoModal && (
                 <div className="photo-modal-overlay">
                     <div className="photo-modal-content">
-                        <h3>Registro Oficial da Equipe</h3>
-                        <p>Parabéns! O grupo está formado. Sorriam para o registro!</p>
-
+                        <h3>Registro Oficial</h3>
                         <div className="camera-box">
                             {capturedImage ? (
-                                <img src={capturedImage} alt="Captura da equipe" className="camera-feed" />
+                                <img src={capturedImage} alt="Captura" className="camera-feed" />
                             ) : (
                                 <video ref={videoRef} autoPlay playsInline className="camera-feed" style={{ transform: 'scaleX(-1)' }} />
                             )}
                         </div>
-
                         <div className="photo-actions">
                             {!capturedImage ? (
-                                <button onClick={takePhoto} className="submit-button capture-btn">
-                                    🔘 CAPTURAR
-                                </button>
+                                <button onClick={takePhoto} className="submit-button capture-btn">Capturar</button>
                             ) : (
                                 <>
                                     <button onClick={savePhotoAndClose} className="submit-button save-btn" disabled={isSavingPhoto}>
-                                        {isSavingPhoto ? "Salvando..." : "✅ CONFIRMAR E SALVAR"}
+                                        {isSavingPhoto ? "Salvando..." : "Confirmar"}
                                     </button>
-                                    <button onClick={retakePhoto} className="submit-button retake-btn" disabled={isSavingPhoto}>
-                                        🔄 Tirar Outra
+                                    <button onClick={() => setCapturedImage(null)} className="submit-button retake-btn" disabled={isSavingPhoto}>
+                                        Tirar Outra
                                     </button>
                                 </>
                             )}
-                            <button onClick={closeCamera} className="cancel-move-btn" disabled={isSavingPhoto}>
-                                Cancelar
-                            </button>
+                            <button onClick={closeCamera} className="cancel-move-btn" disabled={isSavingPhoto}>Cancelar</button>
                         </div>
                     </div>
                 </div>
