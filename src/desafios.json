@@ -275,11 +275,19 @@
             "dialogo": [
                 {
                     "personagemId": "aquiles",
-                    "texto": "Você está criando uma tempestade num copo d’água. Acho que devemos deixar a poeira baixar. Depois falo com Gorjah para que ele releve um pouco,"
+                    "texto": "Você está criando uma tempestade num copo d’água. Acho que devemos deixar a poeira baixar. Depois falo com Gorjah para que ele"
                 },
                 {
                     "personagemId": "aquiles",
-                    "texto": "afinal ninguém é de ferro. A gente sabe que em toda empresa ocorre episódios assim. Veja só, até Zachary e Iuri concordam comigo."
+                    "texto": " releve um pouco,"
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "afinal ninguém é de ferro. A gente sabe que em toda empresa ocorre episódios assim. Veja só, até Zachary"
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "e Iuri concordam comigo."
                 },
                 {
                     "personagemId": "kopenawa",
@@ -287,7 +295,11 @@
                 },
                 {
                     "personagemId": "aquiles",
-                    "texto": "Kopenawa, lembre-se de nossa missão, não podemos perder tempo. Temos colônias para montar, isto não é fácil... Você tem a mania de exagerar na avaliação. Já percebeu que você sempre foi assim?... Pense nisso."
+                    "texto": "Kopenawa, lembre-se de nossa missão, não podemos perder tempo. Temos colônias para montar, isto não é fácil... Você tem a mania"
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": " de exagerar na avaliação. Já percebeu que você sempre foi assim?... Pense nisso."
                 },
                 {
                     "personagemId": "aquiles",
@@ -365,7 +377,11 @@
             "dialogo": [
                 {
                     "personagemId": "atena",
-                    "texto": "Está tudo uma loucura, todos enfrentam demandas em várias frentes acima das possibilidades; astronautas e líderes não estão se comunicando,"
+                    "texto": "Está tudo uma loucura, todos enfrentam demandas em várias frentes acima das possibilidades; astronautas e líderes não estão se,"
+                },
+                {
+                    "personagemId": "atena",
+                    "texto": "comunicando,"
                 },
                 {
                     "personagemId": "atena",
@@ -377,11 +393,27 @@
                 },
                 {
                     "personagemId": "aquiles",
-                    "texto": "A vida é assim, Atena. Aqui é uma organização – a ACEE, se esqueceu? .. Você mais parece uma divindade de sabedoria e do senso de justiça querendo proteger à todos, mas estamos diante de um desafio sem precedentes; aqui é o mundo real."
+                    "texto": "A vida é assim, Atena. Aqui é uma organização – a ACEE, se esqueceu? .. Você mais parece uma divindade de sabedoria e "
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": " do senso de justiça querendo proteger à todos, mas estamos diante de um desafio sem precedentes; aqui é o mundo real."
                 },
                 {
                     "personagemId": "atena",
-                    "texto": "Aquiles, só a coragem de correr atrás não basta, precisamos olhar para a tropa de um outro jeito, conduzi-la de um outro modo. Nossa missão é árdua e precisa de uma química de aproximação, entusiasmo e inspiração. Estamos “tarefeiros” apagando incêndios... Entendo o seu lado, mas nossas preocupações  podem caminhar juntas e transformarmos o clima... Sendo sincera, você provoca muita competição e individualismo aqui, faltam coisas."
+                    "texto": "Aquiles, só a coragem de correr atrás não basta, precisamos olhar para a tropa de um outro jeito, conduzi-la de um outro modo."
+                },
+                {
+                    "personagemId": "atena",
+                    "texto": "Nossa missão é árdua e precisa de uma química de aproximação, entusiasmo e inspiração. Estamos “tarefeiros” apagando incêndios"
+                },
+                {
+                    "personagemId": "atena",
+                    "texto": " Entendo o seu lado, mas nossas preocupações  podem caminhar juntas e transformarmos o clima... Sendo sincera, você "
+                },
+                {
+                    "personagemId": "atena",
+                    "texto": " provoca muita competição e individualismo aqui, faltam coisas."
                 },
                 {
                     "personagemId": "aquiles",
@@ -393,7 +425,11 @@
                 },
                 {
                     "personagemId": "aquiles",
-                    "texto": "Quero pensar, mas tenho a sensação de que estaria me abrindo demais, dando espaço para ouvir coisas sem nexo como líder da estação que sou."
+                    "texto": "Quero pensar, mas tenho a sensação de que estaria me abrindo demais, dando espaço para ouvir coisas sem nexo como "
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "líder da estação que sou."
                 }
             ],
             "opcoes": [

@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./AuthContext";
+import { useConfig } from "./ConfigContext"; // Importação do Contexto de Configuração
 import axios from "axios";
 import "./LobbyGrupos.css";
-
-// CORREÇÃO: Usar rota relativa para Proxy
-const API_URL = "/api";
 
 const LobbyGrupos = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { apiBaseUrl } = useConfig(); // Obtém a URL correta do backend (AWS ou Local)
 
     // Referências
     const canvasRef = useRef(null); // Para o fundo de estrelas
@@ -29,7 +28,7 @@ const LobbyGrupos = () => {
     const [capturedImage, setCapturedImage] = useState(null);
     const [isSavingPhoto, setIsSavingPhoto] = useState(false);
 
-    // NOVO: Estado para controlar a exibição imediata do botão após salvar
+    // Estado para controlar a exibição imediata do botão após salvar
     const [localPhotoConfirmed, setLocalPhotoConfirmed] = useState(false);
 
     // Efeito Visual de Estrelas (Background)
@@ -79,17 +78,25 @@ const LobbyGrupos = () => {
         };
     }, []);
 
-    // Função para buscar dados
+    // Função para buscar dados com FILTRAGEM RIGOROSA DO GAME
     const fetchGroups = async () => {
-        if (!user?.gameNumber) return;
+        if (!user?.gameNumber || !apiBaseUrl) return;
+
         try {
-            const response = await axios.get(`${API_URL}/games/${user.gameNumber}/groups-details`);
+            const response = await axios.get(`${apiBaseUrl}/games/${user.gameNumber}/groups-details`);
             if (response.data.success) {
-                setGroups(response.data.groups);
+
+                // --- LÓGICA DE FILTRAGEM ADICIONADA ---
+                // Garante que apenas grupos com o mesmo gameNumber do usuário sejam exibidos
+                const filteredGroups = response.data.groups.filter(group =>
+                    Number(group.gameNumber) === Number(user.gameNumber)
+                );
+
+                setGroups(filteredGroups);
 
                 // Verifica se o meu grupo já tem foto salva no banco para atualizar o estado local
-                const myGroup = response.data.groups.find(g => g._id === user?.grupo?._id);
-                // Assume que o backend retorna a propriedade 'foto' ou 'photo' ou 'teamPhoto'
+                const myGroup = filteredGroups.find(g => g._id === user?.grupo?._id);
+                // Verifica propriedades comuns onde a foto pode estar salva
                 if (myGroup && (myGroup.foto || myGroup.photo || myGroup.teamPhoto)) {
                     setLocalPhotoConfirmed(true);
                 }
@@ -101,18 +108,19 @@ const LobbyGrupos = () => {
         }
     };
 
-    // Polling de dados
+    // Polling de dados (Atualiza a cada 2 segundos)
     useEffect(() => {
         fetchGroups();
         const interval = setInterval(fetchGroups, 2000);
         return () => clearInterval(interval);
-    }, [user]);
+    }, [user, apiBaseUrl]); // Adicionado apiBaseUrl nas dependências
 
     // --- FUNÇÕES DE LÓGICA DE GRUPO ---
 
     const handleToggleLock = async (groupId) => {
+        if (!apiBaseUrl) return;
         try {
-            const response = await axios.post(`${API_URL}/group/toggle-lock`, {
+            const response = await axios.post(`${apiBaseUrl}/group/toggle-lock`, {
                 userId: user._id,
                 groupId: groupId
             });
@@ -137,9 +145,9 @@ const LobbyGrupos = () => {
     };
 
     const handleMoveMember = async (targetGroupId) => {
-        if (!selectedMember) return;
+        if (!selectedMember || !apiBaseUrl) return;
         try {
-            const response = await axios.post(`${API_URL}/group/move-member`, {
+            const response = await axios.post(`${apiBaseUrl}/group/move-member`, {
                 memberId: selectedMember._id,
                 targetGroupId: targetGroupId
             });
@@ -202,11 +210,11 @@ const LobbyGrupos = () => {
     };
 
     const savePhotoAndClose = async () => {
-        if (!capturedImage) return;
+        if (!capturedImage || !apiBaseUrl) return;
         setIsSavingPhoto(true);
 
         try {
-            await axios.post(`${API_URL}/group/save-photo`, {
+            await axios.post(`${apiBaseUrl}/group/save-photo`, {
                 gameNumber: user.gameNumber,
                 teamName: user.grupo.teamName,
                 image: capturedImage
@@ -219,8 +227,6 @@ const LobbyGrupos = () => {
             await fetchGroups();
 
             closeCamera();
-            // Feedback opcional ou apenas fecha silenciosamente para mostrar o botão do Hangar
-            // alert("Foto da equipe registrada com sucesso!"); 
         } catch (error) {
             console.error(error);
             alert("Erro ao salvar a foto. Tente novamente.");
@@ -254,8 +260,8 @@ const LobbyGrupos = () => {
     const canProceedToHangar = userGroup?.isLocked && (localPhotoConfirmed || userGroup?.foto || userGroup?.photo || userGroup?.teamPhoto);
 
     return (
-        <div className="background">
-            <canvas ref={canvasRef} className="stars"></canvas>
+        <div className="lobby-background"> {/* Corrigido classe CSS para lobby-background se estiver usando LobbyGrupos.css */}
+            <canvas ref={canvasRef} className="lobby-stars"></canvas> {/* Corrigido classe CSS */}
 
             <div className="lobby-container-visual">
                 {/* CABEÇALHO */}
