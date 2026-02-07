@@ -381,9 +381,11 @@ const CadastroForm = () => {
             <button type="submit" className={isLaunching ? "launching" : ""}>
               {isLaunching ? "🚀" : t('loginButton')}
             </button>
+            {/* LINK REMOVIDO PARA EVITAR REGISTRO MANUAL
             <p onClick={() => setIsRegistering(true)} className="toggle-form">
               {t('toggleToRegister')}
             </p>
+            */}
           </form>
         ) : (
           <form onSubmit={handleRegisterSubmit} className="cadastro-form">
