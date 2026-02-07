@@ -232,17 +232,19 @@ const CadastroForm = () => {
     if (!user.autorizado) { navigate("/ContadorRegressivo"); return; }
     if (!user.grupo) { navigate("/BoasVindas"); return; }
 
-    // --- NOVA LÓGICA: VERIFICAÇÃO DA FOTO ---
-    // Verifica se existe alguma propriedade de foto no objeto do grupo.
+    // --- NOVA LÓGICA: VERIFICAÇÃO DE FOTO E TRAVA DO GRUPO ---
+    // Verifica se o grupo já possui uma foto registrada e se está trancado (isLocked)
     const hasGroupPhoto = user.grupo.foto || user.grupo.photo || user.grupo.teamPhoto;
+    const isLocked = user.grupo.isLocked;
 
-    // Se o grupo existe mas NÃO tem foto, força o redirecionamento para o Lobby
-    if (!hasGroupPhoto) {
+    // Se o grupo NÃO estiver trancado OU NÃO tiver foto, o usuário DEVE passar pelo Lobby
+    if (!isLocked || !hasGroupPhoto) {
       navigate("/LobbyGrupos");
       return;
     }
-    // ----------------------------------------
+    // --------------------------------------------------------
 
+    // Se já está trancado e tem foto, segue o fluxo normal das etapas seguintes:
     if (!user.grupo.naveEscolhida) { navigate("/SelecaoNave"); return; }
     if (!user.grupo.equipeEscolhida) { navigate("/SelecaoEquipe"); return; }
     navigate("/CompraDeMaterial");
