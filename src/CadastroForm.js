@@ -64,7 +64,6 @@ const CadastroForm = () => {
   const isRegisteringFromUrl = searchParams.get("form") === "cadastro";
   const [isLaunching, setIsLaunching] = useState(false);
   const [isRegistering, setIsRegistering] = useState(isRegisteringFromUrl);
-  const [usuarioCriado, setUsuarioCriado] = useState(null);
   const [emailAvailable, setEmailAvailable] = useState(true);
   const [emailChecked, setEmailChecked] = useState(false);
   const canvasRef = useRef(null);
@@ -144,11 +143,10 @@ const CadastroForm = () => {
     }
   }, [registerData.senha, confirmSenha, isRegistering, t]);
 
-  // CORREÇÃO: Listener para limpar estado caso o Fullscreen bugue
+  // Listener para limpar estado caso o Fullscreen bugue
   useEffect(() => {
     const handleScreenChange = () => {
       if (!document.fullscreenElement) {
-        // Força um reflow leve caso saia do fullscreen
         window.dispatchEvent(new Event('resize'));
       }
     };
@@ -158,11 +156,18 @@ const CadastroForm = () => {
     };
   }, []);
 
+  // Animação de estrelas no fundo
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    const stars = Array.from({ length: 100 }, () => ({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight, radius: Math.random() * 2, speed: Math.random() * 0.3, }));
+    const stars = Array.from({ length: 100 }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      radius: Math.random() * 2,
+      speed: Math.random() * 0.3
+    }));
+
     let animationFrameId;
     const animateStars = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -176,9 +181,11 @@ const CadastroForm = () => {
       });
       animationFrameId = requestAnimationFrame(animateStars);
     };
+
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
     animateStars();
+
     return () => {
       cancelAnimationFrame(animationFrameId);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -228,25 +235,32 @@ const CadastroForm = () => {
     }
   };
 
+  // --- FUNÇÃO DE REDIRECIONAMENTO CORRIGIDA ---
   const redirectToNextStep = (user) => {
+    console.log("🔍 Verificando redirecionamento para:", user.email);
+
     if (!user.autorizado) { navigate("/ContadorRegressivo"); return; }
     if (!user.grupo) { navigate("/BoasVindas"); return; }
 
-    // --- NOVA LÓGICA: VERIFICAÇÃO DE FOTO E TRAVA DO GRUPO ---
-    // Verifica se o grupo já possui uma foto registrada e se está trancado (isLocked)
-    const hasGroupPhoto = user.grupo.foto || user.grupo.photo || user.grupo.teamPhoto;
-    const isLocked = user.grupo.isLocked;
+    // Verifica APENAS se o grupo está trancado
+    // Tenta 'isLocked' (padrão Mongoose) ou 'locked'
+    const isLocked = user.grupo.isLocked === true || user.grupo.locked === true;
 
-    // Se o grupo NÃO estiver trancado OU NÃO tiver foto, o usuário DEVE passar pelo Lobby
-    if (!isLocked || !hasGroupPhoto) {
+    console.log("🔒 Status de bloqueio do grupo:", isLocked);
+
+    // Se NÃO estiver trancado, vai para o Lobby para formar o time
+    if (!isLocked) {
+      console.log("⚠️ Grupo aberto: Redirecionando para Lobby.");
       navigate("/LobbyGrupos");
       return;
     }
-    // --------------------------------------------------------
 
-    // Se já está trancado e tem foto, segue o fluxo normal das etapas seguintes:
+    // Se estiver trancado, PULA o lobby e verifica as próximas etapas
+    console.log("✅ Grupo trancado: Avançando para próximas etapas.");
+
     if (!user.grupo.naveEscolhida) { navigate("/SelecaoNave"); return; }
     if (!user.grupo.equipeEscolhida) { navigate("/SelecaoEquipe"); return; }
+
     navigate("/CompraDeMaterial");
   };
 
@@ -272,21 +286,21 @@ const CadastroForm = () => {
         const loggedInUser = response.data.usuario;
         login(loggedInUser);
 
-        // CORREÇÃO: Adiciona um pequeno delay para garantir que o navegador 
-        // processe o Fullscreen antes de desmontar o componente atual
+        // Delay para garantir que o state/fullscreen processe
         setTimeout(() => {
           if (loggedInUser.administrador === true) {
             navigate("/admin");
           } else {
             redirectToNextStep(loggedInUser);
           }
-        }, 150);
+        }, 200);
 
       } else {
         alert(`❌ ${response.data.message}`);
         setIsLaunching(false);
       }
     } catch (error) {
+      console.error(error);
       alert(`❌ Erro ao fazer login!`);
       setIsLaunching(false);
     }
@@ -322,7 +336,6 @@ const CadastroForm = () => {
       } else {
         response = await axios.post(`${API_BASE_URL}/register`, dataToSend);
         if (response.data.success) {
-          setUsuarioCriado(response.data.usuario);
           alert("✅ Cadastro realizado com sucesso!");
           setIsRegistering(false);
         } else {
