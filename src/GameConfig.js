@@ -41,7 +41,7 @@ const PlayersTable = ({ players, onDelete, onCopyLink, setPlayerMessage }) => {
     const { frontendUrl } = useConfig();
 
     const handleCopyClick = async (player) => {
-        const baseUrl = frontendUrl || 'http://localhost:3000/';
+        const baseUrl = frontendUrl || 'https://game.galacticquest.com.br/';
         const paramsObject = {
             nome: player.nome || '',
             email: player.email || '',
