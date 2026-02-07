@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, lazy, Suspense, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import './DecolagemMarte.css';
+import './LojaEspacial.css'; // Garante que o CSS do modal seja carregado
 import TelemetryDisplay from './TelemetryDisplay';
 import SpaceView from './SpaceView';
 import { useAudio } from './AudioManager';
@@ -18,7 +19,64 @@ import ModalDesafio from './ModalDesafio';
 import ModalConfirmacaoViagem from './ModalConfirmacaoViagem';
 import { useConfig } from './ConfigContext';
 import LojaEspacial from './LojaEspacial';
-import SosSurpriseModal from './SosSurpriseModal';
+
+// --- DEFINIÇÃO INTERNA DO COMPONENTE SOS SURPRESA PARA EVITAR ERROS DE IMPORTAÇÃO ---
+const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano }) => {
+  if (!event) return null;
+
+  const getRiskColor = (id) => {
+    switch (id) {
+      case 1: return '#ff4444'; // Piratas
+      case 2: return '#ffaa00'; // Astronauta
+      case 3: return '#00ccff'; // Nave
+      default: return '#aaaaaa'; // Fantasma
+    }
+  };
+
+  const riskColor = getRiskColor(event.id);
+
+  return (
+    <div className="store-modal-overlay main-display-overlay">
+      <div className="store-modal-container" style={{ borderColor: riskColor, boxShadow: `0 0 30px ${riskColor}66` }}>
+        <div className="store-header" style={{ borderBottomColor: `${riskColor}4D` }}>
+          <h2 style={{ color: riskColor, textShadow: `0 0 8px ${riskColor}80` }}>
+            RELATÓRIO DE S.O.S
+          </h2>
+        </div>
+        <div className="store-grid challenges-mode" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <div className="store-item" style={{ width: '100%', maxWidth: '800px', borderColor: riskColor, flexDirection: 'row', display: 'flex', gap: '20px', alignItems: 'center' }}>
+            <img
+              src={event.image}
+              alt={event.name}
+              className="store-item-image"
+              style={{ width: '200px', height: '200px', objectFit: 'contain', filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.5))' }}
+              onError={(e) => { e.target.src = '/images/ACEE.png'; }}
+            />
+            <div className="store-item-details" style={{ textAlign: 'left' }}>
+              <div className="store-item-name" style={{ color: riskColor, fontSize: '2rem', marginBottom: '15px' }}>
+                {event.name}
+              </div>
+              <div className="description-wrapper">
+                <div className="store-item-description" style={{ fontSize: '1.2rem', lineHeight: '1.6', color: '#eee' }}>
+                  {event.description}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="store-action-buttons" style={{ position: 'relative', justifyContent: 'center', marginTop: '20px', bottom: 'auto', right: 'auto' }}>
+          <button className="buy-button action-button-mudar" onClick={onMudarRota} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>
+            MUDAR ROTA
+          </button>
+          <button className="buy-button action-button-seguir" onClick={onSeguirPlano} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>
+            SEGUIR PLANO
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+// -------------------------------------------------------------------------------
 
 const GalacticVirtudesPage = lazy(() => import('./GalacticVirtudesPage').catch(() => ({
   default: () => <div className="map-fallback">Glossário Indisponível</div>
@@ -72,10 +130,6 @@ const hasWaterList = new Set([
   "Lua", "Europa", "Ganímedes", "Calisto", "Titã", "Encelado", "Tritão",
   "Caronte", "Titania", "Oberon", "Vesta", "TRAPPIST-1e", "Kepler-186f",
   "Terra", "Proxima Centauri b"
-]);
-
-const stationList = new Set([
-  "acee", "almaz", "mol", "tiangong", "skylab", "salyut", "delfos", "boctok", "boktok"
 ]);
 
 const degradationRates = {
@@ -1089,7 +1143,6 @@ const DecolagemMarte = () => {
             </div>
             <div className="monitor-screen">
               {isSosMinervaActive ? (
-                // Substituído <video> por <img> usando o GIF de velocidade
                 <img
                   src="/images/Minerva/Minerva-Informando-velocidade.gif"
                   alt="Alerta S.O.S Minerva"
@@ -1178,7 +1231,7 @@ const DecolagemMarte = () => {
             hasRoute={plannedRoute && (routeIndex + 1) < plannedRoute.length}
           />}
 
-          {/* NOVO: Modal de SOS Surpresa */}
+          {/* Modal de SOS Surpresa INTEGRADO */}
           {showSosSurprise && sosSurpriseEvent && (
             <SosSurpriseModal
               event={sosSurpriseEvent}
@@ -1201,7 +1254,6 @@ const DecolagemMarte = () => {
           lastImpactTimestamp={lastImpactTimestamp}
           isForcedMapEdit={isForcedMapEdit}
           onSosDetected={handleSosDetected}
-          // Passamos o sinal ativo gerado aqui no Pai para o filho (mapa)
           sosSignalData={activeSosSignal}
         />
       </div>
