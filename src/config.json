@@ -1,6 +1,6 @@
 {
     "__ANTIGO_frontendUrl": "http://192.168.15.8:3000",
-    "frontendUrl": "*",
+    "frontendUrl": "https://game.galacticquest.com.br",
     "__ANTIGO_apiBaseUrl": "http://192.168.15.8:5000",
     "apiBaseUrl": "http://3.136.236.17:5000",
     "serverPort": 5000
