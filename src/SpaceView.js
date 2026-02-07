@@ -7,7 +7,7 @@ const planetImageMap = {
   lua: '/images/Planets/Lua.png',
   mercurio: '/images/Planets/Mercurio-Rotacionando.gif',
   venus: '/images/Planets/venus-rotacionando.webm',
-  jupiter: '/images/Planets/Jupiter-Rotacionando.webm',
+  jupiter: '/images/Planets/Jupiter_Rotacionando.webm',
   proximacentauri: '/images/Planets/proximacentauri-rotacionando.gif',
   makemake: '/images/Planets/makemake-rotacionando.gif',
   ceres: '/images/Planets/ceres-rotacionando.gif',
