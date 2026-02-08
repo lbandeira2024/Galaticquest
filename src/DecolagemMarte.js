@@ -509,7 +509,7 @@ const DecolagemMarte = () => {
 
     setMinervaImage('/images/Minerva/Minerva-Vluz.gif');
 
-    // Áudio curto de ativação
+    // Áudio curto de ativação (Garante que toca ao clicar também)
     playSound('/sounds/05.Dobra-Active.mp3');
 
     // CORREÇÃO: Uso direto da URL (sem timestamp) para aproveitar o cache e evitar delay
@@ -674,9 +674,10 @@ const DecolagemMarte = () => {
     // Se a velocidade chegou a ~60.000, a dobra não está ativa e não está habilitada, e temos distância
     if (telemetry.velocity.kmh >= 59500 && !isDobraEnabled && !isDobraAtivada && distanceKm > 500000) {
       setIsDobraEnabled(true);
-      // Opcional: playSound('/sounds/ready-notification.mp3'); 
+      // Toca o som quando a dobra fica disponível (habilitada)
+      playSound('/sounds/05.Dobra-Active.mp3');
     }
-  }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm]);
+  }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm, playSound]);
   // ------------------------------------------------------------------
 
   // --- EFEITO S.O.S (Geração de novos sinais no mapa) ---
