@@ -29,7 +29,7 @@ const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano }) => {
       case 1: return '#ff4444'; // Piratas
       case 2: return '#ffaa00'; // Astronauta
       case 3: return '#00ccff'; // Nave
-      default: return '#aaaaaa'; // Fantasma
+      default: return '#aaaaaa'; // Alien
     }
   };
 
@@ -97,7 +97,7 @@ const PLANET_DATA_FOR_SOS = [
   { name: "Eris", orbitRadius: 165 }
 ];
 
-// LISTA DE EVENTOS SOS SURPRESA
+// LISTA DE EVENTOS SOS SURPRESA - ATUALIZADA
 const SOS_EVENTS_LIST = [
   {
     id: 1,
@@ -118,9 +118,9 @@ const SOS_EVENTS_LIST = [
     image: '/images/destroyed_ship.png'
   },
   {
-    id: 4,
-    name: 'Sinal Fantasma',
-    description: 'Chegamos às coordenadas, mas... nada. Apenas o vazio. O sinal deve ter sido uma anomalia magnética ou eco de radar.',
+    id: 4, // TIPO 4 ALTERADO CONFORME SOLICITADO
+    name: 'Objeto Alienígena',
+    description: 'Identificamos um artefato de origem desconhecida emitindo o sinal. Sua tecnologia parece avançada e fora dos padrões da ACEE.',
     image: '/images/static_signal.png'
   }
 ];
@@ -229,6 +229,9 @@ const DecolagemMarte = () => {
   const takeoffApplied = useRef(false);
   const [isCooldownOver, setIsCooldownOver] = useState(true);
   const [isForcedMapEdit, setIsForcedMapEdit] = useState(false);
+
+  // NOVO: Estado para controle de resfriamento da dobra
+  const [isWarpCooldown, setIsWarpCooldown] = useState(false);
 
   const [showSOSModal, setShowSOSModal] = useState(false);
   const [sosCost, setSosCost] = useState(0);
@@ -528,6 +531,12 @@ const DecolagemMarte = () => {
       setIsDobraAtivada(false);
       saveTelemetryData();
       stopAllAudio();
+
+      // --- COOLDOWN DE 20 SEGUNDOS ---
+      setIsWarpCooldown(true);
+      setTimeout(() => { setIsWarpCooldown(false); }, 20000);
+      // -------------------------------
+
       const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
       const approachDistanceThreshold = 800000;
       playSound('/sounds/power-down-Warp.mp3');
@@ -670,14 +679,15 @@ const DecolagemMarte = () => {
   useEffect(() => { isDobraAtivadaRef.current = isDobraAtivada; }, [isDobraAtivada]);
 
   // --- NOVO EFEITO: Monitorar velocidade para habilitar Dobra ---
+  // --- ATUALIZADO: Agora respeita o isWarpCooldown ---
   useEffect(() => {
-    // Se a velocidade chegou a ~60.000, a dobra não está ativa e não está habilitada, e temos distância
-    if (telemetry.velocity.kmh >= 59500 && !isDobraEnabled && !isDobraAtivada && distanceKm > 500000) {
+    // Se a velocidade chegou a ~60.000, a dobra não está ativa e não está habilitada, e temos distância, e SEM COOLDOWN
+    if (telemetry.velocity.kmh >= 59500 && !isDobraEnabled && !isDobraAtivada && distanceKm > 500000 && !isWarpCooldown) {
       setIsDobraEnabled(true);
       // Toca o som quando a dobra fica disponível (habilitada)
       playSound('/sounds/05.Dobra-Active.mp3');
     }
-  }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm, playSound]);
+  }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm, playSound, isWarpCooldown]);
   // ------------------------------------------------------------------
 
   // --- EFEITO S.O.S (Geração de novos sinais no mapa) ---
@@ -1041,6 +1051,15 @@ const DecolagemMarte = () => {
         if (newDistance <= 0 && !arrivedAtMars) {
           setArrivedAtMars(true);
           setSpeed(0);
+
+          // --- FIX: GARANTIA DE EVENTO ---
+          // Se chegou a 0km sem evento sorteado (pulo da dobra), sorteia agora.
+          if (!sosSurpriseEvent) {
+            const randIndex = Math.floor(Math.random() * 4);
+            setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
+          }
+          // -------------------------------
+
           setShowSosSurprise(true);
           // Não executa lógica padrão de chegada (O2, save) aqui
           return;
@@ -1053,6 +1072,12 @@ const DecolagemMarte = () => {
         if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
         stopAllAudio();
         isDobraAtivadaRef.current = false; setIsDobraAtivada(false); saveTelemetryData(); setShowWarpDisabledMessage(true); setMinervaImage('/images/Minerva/Minerva_Active.gif'); playSound('/sounds/power-down-Warp.mp3'); setTimeout(() => setShowWarpDisabledMessage(false), 10000);
+
+        // --- APLICAÇÃO DO COOLDOWN DE 20 SEGUNDOS (Caso pare por distância) ---
+        setIsWarpCooldown(true);
+        setTimeout(() => { setIsWarpCooldown(false); }, 20000);
+        // ---------------------------------------------------------------------
+
         const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
         const approachDistanceThreshold = 800000;
         if (!isMoon && newDistance <= approachDistanceThreshold && !isFinalApproachRef.current) { setIsFinalApproach(true); approachSoundPlayed.current = true; } else { setIsBoostingTo60k(false); }
