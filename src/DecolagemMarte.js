@@ -532,10 +532,10 @@ const DecolagemMarte = () => {
       saveTelemetryData();
       stopAllAudio();
 
-      // --- COOLDOWN DE 20 SEGUNDOS ---
+      // --- APLICAÇÃO DO COOLDOWN DE 20 SEGUNDOS ---
       setIsWarpCooldown(true);
       setTimeout(() => { setIsWarpCooldown(false); }, 20000);
-      // -------------------------------
+      // -------------------------------------------
 
       const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
       const approachDistanceThreshold = 800000;
@@ -625,6 +625,9 @@ const DecolagemMarte = () => {
   const hasStartedAudioRef = useRef(false);
 
   useEffect(() => {
+    // FIX: Só inicia a sequência de decolagem quando o carregamento terminar (isLoadingRoute = false)
+    if (isLoadingRoute) return;
+
     unlockAudio();
 
     if (!hasStartedAudioRef.current) {
@@ -666,7 +669,7 @@ const DecolagemMarte = () => {
       clearTimeout(monitorTimer3);
     };
     // eslint-disable-next-line
-  }, []);
+  }, [isLoadingRoute]); // FIX: Dependência adicionada para reagir ao fim do loading
 
   useEffect(() => {
     return () => {
