@@ -1712,13 +1712,38 @@
             "dialogo": [
                 {
                     "personagemId": "sisifo",
-                    "texto": "Pessoal, quero que vocês assimilem o que vou dizer: neste JOB ROTATION para motivá-los, envolvendo desde o pouso no “planetinha misterioso” até a sua decolagem, leiam os manuais das funções que combinamos. Tirem suas dúvidas com o titular da função; ajam com resiliência nesta tarefa. Quando estiverem prontos iniciaremos então o procedimento de descida!",
-                    "duracao": 20000
+                    "texto": "Pessoal, quero que vocês assimilem o que vou dizer: neste JOB ROTATION para motivá-los, envolvendo desde o pouso no",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "“planetinha misterioso” até a sua decolagem, leiam os manuais das funções que combinamos. Tirem suas dúvidas com o titular da",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "“função; ajam com resiliência nesta tarefa. Quando estiverem prontos iniciaremos então o procedimento de descida!",
+                    "duracao": 5000
                 },
                 {
                     "personagemId": "aquiles",
-                    "texto": "Noguchi, Dra. Chiaki, Gorjah e Atena, seguimos com o programa Job Rotation. Noguchi, como Senior da equipe, segue com autonomia fazendo a função de Gorjah na logística, mas me ajuda no coaching ao próprio Gorjah que vai atuar na mecânica aeroespacial. Atena fará como combinamos a função de Noguchi na engenharia geral aeroespacial (projetos e reparos) com meu coaching e o dele quando precisar. Atena ainda se encontra em fase de treinamento. Certo, Atena?...  Por fim, a Dra. Chiaki continua cumprindo seu papel como médica espacial, mas assume paralelamente a função de astrobióloga de Atena, de quem receberá o coaching. O objetivo é conseguir a adaptação de todos com celeridade. \n\nObservei que todos experimentaram os novos papéis. Vi que Dra. Chiaki precisa ser ainda dirigida neste momento. Treinada e apoiada também, até conseguir o desempenho aguardado. Isto é natural, Dra. Chiaki. Já Atena está pronta para algumas delegações, podendo agir com flexibilidade. Para algumas tarefas especificas Atena, creio que você ainda precise de nosso apoio. Adiante, em conformidade com a maturidade e nível de resposta de cada um, poderemos avançar à segunda rodada no giro das funções. Seguimos para o nosso desafio maior parceiros, rumo ao “planetinha misterioso”. Oremos!... Sísifo que me ouve em áudio, acabamos aqui; vamos para a ação. Boa sorte, parceiro!”",
-                    "duracao": 45000
+                    "texto": "Noguchi, Dra. Chiaki, Gorjah e Atena, seguimos com o programa Job Rotation. Noguchi, como Senior da equipe, segue com autonomia",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": " fazendo a função de Gorjah na logística, mas me ajuda no coaching ao próprio Gorjah que vai atuar na mecânica aeroespacial.",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": " Atena fará como combinamos a função de Noguchi na engenharia geral aeroespacial (projetos e reparos) com meu coaching e o dele",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": " Atena fará como combinamos a função de Noguchi na engenharia geral aeroespacial (projetos e reparos) com meu coaching e o dele quando precisar. Atena ainda se encontra em fase de treinamento. Certo, Atena?...  Por fim, a Dra. Chiaki continua cumprindo seu papel como médica espacial, mas assume paralelamente a função de astrobióloga de Atena, de quem receberá o coaching. O objetivo é conseguir a adaptação de todos com celeridade. \n\nObservei que todos experimentaram os novos papéis. Vi que Dra. Chiaki precisa ser ainda dirigida neste momento. Treinada e apoiada também, até conseguir o desempenho aguardado. Isto é natural, Dra. Chiaki. Já Atena está pronta para algumas delegações, podendo agir com flexibilidade. Para algumas tarefas especificas Atena, creio que você ainda precise de nosso apoio. Adiante, em conformidade com a maturidade e nível de resposta de cada um, poderemos avançar à segunda rodada no giro das funções. Seguimos para o nosso desafio maior parceiros, rumo ao “planetinha misterioso”. Oremos!... Sísifo que me ouve em áudio, acabamos aqui; vamos para a ação. Boa sorte, parceiro!”",
+                    "duracao": 5000
                 }
             ],
             "opcoes": [

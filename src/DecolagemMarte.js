@@ -1279,7 +1279,8 @@ const DecolagemMarte = () => {
           <div className="glossary-button-container" style={{ marginTop: '20px', position: 'relative', zIndex: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <button className="glossary-button" onClick={() => !isPaused && setShowGlossary(true)} disabled={isPaused}>GLOSSÁRIO</button>
-              <button className="bolsa-button" onClick={handleInventory} disabled={isPaused} title="Abrir Bolsa Espacial"><img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" /></button>
+              {/* CORREÇÃO: Botão da Bolsa desativado */}
+              <button className="bolsa-button" onClick={handleInventory} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed' }}><img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" /></button>
             </div>
           </div>
 
