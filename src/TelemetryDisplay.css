@@ -59,10 +59,20 @@
   margin: 5px 0;
 }
 
+/* --- MUDANÇA PRINCIPAL AQUI --- */
 .progress-bar {
   height: 100%;
   border-radius: 10px;
   transition: width 0.3s ease;
+
+  /* Flexbox para centralizar o texto DENTRO da barra colorida */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Garante que o texto não suma se a barra for muito pequena */
+  min-width: fit-content;
+  padding: 0 5px;
 }
 
 .progress-bar.blue {
@@ -80,15 +90,16 @@
   box-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
 }
 
+/* --- AJUSTE NO TEXTO --- */
 .progress-value {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  /* Removemos o position absolute antigo */
   font-size: 0.7em;
   color: #fff;
   font-weight: bold;
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  /* Impede que o texto quebre linha */
+  z-index: 2;
 }
 
 .space-coins-panel {
@@ -332,14 +343,10 @@
 /* --- CORREÇÃO DA POSIÇÃO DA MODAL DE TRANSFERÊNCIA --- */
 .transfer-modal {
   position: fixed;
-  /* Anula o top anterior para usar bottom como referência */
   top: auto;
-  /* Empurra a modal para o meio da tela, calculando a partir do painel pai */
   bottom: 50vh;
   left: 50%;
-  /* Move 50% para baixo para centralizar exatamente no meio vertical */
   transform: translate(-50%, 50%);
-
   z-index: 9999;
   width: 90%;
   max-width: 800px;

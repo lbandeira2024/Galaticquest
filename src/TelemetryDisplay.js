@@ -69,8 +69,10 @@ const ProgressBar = ({ value: targetValue }) => {
       <div
         className={`progress-bar ${progressClass}`}
         style={{ width: `${Math.min(100, Math.max(0, finalValue))}%` }}
-      ></div>
-      <span className="progress-value">{finalValue}%</span>
+      >
+        {/* O texto agora está DENTRO da barra para centralização relativa à parte colorida */}
+        <span className="progress-value">{finalValue}%</span>
+      </div>
     </div>
   );
 };

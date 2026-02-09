@@ -1122,7 +1122,7 @@ const DecolagemMarte = () => {
   }, [arrivedAtMars, activeChallengeData, showSosSurprise, isDeparting, selectedPlanet]);
   // -----------------------------------------------------------
 
-  // --- CORREÇÃO: MOTOR DE DIÁLOGO (AVANÇO AUTOMÁTICO) ---
+  // --- CORREÇÃO: MOTOR DE DIÁLOGO (AVANÇO AUTOMÁTICO SIMPLIFICADO) ---
   useEffect(() => {
     // Só roda se a transmissão estiver ativa e houver um desafio carregado
     if (isTransmissionStarting && activeChallengeData && activeChallengeData.dialogo) {
@@ -1145,14 +1145,11 @@ const DecolagemMarte = () => {
 
       // 2. Toca o áudio se existir
       if (currentStep.audio) {
-        // Descomente a linha abaixo se o áudio for gerenciado diretamente por este useEffect
         // playTrack(currentStep.audio, { loop: false }); 
       }
 
-      // 3. Calcula o tempo de duração desta fala
-      // Se tiver 'duracao' no JSON, usa ela. 
-      // Se não tiver (como em Mercúrio), calcula um tempo razoável de leitura (aprox 60ms por letra + 2 seg de pausa base)
-      const tempoLeitura = currentStep.duracao || (currentStep.texto.length * 60) + 2000;
+      // 3. Usa APENAS a duração do JSON ou um padrão de segurança
+      const tempoLeitura = currentStep.duracao || 5000; // 5 segundos de fallback se esquecer no JSON
 
       console.log(`Lendo fala ${dialogueIndex + 1}/${dialogoAtual.length}. Próximo em: ${tempoLeitura}ms`);
 
