@@ -901,7 +901,9 @@ const DecolagemMarte = () => {
   }, [travelTime, travelStarted, isPaused, playSound]);
 
   useEffect(() => {
-    if (isPaused || isDobraAtivada) return;
+    // FIX: Adicionado isLoadingRoute para evitar som de empuxo na inicialização (distância 0)
+    if (isPaused || isDobraAtivada || isLoadingRoute) return;
+
     const isMoon = selectedPlanet.nome.toLowerCase() === 'lua';
     const approachDistanceThreshold = 800000;
     if (!isMoon && distanceKm <= approachDistanceThreshold && !approachSoundPlayed.current) {
@@ -909,7 +911,7 @@ const DecolagemMarte = () => {
       setIsFinalApproach(true);
       approachSoundPlayed.current = true;
     }
-  }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused]);
+  }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]); // Dependência atualizada
 
   useEffect(() => {
     if (isPaused) return;
