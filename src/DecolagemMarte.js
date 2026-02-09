@@ -1098,7 +1098,6 @@ const DecolagemMarte = () => {
     if (arrivedAtMars && !activeChallengeData && !showSosSurprise && !isDeparting) {
 
       // Normaliza o nome do planeta (remove acentos, minúsculas) para bater com o JSON
-      // Ex: "Mercúrio" vira "mercurio"
       const planetNameNormalized = selectedPlanet?.nome
         ?.toLowerCase()
         .trim()
@@ -1113,6 +1112,7 @@ const DecolagemMarte = () => {
       if (desafioEncontrado) {
         console.log("Desafio encontrado para:", planetNameNormalized);
         setActiveChallengeData(desafioEncontrado);
+        setDialogueIndex(0); // Garante que comece sempre da primeira fala do array
         setShowDesafioModal(true); // Abre o Modal de Contexto
 
         // O diálogo começará automaticamente quando o modal for fechado,
@@ -1121,6 +1121,51 @@ const DecolagemMarte = () => {
     }
   }, [arrivedAtMars, activeChallengeData, showSosSurprise, isDeparting, selectedPlanet]);
   // -----------------------------------------------------------
+
+  // --- CORREÇÃO: MOTOR DE DIÁLOGO (AVANÇO AUTOMÁTICO) ---
+  useEffect(() => {
+    // Só roda se a transmissão estiver ativa e houver um desafio carregado
+    if (isTransmissionStarting && activeChallengeData && activeChallengeData.dialogo) {
+
+      const dialogoAtual = activeChallengeData.dialogo;
+      const currentStep = dialogoAtual[dialogueIndex];
+
+      // 1. Verifica se o diálogo acabou
+      if (!currentStep) {
+        // Fim do diálogo: para a transmissão, marca como finalizado e abre as escolhas
+        setIsTransmissionStarting(false);
+        setIsDialogueFinished(true);
+
+        // Pequeno delay para abrir o modal de escolha suavemente
+        setTimeout(() => {
+          setShowEscolhaModal(true);
+        }, 1000);
+        return;
+      }
+
+      // 2. Toca o áudio se existir
+      if (currentStep.audio) {
+        // Descomente a linha abaixo se o áudio for gerenciado diretamente por este useEffect
+        // playTrack(currentStep.audio, { loop: false }); 
+      }
+
+      // 3. Calcula o tempo de duração desta fala
+      // Se tiver 'duracao' no JSON, usa ela. 
+      // Se não tiver (como em Mercúrio), calcula um tempo razoável de leitura (aprox 60ms por letra + 2 seg de pausa base)
+      const tempoLeitura = currentStep.duracao || (currentStep.texto.length * 60) + 2000;
+
+      console.log(`Lendo fala ${dialogueIndex + 1}/${dialogoAtual.length}. Próximo em: ${tempoLeitura}ms`);
+
+      // 4. Cria o timer para avançar para o próximo índice (próxima fala)
+      const timer = setTimeout(() => {
+        setDialogueIndex((prev) => prev + 1);
+      }, tempoLeitura);
+
+      // Limpa o timer se o componente desmontar ou se a dependência mudar antes do tempo
+      return () => clearTimeout(timer);
+    }
+  }, [isTransmissionStarting, dialogueIndex, activeChallengeData]);
+  // -------------------------------------------------------
 
   useEffect(() => {
     if ((monitorState !== 'static' && mainDisplayState !== 'static') || isPaused) return;
