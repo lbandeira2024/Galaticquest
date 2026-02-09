@@ -1092,6 +1092,36 @@ const DecolagemMarte = () => {
     return () => clearInterval(interval);
   }, [travelStarted, arrivedAtMars, isDobraAtivada, isPaused, playSound, distanceKm, plannedRoute, routeIndex, handleChallengeEnd, saveTelemetryData, selectedPlanet, saveCurrentProgress, API_BASE_URL, userId, processadorO2, stopAllAudio, sosSurpriseEvent]);
 
+  // --- CORREÇÃO: DETECTAR CHEGADA E ABRIR DESAFIO/DIALOGO ---
+  useEffect(() => {
+    // Só executa se chegou, se não tem desafio ativo, se não é SOS surpresa e se não está partindo
+    if (arrivedAtMars && !activeChallengeData && !showSosSurprise && !isDeparting) {
+
+      // Normaliza o nome do planeta (remove acentos, minúsculas) para bater com o JSON
+      // Ex: "Mercúrio" vira "mercurio"
+      const planetNameNormalized = selectedPlanet?.nome
+        ?.toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+      // Procura o desafio correspondente no JSON
+      const desafioEncontrado = desafiosData.desafios.find(d =>
+        d.planeta.toLowerCase() === planetNameNormalized
+      );
+
+      if (desafioEncontrado) {
+        console.log("Desafio encontrado para:", planetNameNormalized);
+        setActiveChallengeData(desafioEncontrado);
+        setShowDesafioModal(true); // Abre o Modal de Contexto
+
+        // O diálogo começará automaticamente quando o modal for fechado,
+        // pois o onClose do ModalDesafio seta setIsTransmissionStarting(true)
+      }
+    }
+  }, [arrivedAtMars, activeChallengeData, showSosSurprise, isDeparting, selectedPlanet]);
+  // -----------------------------------------------------------
+
   useEffect(() => {
     if ((monitorState !== 'static' && mainDisplayState !== 'static') || isPaused) return;
     const interval = setInterval(() => { setStaticScreenSeed(Math.random()); }, 100);
