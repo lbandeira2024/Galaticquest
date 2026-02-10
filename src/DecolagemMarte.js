@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, lazy, Suspense, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import './DecolagemMarte.css';
-import './LojaEspacial.css'; // Garante que o CSS do modal seja carregado
+import './LojaEspacial.css';
 import TelemetryDisplay from './TelemetryDisplay';
 import SpaceView from './SpaceView';
 import { useAudio } from './AudioManager';
@@ -1071,6 +1071,24 @@ const DecolagemMarte = () => {
       } else if (newDistance <= 0 && !arrivedAtMars) {
         // CHEGADA PADRÃO (PLANETA/ESTAÇÃO)
         setArrivedAtMars(true); setSpeed(45000);
+
+        // --- NOVA LÓGICA PARA DISPARAR O DESAFIO ---
+        // Normaliza o nome para evitar problemas com acentos (Jupiter vs Júpiter)
+        const normalizeName = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+        const targetName = normalizeName(selectedPlanet.nome);
+
+        // Tenta encontrar o desafio pelo nome do planeta ou ID
+        const desafioEncontrado = desafiosData.desafios?.find(d =>
+          normalizeName(d.planeta) === targetName ||
+          d.id === selectedPlanet.desafioId
+        );
+
+        if (desafioEncontrado) {
+          setActiveChallengeData(desafioEncontrado);
+          setShowDesafioModal(true); // Abre o modal do desafio
+        }
+        // -------------------------------------------
+
         let newProcessadorO2Value = processadorO2;
         const planetNameInput = selectedPlanet?.nome || '';
         const hasWater = Array.from(hasWaterList).some(p => p.toLowerCase() === planetNameInput.toLowerCase().trim());
