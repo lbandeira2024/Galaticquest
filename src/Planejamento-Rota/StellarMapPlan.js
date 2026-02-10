@@ -11,11 +11,12 @@ const CREW_SIZE = 10;
 const FOOD_PER_KM = 30;
 const MAX_FUEL = 98000;
 
+// LISTA DE ÁGUA: Nomes devem ser IDÊNTICOS aos do solarSystem (sem acentos se lá não tiver)
 const hasWaterList = new Set([
-    "Marte", "Mercúrio", "Ceres", "Plutão", "Haumea", "Eris", "Makemake",
-    "Lua", "Europa", "Ganímedes", "Calisto", "Titã", "Encelado", "Tritão",
+    "Marte", "Mercurio", "Ceres", "Plutao", "Haumea", "Eris", "Makemake",
+    "Lua", "Europa", "Ganímedes", "Calisto", "Titã", "Encelado", "Tritao",
     "Caronte", "Titania", "Oberon", "Vesta", "TRAPPIST-1e", "Kepler-186f",
-    "Terra", "Proxima Centauri b"
+    "Terra", "Proxima Centauri b", "Jupiter"
 ]);
 
 const realDistances = {
@@ -73,7 +74,7 @@ const getDistanceValue = (name) => {
     if (name.includes("S.O.S próximo a ")) {
         const host = name.replace("S.O.S próximo a ", "");
         if (realDistances[host]) {
-            // Retorna a distância do planeta + um offset mínimo para não ser zero se a origem for o próprio planeta
+            // Retorna a distância do planeta + um offset mínimo
             return realDistances[host] + 0.355;
         }
     }
@@ -407,31 +408,20 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                 {/* --- RENDERIZAÇÃO CORRIGIDA DO S.O.S --- */}
                 {/* Calcula a posição baseada no planeta HOSPEDEIRO, não no Sol */}
                 {sosSignal && !isSosAdded && (() => {
-                    // Extrai o nome do host (Ex: "Marte" de "S.O.S próximo a Marte")
-                    // Ou assume que sosSignalData pode ter uma propriedade .host se você tiver mudado o backend
-                    // Aqui usamos string replace para segurança com o código atual
                     const hostName = sosSignal.name.replace("S.O.S próximo a ", "");
                     const hostPlanet = solarSystem.planets.find(p => p.name === hostName);
 
-                    // Se não achar o host (ex: nome errado), não renderiza para não quebrar
                     if (!hostPlanet) return null;
 
-                    // Calcula a posição exata onde o planeta está AGORA
-                    // Nota: Math.cos espera Radianos, mas o código original usava graus no Math.cos? 
-                    // Se o seu código original funciona, mantém a lógica. 
-                    // Se os planetas usam graus no Math.cos, mantenha. Se foi ajustado para radianos, ajuste aqui.
-                    // Assumindo consistência com o loop dos planetas abaixo:
                     const hostX = solarSystem.sun.x + Math.cos(hostPlanet.angle) * hostPlanet.orbitRadius;
                     const hostY = solarSystem.sun.y + Math.sin(hostPlanet.angle) * hostPlanet.orbitRadius;
 
-                    // Pequeno offset para o SOS não ficar "dentro" do planeta, mas orbitando ele
-                    const sosOffsetX = 3; // Unidades relativas ao zoom
+                    const sosOffsetX = 3;
                     const sosOffsetY = -3;
 
                     return (
                         <div className="celestial-body sos-signal"
                             style={{
-                                // Posiciona relativo ao host
                                 left: `${hostX + sosOffsetX}%`,
                                 top: `${hostY + sosOffsetY}%`,
                                 transform: 'translate(-50%, -50%)',
