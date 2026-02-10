@@ -3,7 +3,7 @@ import './StellarMapPlan.css';
 import transferDistances from './fixed_transfer_distances.json';
 import { useConfig } from '../ConfigContext';
 
-// Constantes e dados estáticos
+// --- CONSTANTES E DADOS ESTÁTICOS ---
 const MAX_FOOD = 30 * 1200 * 36;
 const MAX_OXYGEN = 242000;
 const OXYGEN_PER_PERSON_PER_DAY = 0.84;
@@ -63,15 +63,19 @@ const solarSystem = {
 
 const calculatePercentage = (value, max) => Math.min(Math.round((value / max) * 100), 100);
 
-// Helper para obter valor de distância considerando também o S.O.S
+// --- HELPER DE DISTÂNCIA CORRIGIDO ---
+// Agora suporta 'S.O.S próximo a X' para calcular combustível baseado no host real
 const getDistanceValue = (name) => {
     // Se o nome está no mapa padrão, retorna
     if (realDistances[name]) return realDistances[name];
 
-    // Se for um SOS, extrai o nome do host e adiciona o offset de 355.000 km (0.355 Milhões de km)
-    if (name.startsWith("S.O.S próximo a ")) {
+    // Se for um SOS, extrai o nome do host e retorna a distância dele (coerência física)
+    if (name.includes("S.O.S próximo a ")) {
         const host = name.replace("S.O.S próximo a ", "");
-        if (realDistances[host]) return realDistances[host] + 0.355;
+        if (realDistances[host]) {
+            // Retorna a distância do planeta + um offset mínimo para não ser zero se a origem for o próprio planeta
+            return realDistances[host] + 0.355;
+        }
     }
     return 0;
 };
@@ -83,7 +87,6 @@ const getDistanceFromJSON = (from, to) => {
     if (transferDistances[key1]) return transferDistances[key1];
     if (transferDistances[key2]) return transferDistances[key2];
 
-    // Usa o helper modificado para suportar SOS
     const distanceFrom = getDistanceValue(from);
     const distanceTo = getDistanceValue(to);
     return Math.abs(distanceFrom - distanceTo) * 1e6;
@@ -160,7 +163,6 @@ function routeReducer(state, action) {
     };
 }
 
-// RECEBE sosSignalData COMO PROP
 const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRoute, currentIndex, onSosDetected, allowSos, sosSignalData }) => {
     const { apiBaseUrl } = useConfig();
     const API_BASE_URL = apiBaseUrl;
@@ -177,7 +179,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
     const [rotationAngles, setRotationAngles] = useState({});
     const [userId, setUserId] = useState(null);
 
-    // O S.O.S AGORA VEM DO COMPONENTE PAI (DecolagemMarte -> TelemetryDisplay -> StellarMapPlan)
+    // O S.O.S agora é gerenciado pelo componente pai e passado via prop
     const sosSignal = sosSignalData;
 
     const containerRef = useRef(null);
@@ -188,7 +190,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
         opacity: 0.1 + Math.random() * 0.9, delay: Math.random() * 10, duration: 3 + Math.random() * 7
     })), []);
 
-    // Monitora a rota: Se o SOS atual foi adicionado à rota, "remove" visualmente (mas o pai controla o tempo)
+    // Verifica se o SOS já foi adicionado na rota atual
     const isSosAdded = useMemo(() => {
         if (!sosSignal) return false;
         return plannedRoute.steps.some(step => step.name === sosSignal.name);
@@ -210,8 +212,11 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
         const updateAngles = () => {
             const newRotationAngles = {};
             solarSystem.planets.forEach(planet => {
+                // Atualiza ângulo orbital (posição na órbita)
                 if (planet.orbitSpeed > 0) planet.angle = (planet.angle + planet.orbitSpeed) % 360;
+                // Atualiza ângulo de rotação (giro do planeta)
                 if (planet.rotationSpeed > 0) newRotationAngles[planet.name] = (rotationAngles[planet.name] || 0) + planet.rotationSpeed;
+
                 planet.moons.forEach(moon => {
                     moon.angle = (moon.angle + moon.orbitSpeed) % 360;
                     newRotationAngles[moon.name] = (rotationAngles[moon.name] || 0) + moon.rotationSpeed;
@@ -399,28 +404,53 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                     <span className="body-label">{solarSystem.sun.name}</span>
                 </div>
 
-                {/* Renderização do S.O.S se estiver ativo */}
-                {sosSignal && !isSosAdded && (
-                    <div className="celestial-body sos-signal"
-                        style={{
-                            left: `${solarSystem.sun.x + Math.cos(sosSignal.angle) * sosSignal.orbitRadius}%`,
-                            top: `${solarSystem.sun.y + Math.sin(sosSignal.angle) * sosSignal.orbitRadius}%`,
-                            transform: 'translate(-50%, -50%)',
-                            position: 'absolute'
-                        }}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            // Ao clicar, adiciona o SOS à rota
-                            handleBodyClick({ name: sosSignal.name });
-                        }}
-                    >
-                        <div className="sos-pulse"></div>
-                        <div className="label-container">
-                            <span className="body-label sos-label">{sosSignal.name}</span>
-                        </div>
-                    </div>
-                )}
+                {/* --- RENDERIZAÇÃO CORRIGIDA DO S.O.S --- */}
+                {/* Calcula a posição baseada no planeta HOSPEDEIRO, não no Sol */}
+                {sosSignal && !isSosAdded && (() => {
+                    // Extrai o nome do host (Ex: "Marte" de "S.O.S próximo a Marte")
+                    // Ou assume que sosSignalData pode ter uma propriedade .host se você tiver mudado o backend
+                    // Aqui usamos string replace para segurança com o código atual
+                    const hostName = sosSignal.name.replace("S.O.S próximo a ", "");
+                    const hostPlanet = solarSystem.planets.find(p => p.name === hostName);
 
+                    // Se não achar o host (ex: nome errado), não renderiza para não quebrar
+                    if (!hostPlanet) return null;
+
+                    // Calcula a posição exata onde o planeta está AGORA
+                    // Nota: Math.cos espera Radianos, mas o código original usava graus no Math.cos? 
+                    // Se o seu código original funciona, mantém a lógica. 
+                    // Se os planetas usam graus no Math.cos, mantenha. Se foi ajustado para radianos, ajuste aqui.
+                    // Assumindo consistência com o loop dos planetas abaixo:
+                    const hostX = solarSystem.sun.x + Math.cos(hostPlanet.angle) * hostPlanet.orbitRadius;
+                    const hostY = solarSystem.sun.y + Math.sin(hostPlanet.angle) * hostPlanet.orbitRadius;
+
+                    // Pequeno offset para o SOS não ficar "dentro" do planeta, mas orbitando ele
+                    const sosOffsetX = 3; // Unidades relativas ao zoom
+                    const sosOffsetY = -3;
+
+                    return (
+                        <div className="celestial-body sos-signal"
+                            style={{
+                                // Posiciona relativo ao host
+                                left: `${hostX + sosOffsetX}%`,
+                                top: `${hostY + sosOffsetY}%`,
+                                transform: 'translate(-50%, -50%)',
+                                position: 'absolute'
+                            }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleBodyClick({ name: sosSignal.name });
+                            }}
+                        >
+                            <div className="sos-pulse"></div>
+                            <div className="label-container">
+                                <span className="body-label sos-label">{sosSignal.name}</span>
+                            </div>
+                        </div>
+                    );
+                })()}
+
+                {/* --- RENDERIZAÇÃO DOS PLANETAS --- */}
                 {solarSystem.planets.map((planet, index) => {
                     const planetX = solarSystem.sun.x + Math.cos(planet.angle) * planet.orbitRadius;
                     const planetY = solarSystem.sun.y + Math.sin(planet.angle) * planet.orbitRadius;
@@ -492,7 +522,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                         <h3>{selectedBody.name}</h3>
                         <button className="close-button" onClick={() => setSelectedBody(null)}>×</button>
                     </div>
-                    {/* Renderização condicional para descrição do SOS */}
                     {selectedBody.description && (
                         <div className="info-section">
                             <p style={{ color: '#b2ff59', fontStyle: 'italic' }}>{selectedBody.description}</p>
