@@ -595,7 +595,9 @@ const DecolagemMarte = () => {
   useEffect(() => {
     if (isLoadingRoute) return;
 
-    if (routeIndex > 0 || hasStartedAudioRef.current) {
+    // --- CORREÇÃO APLICADA AQUI ---
+    // Removido "|| hasStartedAudioRef.current" para forçar a verificação apenas pelo routeIndex
+    if (routeIndex > 0) {
       setMainDisplayState('stars');
       setMonitorState('on');
       setTravelStarted(true);
