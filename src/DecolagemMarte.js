@@ -418,16 +418,19 @@ const DecolagemMarte = () => {
 
     if (isInFlight) {
       saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
-      setPlannedRoute(newPlannedRoute); setRouteIndex(newRouteIndex);
+      setPlannedRoute(newPlannedRoute);
+      setRouteIndex(newRouteIndex);
       const newOriginStep = newPlannedRoute[newRouteIndex];
       const newDestinationStep = newPlannedRoute[newRouteIndex + 1];
+
       if (newOriginStep && newDestinationStep) {
-        setOriginPlanet({ nome: newOriginStep.name }); setSelectedPlanet({ nome: newDestinationStep.name });
-        const originalDistance = (plannedRoute && plannedRoute[routeIndex + 1] ? plannedRoute[routeIndex + 1].distance : null) || 1;
-        const distanceTraveled = originalDistance - distanceKm;
-        const newTotalDistance = newDestinationStep.distance;
-        const newRemainingDistance = Math.max(0, newTotalDistance - distanceTraveled);
-        setDistanceKm(newRemainingDistance);
+        setOriginPlanet({ nome: newOriginStep.name });
+        setSelectedPlanet({ nome: newDestinationStep.name });
+
+        // CORREÇÃO: Ao mudar a rota, resetamos a distância para o total do novo trecho.
+        // Isso evita que o cálculo anterior (que poderia ser maior que a nova distância)
+        // resulte em 0km, acionando a chegada imediata e o modal.
+        setDistanceKm(newDestinationStep.distance);
       }
     } else {
       playSound('/sounds/empuxo.wav'); setIsDeparting(true); setShowStoreModal(false);
