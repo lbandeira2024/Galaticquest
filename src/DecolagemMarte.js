@@ -624,17 +624,32 @@ const DecolagemMarte = () => {
 
   const hasStartedAudioRef = useRef(false);
 
+  // --- CORREÇÃO PRINCIPAL: CONTROLE DE INICIALIZAÇÃO ---
   useEffect(() => {
-    // FIX: Só inicia a sequência de decolagem quando o carregamento terminar (isLoadingRoute = false)
+    // 1. Se os dados ainda estão carregando, não faça nada.
     if (isLoadingRoute) return;
 
+    // 2. Se já não estamos na Terra (index > 0) OU a animação já tocou nesta sessão:
+    // Pula a sequência de decolagem e vai direto para o espaço.
+    if (routeIndex > 0 || hasStartedAudioRef.current) {
+
+      // Garante que o estado visual esteja correto (estrelas, monitor ligado)
+      setMainDisplayState('stars');
+      setMonitorState('on');
+      setTravelStarted(true);
+
+      // Marca como "já iniciado" para prevenir que rode no futuro
+      hasStartedAudioRef.current = true;
+      return;
+    }
+
+    // 3. Se chegou aqui, é a primeira vez (Index 0 e audioRef false). Inicia a decolagem.
     unlockAudio();
 
     if (!hasStartedAudioRef.current) {
       hasStartedAudioRef.current = true;
       const audioUrl = `/sounds/decolagem.mp3?t=${Date.now()}`;
-
-      console.log("🚀 DecolagemMarte: Solicitando áudio (Uppercase):", audioUrl);
+      console.log("🚀 DecolagemMarte: Iniciando sequência de decolagem...");
       playTrack(audioUrl, {
         loop: false,
         isPrimary: true
@@ -668,8 +683,9 @@ const DecolagemMarte = () => {
       clearTimeout(monitorTimer2);
       clearTimeout(monitorTimer3);
     };
-    // eslint-disable-next-line
-  }, [isLoadingRoute]); // FIX: Dependência adicionada para reagir ao fim do loading
+    // Adicionamos routeIndex às dependências para reagir corretamente à mudança de fase
+  }, [isLoadingRoute, routeIndex]);
+  // -----------------------------------------------------
 
   useEffect(() => {
     return () => {
@@ -902,6 +918,7 @@ const DecolagemMarte = () => {
 
   useEffect(() => {
     // FIX: Adicionado isLoadingRoute para evitar som de empuxo na inicialização (distância 0)
+    // Se o jogo está carregando, pausado ou em dobra, não toca o som de aproximação
     if (isPaused || isDobraAtivada || isLoadingRoute) return;
 
     const isMoon = selectedPlanet.nome.toLowerCase() === 'lua';
