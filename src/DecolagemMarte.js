@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, lazy, Suspense, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import './DecolagemMarte.css';
-import './LojaEspacial.css'; // Garante que o CSS do modal seja carregado
+import './LojaEspacial.css';
 import TelemetryDisplay from './TelemetryDisplay';
 import SpaceView from './SpaceView';
 import { useAudio } from './AudioManager';
@@ -1233,7 +1233,8 @@ const DecolagemMarte = () => {
             <button className={`o2-transfer-button ${isO2TransferDisabled ? 'disabled' : ''}`} onClick={handleOpenO2Modal} disabled={isO2TransferDisabled} style={{ zIndex: 100 }}>TRANSFERIR ({processadorO2})</button>
           </div>
         </div>
-        <div className="right-panel-3d" style={{ zIndex: 50, position: 'relative' }}>
+        {/* CORREÇÃO: Removido 'position: relative' para evitar quebrar o layout */}
+        <div className="right-panel-3d" style={{ zIndex: 50 }}>
           <MissionTimer isPaused={isPaused} />
 
           {/* MONITOR SUPERIOR */}
