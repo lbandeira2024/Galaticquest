@@ -118,7 +118,7 @@ const SOS_EVENTS_LIST = [
     image: '/images/destroyed_ship.png'
   },
   {
-    id: 4, // TIPO 4 ALTERADO CONFORME SOLICITADO
+    id: 4,
     name: 'Objeto Alienígena',
     description: 'Identificamos um artefato de origem desconhecida emitindo o sinal. Sua tecnologia parece avançada e fora dos padrões da ACEE.',
     image: '/images/static_signal.png'
@@ -391,8 +391,13 @@ const DecolagemMarte = () => {
   const handleMudarRota = () => {
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
-    // Reset SOS para permitir edição mas mantendo estado se cancelar
+
+    // --- CORREÇÃO: RESET TOTAL DO SOS ---
+    // Limpa os estados do SOS para permitir edição e evitar que o modal reapareça
     setShowSosSurprise(false);
+    setSosSurpriseEvent(null);
+    setArrivedAtMars(false); // Destrava a chegada para permitir nova navegação
+    // ------------------------------------
 
     setIsForcedMapEdit(true);
     setShowStellarMap(true);
@@ -624,9 +629,8 @@ const DecolagemMarte = () => {
 
   const hasStartedAudioRef = useRef(false);
 
-  // --- CORREÇÃO PRINCIPAL: CONTROLE DE INICIALIZAÇÃO ---
   useEffect(() => {
-    // 1. Se os dados ainda estão carregando, não faça nada.
+    // FIX: Só inicia a sequência de decolagem quando o carregamento terminar (isLoadingRoute = false)
     if (isLoadingRoute) return;
 
     // 2. Se já não estamos na Terra (index > 0) OU a animação já tocou nesta sessão:
@@ -643,13 +647,13 @@ const DecolagemMarte = () => {
       return;
     }
 
-    // 3. Se chegou aqui, é a primeira vez (Index 0 e audioRef false). Inicia a decolagem.
     unlockAudio();
 
     if (!hasStartedAudioRef.current) {
       hasStartedAudioRef.current = true;
       const audioUrl = `/sounds/decolagem.mp3?t=${Date.now()}`;
-      console.log("🚀 DecolagemMarte: Iniciando sequência de decolagem...");
+
+      console.log("🚀 DecolagemMarte: Solicitando áudio (Uppercase):", audioUrl);
       playTrack(audioUrl, {
         loop: false,
         isPrimary: true
@@ -683,9 +687,8 @@ const DecolagemMarte = () => {
       clearTimeout(monitorTimer2);
       clearTimeout(monitorTimer3);
     };
-    // Adicionamos routeIndex às dependências para reagir corretamente à mudança de fase
-  }, [isLoadingRoute, routeIndex]);
-  // -----------------------------------------------------
+    // eslint-disable-next-line
+  }, [isLoadingRoute, routeIndex]); // FIX: Dependência adicionada para reagir ao fim do loading
 
   useEffect(() => {
     return () => {
@@ -1062,7 +1065,8 @@ const DecolagemMarte = () => {
       // --- VERIFICAÇÃO DE S.O.S SURPRESA ---
       const isSosDestination = selectedPlanet && selectedPlanet.nome && selectedPlanet.nome.startsWith("S.O.S");
 
-      if (isSosDestination) {
+      // --- CORREÇÃO: Não dispara SOS se estiver editando o mapa
+      if (isSosDestination && !isForcedMapEdit) {
         // Gatilho 1: Sortear evento aos 1000km
         if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEvent) {
           const randIndex = Math.floor(Math.random() * 4);
@@ -1137,7 +1141,7 @@ const DecolagemMarte = () => {
       setProgress(progressPercentage);
     }, 1000);
     return () => clearInterval(interval);
-  }, [travelStarted, arrivedAtMars, isDobraAtivada, isPaused, playSound, distanceKm, plannedRoute, routeIndex, handleChallengeEnd, saveTelemetryData, selectedPlanet, saveCurrentProgress, API_BASE_URL, userId, processadorO2, stopAllAudio, sosSurpriseEvent]);
+  }, [travelStarted, arrivedAtMars, isDobraAtivada, isPaused, playSound, distanceKm, plannedRoute, routeIndex, handleChallengeEnd, saveTelemetryData, selectedPlanet, saveCurrentProgress, API_BASE_URL, userId, processadorO2, stopAllAudio, sosSurpriseEvent, isForcedMapEdit]);
 
   // --- CORREÇÃO: DETECTAR CHEGADA E ABRIR DESAFIO/DIALOGO ---
   useEffect(() => {
