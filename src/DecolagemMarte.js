@@ -20,7 +20,7 @@ import ModalConfirmacaoViagem from './ModalConfirmacaoViagem';
 import { useConfig } from './ConfigContext';
 import LojaEspacial from './LojaEspacial';
 
-// --- DEFINIÇÃO INTERNA DO COMPONENTE SOS SURPRESA ---
+// --- DEFINIÇÃO INTERNA DO COMPONENTE SOS SURPRESA PARA EVITAR ERROS DE IMPORTAÇÃO ---
 const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano }) => {
   if (!event) return null;
 
@@ -97,12 +97,32 @@ const PLANET_DATA_FOR_SOS = [
   { name: "Eris", orbitRadius: 165 }
 ];
 
-// LISTA DE EVENTOS SOS SURPRESA
+// LISTA DE EVENTOS SOS SURPRESA - ATUALIZADA
 const SOS_EVENTS_LIST = [
-  { id: 1, name: 'Piratas Espaciais', description: 'ALERTA! O sinal era uma isca. Piratas interceptaram a nave...', image: '/images/pirates.png' },
-  { id: 2, name: 'Astronauta Morto', description: 'Encontramos um traje à deriva...', image: '/images/dead_astronaut.png' },
-  { id: 3, name: 'Nave Destruída', description: 'Destroços de uma antiga batalha...', image: '/images/destroyed_ship.png' },
-  { id: 4, name: 'Objeto Alienígena', description: 'Identificamos um artefato de origem desconhecida...', image: '/images/static_signal.png' }
+  {
+    id: 1,
+    name: 'Piratas Espaciais',
+    description: 'ALERTA! O sinal era uma isca. Piratas interceptaram a nave. Prepare-se para um possível confronto ou negociação hostil.',
+    image: '/images/pirates.png'
+  },
+  {
+    id: 2,
+    name: 'Astronauta Morto',
+    description: 'Encontramos um traje à deriva. Infelizmente, não há sinais vitais. Podemos recuperar equipamentos e dados da missão dele.',
+    image: '/images/dead_astronaut.png'
+  },
+  {
+    id: 3,
+    name: 'Nave Destruída',
+    description: 'Destroços de uma antiga batalha ou acidente. Há muita sucata valiosa e contêineres que podem conter recursos úteis.',
+    image: '/images/destroyed_ship.png'
+  },
+  {
+    id: 4,
+    name: 'Objeto Alienígena',
+    description: 'Identificamos um artefato de origem desconhecida emitindo o sinal. Sua tecnologia parece avançada e fora dos padrões da ACEE.',
+    image: '/images/static_signal.png'
+  }
 ];
 
 const hasWaterList = new Set([
@@ -210,7 +230,11 @@ const DecolagemMarte = () => {
   const [isCooldownOver, setIsCooldownOver] = useState(true);
   const [isForcedMapEdit, setIsForcedMapEdit] = useState(false);
 
+  // NOVO: Estado para controle de resfriamento da dobra
   const [isWarpCooldown, setIsWarpCooldown] = useState(false);
+
+  // NOVO: Estado para falha crítica de dobra (O2/Propulsão zero)
+  const [showCriticalWarpFail, setShowCriticalWarpFail] = useState(false);
 
   const [showSOSModal, setShowSOSModal] = useState(false);
   const [sosCost, setSosCost] = useState(0);
@@ -224,6 +248,7 @@ const DecolagemMarte = () => {
 
   const [showO2Modal, setShowO2Modal] = useState(false);
 
+  // Estados para o SOS Surpresa
   const [sosSurpriseEvent, setSosSurpriseEvent] = useState(null);
   const [showSosSurprise, setShowSosSurprise] = useState(false);
 
@@ -252,10 +277,17 @@ const DecolagemMarte = () => {
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
 
+  // --- PRÉ-CARREGAMENTO DO ÁUDIO DA DOBRA ---
   useEffect(() => {
+    // Carrega o áudio silenciosamente para evitar delay no clique
     const audioPreload = new Audio('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3');
     audioPreload.preload = 'auto';
   }, []);
+  // ------------------------------------------
+
+  // =========================================================================
+  // HANDLERS (DEFINIDOS ANTES DE USAR PARA EVITAR REFERENCE ERROR)
+  // =========================================================================
 
   const constructPhotoUrl = (gameNumber, teamName) => {
     if (!gameNumber || !teamName) return null;
@@ -327,6 +359,8 @@ const DecolagemMarte = () => {
     }
   }, [userId, API_BASE_URL]);
 
+  // --- Handlers movidos para cima para evitar ReferenceError ---
+
   const handleStoreChallengeImpact = useCallback((item) => {
     playSound('/sounds/data-updates-telemetry.mp3');
     if (item.effects || item.value) {
@@ -354,14 +388,18 @@ const DecolagemMarte = () => {
   }, [travelStarted, routeIndex]);
 
   const handleChallengeEnd = useCallback(() => {
+    // Implemente a lógica necessária se houver ações ao fim de um desafio
   }, []);
 
   const handleMudarRota = () => {
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
+
+    // --- CORREÇÃO: RESET TOTAL DO SOS ---
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
-    setArrivedAtMars(false);
+    setArrivedAtMars(false); // Destrava a chegada para permitir nova navegação
+    // ------------------------------------
 
     setIsForcedMapEdit(true);
     setShowStellarMap(true);
@@ -371,6 +409,8 @@ const DecolagemMarte = () => {
     if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
+
+    // --- RESET SOS ---
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
 
@@ -406,6 +446,8 @@ const DecolagemMarte = () => {
 
     setIsForcedMapEdit(false);
     setShowStellarMap(false);
+
+    // Reset SOS
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
 
@@ -471,14 +513,25 @@ const DecolagemMarte = () => {
   const handleDobraEspacial = () => {
     if (!isDobraEnabled || isDobraAtivada || isPaused) return;
 
+    // --- ALTERAÇÃO: VERIFICAÇÃO CRÍTICA DE RECURSOS ---
+    if (telemetryRef.current.atmosphere.o2 <= 0 || telemetryRef.current.propulsion.powerOutput <= 0) {
+      playSound('/sounds/ui-click.mp3'); // Ou um som de alerta/erro
+      setShowCriticalWarpFail(true);
+      setTimeout(() => setShowCriticalWarpFail(false), 7000);
+      return; // IMPEDE A DOBRA
+    }
+    // --------------------------------------------------
+
     stopAllAudio();
     setIsDobraAtivada(true);
     setIsDobraEnabled(false);
 
     setMinervaImage('/images/Minerva/Minerva-Vluz.gif');
 
+    // Áudio curto de ativação (Garante que toca ao clicar também)
     playSound('/sounds/05.Dobra-Active.mp3');
 
+    // CORREÇÃO: Uso direto da URL (sem timestamp) para aproveitar o cache e evitar delay
     playTrack('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3', {
       loop: true,
       isPrimary: true
@@ -495,8 +548,10 @@ const DecolagemMarte = () => {
       saveTelemetryData();
       stopAllAudio();
 
+      // --- APLICAÇÃO DO COOLDOWN DE 20 SEGUNDOS ---
       setIsWarpCooldown(true);
       setTimeout(() => { setIsWarpCooldown(false); }, 20000);
+      // -------------------------------------------
 
       const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
       const approachDistanceThreshold = 800000;
@@ -574,6 +629,10 @@ const DecolagemMarte = () => {
 
   const isO2TransferDisabled = isPaused || processadorO2 === 0;
 
+  // =========================================================================
+  // FIM HANDLERS MOVIDOS
+  // =========================================================================
+
   const isPausedRef = useRef(isPaused);
   useEffect(() => {
     isPausedRef.current = isPaused;
@@ -582,12 +641,19 @@ const DecolagemMarte = () => {
   const hasStartedAudioRef = useRef(false);
 
   useEffect(() => {
+    // FIX: Só inicia a sequência de decolagem quando o carregamento terminar (isLoadingRoute = false)
     if (isLoadingRoute) return;
 
+    // 2. Se já não estamos na Terra (index > 0) OU a animação já tocou nesta sessão:
+    // Pula a sequência de decolagem e vai direto para o espaço.
     if (routeIndex > 0 || hasStartedAudioRef.current) {
+
+      // Garante que o estado visual esteja correto (estrelas, monitor ligado)
       setMainDisplayState('stars');
       setMonitorState('on');
       setTravelStarted(true);
+
+      // Marca como "já iniciado" para prevenir que rode no futuro
       hasStartedAudioRef.current = true;
       return;
     }
@@ -597,6 +663,7 @@ const DecolagemMarte = () => {
     if (!hasStartedAudioRef.current) {
       hasStartedAudioRef.current = true;
       const audioUrl = `/sounds/decolagem.mp3?t=${Date.now()}`;
+
       console.log("🚀 DecolagemMarte: Iniciando sequência de decolagem...");
       playTrack(audioUrl, {
         loop: false,
@@ -631,7 +698,8 @@ const DecolagemMarte = () => {
       clearTimeout(monitorTimer2);
       clearTimeout(monitorTimer3);
     };
-  }, [isLoadingRoute, routeIndex]);
+    // eslint-disable-next-line
+  }, [isLoadingRoute, routeIndex]); // FIX: Dependência adicionada para reagir ao fim do loading
 
   useEffect(() => {
     return () => {
@@ -643,13 +711,19 @@ const DecolagemMarte = () => {
   const isDobraAtivadaRef = useRef(isDobraAtivada);
   useEffect(() => { isDobraAtivadaRef.current = isDobraAtivada; }, [isDobraAtivada]);
 
+  // --- NOVO EFEITO: Monitorar velocidade para habilitar Dobra ---
+  // --- ATUALIZADO: Agora respeita o isWarpCooldown ---
   useEffect(() => {
+    // Se a velocidade chegou a ~60.000, a dobra não está ativa e não está habilitada, e temos distância, e SEM COOLDOWN
     if (telemetry.velocity.kmh >= 59500 && !isDobraEnabled && !isDobraAtivada && distanceKm > 500000 && !isWarpCooldown) {
       setIsDobraEnabled(true);
+      // Toca o som quando a dobra fica disponível (habilitada)
       playSound('/sounds/05.Dobra-Active.mp3');
     }
   }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm, playSound, isWarpCooldown]);
+  // ------------------------------------------------------------------
 
+  // --- EFEITO S.O.S (Geração de novos sinais no mapa) ---
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
@@ -781,15 +855,32 @@ const DecolagemMarte = () => {
     return () => intervals.forEach(clearInterval);
   }, [isPaused, chosenShip, isDobraAtivada]);
 
+  // --- ALTERAÇÃO: LOOP DE CONSUMO DA DOBRA COM VERIFICAÇÃO CRÍTICA ---
   useEffect(() => {
     if (!isDobraAtivada || isPaused) return;
     const warpConsumptionInterval = setInterval(() => {
-      telemetryRef.current.propulsion.powerOutput = Math.max(0, telemetryRef.current.propulsion.powerOutput - 1);
-      telemetryRef.current.atmosphere.o2 = Math.max(0, telemetryRef.current.atmosphere.o2 - 1);
+      const newPropulsion = Math.max(0, telemetryRef.current.propulsion.powerOutput - 1);
+      const newO2 = Math.max(0, telemetryRef.current.atmosphere.o2 - 1);
+
+      telemetryRef.current.propulsion.powerOutput = newPropulsion;
+      telemetryRef.current.atmosphere.o2 = newO2;
       setTelemetry(prev => ({ ...prev, ...telemetryRef.current }));
+
+      // Se recursos críticos zerarem DURANTE a dobra, cancelar imediatamente
+      if (newPropulsion <= 0 || newO2 <= 0) {
+        if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
+        isDobraAtivadaRef.current = false;
+        setIsDobraAtivada(false);
+        stopAllAudio();
+
+        setShowCriticalWarpFail(true);
+        setTimeout(() => setShowCriticalWarpFail(false), 7000);
+      }
+
     }, 20000);
     return () => clearInterval(warpConsumptionInterval);
   }, [isDobraAtivada, isPaused]);
+  // ------------------------------------------------------------------
 
   useEffect(() => {
     let delayTimer, takeoffInterval;
@@ -857,6 +948,8 @@ const DecolagemMarte = () => {
   }, [travelTime, travelStarted, isPaused, playSound]);
 
   useEffect(() => {
+    // FIX: Adicionado isLoadingRoute para evitar som de empuxo na inicialização (distância 0)
+    // Se o jogo está carregando, pausado ou em dobra, não toca o som de aproximação
     if (isPaused || isDobraAtivada || isLoadingRoute) return;
 
     const isMoon = selectedPlanet.nome.toLowerCase() === 'lua';
@@ -866,7 +959,7 @@ const DecolagemMarte = () => {
       setIsFinalApproach(true);
       approachSoundPlayed.current = true;
     }
-  }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]);
+  }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]); // Dependência atualizada
 
   useEffect(() => {
     if (isPaused) return;
@@ -1184,6 +1277,14 @@ const DecolagemMarte = () => {
                   alt="Alerta S.O.S Minerva"
                   className="monitor-image"
                 />
+              ) : showCriticalWarpFail ? (
+                <div className="monitor-text-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'rgba(50, 0, 0, 0.8)' }}>
+                  <p style={{ color: '#ff0000', textAlign: 'center', fontWeight: 'bold', textShadow: '0 0 10px red', fontSize: '1.2rem', padding: '20px' }}>
+                    ⚠ FALHA CRÍTICA ⚠<br /><br />
+                    Elementos base para a dobra escassos.<br />
+                    Direcionados para suporte à vida no momento.
+                  </p>
+                </div>
               ) : isForcedMapEdit ? (
                 <div className="monitor-text-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'rgba(50, 0, 0, 0.5)' }}>
                   <p style={{ color: '#ffcc00', textAlign: 'center', fontWeight: 'bold', textShadow: '0 0 5px red' }}>
