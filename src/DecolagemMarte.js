@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, lazy, Suspense, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import './DecolagemMarte.css';
-import './LojaEspacial.css';
+import './LojaEspacial.css'; // Garante que o CSS do modal seja carregado
 import TelemetryDisplay from './TelemetryDisplay';
 import SpaceView from './SpaceView';
 import { useAudio } from './AudioManager';
@@ -1175,6 +1175,23 @@ const DecolagemMarte = () => {
     }
   }, [activeChallengeData, dialogueIndex, playSound]);
 
+  // Efeito para avanço automático do diálogo usando 'duracao' do JSON
+  useEffect(() => {
+    if (!isTransmissionStarting || !activeChallengeData || !activeChallengeData.dialogo) return;
+
+    const currentStep = activeChallengeData.dialogo[dialogueIndex];
+    if (!currentStep) return;
+
+    // Prioriza a duração definida no JSON. Se não existir, calcula baseada no texto.
+    const duration = currentStep.duracao || (currentStep.texto.length * 50 + 2000);
+
+    const timer = setTimeout(() => {
+      handleNextDialogue();
+    }, duration);
+
+    return () => clearTimeout(timer);
+  }, [dialogueIndex, isTransmissionStarting, activeChallengeData, handleNextDialogue]);
+
   // Função para controlar a abertura do mapa
   const handleToggleMap = useCallback((show) => {
     if (show) {
@@ -1216,7 +1233,7 @@ const DecolagemMarte = () => {
             <button className={`o2-transfer-button ${isO2TransferDisabled ? 'disabled' : ''}`} onClick={handleOpenO2Modal} disabled={isO2TransferDisabled} style={{ zIndex: 100 }}>TRANSFERIR ({processadorO2})</button>
           </div>
         </div>
-        <div className="right-panel-3d">
+        <div className="right-panel-3d" style={{ zIndex: 50, position: 'relative' }}>
           <MissionTimer isPaused={isPaused} />
 
           {/* MONITOR SUPERIOR */}
