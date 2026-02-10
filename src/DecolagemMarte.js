@@ -20,7 +20,7 @@ import ModalConfirmacaoViagem from './ModalConfirmacaoViagem';
 import { useConfig } from './ConfigContext';
 import LojaEspacial from './LojaEspacial';
 
-// --- DEFINIÇÃO INTERNA DO COMPONENTE SOS SURPRESA PARA EVITAR ERROS DE IMPORTAÇÃO ---
+// --- DEFINIÇÃO INTERNA DO COMPONENTE SOS SURPRESA ---
 const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano }) => {
   if (!event) return null;
 
@@ -97,32 +97,12 @@ const PLANET_DATA_FOR_SOS = [
   { name: "Eris", orbitRadius: 165 }
 ];
 
-// LISTA DE EVENTOS SOS SURPRESA - ATUALIZADA
+// LISTA DE EVENTOS SOS SURPRESA
 const SOS_EVENTS_LIST = [
-  {
-    id: 1,
-    name: 'Piratas Espaciais',
-    description: 'ALERTA! O sinal era uma isca. Piratas interceptaram a nave. Prepare-se para um possível confronto ou negociação hostil.',
-    image: '/images/pirates.png'
-  },
-  {
-    id: 2,
-    name: 'Astronauta Morto',
-    description: 'Encontramos um traje à deriva. Infelizmente, não há sinais vitais. Podemos recuperar equipamentos e dados da missão dele.',
-    image: '/images/dead_astronaut.png'
-  },
-  {
-    id: 3,
-    name: 'Nave Destruída',
-    description: 'Destroços de uma antiga batalha ou acidente. Há muita sucata valiosa e contêineres que podem conter recursos úteis.',
-    image: '/images/destroyed_ship.png'
-  },
-  {
-    id: 4,
-    name: 'Objeto Alienígena',
-    description: 'Identificamos um artefato de origem desconhecida emitindo o sinal. Sua tecnologia parece avançada e fora dos padrões da ACEE.',
-    image: '/images/static_signal.png'
-  }
+  { id: 1, name: 'Piratas Espaciais', description: 'ALERTA! O sinal era uma isca. Piratas interceptaram a nave. Prepare-se para um possível confronto ou negociação hostil.', image: '/images/pirates.png' },
+  { id: 2, name: 'Astronauta Morto', description: 'Encontramos um traje à deriva. Infelizmente, não há sinais vitais. Podemos recuperar equipamentos e dados da missão dele.', image: '/images/dead_astronaut.png' },
+  { id: 3, name: 'Nave Destruída', description: 'Destroços de uma antiga batalha ou acidente. Há muita sucata valiosa e contêineres que podem conter recursos úteis.', image: '/images/destroyed_ship.png' },
+  { id: 4, name: 'Objeto Alienígena', description: 'Identificamos um artefato de origem desconhecida emitindo o sinal. Sua tecnologia parece avançada e fora dos padrões da ACEE.', image: '/images/static_signal.png' }
 ];
 
 const hasWaterList = new Set([
@@ -230,10 +210,7 @@ const DecolagemMarte = () => {
   const [isCooldownOver, setIsCooldownOver] = useState(true);
   const [isForcedMapEdit, setIsForcedMapEdit] = useState(false);
 
-  // NOVO: Estado para controle de resfriamento da dobra
   const [isWarpCooldown, setIsWarpCooldown] = useState(false);
-
-  // NOVO: Estado para falha crítica de dobra (O2/Propulsão zero)
   const [showCriticalWarpFail, setShowCriticalWarpFail] = useState(false);
 
   const [showSOSModal, setShowSOSModal] = useState(false);
@@ -248,7 +225,6 @@ const DecolagemMarte = () => {
 
   const [showO2Modal, setShowO2Modal] = useState(false);
 
-  // Estados para o SOS Surpresa
   const [sosSurpriseEvent, setSosSurpriseEvent] = useState(null);
   const [showSosSurprise, setShowSosSurprise] = useState(false);
 
@@ -277,17 +253,10 @@ const DecolagemMarte = () => {
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
 
-  // --- PRÉ-CARREGAMENTO DO ÁUDIO DA DOBRA ---
   useEffect(() => {
-    // Carrega o áudio silenciosamente para evitar delay no clique
     const audioPreload = new Audio('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3');
     audioPreload.preload = 'auto';
   }, []);
-  // ------------------------------------------
-
-  // =========================================================================
-  // HANDLERS (DEFINIDOS ANTES DE USAR PARA EVITAR REFERENCE ERROR)
-  // =========================================================================
 
   const constructPhotoUrl = (gameNumber, teamName) => {
     if (!gameNumber || !teamName) return null;
@@ -359,8 +328,6 @@ const DecolagemMarte = () => {
     }
   }, [userId, API_BASE_URL]);
 
-  // --- Handlers movidos para cima para evitar ReferenceError ---
-
   const handleStoreChallengeImpact = useCallback((item) => {
     playSound('/sounds/data-updates-telemetry.mp3');
     if (item.effects || item.value) {
@@ -388,18 +355,15 @@ const DecolagemMarte = () => {
   }, [travelStarted, routeIndex]);
 
   const handleChallengeEnd = useCallback(() => {
-    // Implemente a lógica necessária se houver ações ao fim de um desafio
   }, []);
 
   const handleMudarRota = () => {
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
 
-    // --- CORREÇÃO: RESET TOTAL DO SOS ---
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
-    setArrivedAtMars(false); // Destrava a chegada para permitir nova navegação
-    // ------------------------------------
+    setArrivedAtMars(false);
 
     setIsForcedMapEdit(true);
     setShowStellarMap(true);
@@ -410,7 +374,6 @@ const DecolagemMarte = () => {
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
 
-    // --- RESET SOS ---
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
 
@@ -447,7 +410,6 @@ const DecolagemMarte = () => {
     setIsForcedMapEdit(false);
     setShowStellarMap(false);
 
-    // Reset SOS
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
 
@@ -513,14 +475,12 @@ const DecolagemMarte = () => {
   const handleDobraEspacial = () => {
     if (!isDobraEnabled || isDobraAtivada || isPaused) return;
 
-    // --- ALTERAÇÃO: VERIFICAÇÃO CRÍTICA DE RECURSOS ---
     if (telemetryRef.current.atmosphere.o2 <= 0 || telemetryRef.current.propulsion.powerOutput <= 0) {
-      playSound('/sounds/ui-click.mp3'); // Ou um som de alerta/erro
+      playSound('/sounds/ui-click.mp3');
       setShowCriticalWarpFail(true);
       setTimeout(() => setShowCriticalWarpFail(false), 7000);
-      return; // IMPEDE A DOBRA
+      return;
     }
-    // --------------------------------------------------
 
     stopAllAudio();
     setIsDobraAtivada(true);
@@ -528,10 +488,8 @@ const DecolagemMarte = () => {
 
     setMinervaImage('/images/Minerva/Minerva-Vluz.gif');
 
-    // Áudio curto de ativação (Garante que toca ao clicar também)
     playSound('/sounds/05.Dobra-Active.mp3');
 
-    // CORREÇÃO: Uso direto da URL (sem timestamp) para aproveitar o cache e evitar delay
     playTrack('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3', {
       loop: true,
       isPrimary: true
@@ -548,10 +506,8 @@ const DecolagemMarte = () => {
       saveTelemetryData();
       stopAllAudio();
 
-      // --- APLICAÇÃO DO COOLDOWN DE 20 SEGUNDOS ---
       setIsWarpCooldown(true);
       setTimeout(() => { setIsWarpCooldown(false); }, 20000);
-      // -------------------------------------------
 
       const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
       const approachDistanceThreshold = 800000;
@@ -629,10 +585,6 @@ const DecolagemMarte = () => {
 
   const isO2TransferDisabled = isPaused || processadorO2 === 0;
 
-  // =========================================================================
-  // FIM HANDLERS MOVIDOS
-  // =========================================================================
-
   const isPausedRef = useRef(isPaused);
   useEffect(() => {
     isPausedRef.current = isPaused;
@@ -641,19 +593,12 @@ const DecolagemMarte = () => {
   const hasStartedAudioRef = useRef(false);
 
   useEffect(() => {
-    // FIX: Só inicia a sequência de decolagem quando o carregamento terminar (isLoadingRoute = false)
     if (isLoadingRoute) return;
 
-    // 2. Se já não estamos na Terra (index > 0) OU a animação já tocou nesta sessão:
-    // Pula a sequência de decolagem e vai direto para o espaço.
     if (routeIndex > 0 || hasStartedAudioRef.current) {
-
-      // Garante que o estado visual esteja correto (estrelas, monitor ligado)
       setMainDisplayState('stars');
       setMonitorState('on');
       setTravelStarted(true);
-
-      // Marca como "já iniciado" para prevenir que rode no futuro
       hasStartedAudioRef.current = true;
       return;
     }
@@ -663,8 +608,6 @@ const DecolagemMarte = () => {
     if (!hasStartedAudioRef.current) {
       hasStartedAudioRef.current = true;
       const audioUrl = `/sounds/decolagem.mp3?t=${Date.now()}`;
-
-      console.log("🚀 DecolagemMarte: Iniciando sequência de decolagem...");
       playTrack(audioUrl, {
         loop: false,
         isPrimary: true
@@ -698,12 +641,10 @@ const DecolagemMarte = () => {
       clearTimeout(monitorTimer2);
       clearTimeout(monitorTimer3);
     };
-    // eslint-disable-next-line
-  }, [isLoadingRoute, routeIndex]); // FIX: Dependência adicionada para reagir ao fim do loading
+  }, [isLoadingRoute, routeIndex]);
 
   useEffect(() => {
     return () => {
-      console.log("🛑 DecolagemMarte: Desmontando e parando áudio.");
       stopAllAudio();
     };
   }, [stopAllAudio]);
@@ -711,19 +652,13 @@ const DecolagemMarte = () => {
   const isDobraAtivadaRef = useRef(isDobraAtivada);
   useEffect(() => { isDobraAtivadaRef.current = isDobraAtivada; }, [isDobraAtivada]);
 
-  // --- NOVO EFEITO: Monitorar velocidade para habilitar Dobra ---
-  // --- ATUALIZADO: Agora respeita o isWarpCooldown ---
   useEffect(() => {
-    // Se a velocidade chegou a ~60.000, a dobra não está ativa e não está habilitada, e temos distância, e SEM COOLDOWN
     if (telemetry.velocity.kmh >= 59500 && !isDobraEnabled && !isDobraAtivada && distanceKm > 500000 && !isWarpCooldown) {
       setIsDobraEnabled(true);
-      // Toca o som quando a dobra fica disponível (habilitada)
       playSound('/sounds/05.Dobra-Active.mp3');
     }
   }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm, playSound, isWarpCooldown]);
-  // ------------------------------------------------------------------
 
-  // --- EFEITO S.O.S (Geração de novos sinais no mapa) ---
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
@@ -855,7 +790,6 @@ const DecolagemMarte = () => {
     return () => intervals.forEach(clearInterval);
   }, [isPaused, chosenShip, isDobraAtivada]);
 
-  // --- ALTERAÇÃO: LOOP DE CONSUMO DA DOBRA COM VERIFICAÇÃO CRÍTICA ---
   useEffect(() => {
     if (!isDobraAtivada || isPaused) return;
     const warpConsumptionInterval = setInterval(() => {
@@ -866,7 +800,6 @@ const DecolagemMarte = () => {
       telemetryRef.current.atmosphere.o2 = newO2;
       setTelemetry(prev => ({ ...prev, ...telemetryRef.current }));
 
-      // Se recursos críticos zerarem DURANTE a dobra, cancelar imediatamente
       if (newPropulsion <= 0 || newO2 <= 0) {
         if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
         isDobraAtivadaRef.current = false;
@@ -880,7 +813,6 @@ const DecolagemMarte = () => {
     }, 20000);
     return () => clearInterval(warpConsumptionInterval);
   }, [isDobraAtivada, isPaused]);
-  // ------------------------------------------------------------------
 
   useEffect(() => {
     let delayTimer, takeoffInterval;
@@ -948,8 +880,6 @@ const DecolagemMarte = () => {
   }, [travelTime, travelStarted, isPaused, playSound]);
 
   useEffect(() => {
-    // FIX: Adicionado isLoadingRoute para evitar som de empuxo na inicialização (distância 0)
-    // Se o jogo está carregando, pausado ou em dobra, não toca o som de aproximação
     if (isPaused || isDobraAtivada || isLoadingRoute) return;
 
     const isMoon = selectedPlanet.nome.toLowerCase() === 'lua';
@@ -959,7 +889,7 @@ const DecolagemMarte = () => {
       setIsFinalApproach(true);
       approachSoundPlayed.current = true;
     }
-  }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]); // Dependência atualizada
+  }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]);
 
   useEffect(() => {
     if (isPaused) return;
@@ -983,7 +913,11 @@ const DecolagemMarte = () => {
   }, [isPaused]);
 
   const isSystemCritical = telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20;
-  const isSOSActive = isSystemCritical && !isPaused && !isDobraAtivada && !isRestoringSOS;
+
+  // --- ALTERAÇÃO: VERIFICAÇÃO DE FUNDOS ---
+  const hasFundsForSOS = (spaceCoins || 0) > 0;
+  const isSOSActive = isSystemCritical && !isPaused && !isDobraAtivada && !isRestoringSOS && hasFundsForSOS;
+  // ----------------------------------------
 
   const handleSOS = () => {
     if (!isSOSActive) return;
@@ -1041,6 +975,9 @@ const DecolagemMarte = () => {
     return () => { if (restoreIntervalRef.current) clearInterval(restoreIntervalRef.current); };
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
 
+  // =========================================================================
+  // LOOP PRINCIPAL DO JOGO
+  // =========================================================================
   useEffect(() => {
     const gameLoop = (timestamp) => {
       if (isPaused) { lastUpdateTime.current = timestamp; animationFrameId.current = requestAnimationFrame(gameLoop); return; }
@@ -1071,6 +1008,10 @@ const DecolagemMarte = () => {
     return () => cancelAnimationFrame(animationFrameId.current);
   }, [isPaused, travelStarted, chosenShip]);
 
+
+  // =========================================================================
+  // ATUALIZAÇÃO DE DISTÂNCIA E CHECKS DE S.O.S
+  // =========================================================================
   useEffect(() => {
     if (!travelStarted || isPaused) return;
 
@@ -1083,40 +1024,52 @@ const DecolagemMarte = () => {
       const newDistance = distanceKm > 0 ? distanceKm - Math.round(distanceToDecrease) : 0;
       setDistanceKm(newDistance);
 
+      // --- VERIFICAÇÃO DE S.O.S SURPRESA ---
       const isSosDestination = selectedPlanet && selectedPlanet.nome && selectedPlanet.nome.startsWith("S.O.S");
 
       if (isSosDestination && !isForcedMapEdit) {
+        // Gatilho 1: Sortear evento aos 1000km
         if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEvent) {
           const randIndex = Math.floor(Math.random() * 4);
           setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
         }
 
+        // Gatilho 2: Exibir modal aos 0km
         if (newDistance <= 0 && !arrivedAtMars) {
           setArrivedAtMars(true);
           setSpeed(0);
 
+          // --- FIX: GARANTIA DE EVENTO ---
+          // Se chegou a 0km sem evento sorteado (pulo da dobra), sorteia agora.
           if (!sosSurpriseEvent) {
             const randIndex = Math.floor(Math.random() * 4);
             setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
           }
+          // -------------------------------
 
           setShowSosSurprise(true);
+          // Não executa lógica padrão de chegada (O2, save) aqui
           return;
         }
       }
 
+      // --- LÓGICA DE DOBRA E CHEGADA PADRÃO ---
+      // AUMENTADO DE 5000 PARA 150000 PARA EVITAR QUE A NAVE PULE O DESTINO
       if (newDistance <= 150000 && isDobraAtivada) {
         if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
         stopAllAudio();
         isDobraAtivadaRef.current = false; setIsDobraAtivada(false); saveTelemetryData(); setShowWarpDisabledMessage(true); setMinervaImage('/images/Minerva/Minerva_Active.gif'); playSound('/sounds/power-down-Warp.mp3'); setTimeout(() => setShowWarpDisabledMessage(false), 10000);
 
+        // --- APLICAÇÃO DO COOLDOWN DE 20 SEGUNDOS (Caso pare por distância) ---
         setIsWarpCooldown(true);
         setTimeout(() => { setIsWarpCooldown(false); }, 20000);
+        // ---------------------------------------------------------------------
 
         const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
         const approachDistanceThreshold = 800000;
         if (!isMoon && newDistance <= approachDistanceThreshold && !isFinalApproachRef.current) { setIsFinalApproach(true); approachSoundPlayed.current = true; } else { setIsBoostingTo60k(false); }
       } else if (newDistance <= 0 && !arrivedAtMars) {
+        // CHEGADA PADRÃO (PLANETA/ESTAÇÃO)
         setArrivedAtMars(true); setSpeed(45000);
         let newProcessadorO2Value = processadorO2;
         const planetNameInput = selectedPlanet?.nome || '';
@@ -1141,6 +1094,7 @@ const DecolagemMarte = () => {
         saveArrival();
       }
 
+      // Atualiza barra de progresso
       const destinationStepIndex = routeIndex + 1;
       const initialDistanceForLeg = (plannedRoute && plannedRoute[destinationStepIndex] ? plannedRoute[destinationStepIndex].distance : null) || newDistance || 1;
       const distanceTraveled = initialDistanceForLeg - newDistance;
@@ -1149,60 +1103,6 @@ const DecolagemMarte = () => {
     }, 1000);
     return () => clearInterval(interval);
   }, [travelStarted, arrivedAtMars, isDobraAtivada, isPaused, playSound, distanceKm, plannedRoute, routeIndex, handleChallengeEnd, saveTelemetryData, selectedPlanet, saveCurrentProgress, API_BASE_URL, userId, processadorO2, stopAllAudio, sosSurpriseEvent, isForcedMapEdit]);
-
-  useEffect(() => {
-    if (arrivedAtMars && !activeChallengeData && !showSosSurprise && !isDeparting) {
-
-      const planetNameNormalized = selectedPlanet?.nome
-        ?.toLowerCase()
-        .trim()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
-
-      const desafioEncontrado = desafiosData.desafios.find(d =>
-        d.planeta.toLowerCase() === planetNameNormalized
-      );
-
-      if (desafioEncontrado) {
-        console.log("Desafio encontrado para:", planetNameNormalized);
-        setActiveChallengeData(desafioEncontrado);
-        setDialogueIndex(0);
-        setShowDesafioModal(true);
-      }
-    }
-  }, [arrivedAtMars, activeChallengeData, showSosSurprise, isDeparting, selectedPlanet]);
-
-  useEffect(() => {
-    if (isTransmissionStarting && activeChallengeData && activeChallengeData.dialogo) {
-
-      const dialogoAtual = activeChallengeData.dialogo;
-      const currentStep = dialogoAtual[dialogueIndex];
-
-      if (!currentStep) {
-        setIsTransmissionStarting(false);
-        setIsDialogueFinished(true);
-
-        setTimeout(() => {
-          setShowEscolhaModal(true);
-        }, 1000);
-        return;
-      }
-
-      if (currentStep.audio) {
-        // playTrack(currentStep.audio, { loop: false }); 
-      }
-
-      const tempoLeitura = currentStep.duracao || 5000;
-
-      console.log(`Lendo fala ${dialogueIndex + 1}/${dialogoAtual.length}. Próximo em: ${tempoLeitura}ms`);
-
-      const timer = setTimeout(() => {
-        setDialogueIndex((prev) => prev + 1);
-      }, tempoLeitura);
-
-      return () => clearTimeout(timer);
-    }
-  }, [isTransmissionStarting, dialogueIndex, activeChallengeData]);
 
   useEffect(() => {
     if ((monitorState !== 'static' && mainDisplayState !== 'static') || isPaused) return;
@@ -1222,6 +1122,7 @@ const DecolagemMarte = () => {
   const currentCharacterId = currentDialogueStep?.personagemId;
   const currentCharacterData = currentCharacterId ? desafiosData.personagens[currentCharacterId] : null;
 
+  // Handler para modal de escolha fechar
   const handleCloseEscolhaModal = useCallback(() => {
     setShowEscolhaModal(false);
   }, []);
@@ -1230,7 +1131,9 @@ const DecolagemMarte = () => {
     setSpaceCoins(prev => (prev || 0) - amount);
   }, [setSpaceCoins]);
 
+  // Handler para replay de diálogo
   const handleReplayDialogue = () => {
+    // Lógica de replay se necessário
   };
 
   if (isLoadingRoute) return <div className="tela-decolagem" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5em', color: '#00aaff', textShadow: '0 0 10px #00aaff' }}>Buscando dados da missão...</div>;
@@ -1278,13 +1181,15 @@ const DecolagemMarte = () => {
                   className="monitor-image"
                 />
               ) : showCriticalWarpFail ? (
-                <div className="monitor-text-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'rgba(50, 0, 0, 0.8)' }}>
-                  <p style={{ color: '#ff0000', textAlign: 'center', fontWeight: 'bold', textShadow: '0 0 10px red', fontSize: '1.2rem', padding: '20px' }}>
-                    ⚠ FALHA CRÍTICA ⚠<br /><br />
+                // --- AJUSTE VISUAL: TEXTO DE FALHA CRÍTICA ---
+                <div className="monitor-text-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'rgba(30, 0, 0, 0.9)', flexDirection: 'column', padding: '10px' }}>
+                  <h3 style={{ color: '#ff3333', margin: '0 0 10px 0', textShadow: '0 0 10px red', fontSize: '1.1rem', textAlign: 'center' }}>⚠ FALHA CRÍTICA ⚠</h3>
+                  <p style={{ color: '#ffaaaa', textAlign: 'center', fontWeight: 'bold', fontSize: '0.9rem', lineHeight: '1.4', margin: 0 }}>
                     Elementos base para a dobra escassos.<br />
-                    Direcionados para suporte à vida no momento.
+                    Recursos direcionados para<br />suporte à vida.
                   </p>
                 </div>
+                // ---------------------------------------------
               ) : isForcedMapEdit ? (
                 <div className="monitor-text-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'rgba(50, 0, 0, 0.5)' }}>
                   <p style={{ color: '#ffcc00', textAlign: 'center', fontWeight: 'bold', textShadow: '0 0 5px red' }}>
@@ -1324,7 +1229,6 @@ const DecolagemMarte = () => {
           <div className="glossary-button-container" style={{ marginTop: '20px', position: 'relative', zIndex: 10 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
               <button className="glossary-button" onClick={() => !isPaused && setShowGlossary(true)} disabled={isPaused}>GLOSSÁRIO</button>
-              {/* CORREÇÃO: Botão da Bolsa desativado */}
               <button className="bolsa-button" onClick={handleInventory} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed' }}><img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" /></button>
             </div>
           </div>
@@ -1346,7 +1250,18 @@ const DecolagemMarte = () => {
           )}
 
           <div className="floating-buttons-container">
-            <button className={`sos-button ${isSOSActive ? 'active' : ''}`} onClick={handleSOS} disabled={!isSOSActive} title={isSOSActive ? "Ativar S.O.S." : "S.O.S. indisponível"}>S.O.S.</button>
+            <button
+              className={`sos-button ${isSOSActive ? 'active' : ''}`}
+              onClick={handleSOS}
+              disabled={!isSOSActive}
+              title={
+                isSOSActive ? "Ativar S.O.S." :
+                  !hasFundsForSOS ? "Sem SpaceCoins para S.O.S." :
+                    "S.O.S. indisponível"
+              }
+            >
+              S.O.S.
+            </button>
             <button onClick={togglePause} disabled={isPauseButtonDisabled || isRestoringSOS} className={`pause-button ${isPaused ? 'paused' : ''}`} title={isRestoringSOS ? "Não é possível pausar durante a restauração S.O.S." : ""}>{isPaused ? 'Continuar Jogo' : 'Pausar Jogo'}</button>
           </div>
         </div>
@@ -1357,7 +1272,6 @@ const DecolagemMarte = () => {
           {mainDisplayState === 'static' && <div className="static-animation"></div>}
           {isDobraAtivada ? (<video src="/images/Vluz-Dobra.webm" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />) : (mainDisplayState === 'stars' && (<SpaceView distance={distanceKm} forceLarge={arrivedAtMars} isWarpActive={false} isPaused={isPaused} selectedPlanet={selectedPlanet} onChallengeEnd={handleChallengeEnd} isDeparting={isDeparting} />))}
 
-          {/* Modal da Loja Padrão */}
           {showStoreModal && <LojaEspacial
             onClose={() => setShowStoreModal(false)}
             currentTelemetry={telemetry}
@@ -1369,7 +1283,6 @@ const DecolagemMarte = () => {
             hasRoute={plannedRoute && (routeIndex + 1) < plannedRoute.length}
           />}
 
-          {/* Modal de SOS Surpresa INTEGRADO */}
           {showSosSurprise && sosSurpriseEvent && (
             <SosSurpriseModal
               event={sosSurpriseEvent}
