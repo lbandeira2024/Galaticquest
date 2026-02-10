@@ -45,12 +45,6 @@ const planetImageMap = {
   boktok: '/images/stations/BOKTOK-Rotacionando.webm'
 };
 
-// Removidas as variações específicas para manter padrão.
-// O controle de escala agora é feito na lógica do animate.
-const planetScaleFactors = {
-  default: 1
-};
-
 // Cores pré-definidas para evitar criação de strings no loop
 const STAR_HUES = [210, 120, 30, 0, 60];
 
@@ -158,7 +152,7 @@ const SpaceView = ({
     setPlanetImage(imagePath);
 
     if (imagePath && imagePath.endsWith('.webm')) {
-      // Para vídeo, assumimos carregamento rápido, mas o evento de canplay seria ideal
+      // Para vídeo, assumimos carregamento rápido
       setTimeout(() => setPlanetImageLoaded(true), 100);
     } else {
       const img = new Image();
@@ -193,19 +187,6 @@ const SpaceView = ({
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
 
-    const currentPlanetNameNorm = (selectedPlanet?.nome || 'marte').toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
-
-    // === LÓGICA DE ESCALA E EXCEÇÕES ===
-    // Todos os planetas têm fator base 1.0 (mesmo tamanho)
-    // Exceto Júpiter, que é 2x maior.
-    let planetBaseFactor = 1.0;
-    const isJupiter = currentPlanetNameNorm === 'jupiter';
-
-    if (isJupiter) {
-      planetBaseFactor = 2.0;
-    }
-    // Removida a redução para .webm para manter consistência de tamanho.
-
     lastTimeRef.current = performance.now();
 
     const animate = (timestamp) => {
@@ -231,15 +212,11 @@ const SpaceView = ({
       }
 
       if (planetContainerRef.current) {
-        // === LÓGICA DE POSICIONAMENTO LATERAL ===
-        // Se for Júpiter, aplicamos um offset negativo grande no X para jogá-lo à esquerda
-        // window.innerWidth * 0.25 desloca para a esquerda em 25% da largura da tela
-        const xOffset = isJupiter ? -window.innerWidth * 0.25 : 0;
-
-        planetContainerRef.current.style.transform = `translate(calc(-50% + ${position.current.x + xOffset}px), calc(-50% + ${position.current.y}px))`;
+        // === CORREÇÃO: Removido o xOffset que jogava Júpiter para fora da tela ===
+        planetContainerRef.current.style.transform = `translate(calc(-50% + ${position.current.x}px), calc(-50% + ${position.current.y}px))`;
       }
 
-      // === LÓGICA DE OPACIDADE E ESCALA CORRIGIDA ===
+      // === LÓGICA DE OPACIDADE E ESCALA ===
       if (planetImageRef.current && planetImageLoaded && !isWarping) {
         const dist = distanceRef.current;
         const force = forceLargeRef.current;
@@ -261,7 +238,6 @@ const SpaceView = ({
               opacity = 1 - (dist - fadeEnd) / (VIEW_DISTANCE_THRESHOLD - fadeEnd);
             }
           }
-          // Se dist > 50.000.000, opacity permanece 0
         }
         planetImageRef.current.style.opacity = Math.max(0, Math.min(1, opacity));
 
@@ -278,7 +254,9 @@ const SpaceView = ({
             scale = 0.05 + Math.pow(progress, 3) * 2.25;
           }
         }
-        scale *= planetBaseFactor;
+        // === CORREÇÃO: Fator base normalizado para todos os planetas ===
+        scale *= 1.0;
+
         planetImageRef.current.style.transform = `scale(${scale})`;
       }
 
