@@ -1151,8 +1151,42 @@ const DecolagemMarte = () => {
 
   // Handler para replay de diálogo
   const handleReplayDialogue = () => {
-    // Lógica de replay se necessário
+    if (activeChallengeData) {
+      setDialogueIndex(0);
+      setIsTransmissionStarting(true);
+      setIsDialogueFinished(false);
+    }
   };
+
+  // Função para avançar o diálogo ao clicar
+  const handleNextDialogue = useCallback(() => {
+    if (!activeChallengeData || !activeChallengeData.dialogo) return;
+
+    // Se ainda houver falas, avança para a próxima
+    if (dialogueIndex < activeChallengeData.dialogo.length - 1) {
+      setDialogueIndex(prev => prev + 1);
+      playSound('/sounds/ui-click.mp3'); // Opcional: som de clique
+    } else {
+      // Se for a última fala, encerra o diálogo e abre a escolha
+      setIsTransmissionStarting(false);
+      setIsDialogueFinished(true);
+      setShowEscolhaModal(true);
+      setDialogueIndex(0); // Reseta para futuro replay
+    }
+  }, [activeChallengeData, dialogueIndex, playSound]);
+
+  // Função para controlar a abertura do mapa
+  const handleToggleMap = useCallback((show) => {
+    if (show) {
+      // Impede abrir o mapa se a distância for 0 e NÃO for uma edição forçada
+      if (distanceKm <= 0 && !isForcedMapEdit) {
+        playSound('/sounds/error.mp3'); // Opcional: som de erro
+        return;
+      }
+    }
+    setShowStellarMap(show);
+  }, [distanceKm, isForcedMapEdit, playSound]);
+
 
   if (isLoadingRoute) return <div className="tela-decolagem" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5em', color: '#00aaff', textShadow: '0 0 10px #00aaff' }}>Buscando dados da missão...</div>;
 
@@ -1232,9 +1266,24 @@ const DecolagemMarte = () => {
 
           {/* MONITOR INFERIOR */}
           <div className="right-monitor-container" style={{ marginTop: '10px' }}>
-            <div className="monitor-screen">
+            <div
+              className="monitor-screen"
+              onClick={isTransmissionStarting ? handleNextDialogue : undefined}
+              style={{ cursor: isTransmissionStarting ? 'pointer' : 'default' }}
+            >
               {isTransmissionStarting && currentDialogueStep && currentCharacterData ? (
-                <div className="monitor-text-display"><p><span className="dialogue-character-name">{currentCharacterData.nome}: </span>{highlightKeywords(currentDialogueStep.texto, currentDialogueStep.palavras_chave)}</p></div>
+                <div className="monitor-text-display">
+                  <p>
+                    <span className="dialogue-character-name" style={{ color: '#00aaff' }}>
+                      {currentCharacterData.nome}:
+                    </span>
+                    {' '}
+                    {highlightKeywords(currentDialogueStep.texto, currentDialogueStep.palavras_chave)}
+                  </p>
+                  <div style={{ textAlign: 'right', fontSize: '0.8em', color: '#00aaff', animation: 'blink 1s infinite' }}>
+                    ▼
+                  </div>
+                </div>
               ) : (
                 <>
                   {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
@@ -1314,7 +1363,7 @@ const DecolagemMarte = () => {
           data={telemetry}
           isPaused={isPaused}
           showStellarMap={showStellarMap}
-          setShowStellarMap={setShowStellarMap}
+          setShowStellarMap={handleToggleMap} // Alterado para usar o wrapper
           onRouteChanged={handleRouteChanged}
           isDobraAtivada={isDobraAtivada}
           plannedRoute={plannedRoute}
