@@ -209,6 +209,8 @@ const DecolagemMarte = () => {
   const takeoffApplied = useRef(false);
   const [isCooldownOver, setIsCooldownOver] = useState(true);
   const [isForcedMapEdit, setIsForcedMapEdit] = useState(false);
+  // Trava de segurança para evitar modal instantâneo na troca de rota
+  const routeChangeLockRef = useRef(false);
 
   const [isWarpCooldown, setIsWarpCooldown] = useState(false);
   const [showCriticalWarpFail, setShowCriticalWarpFail] = useState(false);
@@ -417,6 +419,10 @@ const DecolagemMarte = () => {
     const isInFlight = !arrivedAtMars && travelStarted;
 
     if (isInFlight) {
+      // ATIVA A TRAVA DE SEGURANÇA
+      // Impede que o useEffect calcule chegada com a distância antiga
+      routeChangeLockRef.current = true;
+
       saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
       setPlannedRoute(newPlannedRoute);
       setRouteIndex(newRouteIndex);
@@ -427,10 +433,9 @@ const DecolagemMarte = () => {
         setOriginPlanet({ nome: newOriginStep.name });
         setSelectedPlanet({ nome: newDestinationStep.name });
 
-        // CORREÇÃO: Ao mudar a rota, resetamos a distância para o total do novo trecho.
-        // Isso evita que o cálculo anterior (que poderia ser maior que a nova distância)
-        // resulte em 0km, acionando a chegada imediata e o modal.
-        setDistanceKm(newDestinationStep.distance);
+        // Define a nova distância corretamente
+        const newDist = newDestinationStep.distance || 300000000;
+        setDistanceKm(newDist);
       }
     } else {
       playSound('/sounds/empuxo.wav'); setIsDeparting(true); setShowStoreModal(false);
@@ -1021,6 +1026,14 @@ const DecolagemMarte = () => {
     if (!travelStarted || isPaused) return;
 
     const interval = setInterval(() => {
+
+      // CORREÇÃO: VERIFICA A TRAVA DE MUDANÇA DE ROTA
+      // Se acabamos de mudar a rota, pulamos este ciclo para evitar leituras falsas de chegada
+      if (routeChangeLockRef.current) {
+        routeChangeLockRef.current = false;
+        return;
+      }
+
       let distanceToDecrease;
       const currentSpeedKmh = telemetryRef.current.velocity.kmh;
       if (currentSpeedKmh >= 60000) distanceToDecrease = (currentSpeedKmh * 9172) / 3000;
