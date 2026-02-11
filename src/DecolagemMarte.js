@@ -255,6 +255,12 @@ const DecolagemMarte = () => {
   const { isPaused, togglePause } = usePause();
 
   const triggerMinervaInterplanetarySpeed = useCallback(() => {
+    // Evita som duplo: para qualquer áudio tocando antes de iniciar este
+    stopAllAudio();
+
+    // Marca como disparado para evitar que o useEffect dispare novamente
+    minervaEventTriggered.current = true;
+
     setShowMinervaOnMonitor(true);
     playSound('/sounds/Mineva-VelInterplanetaria.mp3');
 
@@ -266,7 +272,7 @@ const DecolagemMarte = () => {
       setIsBoostingTo60k(true);
       playSound('/sounds/empuxo.wav');
     }, 2000);
-  }, [playSound]);
+  }, [playSound, stopAllAudio]);
 
   useEffect(() => {
     const audioPreload = new Audio('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3');
@@ -378,8 +384,8 @@ const DecolagemMarte = () => {
 
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
-    // CORREÇÃO: Não remover o planeta ao editar rota
-    // setArrivedAtMars(false);
+    // CORREÇÃO: Removido setArrivedAtMars(false) para manter o planeta visível durante a edição
+    // setArrivedAtMars(false); 
 
     setIsForcedMapEdit(true);
     setShowStellarMap(true);
@@ -403,7 +409,8 @@ const DecolagemMarte = () => {
       setArrivedAtMars(false);
       setIsFinalApproach(false);
       approachSoundPlayed.current = false;
-      minervaEventTriggered.current = false;
+      // Garante que o trigger manual não seja duplicado pelo useEffect
+      minervaEventTriggered.current = true;
 
       triggerMinervaInterplanetarySpeed();
 
@@ -451,6 +458,7 @@ const DecolagemMarte = () => {
         setDistanceKm(newDist);
       }
 
+      // Se mudou a rota durante o voo, reseta status de chegada
       setArrivedAtMars(false);
       setIsFinalApproach(false);
 
@@ -466,7 +474,9 @@ const DecolagemMarte = () => {
         setArrivedAtMars(false);
         setIsFinalApproach(false);
         approachSoundPlayed.current = false;
-        minervaEventTriggered.current = false;
+
+        // CORREÇÃO: Evita resetar para false, o que causaria conflito com o useEffect
+        minervaEventTriggered.current = true;
 
         triggerMinervaInterplanetarySpeed();
 
@@ -936,57 +946,6 @@ const DecolagemMarte = () => {
       approachSoundPlayed.current = true;
     }
   }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]);
-
-  useEffect(() => {
-    if (isPaused) return;
-    let animationId;
-    const targetOffset = { x: 0, y: 0 };
-    const currentOffset = { x: 0, y: 0 };
-    const animateCockpit = () => {
-      const friction = 0.05;
-      currentOffset.x += (targetOffset.x - currentOffset.x) * friction;
-      currentOffset.y += (targetOffset.y - currentOffset.y) * friction;
-      if (cockpitRef.current) {
-        const x = currentOffset.x;
-        const y = currentOffset.y;
-        cockpitRef.current.style.transform =
-          `perspective(1500px) rotateX(${y * 0.1}deg) rotateY(${-x * 0.1}deg) translateX(${-x * 0.5}px) translateY(${y * 0.5}px)`;
-      }
-      animationId = requestAnimationFrame(animateCockpit);
-    };
-    animationId = requestAnimationFrame(animateCockpit);
-    return () => cancelAnimationFrame(animationId);
-  }, [isPaused]);
-
-  useEffect(() => {
-    const gameLoop = (timestamp) => {
-      if (isPaused) { lastUpdateTime.current = timestamp; animationFrameId.current = requestAnimationFrame(gameLoop); return; }
-      if (lastUpdateTime.current === 0) lastUpdateTime.current = timestamp;
-      const deltaTime = timestamp - lastUpdateTime.current;
-
-      if (deltaTime >= telemetryInterval) {
-        lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
-        const dobraAtiva = isDobraAtivadaRef.current;
-        let maxSpeed = dobraAtiva ? 100000000 : (isBoostingTo60kRef.current ? 60000 : (isFinalApproachRef.current ? 45000 : 45000));
-        const accelConfig = accelerationRates[chosenShip] || accelerationRates.default;
-        let speedChange = accelConfig.perTick;
-        let newKmh;
-        const currentSpeed = telemetryRef.current.velocity.kmh;
-        if (dobraAtiva) newKmh = currentSpeed + 2260;
-        else if (currentSpeed > maxSpeed) newKmh = Math.max(currentSpeed - 200000, maxSpeed);
-        else newKmh = Math.min(currentSpeed + speedChange, maxSpeed);
-
-        if (travelStarted) {
-          const SPEED_OF_LIGHT_KMH = 1079252848.8;
-          telemetryRef.current = { ...telemetryRef.current, velocity: { kmh: newKmh, ms: newKmh / 3.6, rel: `${(newKmh / SPEED_OF_LIGHT_KMH).toFixed(7)}c` } };
-          setTelemetry({ ...telemetryRef.current });
-        }
-      }
-      animationFrameId.current = requestAnimationFrame(gameLoop);
-    };
-    animationFrameId.current = requestAnimationFrame(gameLoop);
-    return () => cancelAnimationFrame(animationFrameId.current);
-  }, [isPaused, travelStarted, chosenShip]);
 
   useEffect(() => {
     if (!travelStarted || isPaused) return;
