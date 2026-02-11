@@ -1086,7 +1086,9 @@ const DecolagemMarte = () => {
         const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
         const approachDistanceThreshold = 800000;
         if (!isMoon && newDistance <= approachDistanceThreshold && !isFinalApproachRef.current) { setIsFinalApproach(true); approachSoundPlayed.current = true; } else { setIsBoostingTo60k(false); }
-      } else if (newDistance <= 0 && !arrivedAtMars) {
+
+        // --- CORREÇÃO APLICADA AQUI: && !isForcedMapEdit ---
+      } else if (newDistance <= 0 && !arrivedAtMars && !isForcedMapEdit) {
         // CHEGADA PADRÃO (PLANETA/ESTAÇÃO)
         setArrivedAtMars(true); setSpeed(45000);
 
