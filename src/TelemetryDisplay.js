@@ -246,7 +246,6 @@ const TelemetryDisplay = ({
   const [transferAmounts, setTransferAmounts] = useState({});
   const [rawTransferAmounts, setRawTransferAmounts] = useState({});
 
-  // Lógica de bloqueio do mapa: Se não estiver em edição forçada, bloqueia em dist <= 0 ou vel < 60k
   const isStellarMapDisabled =
     isPaused ||
     isDobraAtivada ||
