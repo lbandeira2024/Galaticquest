@@ -209,7 +209,6 @@ const DecolagemMarte = () => {
   const takeoffApplied = useRef(false);
   const [isCooldownOver, setIsCooldownOver] = useState(true);
   const [isForcedMapEdit, setIsForcedMapEdit] = useState(false);
-  // Trava de segurança para evitar modal instantâneo na troca de rota
   const routeChangeLockRef = useRef(false);
 
   const [isWarpCooldown, setIsWarpCooldown] = useState(false);
@@ -419,8 +418,6 @@ const DecolagemMarte = () => {
     const isInFlight = !arrivedAtMars && travelStarted;
 
     if (isInFlight) {
-      // ATIVA A TRAVA DE SEGURANÇA
-      // Impede que o useEffect calcule chegada com a distância antiga
       routeChangeLockRef.current = true;
 
       saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
@@ -433,7 +430,6 @@ const DecolagemMarte = () => {
         setOriginPlanet({ nome: newOriginStep.name });
         setSelectedPlanet({ nome: newDestinationStep.name });
 
-        // Define a nova distância corretamente
         const newDist = newDestinationStep.distance || 300000000;
         setDistanceKm(newDist);
       }
@@ -603,8 +599,6 @@ const DecolagemMarte = () => {
   useEffect(() => {
     if (isLoadingRoute) return;
 
-    // --- CORREÇÃO APLICADA AQUI ---
-    // Removido "|| hasStartedAudioRef.current" para forçar a verificação apenas pelo routeIndex
     if (routeIndex > 0) {
       setMainDisplayState('stars');
       setMonitorState('on');
@@ -924,10 +918,8 @@ const DecolagemMarte = () => {
 
   const isSystemCritical = telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20;
 
-  // --- ALTERAÇÃO: VERIFICAÇÃO DE FUNDOS ---
   const hasFundsForSOS = (spaceCoins || 0) > 0;
   const isSOSActive = isSystemCritical && !isPaused && !isDobraAtivada && !isRestoringSOS && hasFundsForSOS;
-  // ----------------------------------------
 
   const handleSOS = () => {
     if (!isSOSActive) return;
@@ -985,9 +977,6 @@ const DecolagemMarte = () => {
     return () => { if (restoreIntervalRef.current) clearInterval(restoreIntervalRef.current); };
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
 
-  // =========================================================================
-  // LOOP PRINCIPAL DO JOGO
-  // =========================================================================
   useEffect(() => {
     const gameLoop = (timestamp) => {
       if (isPaused) { lastUpdateTime.current = timestamp; animationFrameId.current = requestAnimationFrame(gameLoop); return; }
@@ -1018,17 +1007,11 @@ const DecolagemMarte = () => {
     return () => cancelAnimationFrame(animationFrameId.current);
   }, [isPaused, travelStarted, chosenShip]);
 
-
-  // =========================================================================
-  // ATUALIZAÇÃO DE DISTÂNCIA E CHECKS DE S.O.S
-  // =========================================================================
   useEffect(() => {
     if (!travelStarted || isPaused) return;
 
     const interval = setInterval(() => {
 
-      // CORREÇÃO: VERIFICA A TRAVA DE MUDANÇA DE ROTA
-      // Se acabamos de mudar a rota, pulamos este ciclo para evitar leituras falsas de chegada
       if (routeChangeLockRef.current) {
         routeChangeLockRef.current = false;
         return;
@@ -1042,62 +1025,46 @@ const DecolagemMarte = () => {
       const newDistance = distanceKm > 0 ? distanceKm - Math.round(distanceToDecrease) : 0;
       setDistanceKm(newDistance);
 
-      // --- VERIFICAÇÃO DE S.O.S SURPRESA ---
       const isSosDestination = selectedPlanet && selectedPlanet.nome && selectedPlanet.nome.startsWith("S.O.S");
 
       if (isSosDestination && !isForcedMapEdit) {
-        // Gatilho 1: Sortear evento aos 1000km
         if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEvent) {
           const randIndex = Math.floor(Math.random() * 4);
           setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
         }
 
-        // Gatilho 2: Exibir modal aos 0km
         if (newDistance <= 0 && !arrivedAtMars) {
           setArrivedAtMars(true);
           setSpeed(0);
 
-          // --- FIX: GARANTIA DE EVENTO ---
-          // Se chegou a 0km sem evento sorteado (pulo da dobra), sorteia agora.
           if (!sosSurpriseEvent) {
             const randIndex = Math.floor(Math.random() * 4);
             setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
           }
-          // -------------------------------
 
           setShowSosSurprise(true);
-          // Não executa lógica padrão de chegada (O2, save) aqui
           return;
         }
       }
 
-      // --- LÓGICA DE DOBRA E CHEGADA PADRÃO ---
-      // AUMENTADO DE 5000 PARA 150000 PARA EVITAR QUE A NAVE PULE O DESTINO
       if (newDistance <= 150000 && isDobraAtivada) {
         if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
         stopAllAudio();
         isDobraAtivadaRef.current = false; setIsDobraAtivada(false); saveTelemetryData(); setShowWarpDisabledMessage(true); setMinervaImage('/images/Minerva/Minerva_Active.gif'); playSound('/sounds/power-down-Warp.mp3'); setTimeout(() => setShowWarpDisabledMessage(false), 10000);
 
-        // --- APLICAÇÃO DO COOLDOWN DE 20 SEGUNDOS (Caso pare por distância) ---
         setIsWarpCooldown(true);
         setTimeout(() => { setIsWarpCooldown(false); }, 20000);
-        // ---------------------------------------------------------------------
 
         const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
         const approachDistanceThreshold = 800000;
         if (!isMoon && newDistance <= approachDistanceThreshold && !isFinalApproachRef.current) { setIsFinalApproach(true); approachSoundPlayed.current = true; } else { setIsBoostingTo60k(false); }
 
-        // --- CORREÇÃO APLICADA AQUI: && !isForcedMapEdit ---
       } else if (newDistance <= 0 && !arrivedAtMars && !isForcedMapEdit) {
-        // CHEGADA PADRÃO (PLANETA/ESTAÇÃO)
         setArrivedAtMars(true); setSpeed(45000);
 
-        // --- NOVA LÓGICA PARA DISPARAR O DESAFIO ---
-        // Normaliza o nome para evitar problemas com acentos (Jupiter vs Júpiter)
         const normalizeName = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
         const targetName = normalizeName(selectedPlanet.nome);
 
-        // Tenta encontrar o desafio pelo nome do planeta ou ID
         const desafioEncontrado = desafiosData.desafios?.find(d =>
           normalizeName(d.planeta) === targetName ||
           d.id === selectedPlanet.desafioId
@@ -1105,9 +1072,8 @@ const DecolagemMarte = () => {
 
         if (desafioEncontrado) {
           setActiveChallengeData(desafioEncontrado);
-          setShowDesafioModal(true); // Abre o modal do desafio
+          setShowDesafioModal(true);
         }
-        // -------------------------------------------
 
         let newProcessadorO2Value = processadorO2;
         const planetNameInput = selectedPlanet?.nome || '';
@@ -1132,7 +1098,6 @@ const DecolagemMarte = () => {
         saveArrival();
       }
 
-      // Atualiza barra de progresso
       const destinationStepIndex = routeIndex + 1;
       const initialDistanceForLeg = (plannedRoute && plannedRoute[destinationStepIndex] ? plannedRoute[destinationStepIndex].distance : null) || newDistance || 1;
       const distanceTraveled = initialDistanceForLeg - newDistance;
@@ -1160,7 +1125,6 @@ const DecolagemMarte = () => {
   const currentCharacterId = currentDialogueStep?.personagemId;
   const currentCharacterData = currentCharacterId ? desafiosData.personagens[currentCharacterId] : null;
 
-  // Handler para modal de escolha fechar
   const handleCloseEscolhaModal = useCallback(() => {
     setShowEscolhaModal(false);
   }, []);
@@ -1169,7 +1133,6 @@ const DecolagemMarte = () => {
     setSpaceCoins(prev => (prev || 0) - amount);
   }, [setSpaceCoins]);
 
-  // Handler para replay de diálogo
   const handleReplayDialogue = () => {
     if (activeChallengeData) {
       setDialogueIndex(0);
@@ -1178,31 +1141,26 @@ const DecolagemMarte = () => {
     }
   };
 
-  // Função para avançar o diálogo ao clicar
   const handleNextDialogue = useCallback(() => {
     if (!activeChallengeData || !activeChallengeData.dialogo) return;
 
-    // Se ainda houver falas, avança para a próxima
     if (dialogueIndex < activeChallengeData.dialogo.length - 1) {
       setDialogueIndex(prev => prev + 1);
-      playSound('/sounds/ui-click.mp3'); // Opcional: som de clique
+      playSound('/sounds/ui-click.mp3');
     } else {
-      // Se for a última fala, encerra o diálogo e abre a escolha
       setIsTransmissionStarting(false);
       setIsDialogueFinished(true);
       setShowEscolhaModal(true);
-      setDialogueIndex(0); // Reseta para futuro replay
+      setDialogueIndex(0);
     }
   }, [activeChallengeData, dialogueIndex, playSound]);
 
-  // Efeito para avanço automático do diálogo usando 'duracao' do JSON
   useEffect(() => {
     if (!isTransmissionStarting || !activeChallengeData || !activeChallengeData.dialogo) return;
 
     const currentStep = activeChallengeData.dialogo[dialogueIndex];
     if (!currentStep) return;
 
-    // Prioriza a duração definida no JSON. Se não existir, calcula baseada no texto.
     const duration = currentStep.duracao || (currentStep.texto.length * 50 + 2000);
 
     const timer = setTimeout(() => {
@@ -1212,12 +1170,10 @@ const DecolagemMarte = () => {
     return () => clearTimeout(timer);
   }, [dialogueIndex, isTransmissionStarting, activeChallengeData, handleNextDialogue]);
 
-  // Função para controlar a abertura do mapa
   const handleToggleMap = useCallback((show) => {
     if (show) {
-      // Impede abrir o mapa se a distância for 0 e NÃO for uma edição forçada
       if (distanceKm <= 0 && !isForcedMapEdit) {
-        playSound('/sounds/error.mp3'); // Opcional: som de erro
+        playSound('/sounds/error.mp3');
         return;
       }
     }
@@ -1253,7 +1209,6 @@ const DecolagemMarte = () => {
             <button className={`o2-transfer-button ${isO2TransferDisabled ? 'disabled' : ''}`} onClick={handleOpenO2Modal} disabled={isO2TransferDisabled} style={{ zIndex: 100 }}>TRANSFERIR ({processadorO2})</button>
           </div>
         </div>
-        {/* CORREÇÃO: Removido 'position: relative' para evitar quebrar o layout */}
         <div className="right-panel-3d" style={{ zIndex: 50 }}>
           <MissionTimer isPaused={isPaused} />
 
@@ -1271,7 +1226,6 @@ const DecolagemMarte = () => {
                   className="monitor-image"
                 />
               ) : showCriticalWarpFail ? (
-                // --- AJUSTE VISUAL: TEXTO DE FALHA CRÍTICA ---
                 <div className="monitor-text-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'rgba(30, 0, 0, 0.9)', flexDirection: 'column', padding: '10px' }}>
                   <h3 style={{ color: '#ff3333', margin: '0 0 10px 0', textShadow: '0 0 10px red', fontSize: '1.1rem', textAlign: 'center' }}>⚠ FALHA CRÍTICA ⚠</h3>
                   <p style={{ color: '#ffaaaa', textAlign: 'center', fontWeight: 'bold', fontSize: '0.9rem', lineHeight: '1.4', margin: 0 }}>
@@ -1279,7 +1233,6 @@ const DecolagemMarte = () => {
                     Recursos direcionados para<br />suporte à vida.
                   </p>
                 </div>
-                // ---------------------------------------------
               ) : isForcedMapEdit ? (
                 <div className="monitor-text-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'rgba(50, 0, 0, 0.5)' }}>
                   <p style={{ color: '#ffcc00', textAlign: 'center', fontWeight: 'bold', textShadow: '0 0 5px red' }}>
@@ -1401,7 +1354,7 @@ const DecolagemMarte = () => {
           data={telemetry}
           isPaused={isPaused}
           showStellarMap={showStellarMap}
-          setShowStellarMap={handleToggleMap} // Alterado para usar o wrapper
+          setShowStellarMap={handleToggleMap}
           onRouteChanged={handleRouteChanged}
           isDobraAtivada={isDobraAtivada}
           plannedRoute={plannedRoute}
@@ -1410,7 +1363,8 @@ const DecolagemMarte = () => {
           lastImpactTimestamp={lastImpactTimestamp}
           isForcedMapEdit={isForcedMapEdit}
           onSosDetected={handleSosDetected}
-          sosSignalData={activeSosSignal}
+          distanceKm={distanceKm}
+          sosSignalData={(distanceKm > 0 || isForcedMapEdit) ? activeSosSignal : null}
         />
       </div>
       {showMandala && (<div className="modal-overlay"><div className="modal-content"><MandalaVirtudes onClose={() => setShowMandala(false)} groupId={groupId} /></div></div>)}

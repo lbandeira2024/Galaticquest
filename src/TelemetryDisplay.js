@@ -70,7 +70,6 @@ const ProgressBar = ({ value: targetValue }) => {
         className={`progress-bar ${progressClass}`}
         style={{ width: `${Math.min(100, Math.max(0, finalValue))}%` }}
       >
-        {/* O texto agora está DENTRO da barra para centralização relativa à parte colorida */}
         <span className="progress-value">{finalValue}%</span>
       </div>
     </div>
@@ -91,8 +90,8 @@ const TelemetryDisplay = ({
   isOxygenRefilled,
   lastImpactTimestamp,
   isForcedMapEdit = false,
-  // CORREÇÃO: Recebendo a prop do pai
-  sosSignalData
+  sosSignalData,
+  distanceKm
 }) => {
   const { user } = useAuth();
   const { apiBaseUrl } = useConfig();
@@ -247,10 +246,13 @@ const TelemetryDisplay = ({
   const [transferAmounts, setTransferAmounts] = useState({});
   const [rawTransferAmounts, setRawTransferAmounts] = useState({});
 
-  const isStellarMapDisabled = isPaused || (data.velocity?.kmh ?? 0) < 60000 || isDobraAtivada;
+  // Lógica de bloqueio do mapa: Se não estiver em edição forçada, bloqueia em dist <= 0 ou vel < 60k
+  const isStellarMapDisabled =
+    isPaused ||
+    isDobraAtivada ||
+    (!isForcedMapEdit && (distanceKm <= 0 || (data.velocity?.kmh ?? 0) < 60000));
 
   const handleMapClose = (newRouteData) => {
-    // Se o modo forçado estiver ativo, não permite fechar sem novos dados de rota
     if (isForcedMapEdit && !newRouteData) return;
 
     setShowStellarMap(false);
@@ -374,7 +376,6 @@ const TelemetryDisplay = ({
 
       {showStellarMap && (
         <div className="stellar-map-floating">
-          {/* O botão de fechar só renderiza se NÃO estivermos no modo forçado de edição */}
           {!isForcedMapEdit && (
             <button className="close-stellar-map-button" onClick={() => handleMapClose(null)}>×</button>
           )}
@@ -383,7 +384,6 @@ const TelemetryDisplay = ({
               onCloseMap={handleMapClose}
               initialRoute={plannedRoute}
               currentIndex={routeIndex}
-              // CORREÇÃO: Passando o sinal para o mapa
               sosSignalData={sosSignalData}
             />
           </Suspense>
