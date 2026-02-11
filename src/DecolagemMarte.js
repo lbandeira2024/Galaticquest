@@ -273,6 +273,10 @@ const DecolagemMarte = () => {
   useEffect(() => {
     const audioPreload = new Audio('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3');
     audioPreload.preload = 'auto';
+
+    // PRÉ-CARREGAMENTO DO SOM DE DESATIVAÇÃO DA DOBRA PARA EVITAR TRAVAMENTO
+    const audioPowerDown = new Audio('/sounds/power-down-Warp.mp3');
+    audioPowerDown.preload = 'auto';
   }, []);
 
   const constructPhotoUrl = (gameNumber, teamName) => {
@@ -541,27 +545,35 @@ const DecolagemMarte = () => {
 
     if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
     dobraTimerRef.current = setTimeout(() => {
-      isDobraAtivadaRef.current = false;
-      setIsDobraAtivada(false);
-      saveTelemetryData();
-      stopAllAudio();
-
-      setIsWarpCooldown(true);
-      setTimeout(() => { setIsWarpCooldown(false); }, 20000);
-
-      const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
-      const approachDistanceThreshold = 800000;
+      // 1. TOCA O SOM DE DESATIVAÇÃO PRIMEIRO (LEVE)
       playSound('/sounds/power-down-Warp.mp3');
-      setShowWarpDisabledMessage(true);
-      setMinervaImage('/images/Minerva/Minerva_Active.gif');
-      setTimeout(() => setShowWarpDisabledMessage(false), 10000);
-      if (!isMoon && distanceKm <= approachDistanceThreshold && !isFinalApproachRef.current) {
-        setIsFinalApproach(true);
-        setIsBoostingTo60k(false);
-        approachSoundPlayed.current = true;
-      } else {
-        setIsBoostingTo60k(true);
-      }
+
+      // 2. AGUARDA 100MS PARA PROCESSAR A TROCA PESADA (EVITA O TRAVAMENTO)
+      setTimeout(() => {
+        isDobraAtivadaRef.current = false;
+        setIsDobraAtivada(false); // Troca visual pesada (Canvas)
+        saveTelemetryData();
+        stopAllAudio(); // Para o loop da música da dobra
+
+        setIsWarpCooldown(true);
+        setTimeout(() => { setIsWarpCooldown(false); }, 20000);
+
+        setShowWarpDisabledMessage(true);
+        setMinervaImage('/images/Minerva/Minerva_Active.gif');
+        setTimeout(() => setShowWarpDisabledMessage(false), 10000);
+
+        const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
+        const approachDistanceThreshold = 800000;
+
+        if (!isMoon && distanceKm <= approachDistanceThreshold && !isFinalApproachRef.current) {
+          setIsFinalApproach(true);
+          setIsBoostingTo60k(false);
+          approachSoundPlayed.current = true;
+        } else {
+          setIsBoostingTo60k(true);
+        }
+      }, 100);
+
     }, DOBRA_DURATION_IN_MS);
 
     if (minervaTimeoutRef.current) clearTimeout(minervaTimeoutRef.current);
