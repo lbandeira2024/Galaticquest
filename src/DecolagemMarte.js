@@ -255,7 +255,6 @@ const DecolagemMarte = () => {
   const { isPaused, togglePause } = usePause();
 
   const triggerMinervaInterplanetarySpeed = useCallback(() => {
-    // CORREÇÃO: Removido stopAllAudio() para não cortar BGM ou alarmes
     minervaEventTriggered.current = true;
 
     setShowMinervaOnMonitor(true);
@@ -269,7 +268,7 @@ const DecolagemMarte = () => {
       setIsBoostingTo60k(true);
       playSound('/sounds/empuxo.wav');
     }, 2000);
-  }, [playSound]); // Removido stopAllAudio das dependências
+  }, [playSound]);
 
   useEffect(() => {
     const audioPreload = new Audio('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3');
@@ -1037,8 +1036,15 @@ const DecolagemMarte = () => {
         if (dobraAtiva) {
           newKmh = currentSpeed + 2260;
         } else if (currentSpeed > maxSpeed) {
-          // CORREÇÃO: Redução suave de velocidade (ex: 300 por tick)
-          newKmh = Math.max(currentSpeed - 300, maxSpeed);
+          // CORREÇÃO: Lógica diferenciada para saída de dobra vs. aproximação suave
+          if (currentSpeed > 62000) {
+            // Se estiver saindo da dobra ou muito rápido, freia bruscamente
+            newKmh = Math.max(currentSpeed - 200000, maxSpeed);
+          } else {
+            // Se estiver apenas ajustando velocidade de cruzeiro (60k) para pouso (45k), freia suave
+            // ~250 km/h por tick dá um efeito visual agradável de desaceleração
+            newKmh = Math.max(currentSpeed - 250, maxSpeed);
+          }
         } else {
           newKmh = Math.min(currentSpeed + speedChange, maxSpeed);
         }
@@ -1101,11 +1107,9 @@ const DecolagemMarte = () => {
         isDobraAtivadaRef.current = false;
         setIsDobraAtivada(false);
 
-        setIsFinalApproach(true); // CORREÇÃO: Isso agora ajusta o alvo de velocidade, o loop faz a redução gradual
+        setIsFinalApproach(true);
         setIsBoostingTo60k(false);
         approachSoundPlayed.current = true;
-
-        // CORREÇÃO: Linha telemetryRef.current.velocity.kmh = 45000 REMOVIDA para permitir desaceleração gradual
 
         saveTelemetryData();
         setShowWarpDisabledMessage(true);
