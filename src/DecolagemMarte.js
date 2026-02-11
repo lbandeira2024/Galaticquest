@@ -254,7 +254,6 @@ const DecolagemMarte = () => {
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
 
-  // Função auxiliar para tocar o áudio da minerva e subir a velocidade na saída
   const triggerMinervaInterplanetarySpeed = useCallback(() => {
     setShowMinervaOnMonitor(true);
     playSound('/sounds/Mineva-VelInterplanetaria.mp3');
@@ -406,7 +405,6 @@ const DecolagemMarte = () => {
       approachSoundPlayed.current = false;
       minervaEventTriggered.current = false;
 
-      // Gatilho da Minerva na saída
       triggerMinervaInterplanetarySpeed();
 
       setActiveChallengeData(null);
@@ -453,7 +451,6 @@ const DecolagemMarte = () => {
         setDistanceKm(newDist);
       }
 
-      // Se mudou a rota durante o voo, reseta status de chegada
       setArrivedAtMars(false);
       setIsFinalApproach(false);
 
@@ -941,27 +938,6 @@ const DecolagemMarte = () => {
   }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]);
 
   useEffect(() => {
-    if (isPaused) return;
-    let animationId;
-    const targetOffset = { x: 0, y: 0 };
-    const currentOffset = { x: 0, y: 0 };
-    const animateCockpit = () => {
-      const friction = 0.05;
-      currentOffset.x += (targetOffset.x - currentOffset.x) * friction;
-      currentOffset.y += (targetOffset.y - currentOffset.y) * friction;
-      if (cockpitRef.current) {
-        const x = currentOffset.x;
-        const y = currentOffset.y;
-        cockpitRef.current.style.transform =
-          `perspective(1500px) rotateX(${y * 0.1}deg) rotateY(${-x * 0.1}deg) translateX(${-x * 0.5}px) translateY(${y * 0.5}px)`;
-      }
-      animationId = requestAnimationFrame(animateCockpit);
-    };
-    animationId = requestAnimationFrame(animateCockpit);
-    return () => cancelAnimationFrame(animationId);
-  }, [isPaused]);
-
-  useEffect(() => {
     if (!travelStarted || isPaused) return;
 
     const interval = setInterval(() => {
@@ -1011,14 +987,14 @@ const DecolagemMarte = () => {
         setIsFinalApproach(true);
         setIsBoostingTo60k(false);
         approachSoundPlayed.current = true;
-        telemetryRef.current.velocity.kmh = 45000; // Força velocidade 45k
+        telemetryRef.current.velocity.kmh = 45000;
 
         saveTelemetryData();
         setShowWarpDisabledMessage(true);
         setMinervaImage('/images/Minerva/Minerva_Active.gif');
 
         playSound('/sounds/power-down-Warp.mp3');
-        setTimeout(() => playSound('/sounds/empuxo.wav'), 800); // Som de empuxo logo após
+        setTimeout(() => playSound('/sounds/empuxo.wav'), 800);
 
         setTimeout(() => setShowWarpDisabledMessage(false), 10000);
 
@@ -1149,12 +1125,31 @@ const DecolagemMarte = () => {
 
   if (isLoadingRoute) return <div className="tela-decolagem" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5em', color: '#00aaff', textShadow: '0 0 10px #00aaff' }}>Buscando dados da missão...</div>;
 
-  // --- DECLARAÇÃO RECOLOCADA DAS VARIÁVEIS FALTANTES ---
+  // --- CORREÇÃO TELA BRANCA: Variáveis recolocadas no escopo correto ---
   const isSystemCritical = telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20;
 
   const hasFundsForSOS = (spaceCoins || 0) > 0;
   const isSOSActive = isSystemCritical && !isPaused && !isDobraAtivada && !isRestoringSOS && hasFundsForSOS;
-  // -----------------------------------------------------
+
+  const handleSOS = () => {
+    if (!isSOSActive) return;
+    const minutesPlayed = travelTime / 60;
+    const calculatedCost = Math.floor(minutesPlayed) + 5000000;
+    const finalCost = Math.min(calculatedCost, spaceCoins || 0);
+    setSosCost(finalCost);
+    setShowSOSModal(true);
+    playSound('/sounds/ui-click.mp3');
+  };
+
+  const handleConfirmSOS = () => {
+    setSpaceCoins(prev => (prev || 0) - sosCost);
+    setIsRestoringSOS(true);
+    playSound('/sounds/ui-click.mp3');
+    setShowSOSModal(false);
+  };
+
+  const handleCancelSOS = () => setShowSOSModal(false);
+  // ---------------------------------------------------------------------
 
   return (
     <div className={`tela-decolagem ${isShaking ? 'shaking' : ''}`}>
