@@ -254,6 +254,7 @@ const DecolagemMarte = () => {
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
 
+  // Função auxiliar para tocar o áudio da minerva e subir a velocidade na saída
   const triggerMinervaInterplanetarySpeed = useCallback(() => {
     setShowMinervaOnMonitor(true);
     playSound('/sounds/Mineva-VelInterplanetaria.mp3');
@@ -378,7 +379,8 @@ const DecolagemMarte = () => {
 
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
-    setArrivedAtMars(false);
+    // CORREÇÃO: Removido setArrivedAtMars(false) para não ocultar o planeta antes da hora
+    // setArrivedAtMars(false); 
 
     setIsForcedMapEdit(true);
     setShowStellarMap(true);
@@ -404,6 +406,7 @@ const DecolagemMarte = () => {
       approachSoundPlayed.current = false;
       minervaEventTriggered.current = false;
 
+      // Gatilho da Minerva na saída
       triggerMinervaInterplanetarySpeed();
 
       setActiveChallengeData(null);
@@ -450,6 +453,7 @@ const DecolagemMarte = () => {
         setDistanceKm(newDist);
       }
 
+      // Se mudou a rota durante o voo, reseta status de chegada
       setArrivedAtMars(false);
       setIsFinalApproach(false);
 
@@ -462,7 +466,7 @@ const DecolagemMarte = () => {
 
         await saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
         setProgress(0);
-        setArrivedAtMars(false);
+        setArrivedAtMars(false); // Agora sim a nave sai do planeta visualmente
         setIsFinalApproach(false);
         approachSoundPlayed.current = false;
         minervaEventTriggered.current = false;
@@ -957,99 +961,6 @@ const DecolagemMarte = () => {
     return () => cancelAnimationFrame(animationId);
   }, [isPaused]);
 
-  // --- REINSERÇÃO DAS VARIÁVEIS FALTANTES (CORREÇÃO DE TELA BRANCA) ---
-  const isSystemCritical = telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20;
-
-  const hasFundsForSOS = (spaceCoins || 0) > 0;
-  const isSOSActive = isSystemCritical && !isPaused && !isDobraAtivada && !isRestoringSOS && hasFundsForSOS;
-  // --------------------------------------------------------------------
-
-  const handleSOS = () => {
-    if (!isSOSActive) return;
-    const minutesPlayed = travelTime / 60;
-    const calculatedCost = Math.floor(minutesPlayed) + 5000000;
-    const finalCost = Math.min(calculatedCost, spaceCoins || 0);
-    setSosCost(finalCost);
-    setShowSOSModal(true);
-    playSound('/sounds/ui-click.mp3');
-  };
-
-  const handleConfirmSOS = () => {
-    setSpaceCoins(prev => (prev || 0) - sosCost);
-    setIsRestoringSOS(true);
-    playSound('/sounds/ui-click.mp3');
-    setShowSOSModal(false);
-  };
-
-  const handleCancelSOS = () => setShowSOSModal(false);
-
-  useEffect(() => {
-    const isCritical = (telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20) && !isRestoringSOS;
-    alarmAudio.loop = true;
-    if (isCritical && !isPaused) {
-      alarmAudio.play().catch(e => console.log("Erro ao tocar alarme:", e));
-    } else {
-      alarmAudio.pause();
-      alarmAudio.currentTime = 0;
-    }
-    return () => {
-      alarmAudio.pause();
-    };
-  }, [telemetry, isPaused, isRestoringSOS, alarmAudio]);
-
-  useEffect(() => {
-    if (isRestoringSOS && !isPaused) {
-      restoreIntervalRef.current = setInterval(() => {
-        let anyChanged = false;
-        let allFull = true;
-        const restoreValue = (currentVal) => {
-          if (currentVal < 100) { anyChanged = true; allFull = false; return Math.min(100, currentVal + 2); }
-          return currentVal;
-        };
-        telemetryRef.current.atmosphere.o2 = restoreValue(telemetryRef.current.atmosphere.o2);
-        telemetryRef.current.propulsion.powerOutput = restoreValue(telemetryRef.current.propulsion.powerOutput);
-        telemetryRef.current.direction = restoreValue(telemetryRef.current.direction);
-        telemetryRef.current.stability = restoreValue(telemetryRef.current.stability);
-        telemetryRef.current.productivity = restoreValue(telemetryRef.current.productivity);
-        telemetryRef.current.interdependence = restoreValue(telemetryRef.current.interdependence);
-        telemetryRef.current.engagement = restoreValue(telemetryRef.current.engagement);
-        if (anyChanged) setTelemetry(prev => ({ ...prev, ...telemetryRef.current }));
-        if (allFull) { clearInterval(restoreIntervalRef.current); setIsRestoringSOS(false); saveTelemetryData(); }
-      }, 50);
-    } else if (isPaused && restoreIntervalRef.current) { clearInterval(restoreIntervalRef.current); }
-    return () => { if (restoreIntervalRef.current) clearInterval(restoreIntervalRef.current); };
-  }, [isRestoringSOS, isPaused, saveTelemetryData]);
-
-  useEffect(() => {
-    const gameLoop = (timestamp) => {
-      if (isPaused) { lastUpdateTime.current = timestamp; animationFrameId.current = requestAnimationFrame(gameLoop); return; }
-      if (lastUpdateTime.current === 0) lastUpdateTime.current = timestamp;
-      const deltaTime = timestamp - lastUpdateTime.current;
-
-      if (deltaTime >= telemetryInterval) {
-        lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
-        const dobraAtiva = isDobraAtivadaRef.current;
-        let maxSpeed = dobraAtiva ? 100000000 : (isBoostingTo60kRef.current ? 60000 : (isFinalApproachRef.current ? 45000 : 45000));
-        const accelConfig = accelerationRates[chosenShip] || accelerationRates.default;
-        let speedChange = accelConfig.perTick;
-        let newKmh;
-        const currentSpeed = telemetryRef.current.velocity.kmh;
-        if (dobraAtiva) newKmh = currentSpeed + 2260;
-        else if (currentSpeed > maxSpeed) newKmh = Math.max(currentSpeed - 200000, maxSpeed);
-        else newKmh = Math.min(currentSpeed + speedChange, maxSpeed);
-
-        if (travelStarted) {
-          const SPEED_OF_LIGHT_KMH = 1079252848.8;
-          telemetryRef.current = { ...telemetryRef.current, velocity: { kmh: newKmh, ms: newKmh / 3.6, rel: `${(newKmh / SPEED_OF_LIGHT_KMH).toFixed(7)}c` } };
-          setTelemetry({ ...telemetryRef.current });
-        }
-      }
-      animationFrameId.current = requestAnimationFrame(gameLoop);
-    };
-    animationFrameId.current = requestAnimationFrame(gameLoop);
-    return () => cancelAnimationFrame(animationFrameId.current);
-  }, [isPaused, travelStarted, chosenShip]);
-
   useEffect(() => {
     if (!travelStarted || isPaused) return;
 
@@ -1237,6 +1148,13 @@ const DecolagemMarte = () => {
 
 
   if (isLoadingRoute) return <div className="tela-decolagem" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5em', color: '#00aaff', textShadow: '0 0 10px #00aaff' }}>Buscando dados da missão...</div>;
+
+  // --- DECLARAÇÃO RECOLOCADA DAS VARIÁVEIS FALTANTES ---
+  const isSystemCritical = telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20;
+
+  const hasFundsForSOS = (spaceCoins || 0) > 0;
+  const isSOSActive = isSystemCritical && !isPaused && !isDobraAtivada && !isRestoringSOS && hasFundsForSOS;
+  // -----------------------------------------------------
 
   return (
     <div className={`tela-decolagem ${isShaking ? 'shaking' : ''}`}>
