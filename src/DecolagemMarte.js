@@ -254,6 +254,24 @@ const DecolagemMarte = () => {
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
 
+  // Função auxiliar para tocar o áudio da minerva e subir a velocidade
+  const triggerMinervaInterplanetarySpeed = useCallback(() => {
+    // Toca o áudio da Minerva
+    setShowMinervaOnMonitor(true);
+    playSound('/sounds/Mineva-VelInterplanetaria.mp3');
+
+    // Remove a imagem da minerva após 5s
+    setTimeout(() => {
+      setShowMinervaOnMonitor(false);
+    }, 5000);
+
+    // Inicia a aceleração para 60k após um breve delay
+    setTimeout(() => {
+      setIsBoostingTo60k(true);
+      playSound('/sounds/empuxo.wav');
+    }, 2000);
+  }, [playSound]);
+
   useEffect(() => {
     const audioPreload = new Audio('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3');
     audioPreload.preload = 'auto';
@@ -386,10 +404,13 @@ const DecolagemMarte = () => {
 
       setProgress(0);
       setArrivedAtMars(false);
-      setIsFinalApproach(false);
+      setIsFinalApproach(false); // Reseta a flag de aproximação
       approachSoundPlayed.current = false;
       minervaEventTriggered.current = false;
-      setIsBoostingTo60k(false);
+
+      // Chama o gatilho da Minerva e acelera para 60k
+      triggerMinervaInterplanetarySpeed();
+
       setActiveChallengeData(null);
       setIsDialogueFinished(false);
       setTravelStarted(true);
@@ -433,17 +454,39 @@ const DecolagemMarte = () => {
         const newDist = newDestinationStep.distance || 300000000;
         setDistanceKm(newDist);
       }
+
+      // Se mudou a rota em voo, reseta estados de chegada
+      setArrivedAtMars(false);
+      setIsFinalApproach(false);
+
+      // Dispara o áudio da Minerva e acelera
+      triggerMinervaInterplanetarySpeed();
+
     } else {
       playSound('/sounds/empuxo.wav'); setIsDeparting(true); setShowStoreModal(false);
       setTimeout(async () => {
         setDistanceKm(300000000);
 
         await saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
-        setProgress(0); setArrivedAtMars(false); setIsFinalApproach(false); approachSoundPlayed.current = false; minervaEventTriggered.current = false; setIsBoostingTo60k(false); setActiveChallengeData(null); setIsDialogueFinished(false); setTravelStarted(true); setDobraCooldownEnd(0); setProcessadorO2(0);
-        setRefetchTrigger(prev => prev + 1); setIsDeparting(false);
+        setProgress(0);
+        setArrivedAtMars(false);
+        setIsFinalApproach(false);
+        approachSoundPlayed.current = false;
+        minervaEventTriggered.current = false;
+
+        // Dispara o áudio da Minerva e acelera
+        triggerMinervaInterplanetarySpeed();
+
+        setActiveChallengeData(null);
+        setIsDialogueFinished(false);
+        setTravelStarted(true);
+        setDobraCooldownEnd(0);
+        setProcessadorO2(0);
+        setRefetchTrigger(prev => prev + 1);
+        setIsDeparting(false);
       }, 4000);
     }
-  }, [saveNewRouteAndProgress, playSound, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit]);
+  }, [saveNewRouteAndProgress, playSound, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit, triggerMinervaInterplanetarySpeed]);
 
   const handleEscolha = async (opcao, desafioId, impactos) => {
     setIsTransmissionStarting(false); setIsDialogueFinished(false);
@@ -888,9 +931,18 @@ const DecolagemMarte = () => {
 
     const isMoon = selectedPlanet.nome.toLowerCase() === 'lua';
     const approachDistanceThreshold = 800000;
+
+    // --- LÓGICA DE APROXIMAÇÃO ATUALIZADA (1000 KM -> 45.000 KM/H) ---
+    // Verifica se está muito próximo (<= 1000km)
+    if (distanceKm <= 1000 && distanceKm > 0 && !isFinalApproachRef.current) {
+      setIsFinalApproach(true);
+      // Desativa o boost de velocidade para forçar a queda para 45k
+      setIsBoostingTo60k(false);
+    }
+
     if (!isMoon && distanceKm <= approachDistanceThreshold && !approachSoundPlayed.current) {
       playSound('/sounds/empuxo.wav');
-      setIsFinalApproach(true);
+      // Mantém a lógica original de som de aproximação
       approachSoundPlayed.current = true;
     }
   }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]);
