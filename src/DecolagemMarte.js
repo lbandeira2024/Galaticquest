@@ -535,9 +535,9 @@ const DecolagemMarte = () => {
       isPrimary: true
     });
 
-    const TWO_MINUTES_IN_MS = 2 * 60 * 1000;
-    setDobraCooldownEnd(Date.now() + TWO_MINUTES_IN_MS);
-    const DOBRA_DURATION_IN_MS = 100 * 1000;
+    const COOLDOWN_IN_MS = 3 * 60 * 1000;
+    setDobraCooldownEnd(Date.now() + COOLDOWN_IN_MS);
+    const DOBRA_DURATION_IN_MS = 130 * 1000;
 
     if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
     dobraTimerRef.current = setTimeout(() => {
