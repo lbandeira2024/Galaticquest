@@ -378,8 +378,8 @@ const DecolagemMarte = () => {
 
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
-    // CORREÇÃO: Removido setArrivedAtMars(false) para não ocultar o planeta antes da hora
-    // setArrivedAtMars(false); 
+    // CORREÇÃO: Não remover o planeta ao editar rota
+    // setArrivedAtMars(false);
 
     setIsForcedMapEdit(true);
     setShowStellarMap(true);
@@ -463,7 +463,7 @@ const DecolagemMarte = () => {
 
         await saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
         setProgress(0);
-        setArrivedAtMars(false); // Agora sim a nave sai do planeta visualmente
+        setArrivedAtMars(false);
         setIsFinalApproach(false);
         approachSoundPlayed.current = false;
         minervaEventTriggered.current = false;
@@ -938,6 +938,57 @@ const DecolagemMarte = () => {
   }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]);
 
   useEffect(() => {
+    if (isPaused) return;
+    let animationId;
+    const targetOffset = { x: 0, y: 0 };
+    const currentOffset = { x: 0, y: 0 };
+    const animateCockpit = () => {
+      const friction = 0.05;
+      currentOffset.x += (targetOffset.x - currentOffset.x) * friction;
+      currentOffset.y += (targetOffset.y - currentOffset.y) * friction;
+      if (cockpitRef.current) {
+        const x = currentOffset.x;
+        const y = currentOffset.y;
+        cockpitRef.current.style.transform =
+          `perspective(1500px) rotateX(${y * 0.1}deg) rotateY(${-x * 0.1}deg) translateX(${-x * 0.5}px) translateY(${y * 0.5}px)`;
+      }
+      animationId = requestAnimationFrame(animateCockpit);
+    };
+    animationId = requestAnimationFrame(animateCockpit);
+    return () => cancelAnimationFrame(animationId);
+  }, [isPaused]);
+
+  useEffect(() => {
+    const gameLoop = (timestamp) => {
+      if (isPaused) { lastUpdateTime.current = timestamp; animationFrameId.current = requestAnimationFrame(gameLoop); return; }
+      if (lastUpdateTime.current === 0) lastUpdateTime.current = timestamp;
+      const deltaTime = timestamp - lastUpdateTime.current;
+
+      if (deltaTime >= telemetryInterval) {
+        lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
+        const dobraAtiva = isDobraAtivadaRef.current;
+        let maxSpeed = dobraAtiva ? 100000000 : (isBoostingTo60kRef.current ? 60000 : (isFinalApproachRef.current ? 45000 : 45000));
+        const accelConfig = accelerationRates[chosenShip] || accelerationRates.default;
+        let speedChange = accelConfig.perTick;
+        let newKmh;
+        const currentSpeed = telemetryRef.current.velocity.kmh;
+        if (dobraAtiva) newKmh = currentSpeed + 2260;
+        else if (currentSpeed > maxSpeed) newKmh = Math.max(currentSpeed - 200000, maxSpeed);
+        else newKmh = Math.min(currentSpeed + speedChange, maxSpeed);
+
+        if (travelStarted) {
+          const SPEED_OF_LIGHT_KMH = 1079252848.8;
+          telemetryRef.current = { ...telemetryRef.current, velocity: { kmh: newKmh, ms: newKmh / 3.6, rel: `${(newKmh / SPEED_OF_LIGHT_KMH).toFixed(7)}c` } };
+          setTelemetry({ ...telemetryRef.current });
+        }
+      }
+      animationFrameId.current = requestAnimationFrame(gameLoop);
+    };
+    animationFrameId.current = requestAnimationFrame(gameLoop);
+    return () => cancelAnimationFrame(animationFrameId.current);
+  }, [isPaused, travelStarted, chosenShip]);
+
+  useEffect(() => {
     if (!travelStarted || isPaused) return;
 
     const interval = setInterval(() => {
@@ -987,14 +1038,14 @@ const DecolagemMarte = () => {
         setIsFinalApproach(true);
         setIsBoostingTo60k(false);
         approachSoundPlayed.current = true;
-        telemetryRef.current.velocity.kmh = 45000;
+        telemetryRef.current.velocity.kmh = 45000; // Força velocidade 45k
 
         saveTelemetryData();
         setShowWarpDisabledMessage(true);
         setMinervaImage('/images/Minerva/Minerva_Active.gif');
 
         playSound('/sounds/power-down-Warp.mp3');
-        setTimeout(() => playSound('/sounds/empuxo.wav'), 800);
+        setTimeout(() => playSound('/sounds/empuxo.wav'), 800); // Som de empuxo logo após
 
         setTimeout(() => setShowWarpDisabledMessage(false), 10000);
 
@@ -1125,12 +1176,13 @@ const DecolagemMarte = () => {
 
   if (isLoadingRoute) return <div className="tela-decolagem" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5em', color: '#00aaff', textShadow: '0 0 10px #00aaff' }}>Buscando dados da missão...</div>;
 
-  // --- CORREÇÃO TELA BRANCA: Variáveis recolocadas no escopo correto ---
+  // --- REINSERÇÃO DAS VARIÁVEIS FALTANTES (CORREÇÃO DE TELA BRANCA) ---
   const isSystemCritical = telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20;
 
   const hasFundsForSOS = (spaceCoins || 0) > 0;
   const isSOSActive = isSystemCritical && !isPaused && !isDobraAtivada && !isRestoringSOS && hasFundsForSOS;
 
+  // DEFINIÇÃO DAS FUNÇÕES SOS QUE ESTAVAM FALTANDO
   const handleSOS = () => {
     if (!isSOSActive) return;
     const minutesPlayed = travelTime / 60;
@@ -1149,7 +1201,7 @@ const DecolagemMarte = () => {
   };
 
   const handleCancelSOS = () => setShowSOSModal(false);
-  // ---------------------------------------------------------------------
+  // --------------------------------------------------------------------
 
   return (
     <div className={`tela-decolagem ${isShaking ? 'shaking' : ''}`}>
