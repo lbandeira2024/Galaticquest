@@ -264,6 +264,23 @@ const DecolagemMarte = () => {
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
 
+  // --- PRÉ-CARREGAMENTO DE VÍDEOS PARA EVITAR TRAVAMENTO ---
+  useEffect(() => {
+    const videosToPreload = [
+      "/images/Vluz-Dobra.webm",
+      "/images/clouds.webm",
+      // Adicione outros vídeos pesados se necessário
+    ];
+
+    videosToPreload.forEach((src) => {
+      const video = document.createElement("video");
+      video.src = src;
+      video.preload = "auto";
+      video.muted = true;
+      video.load(); // Força o buffer imediato
+    });
+  }, []);
+
   const triggerMinervaInterplanetarySpeed = useCallback(() => {
     minervaEventTriggered.current = true;
 
@@ -1065,7 +1082,7 @@ const DecolagemMarte = () => {
         lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
         const dobraAtiva = isDobraAtivadaRef.current;
 
-        // --- DEFINIÇÃO DA VELOCIDADE ALVO COM FRENAGEM SUAVE ---
+        // --- VELOCIDADE ALVO ---
         let targetSpeed = 45000;
 
         if (dobraAtiva) {
@@ -1073,14 +1090,9 @@ const DecolagemMarte = () => {
         } else if (isBoostingTo60kRef.current) {
           targetSpeed = 60000;
         } else if (isFinalApproachRef.current) {
-          // Lógica de frenagem escalonada baseada na distância restante
-          if (distanceKmRef.current < 5000) {
-            targetSpeed = 2000; // Pouso suave
-          } else if (distanceKmRef.current < 20000) {
-            targetSpeed = 15000; // Aproximação final
-          } else {
-            targetSpeed = 45000; // Cruzeiro de aproximação
-          }
+          // *** FIX: Mantém velocidade de cruzeiro orbital (45.000) constante
+          // Não reduz mais para 15.000 ou 2.000
+          targetSpeed = 45000;
         }
 
         const accelConfig = accelerationRates[chosenShip] || accelerationRates.default;
@@ -1091,8 +1103,8 @@ const DecolagemMarte = () => {
         if (dobraAtiva) {
           newKmh = currentSpeed + 2260;
         } else {
-          // *** FIX: Se velocidade muito alta e não está em dobra, corta para 60k direto
-          if (currentSpeed > 100000) {
+          // *** CORTE SECO: Se velocidade estiver muito alta (pós-dobra) e não está em dobra, trava em 60k
+          if (currentSpeed > 65000) {
             newKmh = 60000;
           } else {
             // Lógica normal de aceleração/frenagem
