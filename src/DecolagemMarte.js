@@ -97,6 +97,9 @@ const PLANET_DATA_FOR_SOS = [
   { name: "Eris", orbitRadius: 165 }
 ];
 
+// LISTA DE ESTAÇÕES ESPACIAIS (NOMES NORMALIZADOS)
+const STATION_NAMES = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boktok', 'boctok'];
+
 // LISTA DE EVENTOS SOS SURPRESA
 const SOS_EVENTS_LIST = [
   { id: 1, name: 'Piratas Espaciais', description: 'ALERTA! O sinal era uma isca. Piratas interceptaram a nave. Prepare-se para um possível confronto ou negociação hostil.', image: '/images/pirates.png' },
@@ -395,16 +398,11 @@ const DecolagemMarte = () => {
     }
   }, [playSound, saveTelemetryData]);
 
-  // --- CORREÇÃO PRINCIPAL NO HANDLER DE SOS ---
-  // Agora verificamos explicitamente se estamos em partida ou em edição de mapa
   const handleSosDetected = useCallback(() => {
     if (!travelStarted && routeIndex === 0) return;
     if (monitorStateRef.current !== 'on') return;
 
-    // Bloqueia se estiver em animação de partida (nuvens)
     if (isDepartingRef.current) return;
-
-    // Bloqueia se estiver no modo de edição de mapa
     if (isForcedMapEditRef.current) return;
 
     setIsSosMinervaActive(true);
@@ -751,14 +749,10 @@ const DecolagemMarte = () => {
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
-      // --- BLOQUEIO RIGOROSO DE SOS ---
       if (isDobraAtivadaRef.current) return;
       if (monitorStateRef.current !== 'on') return;
       if (distanceKmRef.current <= 0) return;
       if (isForcedMapEditRef.current) return;
-
-      // Bloqueia também se estiver em animação de partida (nuvens)
-      if (isDepartingRef.current) return;
 
       const audio = new Audio('/sounds/minervaSOS.mp3');
       audio.play().catch(e => console.log("Erro ao tocar áudio SOS:", e));
@@ -1208,14 +1202,25 @@ const DecolagemMarte = () => {
         const normalizeName = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
         const targetName = normalizeName(selectedPlanet.nome);
 
-        const desafioEncontrado = desafiosData.desafios?.find(d =>
-          normalizeName(d.planeta) === targetName ||
-          d.id === selectedPlanet.desafioId
-        );
+        // --- VERIFICAÇÃO DE ESTAÇÃO ---
+        const isStation = STATION_NAMES.some(s => targetName.includes(s));
 
-        if (desafioEncontrado) {
-          setActiveChallengeData(desafioEncontrado);
-          setShowDesafioModal(true);
+        if (isStation) {
+          // Se for Estação: Espera 2.5s antes de abrir a Loja (efeito visual de chegada)
+          setTimeout(() => {
+            setShowStoreModal(true);
+          }, 2500);
+        } else {
+          // Se for Planeta: Busca Desafio
+          const desafioEncontrado = desafiosData.desafios?.find(d =>
+            normalizeName(d.planeta) === targetName ||
+            d.id === selectedPlanet.desafioId
+          );
+
+          if (desafioEncontrado) {
+            setActiveChallengeData(desafioEncontrado);
+            setShowDesafioModal(true);
+          }
         }
 
         let newProcessadorO2Value = processadorO2;
