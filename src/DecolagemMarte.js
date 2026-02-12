@@ -1091,13 +1091,17 @@ const DecolagemMarte = () => {
         if (dobraAtiva) {
           newKmh = currentSpeed + 2260;
         } else {
-          // Aceleração ou frenagem em direção ao alvo
-          if (currentSpeed < targetSpeed) {
-            newKmh = Math.min(currentSpeed + speedChange, targetSpeed);
+          // *** FIX: Se velocidade muito alta e não está em dobra, corta para 60k direto
+          if (currentSpeed > 100000) {
+            newKmh = 60000;
           } else {
-            // Frenagem: aplica o dobro da força para desacelerar rápido se necessário
-            let brakePower = speedChange * 2;
-            newKmh = Math.max(currentSpeed - brakePower, targetSpeed);
+            // Lógica normal de aceleração/frenagem
+            if (currentSpeed < targetSpeed) {
+              newKmh = Math.min(currentSpeed + speedChange, targetSpeed);
+            } else {
+              let brakePower = speedChange * 2;
+              newKmh = Math.max(currentSpeed - brakePower, targetSpeed);
+            }
           }
         }
 
@@ -1487,7 +1491,7 @@ const DecolagemMarte = () => {
       {showGlossary && (<div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}><div className="modal-content" style={{ backgroundColor: 'rgba(0, 30, 60, 0.97)', padding: '20px', borderRadius: '8px', maxWidth: '800px', width: '90%', maxHeight: '80vh', overflow: 'auto', position: 'relative' }}><Suspense fallback={<div>Carregando...</div>}><GalacticVirtudesPage onClose={() => setShowGlossary(false)} /></Suspense></div></div>)}
       {showInventory && <Inventario onClose={() => setShowInventory(false)} onUpdateTelemetry={handleInventoryTelemetryUpdate} />}
       {showDesafioModal && activeChallengeData && <ModalDesafio desafio={activeChallengeData} onClose={() => { setShowDesafioModal(false); setIsTransmissionStarting(true); }} className="main-display-modal" showTimer={true} />}
-      {showEscolhaModal && activeChallengeData && <ModalEscolha key={modalEscolhaKey} desafio={activeChallengeData} onClose={handleCloseEscolhaModal} onEscolha={handleEscolha} missionTime={missionTime} onSpendCoins={handleSpendCoins} showTimer={!isReviewing} />}
+      {showEscolhaModal && activeChallengeData && <ModalEscolha key={modalEscolhaKey} desafio={activeChallengeData} onClose={handleCloseEscolhaModal} onEscolha={handleEscolha} missionTime={travelTime} onSpendCoins={handleSpendCoins} showTimer={!isReviewing} />}
 
       {showConfirmacaoModal && (
         <ModalConfirmacaoViagem

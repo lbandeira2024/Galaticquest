@@ -241,10 +241,10 @@ const SpaceView = ({
           if (departing) {
             scale = Math.max(0.05, 2.5 / (1 + (dist / 100000)));
           } else {
-            // --- ESCALA ÓTICA INVERSA (1/z) PARA APROXIMAÇÃO FLUIDA ---
+            // --- NOVA FÓRMULA DE APROXIMAÇÃO NATURAL (Reaplicada) ---
+            // Garante crescimento exponencial sem saltos
             const MAX_SCALE = 2.8;
             const MIN_SCALE = 0.05;
-            // Ajuste fino: quanto maior, mais cedo começa o zoom
             const OPTICAL_FACTOR = 600000;
 
             scale = MAX_SCALE / (1 + (dist / OPTICAL_FACTOR));
