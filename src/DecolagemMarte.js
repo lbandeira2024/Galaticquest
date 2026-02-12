@@ -234,10 +234,14 @@ const DecolagemMarte = () => {
   const distanceKmRef = useRef(distanceKm);
   const isForcedMapEditRef = useRef(isForcedMapEdit);
 
+  // NOVO: Ref para controlar estado de partida (animação)
+  const isDepartingRef = useRef(isDeparting);
+
   // Sincroniza refs com o estado
   useEffect(() => { monitorStateRef.current = monitorState; }, [monitorState]);
   useEffect(() => { distanceKmRef.current = distanceKm; }, [distanceKm]);
   useEffect(() => { isForcedMapEditRef.current = isForcedMapEdit; }, [isForcedMapEdit]);
+  useEffect(() => { isDepartingRef.current = isDeparting; }, [isDeparting]);
 
   const telemetryRef = useRef({
     velocity: { kmh: 0, ms: 0, rel: '0.0c' },
@@ -739,10 +743,14 @@ const DecolagemMarte = () => {
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
+      // --- BLOQUEIO RIGOROSO DE SOS ---
       if (isDobraAtivadaRef.current) return;
       if (monitorStateRef.current !== 'on') return;
       if (distanceKmRef.current <= 0) return;
       if (isForcedMapEditRef.current) return;
+
+      // Bloqueia também se estiver em animação de partida (nuvens)
+      if (isDepartingRef.current) return;
 
       const audio = new Audio('/sounds/minervaSOS.mp3');
       audio.play().catch(e => console.log("Erro ao tocar áudio SOS:", e));
@@ -1072,6 +1080,7 @@ const DecolagemMarte = () => {
         lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
         const dobraAtiva = isDobraAtivadaRef.current;
 
+        // --- VELOCIDADE ALVO ---
         let targetSpeed = 45000;
 
         if (dobraAtiva) {
@@ -1079,6 +1088,7 @@ const DecolagemMarte = () => {
         } else if (isBoostingTo60kRef.current) {
           targetSpeed = 60000;
         } else if (isFinalApproachRef.current) {
+          // *** FIX: Mantém velocidade de cruzeiro orbital (45.000) constante
           targetSpeed = 45000;
         }
 
@@ -1090,9 +1100,11 @@ const DecolagemMarte = () => {
         if (dobraAtiva) {
           newKmh = currentSpeed + 2260;
         } else {
+          // *** CORTE SECO: Se velocidade estiver muito alta (pós-dobra) e não está em dobra, trava em 60k
           if (currentSpeed > 65000) {
             newKmh = 60000;
           } else {
+            // Lógica normal de aceleração/frenagem
             if (currentSpeed < targetSpeed) {
               newKmh = Math.min(currentSpeed + speedChange, targetSpeed);
             } else {
