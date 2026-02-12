@@ -87,7 +87,8 @@ const SpaceView = ({
 
   const { playTrack } = useAudio();
 
-  // Atualiza refs sem disparar render visual desnecessário
+  // Atualiza refs quando as props mudam
+  // CRUCIAL: O React.memo lá embaixo estava bloqueando isso de acontecer!
   useEffect(() => { distanceRef.current = distance; }, [distance]);
   useEffect(() => { forceLargeRef.current = forceLarge; }, [forceLarge]);
   useEffect(() => { isDepartingRef.current = isDeparting; }, [isDeparting]);
@@ -217,12 +218,10 @@ const SpaceView = ({
       }
 
       // --- INTERPOLAÇÃO VISUAL DA DISTÂNCIA ---
-      // Isso suaviza o movimento visual mesmo se a prop 'distance' vier em "saltos" do pai
       const targetDist = distanceRef.current;
-      // Aproximação assintótica (lerp)
+      // "Desliza" o valor visual em direção ao valor real (efeito smooth)
       currentVisualDistanceRef.current += (targetDist - currentVisualDistanceRef.current) * 0.1;
 
-      // Se estiver muito perto, "gruda" logo para evitar float infinito
       if (Math.abs(targetDist - currentVisualDistanceRef.current) < 100) {
         currentVisualDistanceRef.current = targetDist;
       }
@@ -237,12 +236,11 @@ const SpaceView = ({
         if (departing) {
           opacity = 1;
         } else {
-          // --- SUAVIZAÇÃO DE OPACIDADE ---
-          const FADE_START_DIST = 80000000;
+          // Começa a aparecer (fade in) mais cedo
+          const FADE_START_DIST = 100000000;
           if (visualDist <= 0) {
             opacity = 1;
           } else {
-            // Opacidade inversa à distância
             opacity = Math.max(0, Math.min(1, 1 - (visualDist / FADE_START_DIST)));
           }
         }
@@ -255,10 +253,11 @@ const SpaceView = ({
           if (departing) {
             scale = Math.max(0.05, 2.5 / (1 + (visualDist / 100000)));
           } else {
-            // --- NOVA FÓRMULA DE APROXIMAÇÃO NATURAL ---
+            // --- FÓRMULA DE APROXIMAÇÃO OTIMIZADA ---
             const MAX_SCALE = 2.8;
             const MIN_SCALE = 0.05;
-            const OPTICAL_FACTOR = 600000;
+            // Aumentei o fator para 1.5M para o planeta crescer visivelmente mais cedo
+            const OPTICAL_FACTOR = 1500000;
 
             scale = MAX_SCALE / (1 + (visualDist / OPTICAL_FACTOR));
             scale = Math.max(MIN_SCALE, scale);
@@ -400,12 +399,14 @@ const SpaceView = ({
   );
 };
 
+// --- CORREÇÃO FINAL: React.memo agora verifica se a DISTÂNCIA mudou ---
 export default React.memo(SpaceView, (prevProps, nextProps) => {
   return (
     prevProps.selectedPlanet?.nome === nextProps.selectedPlanet?.nome &&
     prevProps.isWarpActive === nextProps.isWarpActive &&
     prevProps.isPaused === nextProps.isPaused &&
     prevProps.forceLarge === nextProps.forceLarge &&
-    prevProps.isDeparting === nextProps.isDeparting
+    prevProps.isDeparting === nextProps.isDeparting &&
+    prevProps.distance === nextProps.distance // <--- ISSO DESBLOQUEIA A ATUALIZAÇÃO VISUAL
   );
 });
