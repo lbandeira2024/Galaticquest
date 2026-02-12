@@ -750,7 +750,7 @@ const DecolagemMarte = () => {
     };
     const interval = setInterval(triggerSosEvent, 180000);
     return () => clearInterval(interval);
-  }, [travelStarted, routeIndex]); // Não incluímos distanceKm nem monitorState nas dependências para evitar resets do intervalo
+  }, [travelStarted, routeIndex]);
 
   const isBoostingTo60kRef = useRef(isBoostingTo60k);
   useEffect(() => { isBoostingTo60kRef.current = isBoostingTo60k; }, [isBoostingTo60k]);
@@ -1064,24 +1064,41 @@ const DecolagemMarte = () => {
       if (deltaTime >= telemetryInterval) {
         lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
         const dobraAtiva = isDobraAtivadaRef.current;
-        let maxSpeed = dobraAtiva ? 100000000 : (isBoostingTo60kRef.current ? 60000 : (isFinalApproachRef.current ? 45000 : 45000));
+
+        // --- DEFINIÇÃO DA VELOCIDADE ALVO COM FRENAGEM SUAVE ---
+        let targetSpeed = 45000;
+
+        if (dobraAtiva) {
+          targetSpeed = 100000000;
+        } else if (isBoostingTo60kRef.current) {
+          targetSpeed = 60000;
+        } else if (isFinalApproachRef.current) {
+          // Lógica de frenagem escalonada baseada na distância restante
+          if (distanceKmRef.current < 5000) {
+            targetSpeed = 2000; // Pouso suave
+          } else if (distanceKmRef.current < 20000) {
+            targetSpeed = 15000; // Aproximação final
+          } else {
+            targetSpeed = 45000; // Cruzeiro de aproximação
+          }
+        }
+
         const accelConfig = accelerationRates[chosenShip] || accelerationRates.default;
         let speedChange = accelConfig.perTick;
         let newKmh;
         const currentSpeed = telemetryRef.current.velocity.kmh;
+
         if (dobraAtiva) {
           newKmh = currentSpeed + 2260;
-        } else if (currentSpeed > maxSpeed) {
-          // CORREÇÃO: Lógica diferenciada para saída de dobra vs. aproximação suave
-          if (currentSpeed > 62000) {
-            // Se estiver saindo da dobra ou muito rápido, freia bruscamente
-            newKmh = Math.max(currentSpeed - 200000, maxSpeed);
-          } else {
-            // FIX: Aumentei a frenagem para 450 para garantir que chegue a 45.000 antes do pouso
-            newKmh = Math.max(currentSpeed - 450, maxSpeed);
-          }
         } else {
-          newKmh = Math.min(currentSpeed + speedChange, maxSpeed);
+          // Aceleração ou frenagem em direção ao alvo
+          if (currentSpeed < targetSpeed) {
+            newKmh = Math.min(currentSpeed + speedChange, targetSpeed);
+          } else {
+            // Frenagem: aplica o dobro da força para desacelerar rápido se necessário
+            let brakePower = speedChange * 2;
+            newKmh = Math.max(currentSpeed - brakePower, targetSpeed);
+          }
         }
 
         if (travelStarted) {

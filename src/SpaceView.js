@@ -97,7 +97,7 @@ const SpaceView = ({
   // Inicializa estrelas apenas UMA vez
   useEffect(() => {
     if (starsRef.current.length === 0) {
-      starsRef.current = Array.from({ length: 400 }, () => ({ // Reduzi para 400 para melhorar performance
+      starsRef.current = Array.from({ length: 400 }, () => ({
         x: (Math.random() - 0.5) * window.innerWidth,
         y: (Math.random() - 0.5) * window.innerHeight,
         z: Math.random() * window.innerWidth,
@@ -106,14 +106,11 @@ const SpaceView = ({
         hueIndex: Math.floor(Math.random() * 5)
       }));
     }
-    const img = new Image();
-    img.src = '/images/Vluz-Dobra.gif';
   }, []);
 
   // Fast Stars (Memoized)
   const fastStars = useMemo(() => {
     const starClasses = ['star-blue', 'star-green', 'star-orange', 'star-red', 'star-yellow'];
-    // Reduzi quantidade para performance
     return Array.from({ length: 40 }, (_, i) => ({
       id: `fast-star-${i}`,
       top: `${Math.random() * 100}%`,
@@ -163,7 +160,7 @@ const SpaceView = ({
         setPlanetImageLoaded(true);
       };
     }
-  }, [selectedPlanet?.nome]); // Dependência específica
+  }, [selectedPlanet?.nome]);
 
   // LOOP DE ANIMAÇÃO (CANVAS)
   useEffect(() => {
@@ -174,7 +171,7 @@ const SpaceView = ({
 
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d', { alpha: false }); // Otimização de alpha
+    const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
     const resizeCanvas = () => {
@@ -216,7 +213,7 @@ const SpaceView = ({
         planetContainerRef.current.style.transform = `translate(calc(-50% + ${position.current.x}px), calc(-50% + ${position.current.y}px))`;
       }
 
-      // Manipulação do Planeta (Opacidade/Escala) via Refs para não re-renderizar React
+      // Manipulação do Planeta (Opacidade/Escala)
       if (planetImageRef.current && planetImageLoaded && !isWarping) {
         const dist = distanceRef.current;
         const force = forceLargeRef.current;
@@ -226,28 +223,32 @@ const SpaceView = ({
         if (departing) {
           opacity = 1;
         } else {
-          const VIEW_DISTANCE_THRESHOLD = 50000000;
-          if (dist <= VIEW_DISTANCE_THRESHOLD) {
-            const fadeEnd = 40000000;
-            if (dist <= fadeEnd) {
-              opacity = 1;
-            } else {
-              opacity = 1 - (dist - fadeEnd) / (VIEW_DISTANCE_THRESHOLD - fadeEnd);
-            }
+          // --- SUAVIZAÇÃO DE OPACIDADE ---
+          const FADE_START_DIST = 80000000;
+          if (dist <= 0) {
+            opacity = 1;
+          } else {
+            // Opacidade inversa à distância
+            opacity = Math.max(0, Math.min(1, 1 - (dist / FADE_START_DIST)));
           }
         }
-        planetImageRef.current.style.opacity = Math.max(0, Math.min(1, opacity));
+        planetImageRef.current.style.opacity = opacity;
 
         let scale = 1.0;
         if (force) {
-          scale = 2.25;
+          scale = 2.8;
         } else {
-          const MAX_DIST = 50000000;
-          if (dist >= MAX_DIST) {
-            scale = 0.05;
+          if (departing) {
+            scale = Math.max(0.05, 2.5 / (1 + (dist / 100000)));
           } else {
-            const progress = Math.max(0, 1 - (dist / MAX_DIST));
-            scale = 0.05 + Math.pow(progress, 3) * 2.25;
+            // --- ESCALA ÓTICA INVERSA (1/z) PARA APROXIMAÇÃO FLUIDA ---
+            const MAX_SCALE = 2.8;
+            const MIN_SCALE = 0.05;
+            // Ajuste fino: quanto maior, mais cedo começa o zoom
+            const OPTICAL_FACTOR = 600000;
+
+            scale = MAX_SCALE / (1 + (dist / OPTICAL_FACTOR));
+            scale = Math.max(MIN_SCALE, scale);
           }
         }
         planetImageRef.current.style.transform = `scale(${scale})`;
@@ -311,7 +312,7 @@ const SpaceView = ({
       cancelAnimationFrame(animationFrameRef.current);
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, [isPaused, planetImageLoaded, selectedPlanet]); // Removido 'distance' das dependências
+  }, [isPaused, planetImageLoaded, selectedPlanet]);
 
   const isStation = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boktok', 'boctok'].includes(planetName);
   const baseSize = forceLarge ? '50vmin' : '40vmin';
@@ -386,16 +387,12 @@ const SpaceView = ({
   );
 };
 
-// --- IMPORTANTE: Usamos React.memo para evitar re-renderização por mudança de distância ---
 export default React.memo(SpaceView, (prevProps, nextProps) => {
-  // Retorna TRUE se a renderização deve ser prevenida (props iguais)
-  // Só re-renderiza se o planeta mudar, a pausa mudar, a dobra mudar ou se estiver partindo/chegando (forceLarge)
   return (
     prevProps.selectedPlanet?.nome === nextProps.selectedPlanet?.nome &&
     prevProps.isWarpActive === nextProps.isWarpActive &&
     prevProps.isPaused === nextProps.isPaused &&
     prevProps.forceLarge === nextProps.forceLarge &&
     prevProps.isDeparting === nextProps.isDeparting
-    // Note que NÃO incluímos 'distance' aqui. O componente lida com distância via Ref interno.
   );
 });
