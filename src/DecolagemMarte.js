@@ -269,7 +269,6 @@ const DecolagemMarte = () => {
     const videosToPreload = [
       "/images/Vluz-Dobra.webm",
       "/images/clouds.webm",
-      // Adicione outros vídeos pesados se necessário
     ];
 
     videosToPreload.forEach((src) => {
@@ -277,7 +276,7 @@ const DecolagemMarte = () => {
       video.src = src;
       video.preload = "auto";
       video.muted = true;
-      video.load(); // Força o buffer imediato
+      video.load();
     });
   }, []);
 
@@ -301,7 +300,6 @@ const DecolagemMarte = () => {
     const audioPreload = new Audio('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3');
     audioPreload.preload = 'auto';
 
-    // PRÉ-CARREGAMENTO DO SOM DE DESATIVAÇÃO DA DOBRA PARA EVITAR TRAVAMENTO
     const audioPowerDown = new Audio('/sounds/power-down-Warp.mp3');
     audioPowerDown.preload = 'auto';
   }, []);
@@ -394,7 +392,6 @@ const DecolagemMarte = () => {
   }, [playSound, saveTelemetryData]);
 
   const handleSosDetected = useCallback(() => {
-    // NOVA VALIDAÇÃO: Bloqueia se o monitor não estiver 'on'
     if (!travelStarted && routeIndex === 0) return;
     if (monitorStateRef.current !== 'on') return;
 
@@ -574,22 +571,17 @@ const DecolagemMarte = () => {
 
     if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
     dobraTimerRef.current = setTimeout(() => {
-
-      // 1. PRIMEIRO: Para o som da dobra (loop) para não sobrepor
       stopAllAudio();
-
-      // 2. SEGUNDO: Toca o som de desativação (agora ele não será cortado)
       playSound('/sounds/power-down-Warp.mp3');
 
-      // 3. TERCEIRO: Aguarda um pequeno delay para a troca visual (evita travar o áudio)
       setTimeout(() => {
         isDobraAtivadaRef.current = false;
-        setIsDobraAtivada(false); // Troca visual pesada (Canvas)
+        setIsDobraAtivada(false);
 
         saveTelemetryData();
 
         setIsWarpCooldown(true);
-        setTimeout(() => { setIsWarpCooldown(false); }, 20000); // 20s de cooldown visual da mensagem
+        setTimeout(() => { setIsWarpCooldown(false); }, 20000);
 
         setShowWarpDisabledMessage(true);
         setMinervaImage('/images/Minerva/Minerva_Active.gif');
@@ -605,7 +597,7 @@ const DecolagemMarte = () => {
         } else {
           setIsBoostingTo60k(true);
         }
-      }, 200); // Atraso de 200ms para o áudio iniciar suavemente
+      }, 200);
 
     }, DOBRA_DURATION_IN_MS);
 
@@ -748,8 +740,6 @@ const DecolagemMarte = () => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
       if (isDobraAtivadaRef.current) return;
-
-      // NOVA VALIDAÇÃO: Bloqueia se o monitor não estiver 'on', se estiver pousado ou editando mapa
       if (monitorStateRef.current !== 'on') return;
       if (distanceKmRef.current <= 0) return;
       if (isForcedMapEditRef.current) return;
@@ -1082,7 +1072,6 @@ const DecolagemMarte = () => {
         lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
         const dobraAtiva = isDobraAtivadaRef.current;
 
-        // --- VELOCIDADE ALVO ---
         let targetSpeed = 45000;
 
         if (dobraAtiva) {
@@ -1090,8 +1079,6 @@ const DecolagemMarte = () => {
         } else if (isBoostingTo60kRef.current) {
           targetSpeed = 60000;
         } else if (isFinalApproachRef.current) {
-          // *** FIX: Mantém velocidade de cruzeiro orbital (45.000) constante
-          // Não reduz mais para 15.000 ou 2.000
           targetSpeed = 45000;
         }
 
@@ -1103,11 +1090,9 @@ const DecolagemMarte = () => {
         if (dobraAtiva) {
           newKmh = currentSpeed + 2260;
         } else {
-          // *** CORTE SECO: Se velocidade estiver muito alta (pós-dobra) e não está em dobra, trava em 60k
           if (currentSpeed > 65000) {
             newKmh = 60000;
           } else {
-            // Lógica normal de aceleração/frenagem
             if (currentSpeed < targetSpeed) {
               newKmh = Math.min(currentSpeed + speedChange, targetSpeed);
             } else {
@@ -1129,9 +1114,11 @@ const DecolagemMarte = () => {
     return () => cancelAnimationFrame(animationFrameId.current);
   }, [isPaused, travelStarted, chosenShip]);
 
+  // --- NOVA LÓGICA DE ATUALIZAÇÃO DE DISTÂNCIA (50ms = 20fps) ---
   useEffect(() => {
     if (!travelStarted || isPaused) return;
 
+    // Aumentamos a frequência para 50ms para evitar saltos
     const interval = setInterval(() => {
 
       if (routeChangeLockRef.current) {
@@ -1141,10 +1128,14 @@ const DecolagemMarte = () => {
 
       let distanceToDecrease;
       const currentSpeedKmh = telemetryRef.current.velocity.kmh;
-      if (currentSpeedKmh >= 60000) distanceToDecrease = (currentSpeedKmh * 9172) / 3000;
-      else distanceToDecrease = 7172;
+      if (currentSpeedKmh >= 60000) {
+        // Divide por 20 (porque roda 20x mais rápido que 1000ms)
+        distanceToDecrease = (currentSpeedKmh * 9172) / 3000 / 20;
+      } else {
+        distanceToDecrease = 7172 / 20;
+      }
 
-      const newDistance = distanceKm > 0 ? distanceKm - Math.round(distanceToDecrease) : 0;
+      const newDistance = distanceKm > 0 ? distanceKm - Math.max(1, Math.round(distanceToDecrease)) : 0;
       setDistanceKm(newDistance);
 
       const isSosDestination = selectedPlanet && selectedPlanet.nome && selectedPlanet.nome.startsWith("S.O.S");
@@ -1235,7 +1226,7 @@ const DecolagemMarte = () => {
       const distanceTraveled = initialDistanceForLeg - newDistance;
       const progressPercentage = Math.min(Math.floor((distanceTraveled / initialDistanceForLeg) * 100), 100);
       setProgress(progressPercentage);
-    }, 1000);
+    }, 50); // MUDANÇA IMPORTANTE: 50ms para fluidez
     return () => clearInterval(interval);
   }, [travelStarted, arrivedAtMars, isDobraAtivada, isPaused, playSound, distanceKm, plannedRoute, routeIndex, handleChallengeEnd, saveTelemetryData, selectedPlanet, saveCurrentProgress, API_BASE_URL, userId, processadorO2, stopAllAudio, sosSurpriseEvent, isForcedMapEdit]);
 

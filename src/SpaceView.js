@@ -71,6 +71,9 @@ const SpaceView = ({
   const isDepartingRef = useRef(isDeparting);
   const isWarpActiveRef = useRef(isWarpActive);
 
+  // NOVO: Ref para interpolação visual suave
+  const currentVisualDistanceRef = useRef(distance);
+
   const [planetImageLoaded, setPlanetImageLoaded] = useState(false);
   const [planetImage, setPlanetImage] = useState('');
   const [planetName, setPlanetName] = useState('marte');
@@ -213,9 +216,20 @@ const SpaceView = ({
         planetContainerRef.current.style.transform = `translate(calc(-50% + ${position.current.x}px), calc(-50% + ${position.current.y}px))`;
       }
 
+      // --- INTERPOLAÇÃO VISUAL DA DISTÂNCIA ---
+      // Isso suaviza o movimento visual mesmo se a prop 'distance' vier em "saltos" do pai
+      const targetDist = distanceRef.current;
+      // Aproximação assintótica (lerp)
+      currentVisualDistanceRef.current += (targetDist - currentVisualDistanceRef.current) * 0.1;
+
+      // Se estiver muito perto, "gruda" logo para evitar float infinito
+      if (Math.abs(targetDist - currentVisualDistanceRef.current) < 100) {
+        currentVisualDistanceRef.current = targetDist;
+      }
+
       // Manipulação do Planeta (Opacidade/Escala)
       if (planetImageRef.current && planetImageLoaded && !isWarping) {
-        const dist = distanceRef.current;
+        const visualDist = currentVisualDistanceRef.current;
         const force = forceLargeRef.current;
         const departing = isDepartingRef.current;
 
@@ -225,11 +239,11 @@ const SpaceView = ({
         } else {
           // --- SUAVIZAÇÃO DE OPACIDADE ---
           const FADE_START_DIST = 80000000;
-          if (dist <= 0) {
+          if (visualDist <= 0) {
             opacity = 1;
           } else {
             // Opacidade inversa à distância
-            opacity = Math.max(0, Math.min(1, 1 - (dist / FADE_START_DIST)));
+            opacity = Math.max(0, Math.min(1, 1 - (visualDist / FADE_START_DIST)));
           }
         }
         planetImageRef.current.style.opacity = opacity;
@@ -239,15 +253,14 @@ const SpaceView = ({
           scale = 2.8;
         } else {
           if (departing) {
-            scale = Math.max(0.05, 2.5 / (1 + (dist / 100000)));
+            scale = Math.max(0.05, 2.5 / (1 + (visualDist / 100000)));
           } else {
-            // --- NOVA FÓRMULA DE APROXIMAÇÃO NATURAL (Reaplicada) ---
-            // Garante crescimento exponencial sem saltos
+            // --- NOVA FÓRMULA DE APROXIMAÇÃO NATURAL ---
             const MAX_SCALE = 2.8;
             const MIN_SCALE = 0.05;
             const OPTICAL_FACTOR = 600000;
 
-            scale = MAX_SCALE / (1 + (dist / OPTICAL_FACTOR));
+            scale = MAX_SCALE / (1 + (visualDist / OPTICAL_FACTOR));
             scale = Math.max(MIN_SCALE, scale);
           }
         }
