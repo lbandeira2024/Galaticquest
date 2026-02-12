@@ -545,18 +545,22 @@ const DecolagemMarte = () => {
 
     if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
     dobraTimerRef.current = setTimeout(() => {
-      // 1. TOCA O SOM DE DESATIVAÇÃO PRIMEIRO (LEVE)
+
+      // 1. PRIMEIRO: Para o som da dobra (loop) para não sobrepor
+      stopAllAudio();
+
+      // 2. SEGUNDO: Toca o som de desativação (agora ele não será cortado)
       playSound('/sounds/power-down-Warp.mp3');
 
-      // 2. AGUARDA 100MS PARA PROCESSAR A TROCA PESADA (EVITA O TRAVAMENTO)
+      // 3. TERCEIRO: Aguarda um pequeno delay para a troca visual (evita travar o áudio)
       setTimeout(() => {
         isDobraAtivadaRef.current = false;
         setIsDobraAtivada(false); // Troca visual pesada (Canvas)
+
         saveTelemetryData();
-        stopAllAudio(); // Para o loop da música da dobra
 
         setIsWarpCooldown(true);
-        setTimeout(() => { setIsWarpCooldown(false); }, 20000);
+        setTimeout(() => { setIsWarpCooldown(false); }, 20000); // 20s de cooldown visual da mensagem
 
         setShowWarpDisabledMessage(true);
         setMinervaImage('/images/Minerva/Minerva_Active.gif');
@@ -572,7 +576,7 @@ const DecolagemMarte = () => {
         } else {
           setIsBoostingTo60k(true);
         }
-      }, 100);
+      }, 200); // Atraso de 200ms para o áudio iniciar suavemente
 
     }, DOBRA_DURATION_IN_MS);
 
@@ -945,6 +949,9 @@ const DecolagemMarte = () => {
     if (!isMoon && distanceKm <= approachDistanceThreshold && !approachSoundPlayed.current) {
       playSound('/sounds/empuxo.wav');
       approachSoundPlayed.current = true;
+      // FIX: FORÇA A DESACELERAÇÃO ASSIM QUE O SOM TOCA
+      setIsFinalApproach(true);
+      setIsBoostingTo60k(false);
     }
   }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]);
 
@@ -1053,9 +1060,8 @@ const DecolagemMarte = () => {
             // Se estiver saindo da dobra ou muito rápido, freia bruscamente
             newKmh = Math.max(currentSpeed - 200000, maxSpeed);
           } else {
-            // Se estiver apenas ajustando velocidade de cruzeiro (60k) para pouso (45k), freia suave
-            // ~250 km/h por tick dá um efeito visual agradável de desaceleração
-            newKmh = Math.max(currentSpeed - 250, maxSpeed);
+            // FIX: Aumentei a frenagem para 450 para garantir que chegue a 45.000 antes do pouso
+            newKmh = Math.max(currentSpeed - 450, maxSpeed);
           }
         } else {
           newKmh = Math.min(currentSpeed + speedChange, maxSpeed);
