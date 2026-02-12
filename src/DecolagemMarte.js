@@ -395,9 +395,17 @@ const DecolagemMarte = () => {
     }
   }, [playSound, saveTelemetryData]);
 
+  // --- CORREÇÃO PRINCIPAL NO HANDLER DE SOS ---
+  // Agora verificamos explicitamente se estamos em partida ou em edição de mapa
   const handleSosDetected = useCallback(() => {
     if (!travelStarted && routeIndex === 0) return;
     if (monitorStateRef.current !== 'on') return;
+
+    // Bloqueia se estiver em animação de partida (nuvens)
+    if (isDepartingRef.current) return;
+
+    // Bloqueia se estiver no modo de edição de mapa
+    if (isForcedMapEditRef.current) return;
 
     setIsSosMinervaActive(true);
     setTimeout(() => {
@@ -1354,7 +1362,8 @@ const DecolagemMarte = () => {
               <button className={`play-button ${isDialogueFinished ? 'pulsing-play' : ''}`} onClick={handleReplayDialogue} disabled={!isDialogueFinished || isPaused}>Play</button>
             </div>
             <div className="monitor-screen">
-              {isSosMinervaActive ? (
+              {/* --- TRAVA VISUAL NO JSX PARA EVITAR SOS FORA DE HORA --- */}
+              {isSosMinervaActive && !isDeparting && !isForcedMapEdit ? (
                 <img
                   src="/images/Minerva/Minerva-Informando-velocidade.gif"
                   alt="Alerta S.O.S Minerva"
