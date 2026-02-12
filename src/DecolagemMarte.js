@@ -229,6 +229,16 @@ const DecolagemMarte = () => {
   const [sosSurpriseEvent, setSosSurpriseEvent] = useState(null);
   const [showSosSurprise, setShowSosSurprise] = useState(false);
 
+  // REFS PARA CONTROLE DE ESTADO SEM RE-RENDER NO INTERVALO
+  const monitorStateRef = useRef(monitorState);
+  const distanceKmRef = useRef(distanceKm);
+  const isForcedMapEditRef = useRef(isForcedMapEdit);
+
+  // Sincroniza refs com o estado
+  useEffect(() => { monitorStateRef.current = monitorState; }, [monitorState]);
+  useEffect(() => { distanceKmRef.current = distanceKm; }, [distanceKm]);
+  useEffect(() => { isForcedMapEditRef.current = isForcedMapEdit; }, [isForcedMapEdit]);
+
   const telemetryRef = useRef({
     velocity: { kmh: 0, ms: 0, rel: '0.0c' },
     altitude: 0,
@@ -367,7 +377,9 @@ const DecolagemMarte = () => {
   }, [playSound, saveTelemetryData]);
 
   const handleSosDetected = useCallback(() => {
+    // NOVA VALIDAÇÃO: Bloqueia se o monitor não estiver 'on'
     if (!travelStarted && routeIndex === 0) return;
+    if (monitorStateRef.current !== 'on') return;
 
     setIsSosMinervaActive(true);
     setTimeout(() => {
@@ -720,6 +732,11 @@ const DecolagemMarte = () => {
     const triggerSosEvent = () => {
       if (isDobraAtivadaRef.current) return;
 
+      // NOVA VALIDAÇÃO: Bloqueia se o monitor não estiver 'on', se estiver pousado ou editando mapa
+      if (monitorStateRef.current !== 'on') return;
+      if (distanceKmRef.current <= 0) return;
+      if (isForcedMapEditRef.current) return;
+
       const audio = new Audio('/sounds/minervaSOS.mp3');
       audio.play().catch(e => console.log("Erro ao tocar áudio SOS:", e));
       setIsSosMinervaActive(true);
@@ -733,7 +750,7 @@ const DecolagemMarte = () => {
     };
     const interval = setInterval(triggerSosEvent, 180000);
     return () => clearInterval(interval);
-  }, [travelStarted, routeIndex]);
+  }, [travelStarted, routeIndex]); // Não incluímos distanceKm nem monitorState nas dependências para evitar resets do intervalo
 
   const isBoostingTo60kRef = useRef(isBoostingTo60k);
   useEffect(() => { isBoostingTo60kRef.current = isBoostingTo60k; }, [isBoostingTo60k]);
