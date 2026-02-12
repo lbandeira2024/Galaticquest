@@ -42,19 +42,27 @@ const ModalEscolha = ({ desafio, onClose, onEscolha, missionTime, onSpendCoins, 
         return null;
     }
 
+    // Calculo do custo baseado no tempo da missão
+    // Se missionTime for o tempo corrido (ex: travelTime), o custo aumenta.
     const costX = Math.floor(missionTime / 100) + 150;
     const costY = Math.floor(missionTime / 100) + 50;
 
     const handleReviewAll = () => {
         console.log(`Usuário escolheu 'Rever tudo', custo: ${costX}`);
-        onSpendCoins(costX, 'all');
+        // Chama a função de gasto passando o valor e o tipo
+        if (onSpendCoins) {
+            onSpendCoins(costX, 'all');
+        }
+        // Opcional: Aqui você pode resetar o timer ou fechar o modal, dependendo da lógica do jogo
+        // Por enquanto, apenas executa a cobrança.
     };
 
     const handleReviewOptions = () => {
         console.log(`Usuário escolheu 'Rever Opções', custo: ${costY}`);
-        onSpendCoins(costY, 'options');
+        if (onSpendCoins) {
+            onSpendCoins(costY, 'options');
+        }
     };
-
 
     return (
         <div className="modal-escolha-overlay">
@@ -80,16 +88,32 @@ const ModalEscolha = ({ desafio, onClose, onEscolha, missionTime, onSpendCoins, 
                 </div>
             </div>
 
+            {/* A camada de Review Options foi ajustada com zIndex alto e pointerEvents explicitos */}
             {showReviewOptions && (
-                <div className="modal-review-options-overlay">
-                    <div className="modal-review-options-container">
+                <div
+                    className="modal-review-options-overlay"
+                    style={{
+                        zIndex: 9999,
+                        pointerEvents: 'auto',
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(0, 0, 0, 0.85)'
+                    }}
+                >
+                    <div className="modal-review-options-container" style={{ position: 'relative', zIndex: 10000 }}>
                         <h3>O tempo para avaliação terminou!</h3>
                         <p>Você pode usar suas Spacecoins para ter uma nova chance.</p>
                         <div className="review-buttons-container">
-                            <button className="review-button" onClick={handleReviewAll}>
+                            <button className="review-button" onClick={handleReviewAll} style={{ cursor: 'pointer' }}>
                                 Rever tudo - {costX} Spacecoins
                             </button>
-                            <button className="review-button" onClick={handleReviewOptions}>
+                            <button className="review-button" onClick={handleReviewOptions} style={{ cursor: 'pointer' }}>
                                 Rever Opções - {costY} Spacecoins
                             </button>
                         </div>
