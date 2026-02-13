@@ -11,7 +11,6 @@ import SpeedGauge from './SpeedGauge';
 import MandalaVirtudes from './MandalaVirtudes';
 import { usePause } from './PauseContext';
 import Inventario from './Inventario';
-import { useLocation, useNavigate } from 'react-router-dom';
 import desafiosData from './desafios.json';
 import ModalEscolha from './ModalEscolha';
 import { useSpaceCoins } from './SpaceCoinsContext';
@@ -19,100 +18,289 @@ import ModalDesafio from './ModalDesafio';
 import ModalConfirmacaoViagem from './ModalConfirmacaoViagem';
 import { useConfig } from './ConfigContext';
 import LojaEspacial from './LojaEspacial';
+import { useLocation, useNavigate } from 'react-router-dom';
 
-// --- DEFINIÇÃO INTERNA DO COMPONENTE SOS SURPRESA ---
+// --- COMPONENTES OTIMIZADOS (Extraídos para evitar re-render) ---
+
+// 1. Painel Esquerdo (Controles e Medidores)
+const LeftControlPanel = React.memo(({
+  telemetry, distanceKm, progress, isDobraAtivada, isDobraEnabled, isPaused,
+  originPlanet, destinationPlanet, maxSpeed, isBoosting,
+  handleDobraEspacial, handleInventory, minervaImage, handleMinervaClick,
+  isMinervaHighlighted, processadorO2, isO2TransferDisabled, handleOpenO2Modal
+}) => {
+  return (
+    <div className="left-panel-3d">
+      <div style={{ marginTop: '-30px' }}>
+        <RouteMonitor
+          distanceKm={distanceKm}
+          progress={progress}
+          currentSpeed={telemetry.velocity.kmh}
+          isDobraAtivada={isDobraAtivada}
+          originPlanet={originPlanet}
+          destinationPlanet={destinationPlanet}
+        />
+      </div>
+      <div className="dobra-buttons-container">
+        <div className="dobra-btn-wrapper">
+          <button
+            className={`ativar-de-btn ${isDobraAtivada ? 'active' : ''} ${!isDobraEnabled || isPaused || distanceKm <= 0 ? 'disabled' : ''}`}
+            onClick={handleDobraEspacial}
+            disabled={!isDobraEnabled || isPaused || distanceKm <= 0}
+          >
+            {isDobraAtivada ? <>Dobra<br />Ativa</> : <>Dobra<br />Espacial</>}
+          </button>
+        </div>
+        <div className="dobra-btn-wrapper">
+          <button className="inventory-btn" onClick={handleInventory} disabled={isPaused}>Inventário</button>
+        </div>
+      </div>
+      <SpeedGauge
+        currentSpeed={telemetry.velocity.kmh}
+        maxSpeed={maxSpeed}
+        isBoosting={isBoosting}
+        isDobraAtivada={isDobraAtivada}
+      />
+      <div className="minerva-section">
+        <div
+          className={`minerva-title ${isMinervaHighlighted ? 'highlighted' : ''}`}
+          onClick={handleMinervaClick}
+          style={{ cursor: isPaused ? 'not-allowed' : 'pointer', zIndex: 10, position: 'relative' }}
+        >
+          MINERVA I.A.
+        </div>
+        <div className="minerva-container">
+          <img src={minervaImage} alt="Minerva Status" className="minerva-image" />
+        </div>
+      </div>
+      <div className="o2-processor-display">
+        <span className="o2-processor-label">PROCESSADOR O2</span>
+        <div className="o2-meter-visual">
+          {[1, 2, 3, 4, 5].map(unit => (<div key={unit} className={`o2-unit ${processadorO2 >= unit ? 'filled' : ''}`}></div>))}
+        </div>
+        <button
+          className={`o2-transfer-button ${isO2TransferDisabled ? 'disabled' : ''}`}
+          onClick={handleOpenO2Modal}
+          disabled={isO2TransferDisabled}
+          style={{ zIndex: 100 }}
+        >
+          TRANSFERIR ({processadorO2})
+        </button>
+      </div>
+    </div>
+  );
+});
+
+// 2. Painel Direito (Monitores)
+const RightMonitorPanel = React.memo(({
+  isPaused, isTransmissionStarting, isDialogueFinished, handleReplayDialogue,
+  handleNextDialogue, monitorState, staticScreenSeed, showMinervaOnMonitor,
+  showCriticalWarpFail, showWarpDisabledMessage, isForcedMapEdit, isSosMinervaActive,
+  isDeparting, currentCharacterData, currentDialogueStep, highlightKeywords,
+  setShowGlossary, handleInventory, teamPhotoUrl, API_BASE_URL,
+  isSOSActive, handleSOS, hasFundsForSOS, isRestoringSOS, togglePause, isPauseButtonDisabled
+}) => {
+  return (
+    <div className="right-panel-3d" style={{ zIndex: 50 }}>
+      <MissionTimer isPaused={isPaused} />
+
+      {/* MONITOR SUPERIOR */}
+      <div className="right-monitor-container" style={{ marginTop: '80px' }}>
+        <div className="monitor-controls">
+          <span className={`rec-label ${isTransmissionStarting ? 'blinking-rec' : 'inactive-rec'}`}>REC</span>
+          <button
+            className={`play-button ${isDialogueFinished ? 'pulsing-play' : ''}`}
+            onClick={handleReplayDialogue}
+            disabled={!isDialogueFinished || isPaused}
+          >
+            Play
+          </button>
+        </div>
+        <div className="monitor-screen">
+          {isSosMinervaActive && !isDeparting && !isForcedMapEdit ? (
+            <img src="/images/Minerva/Minerva-Informando-velocidade.gif" alt="Alerta S.O.S Minerva" className="monitor-image" />
+          ) : showCriticalWarpFail ? (
+            <div className="monitor-text-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'rgba(30, 0, 0, 0.9)', flexDirection: 'column', padding: '10px' }}>
+              <h3 style={{ color: '#ff3333', margin: '0 0 10px 0', textShadow: '0 0 10px red', fontSize: '1.1rem', textAlign: 'center' }}>⚠ FALHA CRÍTICA ⚠</h3>
+              <p style={{ color: '#ffaaaa', textAlign: 'center', fontWeight: 'bold', fontSize: '0.9rem', lineHeight: '1.4', margin: 0 }}>Elementos base para a dobra escassos.<br />Recursos direcionados para<br />suporte à vida.</p>
+            </div>
+          ) : isForcedMapEdit ? (
+            <div className="monitor-text-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'rgba(50, 0, 0, 0.5)' }}>
+              <p style={{ color: '#ffcc00', textAlign: 'center', fontWeight: 'bold', textShadow: '0 0 5px red' }}>⚠ ATENÇÃO ⚠<br /><br />Edite o Mapa Estelar e mude a rota para fechar.</p>
+            </div>
+          ) : isTransmissionStarting && currentCharacterData?.imagem ? (
+            <img src={currentCharacterData.imagem} alt={currentCharacterData.nome} className="monitor-image" />
+          ) : (
+            <>
+              {showWarpDisabledMessage ? (
+                <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#ff0', textAlign: 'center', padding: '10px', fontSize: '0.9em', textShadow: '0 0 5px rgba(255, 255, 0, 0.7)' }}>Distancia Orbital máxima alcançada.<br />Dobra desativada!</div>
+              ) : showMinervaOnMonitor ? (
+                <img src="/images/Minerva/Minerva-Informando-velocidade.gif" alt="Aviso de Velocidade" className="monitor-image" />
+              ) : (
+                <>
+                  {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
+                  {monitorState === 'static' && <img src={`/images/No_Signal.png?seed=${staticScreenSeed}`} alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
+                </>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* MONITOR INFERIOR */}
+      <div className="right-monitor-container" style={{ marginTop: '10px' }}>
+        <div className="monitor-screen" onClick={isTransmissionStarting ? handleNextDialogue : undefined} style={{ cursor: isTransmissionStarting ? 'pointer' : 'default' }}>
+          {isTransmissionStarting && currentDialogueStep && currentCharacterData ? (
+            <div className="monitor-text-display">
+              <p><span className="dialogue-character-name" style={{ color: '#00aaff' }}>{currentCharacterData.nome}:</span>{' '}{highlightKeywords(currentDialogueStep.texto, currentDialogueStep.palavras_chave)}</p>
+              <div style={{ textAlign: 'right', fontSize: '0.8em', color: '#00aaff', animation: 'blink 1s infinite' }}>▼</div>
+            </div>
+          ) : (
+            <>
+              {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
+              {monitorState === 'static' && <img src={`/images/No_Signal.png?seed=${staticScreenSeed}`} alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="glossary-button-container" style={{ marginTop: '20px', position: 'relative', zIndex: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <button className="glossary-button" onClick={() => !isPaused && setShowGlossary(true)} disabled={isPaused}>GLOSSÁRIO</button>
+          <button className="bolsa-button" onClick={handleInventory} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed' }}><img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" /></button>
+        </div>
+      </div>
+
+      {teamPhotoUrl && (
+        <div className="team-photo-frame">
+          <div className="team-photo-header">TRIPULAÇÃO</div>
+          <img src={`${API_BASE_URL}${teamPhotoUrl}`} alt="Equipe" className="team-photo-img" onError={(e) => { e.target.style.display = 'none'; }} />
+          <div className="team-photo-overlay"></div>
+        </div>
+      )}
+
+      <div className="floating-buttons-container">
+        <button className={`sos-button ${isSOSActive ? 'active' : ''}`} onClick={handleSOS} disabled={!isSOSActive} title={isSOSActive ? "Ativar S.O.S." : !hasFundsForSOS ? "Sem SpaceCoins para S.O.S." : "S.O.S. indisponível"}>S.O.S.</button>
+        <button onClick={togglePause} disabled={isPauseButtonDisabled || isRestoringSOS} className={`pause-button ${isPaused ? 'paused' : ''}`} title={isRestoringSOS ? "Não é possível pausar durante a restauração S.O.S." : ""}>{isPaused ? 'Continuar Jogo' : 'Pausar Jogo'}</button>
+      </div>
+    </div>
+  );
+});
+
+// 3. Janela Principal (Main Display)
+const MainDisplayWindow = React.memo(({
+  mainDisplayState, isDobraAtivada, distanceKm, arrivedAtMars, isPaused,
+  selectedPlanet, handleChallengeEnd, isDeparting, showStoreModal,
+  showSosSurprise, sosSurpriseEvent, handleSeguirPlano, handleMudarRota,
+  handleStoreChallengeImpact, telemetry, plannedRoute, routeIndex
+}) => {
+  return (
+    <div className="main-display">
+      {mainDisplayState === 'acee' && (<img src="/images/ACEE.png" alt="ACEE" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />)}
+      {mainDisplayState === 'clouds' && (<video src="/images/clouds.webm" className="cloud-animation-video" autoPlay muted loop playsInline preload="auto" />)}
+      {mainDisplayState === 'static' && <div className="static-animation"></div>}
+
+      {isDobraAtivada ? (
+        <video src="/images/Vluz-Dobra.webm" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+      ) : (mainDisplayState === 'stars' && (
+        <SpaceView
+          distance={distanceKm}
+          forceLarge={arrivedAtMars}
+          isWarpActive={false}
+          isPaused={isPaused}
+          selectedPlanet={selectedPlanet}
+          onChallengeEnd={handleChallengeEnd}
+          isDeparting={isDeparting}
+        />
+      ))}
+
+      {showStoreModal && (
+        <LojaEspacial
+          onClose={() => { }}
+          currentTelemetry={telemetry}
+          onSeguirPlano={handleSeguirPlano}
+          onMudarRota={handleMudarRota}
+          onChallengeAccepted={handleStoreChallengeImpact}
+          isMainDisplayModal={true}
+          currentStation={selectedPlanet?.nome}
+          hasRoute={plannedRoute && (routeIndex + 1) < plannedRoute.length}
+        />
+      )}
+
+      {showSosSurprise && sosSurpriseEvent && (
+        <SosSurpriseModal
+          event={sosSurpriseEvent}
+          onMudarRota={handleMudarRota}
+          onSeguirPlano={handleSeguirPlano}
+        />
+      )}
+    </div>
+  );
+});
+
+
+// --- COMPONENTES AUXILIARES (Static/Modals) ---
 const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano }) => {
   if (!event) return null;
-
   const getRiskColor = (id) => {
     switch (id) {
-      case 1: return '#ff4444'; // Piratas
-      case 2: return '#ffaa00'; // Astronauta
-      case 3: return '#00ccff'; // Nave
-      default: return '#aaaaaa'; // Alien
+      case 1: return '#ff4444';
+      case 2: return '#ffaa00';
+      case 3: return '#00ccff';
+      default: return '#aaaaaa';
     }
   };
-
   const riskColor = getRiskColor(event.id);
+  const containerStyle = { borderColor: riskColor, boxShadow: `0 0 30px ${riskColor}66` };
 
   return (
     <div className="store-modal-overlay main-display-overlay">
-      <div className="store-modal-container" style={{ borderColor: riskColor, boxShadow: `0 0 30px ${riskColor}66` }}>
+      <div className="store-modal-container" style={containerStyle}>
         <div className="store-header" style={{ borderBottomColor: `${riskColor}4D` }}>
-          <h2 style={{ color: riskColor, textShadow: `0 0 8px ${riskColor}80` }}>
-            RELATÓRIO DE S.O.S
-          </h2>
+          <h2 style={{ color: riskColor, textShadow: `0 0 8px ${riskColor}80` }}>RELATÓRIO DE S.O.S</h2>
         </div>
         <div className="store-grid challenges-mode" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
           <div className="store-item" style={{ width: '100%', maxWidth: '800px', borderColor: riskColor, flexDirection: 'row', display: 'flex', gap: '20px', alignItems: 'center' }}>
-            <img
-              src={event.image}
-              alt={event.name}
-              className="store-item-image"
-              style={{ width: '200px', height: '200px', objectFit: 'contain', filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.5))' }}
-              onError={(e) => { e.target.src = '/images/ACEE.png'; }}
-            />
+            <img src={event.image} alt={event.name} className="store-item-image" style={{ width: '200px', height: '200px', objectFit: 'contain', filter: 'drop-shadow(0 0 10px rgba(0,0,0,0.5))' }} onError={(e) => { e.target.src = '/images/ACEE.png'; }} />
             <div className="store-item-details" style={{ textAlign: 'left' }}>
-              <div className="store-item-name" style={{ color: riskColor, fontSize: '2rem', marginBottom: '15px' }}>
-                {event.name}
-              </div>
+              <div className="store-item-name" style={{ color: riskColor, fontSize: '2rem', marginBottom: '15px' }}>{event.name}</div>
               <div className="description-wrapper">
-                <div className="store-item-description" style={{ fontSize: '1.2rem', lineHeight: '1.6', color: '#eee' }}>
-                  {event.description}
-                </div>
+                <div className="store-item-description" style={{ fontSize: '1.2rem', lineHeight: '1.6', color: '#eee' }}>{event.description}</div>
               </div>
             </div>
           </div>
         </div>
         <div className="store-action-buttons" style={{ position: 'relative', justifyContent: 'center', marginTop: '20px', bottom: 'auto', right: 'auto' }}>
-          <button className="buy-button action-button-mudar" onClick={onMudarRota} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>
-            MUDAR ROTA
-          </button>
-          <button className="buy-button action-button-seguir" onClick={onSeguirPlano} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>
-            SEGUIR PLANO
-          </button>
+          <button className="buy-button action-button-mudar" onClick={onMudarRota} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>MUDAR ROTA</button>
+          <button className="buy-button action-button-seguir" onClick={onSeguirPlano} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>SEGUIR PLANO</button>
         </div>
       </div>
     </div>
   );
 };
-// -------------------------------------------------------------------------------
 
 const GalacticVirtudesPage = lazy(() => import('./GalacticVirtudesPage').catch(() => ({
   default: () => <div className="map-fallback">Glossário Indisponível</div>
 })));
 
-// Dados para gerar o SOS
+// --- DADOS ESTÁTICOS ---
 const PLANET_DATA_FOR_SOS = [
-  { name: "Mercurio", orbitRadius: 20 },
-  { name: "Venus", orbitRadius: 30 },
-  { name: "Terra", orbitRadius: 40 },
-  { name: "Marte", orbitRadius: 50 },
-  { name: "Jupiter", orbitRadius: 80 },
-  { name: "Saturno", orbitRadius: 100 },
-  { name: "Urano", orbitRadius: 120 },
-  { name: "Netuno", orbitRadius: 140 },
-  { name: "Plutao", orbitRadius: 150 },
-  { name: "Ceres", orbitRadius: 60 },
-  { name: "Eris", orbitRadius: 165 }
+  { name: "Mercurio", orbitRadius: 20 }, { name: "Venus", orbitRadius: 30 }, { name: "Terra", orbitRadius: 40 },
+  { name: "Marte", orbitRadius: 50 }, { name: "Jupiter", orbitRadius: 80 }, { name: "Saturno", orbitRadius: 100 },
+  { name: "Urano", orbitRadius: 120 }, { name: "Netuno", orbitRadius: 140 }, { name: "Plutao", orbitRadius: 150 },
+  { name: "Ceres", orbitRadius: 60 }, { name: "Eris", orbitRadius: 165 }
 ];
-
-// LISTA DE ESTAÇÕES ESPACIAIS (NOMES NORMALIZADOS)
 const STATION_NAMES = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boktok', 'boctok'];
-
-// LISTA DE EVENTOS SOS SURPRESA
 const SOS_EVENTS_LIST = [
   { id: 1, name: 'Piratas Espaciais', description: 'ALERTA! O sinal era uma isca. Piratas interceptaram a nave. Prepare-se para um possível confronto ou negociação hostil.', image: '/images/pirates.png' },
   { id: 2, name: 'Astronauta Morto', description: 'Encontramos um traje à deriva. Infelizmente, não há sinais vitais. Podemos recuperar equipamentos e dados da missão dele.', image: '/images/dead_astronaut.png' },
   { id: 3, name: 'Nave Destruída', description: 'Destroços de uma antiga batalha ou acidente. Há muita sucata valiosa e contêineres que podem conter recursos úteis.', image: '/images/destroyed_ship.png' },
   { id: 4, name: 'Objeto Alienígena', description: 'Identificamos um artefato de origem desconhecida emitindo o sinal. Sua tecnologia parece avançada e fora dos padrões da ACEE.', image: '/images/static_signal.png' }
 ];
-
 const hasWaterList = new Set([
-  "Marte", "Mercúrio", "Ceres", "Plutão", "Haumea", "Eris", "Makemake",
-  "Lua", "Europa", "Ganímedes", "Calisto", "Titã", "Encelado", "Tritão",
-  "Caronte", "Titania", "Oberon", "Vesta", "TRAPPIST-1e", "Kepler-186f",
-  "Terra", "Proxima Centauri b"
+  "Marte", "Mercúrio", "Ceres", "Plutão", "Haumea", "Eris", "Makemake", "Lua", "Europa", "Ganímedes",
+  "Calisto", "Titã", "Encelado", "Tritão", "Caronte", "Titania", "Oberon", "Vesta", "TRAPPIST-1e",
+  "Kepler-186f", "Terra", "Proxima Centauri b"
 ]);
 
 const degradationRates = {
@@ -123,12 +311,10 @@ const degradationRates = {
   STRATUSV: { nuclearPropulsion: 6.25, oxygen: 7.5, stability: 8.75, direction: 8.75, productivity: 7.5, interdependence: 7.5, engagement: 7.5 },
   NEOECLIPSE: { nuclearPropulsion: 3.75, oxygen: 5, stability: 6.25, direction: 6.25, productivity: 8.75, interdependence: 8.75, engagement: 8.75 }
 };
-
 const accelerationRates = {
   default: { perTick: 336 }, GAIANOVA: { perTick: 200 }, ARTEMIS1: { perTick: 270 },
   OBERONX: { perTick: 336 }, STRATUSV: { perTick: 500 }, NEOECLIPSE: { perTick: 840 },
 };
-
 const takeoffDegradation = {
   default: { propulsion: 2, direction: 1, stability: 2 },
   NEOECLIPSE: { propulsion: 4, direction: 3, stability: 5 },
@@ -157,8 +343,8 @@ const DecolagemMarte = () => {
   const { spaceCoins, setSpaceCoins, syncSpaceCoins } = useSpaceCoins();
   const alarmAudio = useMemo(() => new Audio('/sounds/evacuation-alarm.mp3'), []);
 
+  // States
   const [speed, setSpeed] = useState(0);
-  const wasPaused = useRef(false);
   const [isDialogueFinished, setIsDialogueFinished] = useState(false);
   const [showEscolhaModal, setShowEscolhaModal] = useState(false);
   const [showStoreModal, setShowStoreModal] = useState(false);
@@ -201,43 +387,39 @@ const DecolagemMarte = () => {
   const [isReviewing, setIsReviewing] = useState(false);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
   const [showMinervaOnMonitor, setShowMinervaOnMonitor] = useState(false);
+  const [groupId, setGroupId] = useState(null);
+  const [isMinervaHighlighted, setIsMinervaHighlighted] = useState(false);
+  const [isCooldownOver, setIsCooldownOver] = useState(true);
+  const [isForcedMapEdit, setIsForcedMapEdit] = useState(false);
+  const [isWarpCooldown, setIsWarpCooldown] = useState(false);
+  const [showCriticalWarpFail, setShowCriticalWarpFail] = useState(false);
+  const [showSOSModal, setShowSOSModal] = useState(false);
+  const [sosCost, setSosCost] = useState(0);
+  const [isRestoringSOS, setIsRestoringSOS] = useState(false);
+  const [processadorO2, setProcessadorO2] = useState(0);
+  const [travelTime, setTravelTime] = useState(0);
+  const [teamPhotoUrl, setTeamPhotoUrl] = useState(null);
+  const [isSosMinervaActive, setIsSosMinervaActive] = useState(false);
+  const [activeSosSignal, setActiveSosSignal] = useState(null);
+  const [showO2Modal, setShowO2Modal] = useState(false);
+  const [sosSurpriseEvent, setSosSurpriseEvent] = useState(null);
+  const [showSosSurprise, setShowSosSurprise] = useState(false);
+
+  // Refs
   const minervaEventTriggered = useRef(false);
   const hideMinervaTimerRef = useRef(null);
   const boostTimerRef = useRef(null);
   const approachSoundPlayed = useRef(false);
   const minervaTimeoutRef = useRef(null);
   const dobraTimerRef = useRef(null);
-  const [groupId, setGroupId] = useState(null);
-  const [isMinervaHighlighted, setIsMinervaHighlighted] = useState(false);
   const takeoffApplied = useRef(false);
-  const [isCooldownOver, setIsCooldownOver] = useState(true);
-  const [isForcedMapEdit, setIsForcedMapEdit] = useState(false);
   const routeChangeLockRef = useRef(false);
-
-  const [isWarpCooldown, setIsWarpCooldown] = useState(false);
-  const [showCriticalWarpFail, setShowCriticalWarpFail] = useState(false);
-
-  const [showSOSModal, setShowSOSModal] = useState(false);
-  const [sosCost, setSosCost] = useState(0);
-  const [isRestoringSOS, setIsRestoringSOS] = useState(false);
   const restoreIntervalRef = useRef(null);
-  const [processadorO2, setProcessadorO2] = useState(0);
-  const [travelTime, setTravelTime] = useState(0);
-  const [teamPhotoUrl, setTeamPhotoUrl] = useState(null);
-  const [isSosMinervaActive, setIsSosMinervaActive] = useState(false);
-  const [activeSosSignal, setActiveSosSignal] = useState(null);
-
-  const [showO2Modal, setShowO2Modal] = useState(false);
-
-  const [sosSurpriseEvent, setSosSurpriseEvent] = useState(null);
-  const [showSosSurprise, setShowSosSurprise] = useState(false);
 
   // REFS PARA CONTROLE DE ESTADO SEM RE-RENDER NO INTERVALO
   const monitorStateRef = useRef(monitorState);
   const distanceKmRef = useRef(distanceKm);
   const isForcedMapEditRef = useRef(isForcedMapEdit);
-
-  // NOVO: Ref para controlar estado de partida (animação)
   const isDepartingRef = useRef(isDeparting);
 
   // Sincroniza refs com o estado
@@ -271,13 +453,9 @@ const DecolagemMarte = () => {
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
 
-  // --- PRÉ-CARREGAMENTO DE VÍDEOS PARA EVITAR TRAVAMENTO ---
+  // --- PRÉ-CARREGAMENTO ---
   useEffect(() => {
-    const videosToPreload = [
-      "/images/Vluz-Dobra.webm",
-      "/images/clouds.webm",
-    ];
-
+    const videosToPreload = ["/images/Vluz-Dobra.webm", "/images/clouds.webm"];
     videosToPreload.forEach((src) => {
       const video = document.createElement("video");
       video.src = src;
@@ -285,31 +463,19 @@ const DecolagemMarte = () => {
       video.muted = true;
       video.load();
     });
+    const audioPreload = new Audio('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3');
+    audioPreload.preload = 'auto';
+    const audioPowerDown = new Audio('/sounds/power-down-Warp.mp3');
+    audioPowerDown.preload = 'auto';
   }, []);
 
   const triggerMinervaInterplanetarySpeed = useCallback(() => {
     minervaEventTriggered.current = true;
-
     setShowMinervaOnMonitor(true);
     playSound('/sounds/Mineva-VelInterplanetaria.mp3');
-
-    setTimeout(() => {
-      setShowMinervaOnMonitor(false);
-    }, 5000);
-
-    setTimeout(() => {
-      setIsBoostingTo60k(true);
-      playSound('/sounds/empuxo.wav');
-    }, 2000);
+    setTimeout(() => { setShowMinervaOnMonitor(false); }, 5000);
+    setTimeout(() => { setIsBoostingTo60k(true); playSound('/sounds/empuxo.wav'); }, 2000);
   }, [playSound]);
-
-  useEffect(() => {
-    const audioPreload = new Audio('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3');
-    audioPreload.preload = 'auto';
-
-    const audioPowerDown = new Audio('/sounds/power-down-Warp.mp3');
-    audioPowerDown.preload = 'auto';
-  }, []);
 
   const constructPhotoUrl = (gameNumber, teamName) => {
     if (!gameNumber || !teamName) return null;
@@ -349,9 +515,7 @@ const DecolagemMarte = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dataToSave),
       });
-    } catch (error) {
-      console.error("ERRO: Falha ao salvar dados de telemetria:", error);
-    }
+    } catch (error) { console.error("ERRO: Falha ao salvar dados de telemetria:", error); }
   }, [userId, API_BASE_URL]);
 
   const saveCurrentProgress = useCallback(async (currentIndex) => {
@@ -362,9 +526,7 @@ const DecolagemMarte = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ routeIndex: currentIndex }),
       });
-    } catch (error) {
-      console.error("ERRO: Falha ao salvar progresso da rota:", error);
-    }
+    } catch (error) { console.error("ERRO: Falha ao salvar progresso da rota:", error); }
   }, [userId, API_BASE_URL]);
 
   const saveNewRouteAndProgress = useCallback(async (currentIndex, newRouteArray) => {
@@ -376,9 +538,7 @@ const DecolagemMarte = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dataToSave),
       });
-    } catch (error) {
-      console.error("ERRO: Falha ao salvar nova rota:", error);
-    }
+    } catch (error) { console.error("ERRO: Falha ao salvar nova rota:", error); }
   }, [userId, API_BASE_URL]);
 
   const handleStoreChallengeImpact = useCallback((item) => {
@@ -401,52 +561,41 @@ const DecolagemMarte = () => {
   const handleSosDetected = useCallback(() => {
     if (!travelStarted && routeIndex === 0) return;
     if (monitorStateRef.current !== 'on') return;
-
     if (isDepartingRef.current) return;
     if (isForcedMapEditRef.current) return;
 
     setIsSosMinervaActive(true);
-    setTimeout(() => {
-      setIsSosMinervaActive(false);
-    }, 5000);
+    setTimeout(() => { setIsSosMinervaActive(false); }, 5000);
   }, [travelStarted, routeIndex]);
 
-  const handleChallengeEnd = useCallback(() => {
-  }, []);
+  const handleChallengeEnd = useCallback(() => { }, []);
 
-  const handleMudarRota = () => {
+  const handleMudarRota = useCallback(() => {
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
-
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
-
     setIsForcedMapEdit(true);
     setShowStellarMap(true);
-  };
+  }, []);
 
-  const handleSeguirPlano = () => {
+  const handleSeguirPlano = useCallback(() => {
     if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
-
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
-
     playSound('/sounds/empuxo.wav');
     setIsDeparting(true);
 
     setTimeout(async () => {
       setDistanceKm(300000000);
-
       setProgress(0);
       setArrivedAtMars(false);
       setIsFinalApproach(false);
       approachSoundPlayed.current = false;
       minervaEventTriggered.current = true;
-
       triggerMinervaInterplanetarySpeed();
-
       setActiveChallengeData(null);
       setIsDialogueFinished(false);
       setTravelStarted(true);
@@ -455,19 +604,15 @@ const DecolagemMarte = () => {
       setRefetchTrigger(prev => prev + 1);
       setIsDeparting(false);
     }, 4000);
-  };
+  }, [playSound, triggerMinervaInterplanetarySpeed]);
 
   const handleRouteChanged = useCallback((newRouteData) => {
     if (!newRouteData || !newRouteData.newPlannedRoute || newRouteData.newRouteIndex === undefined) {
-      if (!isForcedMapEdit) {
-        setShowStellarMap(false);
-      }
+      if (!isForcedMapEdit) { setShowStellarMap(false); }
       return;
     }
-
     setIsForcedMapEdit(false);
     setShowStellarMap(false);
-
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
 
@@ -476,7 +621,6 @@ const DecolagemMarte = () => {
 
     if (isInFlight) {
       routeChangeLockRef.current = true;
-
       saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
       setPlannedRoute(newPlannedRoute);
       setRouteIndex(newRouteIndex);
@@ -486,30 +630,23 @@ const DecolagemMarte = () => {
       if (newOriginStep && newDestinationStep) {
         setOriginPlanet({ nome: newOriginStep.name });
         setSelectedPlanet({ nome: newDestinationStep.name });
-
         const newDist = newDestinationStep.distance || 300000000;
         setDistanceKm(newDist);
       }
-
       setArrivedAtMars(false);
       setIsFinalApproach(false);
-
       triggerMinervaInterplanetarySpeed();
-
     } else {
       playSound('/sounds/empuxo.wav'); setIsDeparting(true); setShowStoreModal(false);
       setTimeout(async () => {
         setDistanceKm(300000000);
-
         await saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
         setProgress(0);
         setArrivedAtMars(false);
         setIsFinalApproach(false);
         approachSoundPlayed.current = false;
         minervaEventTriggered.current = true;
-
         triggerMinervaInterplanetarySpeed();
-
         setActiveChallengeData(null);
         setIsDialogueFinished(false);
         setTravelStarted(true);
@@ -552,7 +689,7 @@ const DecolagemMarte = () => {
     setShowEscolhaModal(false); setShowConfirmacaoModal(true);
   };
 
-  const handleDobraEspacial = () => {
+  const handleDobraEspacial = useCallback(() => {
     if (!isDobraEnabled || isDobraAtivada || isPaused) return;
 
     if (telemetryRef.current.atmosphere.o2 <= 0 || telemetryRef.current.propulsion.powerOutput <= 0) {
@@ -565,15 +702,9 @@ const DecolagemMarte = () => {
     stopAllAudio();
     setIsDobraAtivada(true);
     setIsDobraEnabled(false);
-
     setMinervaImage('/images/Minerva/Minerva-Vluz.gif');
-
     playSound('/sounds/05.Dobra-Active.mp3');
-
-    playTrack('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3', {
-      loop: true,
-      isPrimary: true
-    });
+    playTrack('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3', { loop: true, isPrimary: true });
 
     const COOLDOWN_IN_MS = 3 * 60 * 1000;
     setDobraCooldownEnd(Date.now() + COOLDOWN_IN_MS);
@@ -587,12 +718,9 @@ const DecolagemMarte = () => {
       setTimeout(() => {
         isDobraAtivadaRef.current = false;
         setIsDobraAtivada(false);
-
         saveTelemetryData();
-
         setIsWarpCooldown(true);
         setTimeout(() => { setIsWarpCooldown(false); }, 20000);
-
         setShowWarpDisabledMessage(true);
         setMinervaImage('/images/Minerva/Minerva_Active.gif');
         setTimeout(() => setShowWarpDisabledMessage(false), 10000);
@@ -613,31 +741,19 @@ const DecolagemMarte = () => {
 
     if (minervaTimeoutRef.current) clearTimeout(minervaTimeoutRef.current);
     minervaTimeoutRef.current = setTimeout(() => { setMinervaImage('/images/Minerva/Minerva_Active.gif'); }, DOBRA_DURATION_IN_MS + 3000);
-  };
+  }, [isDobraEnabled, isDobraAtivada, isPaused, playSound, stopAllAudio, playTrack, saveTelemetryData, distanceKm, selectedPlanet]);
 
-  const handleInventory = () => { if (!isPaused) { setShowInventory(true); playSound('/sounds/inventory-open.mp3'); } };
+  const handleInventory = useCallback(() => { if (!isPaused) { setShowInventory(true); playSound('/sounds/inventory-open.mp3'); } }, [isPaused, playSound]);
 
   const handleTransferO2 = async () => {
     if (isPaused || processadorO2 === 0 || !userId || !API_BASE_URL) return;
-
     const amountToAdd = processadorO2;
     const currentO2 = telemetryRef.current.atmosphere.o2;
     const newO2 = Math.min(100, currentO2 + amountToAdd);
-
     telemetryRef.current.atmosphere.o2 = newO2;
-
-    setTelemetry(prev => ({
-      ...prev,
-      atmosphere: {
-        ...prev.atmosphere,
-        o2: newO2
-      }
-    }));
-
+    setTelemetry(prev => ({ ...prev, atmosphere: { ...prev.atmosphere, o2: newO2 } }));
     setLastImpactTimestamp(Date.now());
-
     playSound('/sounds/data-updates-telemetry.mp3');
-
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
         method: 'POST',
@@ -657,31 +773,25 @@ const DecolagemMarte = () => {
         }),
       });
       setProcessadorO2(0);
-    } catch (error) {
-      console.error("ERRO: Falha ao transferir O2 e salvar dados:", error);
-    }
+    } catch (error) { console.error("ERRO: Falha ao transferir O2 e salvar dados:", error); }
   };
 
-  const handleMinervaClick = () => { if (!isPaused) { setShowMandala(true); if (isMinervaHighlighted) setIsMinervaHighlighted(false); } };
+  const handleMinervaClick = useCallback(() => { if (!isPaused) { setShowMandala(true); if (isMinervaHighlighted) setIsMinervaHighlighted(false); } }, [isPaused, isMinervaHighlighted]);
 
-  const handleOpenO2Modal = () => {
+  const handleOpenO2Modal = useCallback(() => {
     if (isPaused || processadorO2 === 0) return;
     setShowO2Modal(true);
     playSound('/sounds/ui-click.mp3');
-  };
+  }, [isPaused, processadorO2, playSound]);
 
   const isO2TransferDisabled = isPaused || processadorO2 === 0;
 
   const isPausedRef = useRef(isPaused);
-  useEffect(() => {
-    isPausedRef.current = isPaused;
-  }, [isPaused]);
-
+  useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
   const hasStartedAudioRef = useRef(false);
 
   useEffect(() => {
     if (isLoadingRoute) return;
-
     if (routeIndex > 0) {
       setMainDisplayState('stars');
       setMonitorState('on');
@@ -689,52 +799,19 @@ const DecolagemMarte = () => {
       hasStartedAudioRef.current = true;
       return;
     }
-
     unlockAudio();
-
     if (!hasStartedAudioRef.current) {
       hasStartedAudioRef.current = true;
       const audioUrl = `/sounds/decolagem.mp3?t=${Date.now()}`;
-      playTrack(audioUrl, {
-        loop: false,
-        isPrimary: true
-      });
+      playTrack(audioUrl, { loop: false, isPrimary: true });
     }
+    const monitorTimer1 = setTimeout(() => { if (!isPausedRef.current) { setMainDisplayState('clouds'); setTravelStarted(true); } }, 13000);
+    const monitorTimer2 = setTimeout(() => { if (!isPausedRef.current) { setMainDisplayState('static'); setMonitorState('static'); } }, 23000);
+    const monitorTimer3 = setTimeout(() => { if (!isPausedRef.current) { stopAllAudio(); setMainDisplayState('stars'); setMonitorState('on'); } }, 45000);
+    return () => { clearTimeout(monitorTimer1); clearTimeout(monitorTimer2); clearTimeout(monitorTimer3); };
+  }, [isLoadingRoute, routeIndex, unlockAudio, playTrack, stopAllAudio]);
 
-    const monitorTimer1 = setTimeout(() => {
-      if (!isPausedRef.current) {
-        setMainDisplayState('clouds');
-        setTravelStarted(true);
-      }
-    }, 13000);
-
-    const monitorTimer2 = setTimeout(() => {
-      if (!isPausedRef.current) {
-        setMainDisplayState('static');
-        setMonitorState('static');
-      }
-    }, 23000);
-
-    const monitorTimer3 = setTimeout(() => {
-      if (!isPausedRef.current) {
-        stopAllAudio();
-        setMainDisplayState('stars');
-        setMonitorState('on');
-      }
-    }, 45000);
-
-    return () => {
-      clearTimeout(monitorTimer1);
-      clearTimeout(monitorTimer2);
-      clearTimeout(monitorTimer3);
-    };
-  }, [isLoadingRoute, routeIndex]);
-
-  useEffect(() => {
-    return () => {
-      stopAllAudio();
-    };
-  }, [stopAllAudio]);
+  useEffect(() => { return () => { stopAllAudio(); }; }, [stopAllAudio]);
 
   const isDobraAtivadaRef = useRef(isDobraAtivada);
   useEffect(() => { isDobraAtivadaRef.current = isDobraAtivada; }, [isDobraAtivada]);
@@ -777,8 +854,10 @@ const DecolagemMarte = () => {
 
   const animationFrameId = useRef();
   const lastUpdateTime = useRef(0);
-  const telemetryInterval = 100;
+  const telemetryInterval = 100; // Física roda a cada 100ms
+  const lastRenderTime = useRef(0); // Controle de render do React
 
+  // FETCH GAME DATA
   useEffect(() => {
     const saveIndexForCorrection = async (currentIndex) => {
       if (!userId || !API_BASE_URL) return;
@@ -788,9 +867,7 @@ const DecolagemMarte = () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ routeIndex: currentIndex }),
         });
-      } catch (error) {
-        console.error("ERRO: Falha ao salvar correção de rota:", error);
-      }
+      } catch (error) { console.error("ERRO: Falha ao salvar correção de rota:", error); }
     };
 
     const fetchGameData = async () => {
@@ -830,13 +907,7 @@ const DecolagemMarte = () => {
             setSelectedPlanet({ nome: "Erro de Rota" });
           }
           if (data.telemetryState) {
-            telemetryRef.current.atmosphere.o2 = data.telemetryState.oxygen ?? 100;
-            telemetryRef.current.propulsion.powerOutput = data.telemetryState.nuclearPropulsion ?? 100;
-            telemetryRef.current.direction = data.telemetryState.direction ?? 100;
-            telemetryRef.current.stability = data.telemetryState.stability ?? 100;
-            telemetryRef.current.productivity = data.telemetryState.productivity ?? 100;
-            telemetryRef.current.interdependence = data.telemetryState.interdependence ?? 100;
-            telemetryRef.current.engagement = data.telemetryState.engagement ?? 100;
+            telemetryRef.current = { ...telemetryRef.current, ...data.telemetryState, atmosphere: { ...telemetryRef.current.atmosphere, o2: data.telemetryState.oxygen ?? 100 }, propulsion: { ...telemetryRef.current.propulsion, powerOutput: data.telemetryState.nuclearPropulsion ?? 100 } };
             setTelemetry({ ...telemetryRef.current });
           }
         } else {
@@ -850,8 +921,9 @@ const DecolagemMarte = () => {
       }
     };
     fetchGameData();
-  }, [userId, API_BASE_URL, syncSpaceCoins, refetchTrigger]);
+  }, [userId, API_BASE_URL, syncSpaceCoins, refetchTrigger, user]);
 
+  // Efeitos de degradação
   useEffect(() => {
     if (isPaused || !chosenShip || isDobraAtivada) return;
     const rates = degradationRates[chosenShip] || degradationRates.default;
@@ -880,30 +952,28 @@ const DecolagemMarte = () => {
     return () => intervals.forEach(clearInterval);
   }, [isPaused, chosenShip, isDobraAtivada]);
 
+  // Consumo durante Dobra
   useEffect(() => {
     if (!isDobraAtivada || isPaused) return;
     const warpConsumptionInterval = setInterval(() => {
       const newPropulsion = Math.max(0, telemetryRef.current.propulsion.powerOutput - 1);
       const newO2 = Math.max(0, telemetryRef.current.atmosphere.o2 - 1);
-
       telemetryRef.current.propulsion.powerOutput = newPropulsion;
       telemetryRef.current.atmosphere.o2 = newO2;
       setTelemetry(prev => ({ ...prev, ...telemetryRef.current }));
-
       if (newPropulsion <= 0 || newO2 <= 0) {
         if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
         isDobraAtivadaRef.current = false;
         setIsDobraAtivada(false);
         stopAllAudio();
-
         setShowCriticalWarpFail(true);
         setTimeout(() => setShowCriticalWarpFail(false), 7000);
       }
-
     }, 20000);
     return () => clearInterval(warpConsumptionInterval);
-  }, [isDobraAtivada, isPaused]);
+  }, [isDobraAtivada, isPaused, stopAllAudio]);
 
+  // Decolagem Inicial
   useEffect(() => {
     let delayTimer, takeoffInterval;
     if (chosenShip && originPlanet.nome === 'Terra' && !takeoffApplied.current) {
@@ -919,8 +989,7 @@ const DecolagemMarte = () => {
         let ticks = 0;
         takeoffInterval = setInterval(() => {
           if (ticks >= takeoffDurationInSeconds) { clearInterval(takeoffInterval); return; }
-          const currentPropulsion = telemetryRef.current.propulsion.powerOutput;
-          telemetryRef.current.propulsion.powerOutput = Math.max(0, currentPropulsion - lossPerSecond.propulsion);
+          telemetryRef.current.propulsion.powerOutput = Math.max(0, telemetryRef.current.propulsion.powerOutput - lossPerSecond.propulsion);
           telemetryRef.current.direction = Math.max(0, telemetryRef.current.direction - lossPerSecond.direction);
           telemetryRef.current.stability = Math.max(0, telemetryRef.current.stability - lossPerSecond.stability);
           setTelemetry(prev => ({ ...prev, ...telemetryRef.current }));
@@ -931,6 +1000,7 @@ const DecolagemMarte = () => {
     return () => { clearTimeout(delayTimer); clearInterval(takeoffInterval); };
   }, [chosenShip, originPlanet.nome]);
 
+  // Check Minerva CDS
   useEffect(() => {
     if (!groupId || isPaused || isMinervaHighlighted || !API_BASE_URL) return;
     const checkMinervaHighlight = async () => {
@@ -939,21 +1009,21 @@ const DecolagemMarte = () => {
         if (!response.ok) throw new Error(`Server responded with ${response.status}`);
         const data = await response.json();
         if (data.success && data.hasRecentEntry) setIsMinervaHighlighted(true);
-      } catch (error) {
-        console.error("ERRO: Falha ao verificar destaque da Minerva:", error);
-      }
+      } catch (error) { console.error("ERRO: Falha ao verificar destaque da Minerva:", error); }
     };
     checkMinervaHighlight();
     const interval = setInterval(checkMinervaHighlight, 60000);
     return () => clearInterval(interval);
   }, [groupId, isPaused, isMinervaHighlighted, API_BASE_URL]);
 
+  // Timer de Missão
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => { if (travelStarted) setTravelTime(prev => prev + 1); }, 1000);
     return () => clearInterval(interval);
   }, [isPaused, travelStarted]);
 
+  // Evento de velocidade Interplanetaria
   useEffect(() => {
     if (isPaused || !travelStarted || minervaEventTriggered.current) return;
     if (travelTime >= 60) {
@@ -969,31 +1039,40 @@ const DecolagemMarte = () => {
     }
   }, [travelTime, travelStarted, isPaused, playSound]);
 
+  // Monitoramento de Aproximação
   useEffect(() => {
     if (isPaused || isDobraAtivada || isLoadingRoute) return;
-
     const isMoon = selectedPlanet.nome.toLowerCase() === 'lua';
     const approachDistanceThreshold = 800000;
-
     if (distanceKm <= 1000 && distanceKm > 0 && !isFinalApproachRef.current) {
       setIsFinalApproach(true);
       setIsBoostingTo60k(false);
     }
-
     if (!isMoon && distanceKm <= approachDistanceThreshold && !approachSoundPlayed.current) {
       playSound('/sounds/empuxo.wav');
       approachSoundPlayed.current = true;
-      // FIX: FORÇA A DESACELERAÇÃO ASSIM QUE O SOM TOCA
       setIsFinalApproach(true);
       setIsBoostingTo60k(false);
     }
   }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]);
 
+  // Animação do Cockpit (3D Mouse Effect)
   useEffect(() => {
     if (isPaused) return;
     let animationId;
     const targetOffset = { x: 0, y: 0 };
     const currentOffset = { x: 0, y: 0 };
+
+    // Handler de mouse
+    const handleMouseMove = (e) => {
+      const { innerWidth, innerHeight } = window;
+      const x = (e.clientX - innerWidth / 2) / (innerWidth / 2);
+      const y = (e.clientY - innerHeight / 2) / (innerHeight / 2);
+      targetOffset.x = x * 20;
+      targetOffset.y = y * 20;
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+
     const animateCockpit = () => {
       const friction = 0.05;
       currentOffset.x += (targetOffset.x - currentOffset.x) * friction;
@@ -1001,22 +1080,23 @@ const DecolagemMarte = () => {
       if (cockpitRef.current) {
         const x = currentOffset.x;
         const y = currentOffset.y;
-        cockpitRef.current.style.transform =
-          `perspective(1500px) rotateX(${y * 0.1}deg) rotateY(${-x * 0.1}deg) translateX(${-x * 0.5}px) translateY(${y * 0.5}px)`;
+        cockpitRef.current.style.transform = `perspective(1500px) rotateX(${y * 0.1}deg) rotateY(${-x * 0.1}deg) translateX(${-x * 0.5}px) translateY(${y * 0.5}px)`;
       }
       animationId = requestAnimationFrame(animateCockpit);
     };
     animationId = requestAnimationFrame(animateCockpit);
-    return () => cancelAnimationFrame(animationId);
+    return () => {
+      cancelAnimationFrame(animationId);
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
   }, [isPaused]);
 
-  // VARIÁVEIS DEFINIDAS NO ESCOPO CORRETO PARA EVITAR ERRO DE REFERÊNCIA
+  // SOS Logic
   const isSystemCritical = telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20;
-
   const hasFundsForSOS = (spaceCoins || 0) > 0;
   const isSOSActive = isSystemCritical && !isPaused && !isDobraAtivada && !isRestoringSOS && hasFundsForSOS;
 
-  const handleSOS = () => {
+  const handleSOS = useCallback(() => {
     if (!isSOSActive) return;
     const minutesPlayed = travelTime / 60;
     const calculatedCost = Math.floor(minutesPlayed) + 5000000;
@@ -1024,7 +1104,7 @@ const DecolagemMarte = () => {
     setSosCost(finalCost);
     setShowSOSModal(true);
     playSound('/sounds/ui-click.mp3');
-  };
+  }, [isSOSActive, travelTime, spaceCoins, playSound]);
 
   const handleConfirmSOS = () => {
     setSpaceCoins(prev => (prev || 0) - sosCost);
@@ -1032,21 +1112,14 @@ const DecolagemMarte = () => {
     playSound('/sounds/ui-click.mp3');
     setShowSOSModal(false);
   };
-
   const handleCancelSOS = () => setShowSOSModal(false);
 
   useEffect(() => {
     const isCritical = (telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20) && !isRestoringSOS;
     alarmAudio.loop = true;
-    if (isCritical && !isPaused) {
-      alarmAudio.play().catch(e => console.log("Erro ao tocar alarme:", e));
-    } else {
-      alarmAudio.pause();
-      alarmAudio.currentTime = 0;
-    }
-    return () => {
-      alarmAudio.pause();
-    };
+    if (isCritical && !isPaused) { alarmAudio.play().catch(e => console.log("Erro ao tocar alarme:", e)); }
+    else { alarmAudio.pause(); alarmAudio.currentTime = 0; }
+    return () => { alarmAudio.pause(); };
   }, [telemetry, isPaused, isRestoringSOS, alarmAudio]);
 
   useEffect(() => {
@@ -1072,195 +1145,168 @@ const DecolagemMarte = () => {
     return () => { if (restoreIntervalRef.current) clearInterval(restoreIntervalRef.current); };
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
 
+
+  // --- GAME LOOP UNIFICADO (Física + Distância) ---
   useEffect(() => {
     const gameLoop = (timestamp) => {
       if (isPaused) { lastUpdateTime.current = timestamp; animationFrameId.current = requestAnimationFrame(gameLoop); return; }
       if (lastUpdateTime.current === 0) lastUpdateTime.current = timestamp;
       const deltaTime = timestamp - lastUpdateTime.current;
 
+      // Atualiza Física (Intervalo Fixo ou Delta)
       if (deltaTime >= telemetryInterval) {
         lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
         const dobraAtiva = isDobraAtivadaRef.current;
 
-        // --- VELOCIDADE ALVO ---
-        let targetSpeed = 45000;
-
-        if (dobraAtiva) {
-          targetSpeed = 100000000;
-        } else if (isBoostingTo60kRef.current) {
-          targetSpeed = 60000;
-        } else if (isFinalApproachRef.current) {
-          // *** FIX: Mantém velocidade de cruzeiro orbital (45.000) constante
-          targetSpeed = 45000;
-        }
-
+        // --- NOVA LÓGICA DE FÍSICA PROPORCIONAL ---
         const accelConfig = accelerationRates[chosenShip] || accelerationRates.default;
-        let speedChange = accelConfig.perTick;
+        const WARP_MULTIPLIER = 6.726; // Razão base (2260 / 336)
+
+        let targetSpeed = 45000;
+        if (dobraAtiva) { targetSpeed = 100000000; }
+        else if (isBoostingTo60kRef.current) { targetSpeed = 60000; }
+        else if (isFinalApproachRef.current) { targetSpeed = 45000; }
+
         let newKmh;
         const currentSpeed = telemetryRef.current.velocity.kmh;
 
         if (dobraAtiva) {
-          newKmh = currentSpeed + 2260;
+          // Aceleração proporcional à nave escolhida
+          const warpAcceleration = Math.floor(accelConfig.perTick * WARP_MULTIPLIER);
+          newKmh = currentSpeed + warpAcceleration;
         } else {
-          // *** CORTE SECO: Se velocidade estiver muito alta (pós-dobra) e não está em dobra, trava em 60k
-          if (currentSpeed > 65000) {
-            newKmh = 60000;
-          } else {
-            // Lógica normal de aceleração/frenagem
-            if (currentSpeed < targetSpeed) {
-              newKmh = Math.min(currentSpeed + speedChange, targetSpeed);
-            } else {
-              let brakePower = speedChange * 2;
-              newKmh = Math.max(currentSpeed - brakePower, targetSpeed);
-            }
+          // Voo normal
+          let speedChange = accelConfig.perTick;
+          if (currentSpeed > 65000) { newKmh = 60000; }
+          else {
+            if (currentSpeed < targetSpeed) { newKmh = Math.min(currentSpeed + speedChange, targetSpeed); }
+            else { let brakePower = speedChange * 2; newKmh = Math.max(currentSpeed - brakePower, targetSpeed); }
           }
         }
 
         if (travelStarted) {
           const SPEED_OF_LIGHT_KMH = 1079252848.8;
           telemetryRef.current = { ...telemetryRef.current, velocity: { kmh: newKmh, ms: newKmh / 3.6, rel: `${(newKmh / SPEED_OF_LIGHT_KMH).toFixed(7)}c` } };
-          setTelemetry({ ...telemetryRef.current });
+
+          // Otimização: Só atualiza o estado React (UI) se passou tempo suficiente (10fps)
+          if (timestamp - lastRenderTime.current > 100) {
+            setTelemetry({ ...telemetryRef.current });
+            lastRenderTime.current = timestamp;
+          }
         }
       }
-      animationFrameId.current = requestAnimationFrame(gameLoop);
-    };
-    animationFrameId.current = requestAnimationFrame(gameLoop);
-    return () => cancelAnimationFrame(animationFrameId.current);
-  }, [isPaused, travelStarted, chosenShip]);
 
-  // --- NOVA LÓGICA DE ATUALIZAÇÃO DE DISTÂNCIA (50ms = 20fps) ---
-  useEffect(() => {
-    if (!travelStarted || isPaused) return;
+      // Atualiza Distância (Baseado em DeltaTime para suavidade visual)
+      if (travelStarted && !routeChangeLockRef.current) {
+        const currentSpeedKmh = telemetryRef.current.velocity.kmh;
 
-    // Aumentamos a frequência para 50ms para evitar saltos
-    const interval = setInterval(() => {
-
-      if (routeChangeLockRef.current) {
-        routeChangeLockRef.current = false;
-        return;
-      }
-
-      let distanceToDecrease;
-      const currentSpeedKmh = telemetryRef.current.velocity.kmh;
-      if (currentSpeedKmh >= 60000) {
-        // Divide por 20 (porque roda 20x mais rápido que 1000ms)
-        distanceToDecrease = (currentSpeedKmh * 9172) / 3000 / 20;
-      } else {
-        distanceToDecrease = 7172 / 20;
-      }
-
-      const newDistance = distanceKm > 0 ? distanceKm - Math.max(1, Math.round(distanceToDecrease)) : 0;
-      setDistanceKm(newDistance);
-
-      const isSosDestination = selectedPlanet && selectedPlanet.nome && selectedPlanet.nome.startsWith("S.O.S");
-
-      if (isSosDestination && !isForcedMapEdit) {
-        if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEvent) {
-          const randIndex = Math.floor(Math.random() * 4);
-          setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
+        // Cálculo de delta de distância para 60fps (~16ms)
+        // Lógica adaptada do original (que rodava a 50ms)
+        // Divide por ~3.125 para compensar a frequência maior (50ms / 16ms)
+        let distanceToDecrease = 0;
+        if (currentSpeedKmh >= 60000) {
+          distanceToDecrease = (currentSpeedKmh * 9172) / 3000 / 3.125;
+        } else {
+          distanceToDecrease = 7172 / 3.125;
         }
 
-        if (newDistance <= 0 && !arrivedAtMars) {
-          setArrivedAtMars(true);
-          setSpeed(0);
+        const newDistance = Math.max(0, distanceKmRef.current - distanceToDecrease);
 
-          if (!sosSurpriseEvent) {
+        // Atualiza Refs e State
+        distanceKmRef.current = newDistance;
+        setDistanceKm(Math.round(newDistance));
+
+        // Lógica de Chegada/Eventos (Simplificada dentro do loop)
+        const isSosDestination = selectedPlanet && selectedPlanet.nome && selectedPlanet.nome.startsWith("S.O.S");
+
+        // SOS Surprise Events
+        if (isSosDestination && !isForcedMapEditRef.current) {
+          if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEvent) {
             const randIndex = Math.floor(Math.random() * 4);
             setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
           }
-
-          setShowSosSurprise(true);
-          return;
-        }
-      }
-
-      if (newDistance <= 150000 && isDobraAtivada) {
-        if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
-        stopAllAudio();
-        isDobraAtivadaRef.current = false;
-        setIsDobraAtivada(false);
-
-        setIsFinalApproach(true);
-        setIsBoostingTo60k(false);
-        approachSoundPlayed.current = true;
-
-        saveTelemetryData();
-        setShowWarpDisabledMessage(true);
-        setMinervaImage('/images/Minerva/Minerva_Active.gif');
-
-        playSound('/sounds/power-down-Warp.mp3');
-        setTimeout(() => playSound('/sounds/empuxo.wav'), 800);
-
-        setTimeout(() => setShowWarpDisabledMessage(false), 10000);
-
-        setIsWarpCooldown(true);
-        setTimeout(() => { setIsWarpCooldown(false); }, 20000);
-
-      } else if (newDistance <= 0 && !arrivedAtMars && !isForcedMapEdit) {
-        setArrivedAtMars(true); setSpeed(45000);
-
-        const normalizeName = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
-        const targetName = normalizeName(selectedPlanet.nome);
-
-        // --- VERIFICAÇÃO DE ESTAÇÃO ---
-        const isStation = STATION_NAMES.some(s => targetName.includes(s));
-
-        if (isStation) {
-          // Se for Estação: Espera 2.5s antes de abrir a Loja (efeito visual de chegada)
-          setTimeout(() => {
-            setShowStoreModal(true);
-          }, 2500);
-        } else {
-          // Se for Planeta: Busca Desafio
-          const desafioEncontrado = desafiosData.desafios?.find(d =>
-            normalizeName(d.planeta) === targetName ||
-            d.id === selectedPlanet.desafioId
-          );
-
-          if (desafioEncontrado) {
-            setActiveChallengeData(desafioEncontrado);
-            setShowDesafioModal(true);
+          if (newDistance <= 0 && !arrivedAtMars) {
+            setArrivedAtMars(true); setSpeed(0);
+            if (!sosSurpriseEvent) {
+              const randIndex = Math.floor(Math.random() * 4);
+              setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
+            }
+            setShowSosSurprise(true);
           }
         }
 
-        let newProcessadorO2Value = processadorO2;
-        const planetNameInput = selectedPlanet?.nome || '';
-        const hasWater = Array.from(hasWaterList).some(p => p.toLowerCase() === planetNameInput.toLowerCase().trim());
-        if (hasWater) { const o2Bonus = Math.floor(Math.random() * 5) + 1; newProcessadorO2Value = Math.min(5, processadorO2 + o2Bonus); }
-        const newRouteIndex = routeIndex + 1;
-        const saveArrival = async () => {
-          await saveCurrentProgress(newRouteIndex);
-          try {
-            await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                routeIndex: newRouteIndex,
-                processadorO2: newProcessadorO2Value,
-                telemetryState: { oxygen: telemetryRef.current.atmosphere.o2, nuclearPropulsion: telemetryRef.current.propulsion.powerOutput, direction: telemetryRef.current.direction, stability: telemetryRef.current.stability, productivity: telemetryRef.current.productivity, interdependence: telemetryRef.current.interdependence, engagement: telemetryRef.current.engagement }
-              }),
-            });
-          } catch (error) { console.error("ERRO: Falha ao salvar chegada:", error); }
-          setProcessadorO2(newProcessadorO2Value); setRouteIndex(newRouteIndex); handleChallengeEnd();
-        };
-        saveArrival();
+        // Chegada Normal
+        if (newDistance <= 150000 && isDobraAtivadaRef.current) {
+          // Desliga Dobra (Código original)
+          if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
+          stopAllAudio();
+          isDobraAtivadaRef.current = false;
+          setIsDobraAtivada(false);
+          setIsFinalApproach(true);
+          setIsBoostingTo60k(false);
+          approachSoundPlayed.current = true;
+          saveTelemetryData();
+          setShowWarpDisabledMessage(true);
+          setMinervaImage('/images/Minerva/Minerva_Active.gif');
+          playSound('/sounds/power-down-Warp.mp3');
+          setTimeout(() => playSound('/sounds/empuxo.wav'), 800);
+          setTimeout(() => setShowWarpDisabledMessage(false), 10000);
+          setIsWarpCooldown(true);
+          setTimeout(() => { setIsWarpCooldown(false); }, 20000);
+        } else if (newDistance <= 0 && !arrivedAtMars && !isForcedMapEditRef.current && !isSosDestination) {
+          setArrivedAtMars(true); setSpeed(45000);
+          const normalizeName = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+          const targetName = normalizeName(selectedPlanet.nome);
+          const isStation = STATION_NAMES.some(s => targetName.includes(s));
+          if (isStation) { setTimeout(() => { setShowStoreModal(true); }, 2500); }
+          else {
+            const desafioEncontrado = desafiosData.desafios?.find(d => normalizeName(d.planeta) === targetName || d.id === selectedPlanet.desafioId);
+            if (desafioEncontrado) { setActiveChallengeData(desafioEncontrado); setShowDesafioModal(true); }
+          }
+          // Salvar progresso
+          let newProcessadorO2Value = processadorO2;
+          const planetNameInput = selectedPlanet?.nome || '';
+          const hasWater = Array.from(hasWaterList).some(p => p.toLowerCase() === planetNameInput.toLowerCase().trim());
+          if (hasWater) { const o2Bonus = Math.floor(Math.random() * 5) + 1; newProcessadorO2Value = Math.min(5, processadorO2 + o2Bonus); }
+          const newRouteIndex = routeIndex + 1;
+
+          // Wrap async save
+          (async () => {
+            await saveCurrentProgress(newRouteIndex);
+            try {
+              await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ routeIndex: newRouteIndex, processadorO2: newProcessadorO2Value, telemetryState: { oxygen: telemetryRef.current.atmosphere.o2, nuclearPropulsion: telemetryRef.current.propulsion.powerOutput, direction: telemetryRef.current.direction, stability: telemetryRef.current.stability, productivity: telemetryRef.current.productivity, interdependence: telemetryRef.current.interdependence, engagement: telemetryRef.current.engagement } }),
+              });
+            } catch (error) { console.error("ERRO", error); }
+            setProcessadorO2(newProcessadorO2Value); setRouteIndex(newRouteIndex); handleChallengeEnd();
+          })();
+        }
+
+        // Progress Calculation
+        const destinationStepIndex = routeIndex + 1;
+        const initialDistanceForLeg = (plannedRoute && plannedRoute[destinationStepIndex] ? plannedRoute[destinationStepIndex].distance : null) || newDistance || 1;
+        const distanceTraveled = initialDistanceForLeg - newDistance;
+        const progressPercentage = Math.min(Math.floor((distanceTraveled / initialDistanceForLeg) * 100), 100);
+        setProgress(progressPercentage);
       }
 
-      const destinationStepIndex = routeIndex + 1;
-      const initialDistanceForLeg = (plannedRoute && plannedRoute[destinationStepIndex] ? plannedRoute[destinationStepIndex].distance : null) || newDistance || 1;
-      const distanceTraveled = initialDistanceForLeg - newDistance;
-      const progressPercentage = Math.min(Math.floor((distanceTraveled / initialDistanceForLeg) * 100), 100);
-      setProgress(progressPercentage);
-    }, 50); // MUDANÇA IMPORTANTE: 50ms para fluidez
-    return () => clearInterval(interval);
-  }, [travelStarted, arrivedAtMars, isDobraAtivada, isPaused, playSound, distanceKm, plannedRoute, routeIndex, handleChallengeEnd, saveTelemetryData, selectedPlanet, saveCurrentProgress, API_BASE_URL, userId, processadorO2, stopAllAudio, sosSurpriseEvent, isForcedMapEdit]);
+      animationFrameId.current = requestAnimationFrame(gameLoop);
+    };
 
+    animationFrameId.current = requestAnimationFrame(gameLoop);
+    return () => cancelAnimationFrame(animationFrameId.current);
+  }, [isPaused, travelStarted, chosenShip, plannedRoute, routeIndex, handleChallengeEnd, saveTelemetryData, saveCurrentProgress, API_BASE_URL, userId, processadorO2, stopAllAudio, sosSurpriseEvent, playSound, syncSpaceCoins, spaceCoins]);
+
+
+  // Static Screen Effect
   useEffect(() => {
     if ((monitorState !== 'static' && mainDisplayState !== 'static') || isPaused) return;
     const interval = setInterval(() => { setStaticScreenSeed(Math.random()); }, 100);
     return () => clearInterval(interval);
   }, [monitorState, mainDisplayState, isPaused]);
 
+  // Max Speed Calculation (Memoized)
   const currentMaxSpeed = useMemo(() => {
     if (isDobraAtivada) return 100000000;
     if (isBoostingTo60k) return 60000;
@@ -1273,25 +1319,15 @@ const DecolagemMarte = () => {
   const currentCharacterId = currentDialogueStep?.personagemId;
   const currentCharacterData = currentCharacterId ? desafiosData.personagens[currentCharacterId] : null;
 
-  const handleCloseEscolhaModal = useCallback(() => {
-    setShowEscolhaModal(false);
-  }, []);
+  const handleCloseEscolhaModal = useCallback(() => { setShowEscolhaModal(false); }, []);
+  const handleSpendCoins = useCallback((amount) => { setSpaceCoins(prev => (prev || 0) - amount); }, [setSpaceCoins]);
 
-  const handleSpendCoins = useCallback((amount) => {
-    setSpaceCoins(prev => (prev || 0) - amount);
-  }, [setSpaceCoins]);
-
-  const handleReplayDialogue = () => {
-    if (activeChallengeData) {
-      setDialogueIndex(0);
-      setIsTransmissionStarting(true);
-      setIsDialogueFinished(false);
-    }
-  };
+  const handleReplayDialogue = useCallback(() => {
+    if (activeChallengeData) { setDialogueIndex(0); setIsTransmissionStarting(true); setIsDialogueFinished(false); }
+  }, [activeChallengeData]);
 
   const handleNextDialogue = useCallback(() => {
     if (!activeChallengeData || !activeChallengeData.dialogo) return;
-
     if (dialogueIndex < activeChallengeData.dialogo.length - 1) {
       setDialogueIndex(prev => prev + 1);
       playSound('/sounds/ui-click.mp3');
@@ -1305,25 +1341,16 @@ const DecolagemMarte = () => {
 
   useEffect(() => {
     if (!isTransmissionStarting || !activeChallengeData || !activeChallengeData.dialogo) return;
-
     const currentStep = activeChallengeData.dialogo[dialogueIndex];
     if (!currentStep) return;
-
     const duration = currentStep.duracao || (currentStep.texto.length * 50 + 2000);
-
-    const timer = setTimeout(() => {
-      handleNextDialogue();
-    }, duration);
-
+    const timer = setTimeout(() => { handleNextDialogue(); }, duration);
     return () => clearTimeout(timer);
   }, [dialogueIndex, isTransmissionStarting, activeChallengeData, handleNextDialogue]);
 
   const handleToggleMap = useCallback((show) => {
     if (show) {
-      if (distanceKm <= 0 && !isForcedMapEdit) {
-        playSound('/sounds/error.mp3');
-        return;
-      }
+      if (distanceKm <= 0 && !isForcedMapEdit) { playSound('/sounds/error.mp3'); return; }
     }
     setShowStellarMap(show);
   }, [distanceKm, isForcedMapEdit, playSound]);
@@ -1334,171 +1361,82 @@ const DecolagemMarte = () => {
   return (
     <div className={`tela-decolagem ${isShaking ? 'shaking' : ''}`}>
       <div ref={cockpitRef} className="cockpit-container">
-        <div className="left-panel-3d">
-          <div style={{ marginTop: '-30px' }}>
-            <RouteMonitor distanceKm={distanceKm} progress={progress} currentSpeed={telemetry.velocity.kmh} isDobraAtivada={isDobraAtivada} originPlanet={originPlanet.nome} destinationPlanet={selectedPlanet.nome} />
-          </div>
-          <div className="dobra-buttons-container">
-            <div className="dobra-btn-wrapper">
-              <button className={`ativar-de-btn ${isDobraAtivada ? 'active' : ''} ${!isDobraEnabled || isPaused || distanceKm <= 0 ? 'disabled' : ''}`} onClick={handleDobraEspacial} disabled={!isDobraEnabled || isPaused || distanceKm <= 0}>
-                {isDobraAtivada ? <>Dobra<br />Ativa</> : <>Dobra<br />Espacial</>}
-              </button>
-            </div>
-            <div className="dobra-btn-wrapper"><button className="inventory-btn" onClick={handleInventory} disabled={isPaused}>Inventário</button></div>
-          </div>
-          <SpeedGauge currentSpeed={telemetry.velocity.kmh} maxSpeed={currentMaxSpeed} isBoosting={isBoostingTo60k} isDobraAtivada={isDobraAtivada} />
-          <div className="minerva-section">
-            <div className={`minerva-title ${isMinervaHighlighted ? 'highlighted' : ''}`} onClick={handleMinervaClick} style={{ cursor: isPaused ? 'not-allowed' : 'pointer', zIndex: 10, position: 'relative' }}>MINERVA I.A.</div>
-            <div className="minerva-container"><img src={minervaImage} alt="Minerva Status" className="minerva-image" /></div>
-          </div>
-          <div className="o2-processor-display">
-            <span className="o2-processor-label">PROCESSADOR O2</span>
-            <div className="o2-meter-visual">{[1, 2, 3, 4, 5].map(unit => (<div key={unit} className={`o2-unit ${processadorO2 >= unit ? 'filled' : ''}`}></div>))}</div>
-            <button className={`o2-transfer-button ${isO2TransferDisabled ? 'disabled' : ''}`} onClick={handleOpenO2Modal} disabled={isO2TransferDisabled} style={{ zIndex: 100 }}>TRANSFERIR ({processadorO2})</button>
-          </div>
-        </div>
-        <div className="right-panel-3d" style={{ zIndex: 50 }}>
-          <MissionTimer isPaused={isPaused} />
 
-          {/* MONITOR SUPERIOR */}
-          <div className="right-monitor-container" style={{ marginTop: '80px' }}>
-            <div className="monitor-controls">
-              <span className={`rec-label ${isTransmissionStarting ? 'blinking-rec' : 'inactive-rec'}`}>REC</span>
-              <button className={`play-button ${isDialogueFinished ? 'pulsing-play' : ''}`} onClick={handleReplayDialogue} disabled={!isDialogueFinished || isPaused}>Play</button>
-            </div>
-            <div className="monitor-screen">
-              {/* --- TRAVA VISUAL NO JSX PARA EVITAR SOS FORA DE HORA --- */}
-              {isSosMinervaActive && !isDeparting && !isForcedMapEdit ? (
-                <img
-                  src="/images/Minerva/Minerva-Informando-velocidade.gif"
-                  alt="Alerta S.O.S Minerva"
-                  className="monitor-image"
-                />
-              ) : showCriticalWarpFail ? (
-                <div className="monitor-text-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'rgba(30, 0, 0, 0.9)', flexDirection: 'column', padding: '10px' }}>
-                  <h3 style={{ color: '#ff3333', margin: '0 0 10px 0', textShadow: '0 0 10px red', fontSize: '1.1rem', textAlign: 'center' }}>⚠ FALHA CRÍTICA ⚠</h3>
-                  <p style={{ color: '#ffaaaa', textAlign: 'center', fontWeight: 'bold', fontSize: '0.9rem', lineHeight: '1.4', margin: 0 }}>
-                    Elementos base para a dobra escassos.<br />
-                    Recursos direcionados para<br />suporte à vida.
-                  </p>
-                </div>
-              ) : isForcedMapEdit ? (
-                <div className="monitor-text-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'rgba(50, 0, 0, 0.5)' }}>
-                  <p style={{ color: '#ffcc00', textAlign: 'center', fontWeight: 'bold', textShadow: '0 0 5px red' }}>
-                    ⚠ ATENÇÃO ⚠<br /><br />
-                    Edite o Mapa Estelar e mude a rota para fechar.
-                  </p>
-                </div>
-              ) : isTransmissionStarting && currentCharacterData?.imagem ? (
-                <img src={currentCharacterData.imagem} alt={currentCharacterData.nome} className="monitor-image" />
-              ) : (
-                <>
-                  {showWarpDisabledMessage ? (<div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#ff0', textAlign: 'center', padding: '10px', fontSize: '0.9em', textShadow: '0 0 5px rgba(255, 255, 0, 0.7)' }}>Distancia Orbital máxima alcançada.<br />Dobra desativada!</div>) : showMinervaOnMonitor ? (<img src="/images/Minerva/Minerva-Informando-velocidade.gif" alt="Aviso de Velocidade" className="monitor-image" />) : (
-                    <>
-                      {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
-                      {monitorState === 'static' && <img src={`/images/No_Signal.png?seed=${staticScreenSeed}`} alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
+        {/* PAINEL ESQUERDO OTIMIZADO */}
+        <LeftControlPanel
+          telemetry={telemetry}
+          distanceKm={distanceKm}
+          progress={progress}
+          isDobraAtivada={isDobraAtivada}
+          isDobraEnabled={isDobraEnabled}
+          isPaused={isPaused}
+          originPlanet={originPlanet.nome}
+          destinationPlanet={selectedPlanet.nome}
+          maxSpeed={currentMaxSpeed}
+          isBoosting={isBoostingTo60k}
+          handleDobraEspacial={handleDobraEspacial}
+          handleInventory={handleInventory}
+          minervaImage={minervaImage}
+          handleMinervaClick={handleMinervaClick}
+          isMinervaHighlighted={isMinervaHighlighted}
+          processadorO2={processadorO2}
+          isO2TransferDisabled={isO2TransferDisabled}
+          handleOpenO2Modal={handleOpenO2Modal}
+        />
 
-          {/* MONITOR INFERIOR */}
-          <div className="right-monitor-container" style={{ marginTop: '10px' }}>
-            <div
-              className="monitor-screen"
-              onClick={isTransmissionStarting ? handleNextDialogue : undefined}
-              style={{ cursor: isTransmissionStarting ? 'pointer' : 'default' }}
-            >
-              {isTransmissionStarting && currentDialogueStep && currentCharacterData ? (
-                <div className="monitor-text-display">
-                  <p>
-                    <span className="dialogue-character-name" style={{ color: '#00aaff' }}>
-                      {currentCharacterData.nome}:
-                    </span>
-                    {' '}
-                    {highlightKeywords(currentDialogueStep.texto, currentDialogueStep.palavras_chave)}
-                  </p>
-                  <div style={{ textAlign: 'right', fontSize: '0.8em', color: '#00aaff', animation: 'blink 1s infinite' }}>
-                    ▼
-                  </div>
-                </div>
-              ) : (
-                <>
-                  {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
-                  {monitorState === 'static' && <img src={`/images/No_Signal.png?seed=${staticScreenSeed}`} alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
-                </>
-              )}
-            </div>
-          </div>
+        {/* PAINEL DIREITO OTIMIZADO */}
+        <RightMonitorPanel
+          isPaused={isPaused}
+          isTransmissionStarting={isTransmissionStarting}
+          isDialogueFinished={isDialogueFinished}
+          handleReplayDialogue={handleReplayDialogue}
+          handleNextDialogue={handleNextDialogue}
+          monitorState={monitorState}
+          staticScreenSeed={staticScreenSeed}
+          showMinervaOnMonitor={showMinervaOnMonitor}
+          showCriticalWarpFail={showCriticalWarpFail}
+          showWarpDisabledMessage={showWarpDisabledMessage}
+          isForcedMapEdit={isForcedMapEdit}
+          isSosMinervaActive={isSosMinervaActive}
+          isDeparting={isDeparting}
+          currentCharacterData={currentCharacterData}
+          currentDialogueStep={currentDialogueStep}
+          highlightKeywords={highlightKeywords}
+          setShowGlossary={setShowGlossary}
+          handleInventory={handleInventory}
+          teamPhotoUrl={teamPhotoUrl}
+          API_BASE_URL={API_BASE_URL}
+          isSOSActive={isSOSActive}
+          handleSOS={handleSOS}
+          hasFundsForSOS={hasFundsForSOS}
+          isRestoringSOS={isRestoringSOS}
+          togglePause={togglePause}
+          isPauseButtonDisabled={isPauseButtonDisabled}
+        />
 
-          <div className="glossary-button-container" style={{ marginTop: '20px', position: 'relative', zIndex: 10 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <button className="glossary-button" onClick={() => !isPaused && setShowGlossary(true)} disabled={isPaused}>GLOSSÁRIO</button>
-              <button className="bolsa-button" onClick={handleInventory} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed' }}><img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" /></button>
-            </div>
-          </div>
-
-          {teamPhotoUrl && (
-            <div className="team-photo-frame">
-              <div className="team-photo-header">TRIPULAÇÃO</div>
-              <img
-                src={`${API_BASE_URL}${teamPhotoUrl}`}
-                alt="Equipe"
-                className="team-photo-img"
-                onError={(e) => {
-                  console.log("Erro ao carregar foto, escondendo elemento...");
-                  e.target.style.display = 'none';
-                }}
-              />
-              <div className="team-photo-overlay"></div>
-            </div>
-          )}
-
-          <div className="floating-buttons-container">
-            <button
-              className={`sos-button ${isSOSActive ? 'active' : ''}`}
-              onClick={handleSOS}
-              disabled={!isSOSActive}
-              title={
-                isSOSActive ? "Ativar S.O.S." :
-                  !hasFundsForSOS ? "Sem SpaceCoins para S.O.S." :
-                    "S.O.S. indisponível"
-              }
-            >
-              S.O.S.
-            </button>
-            <button onClick={togglePause} disabled={isPauseButtonDisabled || isRestoringSOS} className={`pause-button ${isPaused ? 'paused' : ''}`} title={isRestoringSOS ? "Não é possível pausar durante a restauração S.O.S." : ""}>{isPaused ? 'Continuar Jogo' : 'Pausar Jogo'}</button>
-          </div>
-        </div>
         <div className="cockpit-overlay"></div>
-        <div className="main-display">
-          {mainDisplayState === 'acee' && (<img src="/images/ACEE.png" alt="ACEE" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />)}
-          {mainDisplayState === 'clouds' && (<video src="/images/clouds.webm" className="cloud-animation-video" autoPlay muted loop playsInline preload="auto" />)}
-          {mainDisplayState === 'static' && <div className="static-animation"></div>}
-          {isDobraAtivada ? (<video src="/images/Vluz-Dobra.webm" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />) : (mainDisplayState === 'stars' && (<SpaceView distance={distanceKm} forceLarge={arrivedAtMars} isWarpActive={false} isPaused={isPaused} selectedPlanet={selectedPlanet} onChallengeEnd={handleChallengeEnd} isDeparting={isDeparting} />))}
 
-          {showStoreModal && <LojaEspacial
-            onClose={() => setShowStoreModal(false)}
-            currentTelemetry={telemetry}
-            onSeguirPlano={handleSeguirPlano}
-            onMudarRota={handleMudarRota}
-            onChallengeAccepted={handleStoreChallengeImpact}
-            isMainDisplayModal={true}
-            currentStation={selectedPlanet?.nome}
-            hasRoute={plannedRoute && (routeIndex + 1) < plannedRoute.length}
-          />}
+        {/* JANELA PRINCIPAL OTIMIZADA */}
+        <MainDisplayWindow
+          mainDisplayState={mainDisplayState}
+          isDobraAtivada={isDobraAtivada}
+          distanceKm={distanceKm}
+          arrivedAtMars={arrivedAtMars}
+          isPaused={isPaused}
+          selectedPlanet={selectedPlanet}
+          handleChallengeEnd={handleChallengeEnd}
+          isDeparting={isDeparting}
+          showStoreModal={showStoreModal}
+          showSosSurprise={showSosSurprise}
+          sosSurpriseEvent={sosSurpriseEvent}
+          handleSeguirPlano={handleSeguirPlano}
+          handleMudarRota={handleMudarRota}
+          handleStoreChallengeImpact={handleStoreChallengeImpact}
+          telemetry={telemetry}
+          plannedRoute={plannedRoute}
+          routeIndex={routeIndex}
+        />
 
-          {showSosSurprise && sosSurpriseEvent && (
-            <SosSurpriseModal
-              event={sosSurpriseEvent}
-              onMudarRota={handleMudarRota}
-              onSeguirPlano={handleSeguirPlano}
-            />
-          )}
-
-        </div>
         <TelemetryDisplay
           data={telemetry}
           isPaused={isPaused}
@@ -1516,6 +1454,7 @@ const DecolagemMarte = () => {
           sosSignalData={(distanceKm > 0 || isForcedMapEdit) ? activeSosSignal : null}
         />
       </div>
+
       {showMandala && (<div className="modal-overlay"><div className="modal-content"><MandalaVirtudes onClose={() => setShowMandala(false)} groupId={groupId} /></div></div>)}
       {showGlossary && (<div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}><div className="modal-content" style={{ backgroundColor: 'rgba(0, 30, 60, 0.97)', padding: '20px', borderRadius: '8px', maxWidth: '800px', width: '90%', maxHeight: '80vh', overflow: 'auto', position: 'relative' }}><Suspense fallback={<div>Carregando...</div>}><GalacticVirtudesPage onClose={() => setShowGlossary(false)} /></Suspense></div></div>)}
       {showInventory && <Inventario onClose={() => setShowInventory(false)} onUpdateTelemetry={handleInventoryTelemetryUpdate} />}
@@ -1548,25 +1487,10 @@ const DecolagemMarte = () => {
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: '500px', textAlign: 'center', fontFamily: "'Courier New', monospace", color: '#fff', border: '2px solid #0bf', boxShadow: '0 0 20px #0bf' }}>
             <h3 style={{ textShadow: '0 0 10px #0bf' }}>TRANSFERÊNCIA DE OXIGÊNIO</h3>
-            <p style={{ fontSize: '1.1em', margin: '20px 0' }}>
-              Deseja transferir <strong style={{ color: '#0bf' }}>{processadorO2} unidades</strong> do Processador de O2 para o suporte de vida da nave?
-            </p>
+            <p style={{ fontSize: '1.1em', margin: '20px 0' }}>Deseja transferir <strong style={{ color: '#0bf' }}>{processadorO2} unidades</strong> do Processador de O2 para o suporte de vida da nave?</p>
             <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '30px' }}>
-              <button
-                onClick={() => setShowO2Modal(false)}
-                style={{ padding: '10px 20px', background: '#444', color: 'white', border: '1px solid #777', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold' }}
-              >
-                CANCELAR
-              </button>
-              <button
-                onClick={() => {
-                  handleTransferO2();
-                  setShowO2Modal(false);
-                }}
-                style={{ padding: '10px 20px', background: 'linear-gradient(145deg, #0055ff, #0033cc)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold', boxShadow: '0 0 10px #0055ff' }}
-              >
-                CONFIRMAR
-              </button>
+              <button onClick={() => setShowO2Modal(false)} style={{ padding: '10px 20px', background: '#444', color: 'white', border: '1px solid #777', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold' }}>CANCELAR</button>
+              <button onClick={() => { handleTransferO2(); setShowO2Modal(false); }} style={{ padding: '10px 20px', background: 'linear-gradient(145deg, #0055ff, #0033cc)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold', boxShadow: '0 0 10px #0055ff' }}>CONFIRMAR</button>
             </div>
           </div>
         </div>
