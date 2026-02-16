@@ -20,9 +20,9 @@ import { useConfig } from './ConfigContext';
 import LojaEspacial from './LojaEspacial';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-// --- COMPONENTES OTIMIZADOS (Extraídos para evitar re-render) ---
+// --- COMPONENTES OTIMIZADOS (React.memo) ---
 
-// 1. Painel Esquerdo (Controles e Medidores)
+// 1. Painel Esquerdo
 const LeftControlPanel = React.memo(({
   telemetry, distanceKm, progress, isDobraAtivada, isDobraEnabled, isPaused,
   originPlanet, destinationPlanet, maxSpeed, isBoosting,
@@ -91,7 +91,7 @@ const LeftControlPanel = React.memo(({
   );
 });
 
-// 2. Painel Direito (Monitores)
+// 2. Painel Direito
 const RightMonitorPanel = React.memo(({
   isPaused, isTransmissionStarting, isDialogueFinished, handleReplayDialogue,
   handleNextDialogue, monitorState, staticScreenSeed, showMinervaOnMonitor,
@@ -103,7 +103,6 @@ const RightMonitorPanel = React.memo(({
   return (
     <div className="right-panel-3d" style={{ zIndex: 50 }}>
       <MissionTimer isPaused={isPaused} />
-
       {/* MONITOR SUPERIOR */}
       <div className="right-monitor-container" style={{ marginTop: '80px' }}>
         <div className="monitor-controls">
@@ -146,7 +145,6 @@ const RightMonitorPanel = React.memo(({
           )}
         </div>
       </div>
-
       {/* MONITOR INFERIOR */}
       <div className="right-monitor-container" style={{ marginTop: '10px' }}>
         <div className="monitor-screen" onClick={isTransmissionStarting ? handleNextDialogue : undefined} style={{ cursor: isTransmissionStarting ? 'pointer' : 'default' }}>
@@ -163,14 +161,12 @@ const RightMonitorPanel = React.memo(({
           )}
         </div>
       </div>
-
       <div className="glossary-button-container" style={{ marginTop: '20px', position: 'relative', zIndex: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <button className="glossary-button" onClick={() => !isPaused && setShowGlossary(true)} disabled={isPaused}>GLOSSÁRIO</button>
           <button className="bolsa-button" onClick={handleInventory} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed' }}><img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" /></button>
         </div>
       </div>
-
       {teamPhotoUrl && (
         <div className="team-photo-frame">
           <div className="team-photo-header">TRIPULAÇÃO</div>
@@ -178,7 +174,6 @@ const RightMonitorPanel = React.memo(({
           <div className="team-photo-overlay"></div>
         </div>
       )}
-
       <div className="floating-buttons-container">
         <button className={`sos-button ${isSOSActive ? 'active' : ''}`} onClick={handleSOS} disabled={!isSOSActive} title={isSOSActive ? "Ativar S.O.S." : !hasFundsForSOS ? "Sem SpaceCoins para S.O.S." : "S.O.S. indisponível"}>S.O.S.</button>
         <button onClick={togglePause} disabled={isPauseButtonDisabled || isRestoringSOS} className={`pause-button ${isPaused ? 'paused' : ''}`} title={isRestoringSOS ? "Não é possível pausar durante a restauração S.O.S." : ""}>{isPaused ? 'Continuar Jogo' : 'Pausar Jogo'}</button>
@@ -187,7 +182,7 @@ const RightMonitorPanel = React.memo(({
   );
 });
 
-// 3. Janela Principal (Main Display)
+// 3. Janela Principal
 const MainDisplayWindow = React.memo(({
   mainDisplayState, isDobraAtivada, distanceKm, arrivedAtMars, isPaused,
   selectedPlanet, handleChallengeEnd, isDeparting, showStoreModal,
@@ -199,7 +194,6 @@ const MainDisplayWindow = React.memo(({
       {mainDisplayState === 'acee' && (<img src="/images/ACEE.png" alt="ACEE" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />)}
       {mainDisplayState === 'clouds' && (<video src="/images/clouds.webm" className="cloud-animation-video" autoPlay muted loop playsInline preload="auto" />)}
       {mainDisplayState === 'static' && <div className="static-animation"></div>}
-
       {isDobraAtivada ? (
         <video src="/images/Vluz-Dobra.webm" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
       ) : (mainDisplayState === 'stars' && (
@@ -213,7 +207,6 @@ const MainDisplayWindow = React.memo(({
           isDeparting={isDeparting}
         />
       ))}
-
       {showStoreModal && (
         <LojaEspacial
           onClose={() => { }}
@@ -226,7 +219,6 @@ const MainDisplayWindow = React.memo(({
           hasRoute={plannedRoute && (routeIndex + 1) < plannedRoute.length}
         />
       )}
-
       {showSosSurprise && sosSurpriseEvent && (
         <SosSurpriseModal
           event={sosSurpriseEvent}
@@ -238,8 +230,7 @@ const MainDisplayWindow = React.memo(({
   );
 });
 
-
-// --- COMPONENTES AUXILIARES (Static/Modals) ---
+// --- UTILS & MODALS ---
 const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano }) => {
   if (!event) return null;
   const getRiskColor = (id) => {
@@ -252,7 +243,6 @@ const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano }) => {
   };
   const riskColor = getRiskColor(event.id);
   const containerStyle = { borderColor: riskColor, boxShadow: `0 0 30px ${riskColor}66` };
-
   return (
     <div className="store-modal-overlay main-display-overlay">
       <div className="store-modal-container" style={containerStyle}>
@@ -283,7 +273,6 @@ const GalacticVirtudesPage = lazy(() => import('./GalacticVirtudesPage').catch((
   default: () => <div className="map-fallback">Glossário Indisponível</div>
 })));
 
-// --- DADOS ESTÁTICOS ---
 const PLANET_DATA_FOR_SOS = [
   { name: "Mercurio", orbitRadius: 20 }, { name: "Venus", orbitRadius: 30 }, { name: "Terra", orbitRadius: 40 },
   { name: "Marte", orbitRadius: 50 }, { name: "Jupiter", orbitRadius: 80 }, { name: "Saturno", orbitRadius: 100 },
@@ -339,96 +328,12 @@ const DecolagemMarte = () => {
   const { user } = useAuth();
   const { apiBaseUrl } = useConfig();
   const API_BASE_URL = apiBaseUrl;
-
   const { spaceCoins, setSpaceCoins, syncSpaceCoins } = useSpaceCoins();
   const alarmAudio = useMemo(() => new Audio('/sounds/evacuation-alarm.mp3'), []);
 
-  // States
-  const [speed, setSpeed] = useState(0);
-  const [isDialogueFinished, setIsDialogueFinished] = useState(false);
-  const [showEscolhaModal, setShowEscolhaModal] = useState(false);
-  const [showStoreModal, setShowStoreModal] = useState(false);
-  const [isOxygenRefilled, setIsOxygenRefilled] = useState(false);
-  const [lastImpactTimestamp, setLastImpactTimestamp] = useState(0);
-  const userId = user?._id;
-  const [showMandala, setShowMandala] = useState(false);
-  const [minervaImage, setMinervaImage] = useState('/images/Minerva/Minerva_Active.gif');
-  const [isDobraEnabled, setIsDobraEnabled] = useState(false);
-  const [showGlossary, setShowGlossary] = useState(false);
-  const [showInventory, setShowInventory] = useState(false);
-  const [isShaking, setIsShaking] = useState(false);
-  const [missionTime, setMissionTime] = useState(12 * 60 * 60);
-  const [travelStarted, setTravelStarted] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [arrivedAtMars, setArrivedAtMars] = useState(false);
-  const [isDobraAtivada, setIsDobraAtivada] = useState(false);
-  const [monitorState, setMonitorState] = useState('on');
-  const [mainDisplayState, setMainDisplayState] = useState('acee');
-  const [staticScreenSeed, setStaticScreenSeed] = useState(Math.random());
-  const [plannedRoute, setPlannedRoute] = useState([]);
-  const [routeIndex, setRouteIndex] = useState(0);
-  const [selectedPlanet, setSelectedPlanet] = useState({ nome: 'Carregando Rota...' });
-  const [distanceKm, setDistanceKm] = useState(0);
-  const [originPlanet, setOriginPlanet] = useState({ nome: 'Terra' });
-  const [isLoadingRoute, setIsLoadingRoute] = useState(true);
-  const [chosenShip, setChosenShip] = useState(null);
-  const [showWarpDisabledMessage, setShowWarpDisabledMessage] = useState(false);
-  const [dobraCooldownEnd, setDobraCooldownEnd] = useState(0);
-  const [isTransmissionStarting, setIsTransmissionStarting] = useState(false);
-  const [activeChallengeData, setActiveChallengeData] = useState(null);
-  const [dialogueIndex, setDialogueIndex] = useState(0);
-  const [isBoostingTo60k, setIsBoostingTo60k] = useState(false);
-  const [isFinalApproach, setIsFinalApproach] = useState(false);
-  const [showDesafioModal, setShowDesafioModal] = useState(false);
-  const [modalEscolhaKey, setModalEscolhaKey] = useState(0);
-  const [showStellarMap, setShowStellarMap] = useState(false);
-  const [showConfirmacaoModal, setShowConfirmacaoModal] = useState(false);
-  const [isDeparting, setIsDeparting] = useState(false);
-  const [isReviewing, setIsReviewing] = useState(false);
-  const [refetchTrigger, setRefetchTrigger] = useState(0);
-  const [showMinervaOnMonitor, setShowMinervaOnMonitor] = useState(false);
-  const [groupId, setGroupId] = useState(null);
-  const [isMinervaHighlighted, setIsMinervaHighlighted] = useState(false);
-  const [isCooldownOver, setIsCooldownOver] = useState(true);
-  const [isForcedMapEdit, setIsForcedMapEdit] = useState(false);
-  const [isWarpCooldown, setIsWarpCooldown] = useState(false);
-  const [showCriticalWarpFail, setShowCriticalWarpFail] = useState(false);
-  const [showSOSModal, setShowSOSModal] = useState(false);
-  const [sosCost, setSosCost] = useState(0);
-  const [isRestoringSOS, setIsRestoringSOS] = useState(false);
-  const [processadorO2, setProcessadorO2] = useState(0);
-  const [travelTime, setTravelTime] = useState(0);
-  const [teamPhotoUrl, setTeamPhotoUrl] = useState(null);
-  const [isSosMinervaActive, setIsSosMinervaActive] = useState(false);
-  const [activeSosSignal, setActiveSosSignal] = useState(null);
-  const [showO2Modal, setShowO2Modal] = useState(false);
-  const [sosSurpriseEvent, setSosSurpriseEvent] = useState(null);
-  const [showSosSurprise, setShowSosSurprise] = useState(false);
-
-  // Refs
-  const minervaEventTriggered = useRef(false);
-  const hideMinervaTimerRef = useRef(null);
-  const boostTimerRef = useRef(null);
-  const approachSoundPlayed = useRef(false);
-  const minervaTimeoutRef = useRef(null);
-  const dobraTimerRef = useRef(null);
-  const takeoffApplied = useRef(false);
-  const routeChangeLockRef = useRef(false);
-  const restoreIntervalRef = useRef(null);
-
-  // REFS PARA CONTROLE DE ESTADO SEM RE-RENDER NO INTERVALO
-  const monitorStateRef = useRef(monitorState);
-  const distanceKmRef = useRef(distanceKm);
-  const isForcedMapEditRef = useRef(isForcedMapEdit);
-  const isDepartingRef = useRef(isDeparting);
-
-  // Sincroniza refs com o estado
-  useEffect(() => { monitorStateRef.current = monitorState; }, [monitorState]);
-  useEffect(() => { distanceKmRef.current = distanceKm; }, [distanceKm]);
-  useEffect(() => { isForcedMapEditRef.current = isForcedMapEdit; }, [isForcedMapEdit]);
-  useEffect(() => { isDepartingRef.current = isDeparting; }, [isDeparting]);
-
-  const telemetryRef = useRef({
+  // --- REFS E STATES PRINCIPAIS ---
+  // A estratégia aqui é usar Refs para o GameLoop para evitar reinicializações
+  const [telemetry, setTelemetry] = useState({
     velocity: { kmh: 0, ms: 0, rel: '0.0c' },
     altitude: 0,
     orbitalPosition: '0.00, 0.00, 0.00',
@@ -447,11 +352,153 @@ const DecolagemMarte = () => {
     direction: 100, stability: 100, productivity: 100, interdependence: 100, engagement: 100
   });
 
-  const [telemetry, setTelemetry] = useState(telemetryRef.current);
+  // Refs de sincronização (GameLoop lê daqui)
+  const telemetryRef = useRef(telemetry);
+  const spaceCoinsRef = useRef(spaceCoins);
+
+  const [speed, setSpeed] = useState(0);
+  const [isDialogueFinished, setIsDialogueFinished] = useState(false);
+  const [showEscolhaModal, setShowEscolhaModal] = useState(false);
+  const [showStoreModal, setShowStoreModal] = useState(false);
+  const [isOxygenRefilled, setIsOxygenRefilled] = useState(false);
+  const [lastImpactTimestamp, setLastImpactTimestamp] = useState(0);
+  const userId = user?._id;
+  const [showMandala, setShowMandala] = useState(false);
+  const [minervaImage, setMinervaImage] = useState('/images/Minerva/Minerva_Active.gif');
+  const [isDobraEnabled, setIsDobraEnabled] = useState(false);
+  const [showGlossary, setShowGlossary] = useState(false);
+  const [showInventory, setShowInventory] = useState(false);
+  const [isShaking, setIsShaking] = useState(false);
+  const [missionTime, setMissionTime] = useState(12 * 60 * 60);
+
+  const [travelStarted, setTravelStarted] = useState(false);
+  const travelStartedRef = useRef(travelStarted);
+
+  const [progress, setProgress] = useState(0);
+
+  const [arrivedAtMars, setArrivedAtMars] = useState(false);
+  const arrivedAtMarsRef = useRef(arrivedAtMars);
+
+  const [isDobraAtivada, setIsDobraAtivada] = useState(false);
+  const isDobraAtivadaRef = useRef(isDobraAtivada);
+
+  const [monitorState, setMonitorState] = useState('on');
+  const monitorStateRef = useRef(monitorState);
+
+  const [mainDisplayState, setMainDisplayState] = useState('acee');
+  const [staticScreenSeed, setStaticScreenSeed] = useState(Math.random());
+
+  const [plannedRoute, setPlannedRoute] = useState([]);
+  const plannedRouteRef = useRef(plannedRoute);
+
+  const [routeIndex, setRouteIndex] = useState(0);
+  const routeIndexRef = useRef(routeIndex);
+
+  const [selectedPlanet, setSelectedPlanet] = useState({ nome: 'Carregando Rota...' });
+  const selectedPlanetRef = useRef(selectedPlanet);
+
+  const [distanceKm, setDistanceKm] = useState(0);
+  const distanceKmRef = useRef(distanceKm);
+
+  const [originPlanet, setOriginPlanet] = useState({ nome: 'Terra' });
+  const [isLoadingRoute, setIsLoadingRoute] = useState(true);
+
+  const [chosenShip, setChosenShip] = useState(null);
+  const chosenShipRef = useRef(chosenShip);
+
+  const [showWarpDisabledMessage, setShowWarpDisabledMessage] = useState(false);
+  const [dobraCooldownEnd, setDobraCooldownEnd] = useState(0);
+  const [isTransmissionStarting, setIsTransmissionStarting] = useState(false);
+  const [activeChallengeData, setActiveChallengeData] = useState(null);
+  const [dialogueIndex, setDialogueIndex] = useState(0);
+
+  const [isBoostingTo60k, setIsBoostingTo60k] = useState(false);
+  const isBoostingTo60kRef = useRef(isBoostingTo60k);
+
+  const [isFinalApproach, setIsFinalApproach] = useState(false);
+  const isFinalApproachRef = useRef(isFinalApproach);
+
+  const [showDesafioModal, setShowDesafioModal] = useState(false);
+  const [modalEscolhaKey, setModalEscolhaKey] = useState(0);
+  const [showStellarMap, setShowStellarMap] = useState(false);
+  const [showConfirmacaoModal, setShowConfirmacaoModal] = useState(false);
+
+  const [isDeparting, setIsDeparting] = useState(false);
+  const isDepartingRef = useRef(isDeparting);
+
+  const [isReviewing, setIsReviewing] = useState(false);
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
+  const [showMinervaOnMonitor, setShowMinervaOnMonitor] = useState(false);
+  const [groupId, setGroupId] = useState(null);
+  const [isMinervaHighlighted, setIsMinervaHighlighted] = useState(false);
+  const [isCooldownOver, setIsCooldownOver] = useState(true);
+
+  const [isForcedMapEdit, setIsForcedMapEdit] = useState(false);
+  const isForcedMapEditRef = useRef(isForcedMapEdit);
+
+  const [isWarpCooldown, setIsWarpCooldown] = useState(false);
+  const [showCriticalWarpFail, setShowCriticalWarpFail] = useState(false);
+  const [showSOSModal, setShowSOSModal] = useState(false);
+  const [sosCost, setSosCost] = useState(0);
+  const [isRestoringSOS, setIsRestoringSOS] = useState(false);
+
+  const [processadorO2, setProcessadorO2] = useState(0);
+  const processadorO2Ref = useRef(processadorO2);
+
+  const [travelTime, setTravelTime] = useState(0);
+  const [teamPhotoUrl, setTeamPhotoUrl] = useState(null);
+  const [isSosMinervaActive, setIsSosMinervaActive] = useState(false);
+  const [activeSosSignal, setActiveSosSignal] = useState(null);
+  const [showO2Modal, setShowO2Modal] = useState(false);
+
+  const [sosSurpriseEvent, setSosSurpriseEvent] = useState(null);
+  const sosSurpriseEventRef = useRef(sosSurpriseEvent);
+
+  const [showSosSurprise, setShowSosSurprise] = useState(false);
+
+  // Refs de controle de timers e áudio
+  const minervaEventTriggered = useRef(false);
+  const hideMinervaTimerRef = useRef(null);
+  const boostTimerRef = useRef(null);
+  const approachSoundPlayed = useRef(false);
+  const minervaTimeoutRef = useRef(null);
+  const dobraTimerRef = useRef(null);
+  const takeoffApplied = useRef(false);
+  const routeChangeLockRef = useRef(false);
+  const restoreIntervalRef = useRef(null);
   const cockpitRef = useRef(null);
 
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
+  const isPausedRef = useRef(isPaused);
+
+  // --- SINCRONIZAÇÃO DE REFS PARA O GAME LOOP ---
+  // Estes efeitos garantem que o loop (que não tem dependências) leia sempre o estado mais recente
+  useEffect(() => { telemetryRef.current = telemetry; }, [telemetry]);
+  useEffect(() => { spaceCoinsRef.current = spaceCoins; }, [spaceCoins]);
+  useEffect(() => { travelStartedRef.current = travelStarted; }, [travelStarted]);
+  useEffect(() => { arrivedAtMarsRef.current = arrivedAtMars; }, [arrivedAtMars]);
+  useEffect(() => { isDobraAtivadaRef.current = isDobraAtivada; }, [isDobraAtivada]);
+  useEffect(() => { monitorStateRef.current = monitorState; }, [monitorState]);
+  useEffect(() => { plannedRouteRef.current = plannedRoute; }, [plannedRoute]);
+  useEffect(() => { routeIndexRef.current = routeIndex; }, [routeIndex]);
+  useEffect(() => { selectedPlanetRef.current = selectedPlanet; }, [selectedPlanet]);
+  useEffect(() => { distanceKmRef.current = distanceKm; }, [distanceKm]);
+  useEffect(() => { chosenShipRef.current = chosenShip; }, [chosenShip]);
+  useEffect(() => { isBoostingTo60kRef.current = isBoostingTo60k; }, [isBoostingTo60k]);
+  useEffect(() => { isFinalApproachRef.current = isFinalApproach; }, [isFinalApproach]);
+  useEffect(() => { isDepartingRef.current = isDeparting; }, [isDeparting]);
+  useEffect(() => { isForcedMapEditRef.current = isForcedMapEdit; }, [isForcedMapEdit]);
+  useEffect(() => { processadorO2Ref.current = processadorO2; }, [processadorO2]);
+  useEffect(() => { sosSurpriseEventRef.current = sosSurpriseEvent; }, [sosSurpriseEvent]);
+  useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
+
+  // Ref para funções estáveis usadas dentro do loop
+  const stopAllAudioRef = useRef(stopAllAudio);
+  useEffect(() => { stopAllAudioRef.current = stopAllAudio; }, [stopAllAudio]);
+
+  const playSoundRef = useRef(playSound);
+  useEffect(() => { playSoundRef.current = playSound; }, [playSound]);
 
   // --- PRÉ-CARREGAMENTO ---
   useEffect(() => {
@@ -496,6 +543,7 @@ const DecolagemMarte = () => {
     setLastImpactTimestamp(Date.now());
   }, []);
 
+  // Refs para funções de callback usadas no loop
   const saveTelemetryData = useCallback(async () => {
     if (!userId || !API_BASE_URL) return;
     const dataToSave = {
@@ -518,6 +566,9 @@ const DecolagemMarte = () => {
     } catch (error) { console.error("ERRO: Falha ao salvar dados de telemetria:", error); }
   }, [userId, API_BASE_URL]);
 
+  const saveTelemetryDataRef = useRef(saveTelemetryData);
+  useEffect(() => { saveTelemetryDataRef.current = saveTelemetryData; }, [saveTelemetryData]);
+
   const saveCurrentProgress = useCallback(async (currentIndex) => {
     if (!userId || !API_BASE_URL) return;
     try {
@@ -528,6 +579,9 @@ const DecolagemMarte = () => {
       });
     } catch (error) { console.error("ERRO: Falha ao salvar progresso da rota:", error); }
   }, [userId, API_BASE_URL]);
+
+  const saveCurrentProgressRef = useRef(saveCurrentProgress);
+  useEffect(() => { saveCurrentProgressRef.current = saveCurrentProgress; }, [saveCurrentProgress]);
 
   const saveNewRouteAndProgress = useCallback(async (currentIndex, newRouteArray) => {
     if (!userId || !API_BASE_URL) return;
@@ -569,6 +623,8 @@ const DecolagemMarte = () => {
   }, [travelStarted, routeIndex]);
 
   const handleChallengeEnd = useCallback(() => { }, []);
+  const handleChallengeEndRef = useRef(handleChallengeEnd);
+  useEffect(() => { handleChallengeEndRef.current = handleChallengeEnd; }, [handleChallengeEnd]);
 
   const handleMudarRota = useCallback(() => {
     setShowConfirmacaoModal(false);
@@ -725,10 +781,11 @@ const DecolagemMarte = () => {
         setMinervaImage('/images/Minerva/Minerva_Active.gif');
         setTimeout(() => setShowWarpDisabledMessage(false), 10000);
 
-        const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
+        const isMoon = selectedPlanetRef.current?.nome?.toLowerCase() === 'lua';
         const approachDistanceThreshold = 800000;
+        const currentDist = distanceKmRef.current;
 
-        if (!isMoon && distanceKm <= approachDistanceThreshold && !isFinalApproachRef.current) {
+        if (!isMoon && currentDist <= approachDistanceThreshold && !isFinalApproachRef.current) {
           setIsFinalApproach(true);
           setIsBoostingTo60k(false);
           approachSoundPlayed.current = true;
@@ -741,7 +798,7 @@ const DecolagemMarte = () => {
 
     if (minervaTimeoutRef.current) clearTimeout(minervaTimeoutRef.current);
     minervaTimeoutRef.current = setTimeout(() => { setMinervaImage('/images/Minerva/Minerva_Active.gif'); }, DOBRA_DURATION_IN_MS + 3000);
-  }, [isDobraEnabled, isDobraAtivada, isPaused, playSound, stopAllAudio, playTrack, saveTelemetryData, distanceKm, selectedPlanet]);
+  }, [isDobraEnabled, isDobraAtivada, isPaused, playSound, stopAllAudio, playTrack, saveTelemetryData]);
 
   const handleInventory = useCallback(() => { if (!isPaused) { setShowInventory(true); playSound('/sounds/inventory-open.mp3'); } }, [isPaused, playSound]);
 
@@ -785,9 +842,6 @@ const DecolagemMarte = () => {
   }, [isPaused, processadorO2, playSound]);
 
   const isO2TransferDisabled = isPaused || processadorO2 === 0;
-
-  const isPausedRef = useRef(isPaused);
-  useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
   const hasStartedAudioRef = useRef(false);
 
   useEffect(() => {
@@ -812,9 +866,6 @@ const DecolagemMarte = () => {
   }, [isLoadingRoute, routeIndex, unlockAudio, playTrack, stopAllAudio]);
 
   useEffect(() => { return () => { stopAllAudio(); }; }, [stopAllAudio]);
-
-  const isDobraAtivadaRef = useRef(isDobraAtivada);
-  useEffect(() => { isDobraAtivadaRef.current = isDobraAtivada; }, [isDobraAtivada]);
 
   useEffect(() => {
     if (telemetry.velocity.kmh >= 59500 && !isDobraEnabled && !isDobraAtivada && distanceKm > 500000 && !isWarpCooldown) {
@@ -846,16 +897,10 @@ const DecolagemMarte = () => {
     return () => clearInterval(interval);
   }, [travelStarted, routeIndex]);
 
-  const isBoostingTo60kRef = useRef(isBoostingTo60k);
-  useEffect(() => { isBoostingTo60kRef.current = isBoostingTo60k; }, [isBoostingTo60k]);
-
-  const isFinalApproachRef = useRef(isFinalApproach);
-  useEffect(() => { isFinalApproachRef.current = isFinalApproach; }, [isFinalApproach]);
-
   const animationFrameId = useRef();
   const lastUpdateTime = useRef(0);
-  const telemetryInterval = 100; // Física roda a cada 100ms
-  const lastRenderTime = useRef(0); // Controle de render do React
+  const telemetryInterval = 100;
+  const lastRenderTime = useRef(0);
 
   // FETCH GAME DATA
   useEffect(() => {
@@ -1056,14 +1101,12 @@ const DecolagemMarte = () => {
     }
   }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]);
 
-  // Animação do Cockpit (3D Mouse Effect)
+  // Animação do Cockpit
   useEffect(() => {
     if (isPaused) return;
     let animationId;
     const targetOffset = { x: 0, y: 0 };
     const currentOffset = { x: 0, y: 0 };
-
-    // Handler de mouse
     const handleMouseMove = (e) => {
       const { innerWidth, innerHeight } = window;
       const x = (e.clientX - innerWidth / 2) / (innerWidth / 2);
@@ -1072,7 +1115,6 @@ const DecolagemMarte = () => {
       targetOffset.y = y * 20;
     };
     window.addEventListener('mousemove', handleMouseMove);
-
     const animateCockpit = () => {
       const friction = 0.05;
       currentOffset.x += (targetOffset.x - currentOffset.x) * friction;
@@ -1146,21 +1188,25 @@ const DecolagemMarte = () => {
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
 
 
-  // --- GAME LOOP UNIFICADO (Física + Distância) ---
+  // --- GAME LOOP OTIMIZADO (Dependência Vazia) ---
   useEffect(() => {
     const gameLoop = (timestamp) => {
-      if (isPaused) { lastUpdateTime.current = timestamp; animationFrameId.current = requestAnimationFrame(gameLoop); return; }
+      // Usa Refs para verificar estado sem depender do State
+      if (isPausedRef.current) {
+        lastUpdateTime.current = timestamp;
+        animationFrameId.current = requestAnimationFrame(gameLoop);
+        return;
+      }
+
       if (lastUpdateTime.current === 0) lastUpdateTime.current = timestamp;
       const deltaTime = timestamp - lastUpdateTime.current;
 
-      // Atualiza Física (Intervalo Fixo ou Delta)
+      // Física (a cada ~100ms)
       if (deltaTime >= telemetryInterval) {
         lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
         const dobraAtiva = isDobraAtivadaRef.current;
-
-        // --- NOVA LÓGICA DE FÍSICA PROPORCIONAL ---
-        const accelConfig = accelerationRates[chosenShip] || accelerationRates.default;
-        const WARP_MULTIPLIER = 6.726; // Razão base (2260 / 336)
+        const accelConfig = accelerationRates[chosenShipRef.current] || accelerationRates.default;
+        const WARP_MULTIPLIER = 6.726;
 
         let targetSpeed = 45000;
         if (dobraAtiva) { targetSpeed = 100000000; }
@@ -1171,11 +1217,9 @@ const DecolagemMarte = () => {
         const currentSpeed = telemetryRef.current.velocity.kmh;
 
         if (dobraAtiva) {
-          // Aceleração proporcional à nave escolhida
           const warpAcceleration = Math.floor(accelConfig.perTick * WARP_MULTIPLIER);
           newKmh = currentSpeed + warpAcceleration;
         } else {
-          // Voo normal
           let speedChange = accelConfig.perTick;
           if (currentSpeed > 65000) { newKmh = 60000; }
           else {
@@ -1184,11 +1228,11 @@ const DecolagemMarte = () => {
           }
         }
 
-        if (travelStarted) {
+        if (travelStartedRef.current) {
           const SPEED_OF_LIGHT_KMH = 1079252848.8;
           telemetryRef.current = { ...telemetryRef.current, velocity: { kmh: newKmh, ms: newKmh / 3.6, rel: `${(newKmh / SPEED_OF_LIGHT_KMH).toFixed(7)}c` } };
 
-          // Otimização: Só atualiza o estado React (UI) se passou tempo suficiente (10fps)
+          // UI Throttling
           if (timestamp - lastRenderTime.current > 100) {
             setTelemetry({ ...telemetryRef.current });
             lastRenderTime.current = timestamp;
@@ -1196,13 +1240,9 @@ const DecolagemMarte = () => {
         }
       }
 
-      // Atualiza Distância (Baseado em DeltaTime para suavidade visual)
-      if (travelStarted && !routeChangeLockRef.current) {
+      // Distância (Suavizada)
+      if (travelStartedRef.current && !routeChangeLockRef.current) {
         const currentSpeedKmh = telemetryRef.current.velocity.kmh;
-
-        // Cálculo de delta de distância para 60fps (~16ms)
-        // Lógica adaptada do original (que rodava a 50ms)
-        // Divide por ~3.125 para compensar a frequência maior (50ms / 16ms)
         let distanceToDecrease = 0;
         if (currentSpeedKmh >= 60000) {
           distanceToDecrease = (currentSpeedKmh * 9172) / 3000 / 3.125;
@@ -1211,23 +1251,21 @@ const DecolagemMarte = () => {
         }
 
         const newDistance = Math.max(0, distanceKmRef.current - distanceToDecrease);
-
-        // Atualiza Refs e State
         distanceKmRef.current = newDistance;
         setDistanceKm(Math.round(newDistance));
 
-        // Lógica de Chegada/Eventos (Simplificada dentro do loop)
-        const isSosDestination = selectedPlanet && selectedPlanet.nome && selectedPlanet.nome.startsWith("S.O.S");
+        // Chegada e Eventos
+        const selPlanet = selectedPlanetRef.current;
+        const isSosDestination = selPlanet && selPlanet.nome && selPlanet.nome.startsWith("S.O.S");
 
-        // SOS Surprise Events
         if (isSosDestination && !isForcedMapEditRef.current) {
-          if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEvent) {
+          if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEventRef.current) {
             const randIndex = Math.floor(Math.random() * 4);
             setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
           }
-          if (newDistance <= 0 && !arrivedAtMars) {
+          if (newDistance <= 0 && !arrivedAtMarsRef.current) {
             setArrivedAtMars(true); setSpeed(0);
-            if (!sosSurpriseEvent) {
+            if (!sosSurpriseEventRef.current) {
               const randIndex = Math.floor(Math.random() * 4);
               setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
             }
@@ -1235,57 +1273,53 @@ const DecolagemMarte = () => {
           }
         }
 
-        // Chegada Normal
         if (newDistance <= 150000 && isDobraAtivadaRef.current) {
-          // Desliga Dobra (Código original)
           if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
-          stopAllAudio();
+          stopAllAudioRef.current();
           isDobraAtivadaRef.current = false;
           setIsDobraAtivada(false);
           setIsFinalApproach(true);
           setIsBoostingTo60k(false);
           approachSoundPlayed.current = true;
-          saveTelemetryData();
+          saveTelemetryDataRef.current();
           setShowWarpDisabledMessage(true);
           setMinervaImage('/images/Minerva/Minerva_Active.gif');
-          playSound('/sounds/power-down-Warp.mp3');
-          setTimeout(() => playSound('/sounds/empuxo.wav'), 800);
+          playSoundRef.current('/sounds/power-down-Warp.mp3');
+          setTimeout(() => playSoundRef.current('/sounds/empuxo.wav'), 800);
           setTimeout(() => setShowWarpDisabledMessage(false), 10000);
           setIsWarpCooldown(true);
           setTimeout(() => { setIsWarpCooldown(false); }, 20000);
-        } else if (newDistance <= 0 && !arrivedAtMars && !isForcedMapEditRef.current && !isSosDestination) {
+        } else if (newDistance <= 0 && !arrivedAtMarsRef.current && !isForcedMapEditRef.current && !isSosDestination) {
           setArrivedAtMars(true); setSpeed(45000);
           const normalizeName = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
-          const targetName = normalizeName(selectedPlanet.nome);
+          const targetName = normalizeName(selPlanet.nome);
           const isStation = STATION_NAMES.some(s => targetName.includes(s));
           if (isStation) { setTimeout(() => { setShowStoreModal(true); }, 2500); }
           else {
-            const desafioEncontrado = desafiosData.desafios?.find(d => normalizeName(d.planeta) === targetName || d.id === selectedPlanet.desafioId);
+            const desafioEncontrado = desafiosData.desafios?.find(d => normalizeName(d.planeta) === targetName || d.id === selPlanet.desafioId);
             if (desafioEncontrado) { setActiveChallengeData(desafioEncontrado); setShowDesafioModal(true); }
           }
-          // Salvar progresso
-          let newProcessadorO2Value = processadorO2;
-          const planetNameInput = selectedPlanet?.nome || '';
-          const hasWater = Array.from(hasWaterList).some(p => p.toLowerCase() === planetNameInput.toLowerCase().trim());
-          if (hasWater) { const o2Bonus = Math.floor(Math.random() * 5) + 1; newProcessadorO2Value = Math.min(5, processadorO2 + o2Bonus); }
-          const newRouteIndex = routeIndex + 1;
 
-          // Wrap async save
+          let newProcessadorO2Value = processadorO2Ref.current;
+          const planetNameInput = selPlanet?.nome || '';
+          const hasWater = Array.from(hasWaterList).some(p => p.toLowerCase() === planetNameInput.toLowerCase().trim());
+          if (hasWater) { const o2Bonus = Math.floor(Math.random() * 5) + 1; newProcessadorO2Value = Math.min(5, processadorO2Ref.current + o2Bonus); }
+          const newRouteIndex = routeIndexRef.current + 1;
+
           (async () => {
-            await saveCurrentProgress(newRouteIndex);
+            await saveCurrentProgressRef.current(newRouteIndex);
             try {
               await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ routeIndex: newRouteIndex, processadorO2: newProcessadorO2Value, telemetryState: { oxygen: telemetryRef.current.atmosphere.o2, nuclearPropulsion: telemetryRef.current.propulsion.powerOutput, direction: telemetryRef.current.direction, stability: telemetryRef.current.stability, productivity: telemetryRef.current.productivity, interdependence: telemetryRef.current.interdependence, engagement: telemetryRef.current.engagement } }),
               });
             } catch (error) { console.error("ERRO", error); }
-            setProcessadorO2(newProcessadorO2Value); setRouteIndex(newRouteIndex); handleChallengeEnd();
+            setProcessadorO2(newProcessadorO2Value); setRouteIndex(newRouteIndex); handleChallengeEndRef.current();
           })();
         }
 
-        // Progress Calculation
-        const destinationStepIndex = routeIndex + 1;
-        const initialDistanceForLeg = (plannedRoute && plannedRoute[destinationStepIndex] ? plannedRoute[destinationStepIndex].distance : null) || newDistance || 1;
+        const destinationStepIndex = routeIndexRef.current + 1;
+        const initialDistanceForLeg = (plannedRouteRef.current && plannedRouteRef.current[destinationStepIndex] ? plannedRouteRef.current[destinationStepIndex].distance : null) || newDistance || 1;
         const distanceTraveled = initialDistanceForLeg - newDistance;
         const progressPercentage = Math.min(Math.floor((distanceTraveled / initialDistanceForLeg) * 100), 100);
         setProgress(progressPercentage);
@@ -1296,8 +1330,7 @@ const DecolagemMarte = () => {
 
     animationFrameId.current = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animationFrameId.current);
-  }, [isPaused, travelStarted, chosenShip, plannedRoute, routeIndex, handleChallengeEnd, saveTelemetryData, saveCurrentProgress, API_BASE_URL, userId, processadorO2, stopAllAudio, sosSurpriseEvent, playSound, syncSpaceCoins, spaceCoins]);
-
+  }, [API_BASE_URL, userId]); // Dependências mínimas
 
   // Static Screen Effect
   useEffect(() => {
@@ -1306,7 +1339,7 @@ const DecolagemMarte = () => {
     return () => clearInterval(interval);
   }, [monitorState, mainDisplayState, isPaused]);
 
-  // Max Speed Calculation (Memoized)
+  // Max Speed Calculation
   const currentMaxSpeed = useMemo(() => {
     if (isDobraAtivada) return 100000000;
     if (isBoostingTo60k) return 60000;
@@ -1355,14 +1388,11 @@ const DecolagemMarte = () => {
     setShowStellarMap(show);
   }, [distanceKm, isForcedMapEdit, playSound]);
 
-
   if (isLoadingRoute) return <div className="tela-decolagem" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5em', color: '#00aaff', textShadow: '0 0 10px #00aaff' }}>Buscando dados da missão...</div>;
 
   return (
     <div className={`tela-decolagem ${isShaking ? 'shaking' : ''}`}>
       <div ref={cockpitRef} className="cockpit-container">
-
-        {/* PAINEL ESQUERDO OTIMIZADO */}
         <LeftControlPanel
           telemetry={telemetry}
           distanceKm={distanceKm}
@@ -1383,8 +1413,6 @@ const DecolagemMarte = () => {
           isO2TransferDisabled={isO2TransferDisabled}
           handleOpenO2Modal={handleOpenO2Modal}
         />
-
-        {/* PAINEL DIREITO OTIMIZADO */}
         <RightMonitorPanel
           isPaused={isPaused}
           isTransmissionStarting={isTransmissionStarting}
@@ -1413,10 +1441,7 @@ const DecolagemMarte = () => {
           togglePause={togglePause}
           isPauseButtonDisabled={isPauseButtonDisabled}
         />
-
         <div className="cockpit-overlay"></div>
-
-        {/* JANELA PRINCIPAL OTIMIZADA */}
         <MainDisplayWindow
           mainDisplayState={mainDisplayState}
           isDobraAtivada={isDobraAtivada}
@@ -1436,7 +1461,6 @@ const DecolagemMarte = () => {
           plannedRoute={plannedRoute}
           routeIndex={routeIndex}
         />
-
         <TelemetryDisplay
           data={telemetry}
           isPaused={isPaused}
@@ -1454,13 +1478,11 @@ const DecolagemMarte = () => {
           sosSignalData={(distanceKm > 0 || isForcedMapEdit) ? activeSosSignal : null}
         />
       </div>
-
       {showMandala && (<div className="modal-overlay"><div className="modal-content"><MandalaVirtudes onClose={() => setShowMandala(false)} groupId={groupId} /></div></div>)}
       {showGlossary && (<div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}><div className="modal-content" style={{ backgroundColor: 'rgba(0, 30, 60, 0.97)', padding: '20px', borderRadius: '8px', maxWidth: '800px', width: '90%', maxHeight: '80vh', overflow: 'auto', position: 'relative' }}><Suspense fallback={<div>Carregando...</div>}><GalacticVirtudesPage onClose={() => setShowGlossary(false)} /></Suspense></div></div>)}
       {showInventory && <Inventario onClose={() => setShowInventory(false)} onUpdateTelemetry={handleInventoryTelemetryUpdate} />}
       {showDesafioModal && activeChallengeData && <ModalDesafio desafio={activeChallengeData} onClose={() => { setShowDesafioModal(false); setIsTransmissionStarting(true); }} className="main-display-modal" showTimer={true} />}
       {showEscolhaModal && activeChallengeData && <ModalEscolha key={modalEscolhaKey} desafio={activeChallengeData} onClose={handleCloseEscolhaModal} onEscolha={handleEscolha} missionTime={travelTime} onSpendCoins={handleSpendCoins} showTimer={!isReviewing} />}
-
       {showConfirmacaoModal && (
         <ModalConfirmacaoViagem
           onSeguirPlano={handleSeguirPlano}
@@ -1468,7 +1490,6 @@ const DecolagemMarte = () => {
           hasRoute={plannedRoute && (routeIndex + 1) < plannedRoute.length}
         />
       )}
-
       {showSOSModal && (
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: '500px', textAlign: 'center', fontFamily: "'Courier New', monospace" }}>
@@ -1482,7 +1503,6 @@ const DecolagemMarte = () => {
           </div>
         </div>
       )}
-
       {showO2Modal && (
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: '500px', textAlign: 'center', fontFamily: "'Courier New', monospace", color: '#fff', border: '2px solid #0bf', boxShadow: '0 0 20px #0bf' }}>
