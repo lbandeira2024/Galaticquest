@@ -3,7 +3,11 @@ import './DecolagemMarte.css';
 
 const SpeedGauge = ({ currentSpeed, maxSpeed, isBoosting, isDobraAtivada }) => {
     const GAUGE_VISUAL_MAX = 60000;
-    const percentage = Math.min((currentSpeed / GAUGE_VISUAL_MAX) * 100, 100);
+
+    // Ajuste solicitado: Multiplicamos por 0.7 para que a subida seja visualmente 30% mais lenta
+    // Isso ajuda a mascarar oscilações de conexão (jitter/ping alto)
+    const percentage = Math.min(((currentSpeed / GAUGE_VISUAL_MAX) * 100) * 0.7, 100);
+
     const speedMarks = [0, 12000, 24000, 36000, 48000, 60000];
 
     return (
