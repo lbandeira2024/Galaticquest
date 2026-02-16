@@ -40,9 +40,6 @@ const ModalEscolha = ({ desafio, onClose, onEscolha, missionTime, onSpendCoins, 
         return null;
     }
 
-    // CUSTO DINÂMICO:
-    // Usa 'missionTime' (que receberá o travelTime do pai) para aumentar o valor.
-    // Ajuste o divisor (ex: /10) se quiser que suba mais rápido ou (/100) mais devagar.
     const costX = Math.floor(missionTime / 10) + 150;
     const costY = Math.floor(missionTime / 10) + 50;
 
@@ -52,19 +49,22 @@ const ModalEscolha = ({ desafio, onClose, onEscolha, missionTime, onSpendCoins, 
         setTimeLeft(300);
     };
 
+    // ALTERAÇÃO: 'Rever tudo' agora fecha este modal e sinaliza ao pai para abrir o ModalDesafio
     const handleReviewAll = (e) => {
-        e.stopPropagation(); // Previne conflitos de clique
-        console.log(`Usuário escolheu 'Rever tudo', custo: ${costX}`);
+        e.stopPropagation();
         if (onSpendCoins) {
+            // Enviamos 'all' para o pai saber que deve reabrir o desafio completo
             onSpendCoins(costX, 'all');
         }
-        resetModalState();
+        // Fechamos o ModalEscolha atual para que o pai possa renderizar o ModalDesafio
+        onClose();
     };
 
+    // ALTERAÇÃO: 'Rever Opções' apenas reseta o timer e mantém o usuário aqui
     const handleReviewOptions = (e) => {
-        e.stopPropagation(); // Previne conflitos de clique
-        console.log(`Usuário escolheu 'Rever Opções', custo: ${costY}`);
+        e.stopPropagation();
         if (onSpendCoins) {
+            // Enviamos 'options' apenas para debitar as moedas
             onSpendCoins(costY, 'options');
         }
         resetModalState();
@@ -72,7 +72,6 @@ const ModalEscolha = ({ desafio, onClose, onEscolha, missionTime, onSpendCoins, 
 
     return (
         <>
-            {/* Modal Principal (Fica "disabled" visualmente quando o tempo acaba) */}
             <div className="modal-escolha-overlay">
                 <div className={`modal-escolha-container ${timeUp ? 'disabled' : ''}`}>
                     <div className="modal-escolha-header">
@@ -97,22 +96,19 @@ const ModalEscolha = ({ desafio, onClose, onEscolha, missionTime, onSpendCoins, 
                 </div>
             </div>
 
-            {/* Overlay de Revisão (SEPARADO e FORÇADO NO TOPO) */}
             {showReviewOptions && (
                 <div
                     className="modal-review-options-overlay"
                     style={{
                         position: 'fixed',
-                        top: 0,
-                        left: 0,
-                        width: '100vw',
-                        height: '100vh',
+                        top: 0, left: 0,
+                        width: '100vw', height: '100vh',
                         backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                        zIndex: 999999, // Z-Index altíssimo para garantir prioridade
+                        zIndex: 999999,
                         display: 'flex',
                         justifyContent: 'center',
                         alignItems: 'center',
-                        pointerEvents: 'auto' // Garante que aceita cliques
+                        pointerEvents: 'auto'
                     }}
                 >
                     <div
@@ -140,13 +136,9 @@ const ModalEscolha = ({ desafio, onClose, onEscolha, missionTime, onSpendCoins, 
                                 style={{
                                     padding: '15px 25px',
                                     cursor: 'pointer',
-                                    pointerEvents: 'auto',
                                     background: 'linear-gradient(45deg, #00aaff, #0077cc)',
-                                    border: 'none',
-                                    borderRadius: '5px',
-                                    color: 'white',
-                                    fontWeight: 'bold',
-                                    fontSize: '1rem'
+                                    border: 'none', borderRadius: '5px',
+                                    color: 'white', fontWeight: 'bold', fontSize: '1rem'
                                 }}
                             >
                                 Rever tudo - {costX} Spacecoins
@@ -157,13 +149,9 @@ const ModalEscolha = ({ desafio, onClose, onEscolha, missionTime, onSpendCoins, 
                                 style={{
                                     padding: '15px 25px',
                                     cursor: 'pointer',
-                                    pointerEvents: 'auto',
                                     background: 'linear-gradient(45deg, #ffaa00, #cc8800)',
-                                    border: 'none',
-                                    borderRadius: '5px',
-                                    color: 'white',
-                                    fontWeight: 'bold',
-                                    fontSize: '1rem'
+                                    border: 'none', borderRadius: '5px',
+                                    color: 'white', fontWeight: 'bold', fontSize: '1rem'
                                 }}
                             >
                                 Rever Opções - {costY} Spacecoins
