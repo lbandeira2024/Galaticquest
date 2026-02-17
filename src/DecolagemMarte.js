@@ -1353,7 +1353,21 @@ const DecolagemMarte = () => {
   const currentCharacterData = currentCharacterId ? desafiosData.personagens[currentCharacterId] : null;
 
   const handleCloseEscolhaModal = useCallback(() => { setShowEscolhaModal(false); }, []);
-  const handleSpendCoins = useCallback((amount) => { setSpaceCoins(prev => (prev || 0) - amount); }, [setSpaceCoins]);
+
+  // ALTERAÇÃO: Atualizado para aceitar 'type' e reabrir ModalDesafio se 'all'
+  const handleSpendCoins = useCallback((amount, type) => {
+    setSpaceCoins(prev => (prev || 0) - amount);
+
+    if (type === 'all') {
+      setShowDesafioModal(true);
+      // Fecha o modal de escolha, pois o desafio vai abrir por cima ou no lugar
+      setShowEscolhaModal(false);
+      // Reseta o estado do diálogo para que ele comece do zero
+      setIsTransmissionStarting(false);
+      setIsDialogueFinished(false);
+      setDialogueIndex(0);
+    }
+  }, [setSpaceCoins]);
 
   const handleReplayDialogue = useCallback(() => {
     if (activeChallengeData) { setDialogueIndex(0); setIsTransmissionStarting(true); setIsDialogueFinished(false); }
