@@ -301,8 +301,8 @@ const degradationRates = {
   NEOECLIPSE: { nuclearPropulsion: 3.75, oxygen: 5, stability: 6.25, direction: 6.25, productivity: 8.75, interdependence: 8.75, engagement: 8.75 }
 };
 const accelerationRates = {
-  default: { perTick: 336 }, GAIANOVA: { perTick: 200 }, ARTEMIS1: { perTick: 270 },
-  OBERONX: { perTick: 336 }, STRATUSV: { perTick: 500 }, NEOECLIPSE: { perTick: 840 },
+  default: { perTick: 60 }, GAIANOVA: { perTick: 40 }, ARTEMIS1: { perTick: 55 },
+  OBERONX: { perTick: 60 }, STRATUSV: { perTick: 90 }, NEOECLIPSE: { perTick: 150 },
 };
 const takeoffDegradation = {
   default: { propulsion: 2, direction: 1, stability: 2 },
@@ -332,7 +332,6 @@ const DecolagemMarte = () => {
   const alarmAudio = useMemo(() => new Audio('/sounds/evacuation-alarm.mp3'), []);
 
   // --- REFS E STATES PRINCIPAIS ---
-  // A estratégia aqui é usar Refs para o GameLoop para evitar reinicializações
   const [telemetry, setTelemetry] = useState({
     velocity: { kmh: 0, ms: 0, rel: '0.0c' },
     altitude: 0,
@@ -352,7 +351,6 @@ const DecolagemMarte = () => {
     direction: 100, stability: 100, productivity: 100, interdependence: 100, engagement: 100
   });
 
-  // Refs de sincronização (GameLoop lê daqui)
   const telemetryRef = useRef(telemetry);
   const spaceCoinsRef = useRef(spaceCoins);
 
@@ -456,7 +454,6 @@ const DecolagemMarte = () => {
 
   const [showSosSurprise, setShowSosSurprise] = useState(false);
 
-  // Refs de controle de timers e áudio
   const minervaEventTriggered = useRef(false);
   const hideMinervaTimerRef = useRef(null);
   const boostTimerRef = useRef(null);
@@ -472,8 +469,7 @@ const DecolagemMarte = () => {
   const { isPaused, togglePause } = usePause();
   const isPausedRef = useRef(isPaused);
 
-  // --- SINCRONIZAÇÃO DE REFS PARA O GAME LOOP ---
-  // Estes efeitos garantem que o loop (que não tem dependências) leia sempre o estado mais recente
+  // Sincronização de Refs
   useEffect(() => { telemetryRef.current = telemetry; }, [telemetry]);
   useEffect(() => { spaceCoinsRef.current = spaceCoins; }, [spaceCoins]);
   useEffect(() => { travelStartedRef.current = travelStarted; }, [travelStarted]);
@@ -493,14 +489,12 @@ const DecolagemMarte = () => {
   useEffect(() => { sosSurpriseEventRef.current = sosSurpriseEvent; }, [sosSurpriseEvent]);
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
 
-  // Ref para funções estáveis usadas dentro do loop
   const stopAllAudioRef = useRef(stopAllAudio);
   useEffect(() => { stopAllAudioRef.current = stopAllAudio; }, [stopAllAudio]);
 
   const playSoundRef = useRef(playSound);
   useEffect(() => { playSoundRef.current = playSound; }, [playSound]);
 
-  // --- PRÉ-CARREGAMENTO ---
   useEffect(() => {
     const videosToPreload = ["/images/Vluz-Dobra.webm", "/images/clouds.webm"];
     videosToPreload.forEach((src) => {
@@ -543,7 +537,6 @@ const DecolagemMarte = () => {
     setLastImpactTimestamp(Date.now());
   }, []);
 
-  // Refs para funções de callback usadas no loop
   const saveTelemetryData = useCallback(async () => {
     if (!userId || !API_BASE_URL) return;
     const dataToSave = {
@@ -645,7 +638,20 @@ const DecolagemMarte = () => {
     setIsDeparting(true);
 
     setTimeout(async () => {
-      setDistanceKm(300000000);
+      // --- CORREÇÃO APLICADA AQUI ---
+      // Lógica de rota local (Evita pedir dados velhos ao DB e reiniciar a viagem)
+      const currentIndex = routeIndexRef.current;
+      const currentRoute = plannedRouteRef.current;
+
+      if (currentRoute && currentRoute[currentIndex] && currentRoute[currentIndex + 1]) {
+        setOriginPlanet({ nome: currentRoute[currentIndex].name });
+        setSelectedPlanet({ nome: currentRoute[currentIndex + 1].name });
+        const nextDistance = currentRoute[currentIndex + 1].distance || 300000000;
+        setDistanceKm(nextDistance);
+      } else {
+        setDistanceKm(300000000);
+      }
+
       setProgress(0);
       setArrivedAtMars(false);
       setIsFinalApproach(false);
@@ -657,7 +663,10 @@ const DecolagemMarte = () => {
       setTravelStarted(true);
       setDobraCooldownEnd(0);
       setProcessadorO2(0);
-      setRefetchTrigger(prev => prev + 1);
+
+      // REMOVIDO: setRefetchTrigger(prev => prev + 1);
+      // Isso é o que causava o "reset" do planeta!
+
       setIsDeparting(false);
     }, 4000);
   }, [playSound, triggerMinervaInterplanetarySpeed]);
@@ -902,9 +911,6 @@ const DecolagemMarte = () => {
   const telemetryInterval = 100;
   const lastRenderTime = useRef(0);
 
-  // Adicione esta linha antes do useEffect do FETCH GAME DATA para evitar resets inesperados
-  const userGameNumber = user?.gameNumber;
-
   // FETCH GAME DATA
   useEffect(() => {
     const saveIndexForCorrection = async (currentIndex) => {
@@ -931,8 +937,8 @@ const DecolagemMarte = () => {
           if (data.processadorO2 !== undefined) setProcessadorO2(data.processadorO2);
 
           let photo = data.photoUrl;
-          if (!photo && userGameNumber && data.teamName) {
-            photo = constructPhotoUrl(userGameNumber, data.teamName);
+          if (!photo && user && user.gameNumber && data.teamName) {
+            photo = constructPhotoUrl(user.gameNumber, data.teamName);
           }
           if (photo) setTeamPhotoUrl(photo);
 
@@ -969,7 +975,7 @@ const DecolagemMarte = () => {
       }
     };
     fetchGameData();
-  }, [userId, API_BASE_URL, syncSpaceCoins, refetchTrigger, userGameNumber]);
+  }, [userId, API_BASE_URL, syncSpaceCoins, refetchTrigger, user]);
 
   // Efeitos de degradação
   useEffect(() => {
@@ -1240,6 +1246,11 @@ const DecolagemMarte = () => {
               const randIndex = Math.floor(Math.random() * 4);
               setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
             }
+
+            const newRouteIndex = routeIndexRef.current + 1;
+            setRouteIndex(newRouteIndex);
+            saveCurrentProgressRef.current(newRouteIndex);
+
             setShowSosSurprise(true);
           }
         }
