@@ -49,7 +49,7 @@ const planetImageMap = {
 const PLANET_MUSIC_CONFIG = {
   mercurio: { src: '/sounds/mercurio/mercurio.mp3', volume: 0.4 },
   marte: { src: '/sounds/marte/marte.mp3', volume: 0.5 },
-  venus: { src: '/sounds/marte/venus.mp3', volume: 0.5 },
+  venus: { src: '/sounds/venus/venus.mp3', volume: 0.5 },
   lua: { src: '/sounds/lua/lua.mp3', volume: 0.5 },
   acee: { src: '/sounds/ACEE/EstacaoACEE.mp3', volume: 0.5 },
   caronte: { src: '/sounds/carote/caronte.mp3', volume: 0.5 },

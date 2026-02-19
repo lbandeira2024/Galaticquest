@@ -902,6 +902,9 @@ const DecolagemMarte = () => {
   const telemetryInterval = 100;
   const lastRenderTime = useRef(0);
 
+  // Adicione esta linha antes do useEffect do FETCH GAME DATA para evitar resets inesperados
+  const userGameNumber = user?.gameNumber;
+
   // FETCH GAME DATA
   useEffect(() => {
     const saveIndexForCorrection = async (currentIndex) => {
@@ -928,8 +931,8 @@ const DecolagemMarte = () => {
           if (data.processadorO2 !== undefined) setProcessadorO2(data.processadorO2);
 
           let photo = data.photoUrl;
-          if (!photo && user && user.gameNumber && data.teamName) {
-            photo = constructPhotoUrl(user.gameNumber, data.teamName);
+          if (!photo && userGameNumber && data.teamName) {
+            photo = constructPhotoUrl(userGameNumber, data.teamName);
           }
           if (photo) setTeamPhotoUrl(photo);
 
@@ -966,7 +969,7 @@ const DecolagemMarte = () => {
       }
     };
     fetchGameData();
-  }, [userId, API_BASE_URL, syncSpaceCoins, refetchTrigger, user]);
+  }, [userId, API_BASE_URL, syncSpaceCoins, refetchTrigger, userGameNumber]);
 
   // Efeitos de degradação
   useEffect(() => {
@@ -1100,38 +1103,6 @@ const DecolagemMarte = () => {
       setIsBoostingTo60k(false);
     }
   }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]);
-
-  // Animação do Cockpit
-  useEffect(() => {
-    if (isPaused) return;
-    let animationId;
-    const targetOffset = { x: 0, y: 0 };
-    const currentOffset = { x: 0, y: 0 };
-    const handleMouseMove = (e) => {
-      const { innerWidth, innerHeight } = window;
-      const x = (e.clientX - innerWidth / 2) / (innerWidth / 2);
-      const y = (e.clientY - innerHeight / 2) / (innerHeight / 2);
-      targetOffset.x = x * 20;
-      targetOffset.y = y * 20;
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    const animateCockpit = () => {
-      const friction = 0.05;
-      currentOffset.x += (targetOffset.x - currentOffset.x) * friction;
-      currentOffset.y += (targetOffset.y - currentOffset.y) * friction;
-      if (cockpitRef.current) {
-        const x = currentOffset.x;
-        const y = currentOffset.y;
-        cockpitRef.current.style.transform = `perspective(1500px) rotateX(${y * 0.1}deg) rotateY(${-x * 0.1}deg) translateX(${-x * 0.5}px) translateY(${y * 0.5}px)`;
-      }
-      animationId = requestAnimationFrame(animateCockpit);
-    };
-    animationId = requestAnimationFrame(animateCockpit);
-    return () => {
-      cancelAnimationFrame(animationId);
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, [isPaused]);
 
   // SOS Logic
   const isSystemCritical = telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20;
