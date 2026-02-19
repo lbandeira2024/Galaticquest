@@ -49,7 +49,7 @@ const planetImageMap = {
 const PLANET_MUSIC_CONFIG = {
   mercurio: { src: '/sounds/mercurio/mercurio.mp3', volume: 0.4 },
   marte: { src: '/sounds/marte/marte.mp3', volume: 0.5 },
-  venus: { src: '/sounds/venus/venus.mp3', volume: 0.5 },
+  venus: { src: '/sounds/marte/venus.mp3', volume: 0.5 },
   lua: { src: '/sounds/lua/lua.mp3', volume: 0.5 },
   acee: { src: '/sounds/ACEE/EstacaoACEE.mp3', volume: 0.5 },
   caronte: { src: '/sounds/carote/caronte.mp3', volume: 0.5 },
@@ -142,9 +142,7 @@ const SpaceView = ({
     }));
   }, []);
 
-  // --- CORREÇÃO APLICADA AQUI ---
-  // Transforma a checagem da distância em um Booleano absoluto para evitar
-  // chamadas repetidas no useEffect a cada frame renderizado.
+  // Áudio Ambiente com Fade (Dobra, Planetas Específicos e Voo Padrão)
   const isNearPlanet = distance <= 1000;
 
   useEffect(() => {
@@ -159,15 +157,13 @@ const SpaceView = ({
       targetVolume = PLANET_MUSIC_CONFIG[planetName].volume;
     }
 
-    // O React agora só vai chamar essa função quando o booleano 'isNearPlanet' mudar,
-    // garantindo que o Fade aconteça com suavidade e não trave o volume.
     playTrack(targetAudioSrc, {
       loop: true,
       isPrimary: false,
       volume: targetVolume,
       fade: true
     });
-  }, [isWarpActive, isNearPlanet, planetName, playTrack]); // <-- 'distance' removido das dependências
+  }, [isWarpActive, isNearPlanet, planetName, playTrack]);
 
   // Carregamento da Imagem do Planeta
   useEffect(() => {
@@ -251,7 +247,15 @@ const SpaceView = ({
 
       // --- INTERPOLAÇÃO VISUAL DA DISTÂNCIA ---
       const targetDist = distanceRef.current;
-      currentVisualDistanceRef.current += (targetDist - currentVisualDistanceRef.current) * 0.1;
+
+      // Se a diferença for gigantesca (ex: o jogo acabou de iniciar e saltou para 300 milhões),
+      // a câmara corta diretamente para o alvo para evitar o efeito de encolhimento.
+      if (Math.abs(targetDist - currentVisualDistanceRef.current) > 5000000) {
+        currentVisualDistanceRef.current = targetDist;
+      } else {
+        // "Desliza" o valor visual em direção ao valor real (efeito smooth) durante o voo normal
+        currentVisualDistanceRef.current += (targetDist - currentVisualDistanceRef.current) * 0.1;
+      }
 
       if (Math.abs(targetDist - currentVisualDistanceRef.current) < 100) {
         currentVisualDistanceRef.current = targetDist;
