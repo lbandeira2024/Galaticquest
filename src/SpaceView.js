@@ -129,13 +129,21 @@ const SpaceView = ({
     }));
   }, []);
 
-  // Áudio da Dobra
+  // Identifica se o planeta atual é Mercúrio e a distância é 1000km ou menos
+  const isNearMercury = planetName === 'mercurio' && distance <= 1000;
+
+  // Áudio Ambiente (Dobra, Planetas Específicos e Voo Padrão)
   useEffect(() => {
-    const targetAudioSrc = isWarpActive
-      ? '/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3'
-      : '/sounds/02.Navigating-Flying.mp3';
+    let targetAudioSrc = '/sounds/02.Navigating-Flying.mp3'; // Música Padrão de Voo
+
+    if (isWarpActive) {
+      targetAudioSrc = '/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3';
+    } else if (isNearMercury) {
+      targetAudioSrc = '/sounds/mercurio/mercurio.mp3'; // Música específica de Mercúrio
+    }
+
     playTrack(targetAudioSrc, { loop: true, isPrimary: false });
-  }, [isWarpActive, playTrack]);
+  }, [isWarpActive, isNearMercury, playTrack]);
 
   // Carregamento da Imagem do Planeta
   useEffect(() => {
