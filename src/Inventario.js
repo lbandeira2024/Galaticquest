@@ -157,7 +157,10 @@ const Inventario = ({ onClose, onUpdateTelemetry }) => {
             });
             const data = await response.json();
             if (response.ok && data.user) {
-                login(data.user);
+                // --- CORREÇÃO APLICADA AQUI ---
+                // Ocultamos/removemos a chamada do login para não atualizar o AuthContext inteiro,
+                // o que causava o recarregamento total do componente pai DecolagemMarte.js
+                // login(data.user); 
             }
         } catch (err) {
             console.error("❌ Erro ao atualizar inventário:", err);

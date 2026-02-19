@@ -45,6 +45,15 @@ const planetImageMap = {
   boktok: '/images/stations/BOKTOK-Rotacionando.webm'
 };
 
+// Dicionário de Músicas Específicas dos Planetas
+// Nota: Mantive o caminho que você enviou para Vênus (/sounds/marte/venus.mp3)
+const PLANET_MUSIC_CONFIG = {
+  mercurio: { src: '/sounds/mercurio/mercurio.mp3', volume: 0.4 },
+  marte: { src: '/sounds/marte/marte.mp3', volume: 0.5 },
+  venus: { src: '/sounds/marte/venus.mp3', volume: 0.5 },
+  lua: { src: '/sounds/lua/lua.mp3', volume: 0.5 }
+};
+
 // Cores estáticas
 const STAR_HUES = [210, 120, 30, 0, 60];
 
@@ -88,7 +97,6 @@ const SpaceView = ({
   const { playTrack } = useAudio();
 
   // Atualiza refs quando as props mudam
-  // CRUCIAL: O React.memo lá embaixo estava bloqueando isso de acontecer!
   useEffect(() => { distanceRef.current = distance; }, [distance]);
   useEffect(() => { forceLargeRef.current = forceLarge; }, [forceLarge]);
   useEffect(() => { isDepartingRef.current = isDeparting; }, [isDeparting]);
@@ -129,21 +137,30 @@ const SpaceView = ({
     }));
   }, []);
 
-  // Identifica se o planeta atual é Mercúrio e a distância é 1000km ou menos
-  const isNearMercury = planetName === 'mercurio' && distance <= 1000;
-
-  // Áudio Ambiente (Dobra, Planetas Específicos e Voo Padrão)
+  // Áudio Ambiente com Fade (Dobra, Planetas Específicos e Voo Padrão)
   useEffect(() => {
-    let targetAudioSrc = '/sounds/02.Navigating-Flying.mp3'; // Música Padrão de Voo
+    const isNearPlanet = distance <= 1000;
+
+    let targetAudioSrc = '/sounds/02.Navigating-Flying.mp3'; // Música Padrão
+    let targetVolume = 1.0;
 
     if (isWarpActive) {
       targetAudioSrc = '/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3';
-    } else if (isNearMercury) {
-      targetAudioSrc = '/sounds/mercurio/mercurio.mp3'; // Música específica de Mercúrio
+      targetVolume = 1.0;
+    } else if (isNearPlanet && PLANET_MUSIC_CONFIG[planetName]) {
+      // Puxa a música e o volume específicos do dicionário lá em cima
+      targetAudioSrc = PLANET_MUSIC_CONFIG[planetName].src;
+      targetVolume = PLANET_MUSIC_CONFIG[planetName].volume;
     }
 
-    playTrack(targetAudioSrc, { loop: true, isPrimary: false });
-  }, [isWarpActive, isNearMercury, playTrack]);
+    // Passamos a propriedade fade: true para avisar o AudioManager
+    playTrack(targetAudioSrc, {
+      loop: true,
+      isPrimary: false,
+      volume: targetVolume,
+      fade: true
+    });
+  }, [isWarpActive, distance, planetName, playTrack]);
 
   // Carregamento da Imagem do Planeta
   useEffect(() => {
@@ -227,7 +244,6 @@ const SpaceView = ({
 
       // --- INTERPOLAÇÃO VISUAL DA DISTÂNCIA ---
       const targetDist = distanceRef.current;
-      // "Desliza" o valor visual em direção ao valor real (efeito smooth)
       currentVisualDistanceRef.current += (targetDist - currentVisualDistanceRef.current) * 0.1;
 
       if (Math.abs(targetDist - currentVisualDistanceRef.current) < 100) {
@@ -244,7 +260,6 @@ const SpaceView = ({
         if (departing) {
           opacity = 1;
         } else {
-          // Começa a aparecer (fade in) mais cedo
           const FADE_START_DIST = 100000000;
           if (visualDist <= 0) {
             opacity = 1;
@@ -261,10 +276,8 @@ const SpaceView = ({
           if (departing) {
             scale = Math.max(0.05, 2.5 / (1 + (visualDist / 100000)));
           } else {
-            // --- FÓRMULA DE APROXIMAÇÃO OTIMIZADA ---
             const MAX_SCALE = 2.8;
             const MIN_SCALE = 0.05;
-            // Aumentei o fator para 1.5M para o planeta crescer visivelmente mais cedo
             const OPTICAL_FACTOR = 1500000;
 
             scale = MAX_SCALE / (1 + (visualDist / OPTICAL_FACTOR));
@@ -407,7 +420,6 @@ const SpaceView = ({
   );
 };
 
-// --- CORREÇÃO FINAL: React.memo agora verifica se a DISTÂNCIA mudou ---
 export default React.memo(SpaceView, (prevProps, nextProps) => {
   return (
     prevProps.selectedPlanet?.nome === nextProps.selectedPlanet?.nome &&
@@ -415,6 +427,6 @@ export default React.memo(SpaceView, (prevProps, nextProps) => {
     prevProps.isPaused === nextProps.isPaused &&
     prevProps.forceLarge === nextProps.forceLarge &&
     prevProps.isDeparting === nextProps.isDeparting &&
-    prevProps.distance === nextProps.distance // <--- ISSO DESBLOQUEIA A ATUALIZAÇÃO VISUAL
+    prevProps.distance === nextProps.distance
   );
 });
