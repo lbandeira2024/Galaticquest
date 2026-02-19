@@ -20,7 +20,10 @@ const SpeedGauge = ({ currentSpeed, maxSpeed, isBoosting, isDobraAtivada }) => {
             <div className="speed-gauge-bar">
                 <div
                     className={`speed-gauge-fill ${isBoosting ? 'is-boosting' : ''} ${isDobraAtivada ? 'is-dobra-active' : ''}`}
-                    style={{ width: `${percentage}%` }}
+                    style={{
+                        width: `${percentage}%`,
+                        transition: 'width 0.3s ease-out' // <-- ISSO DEIXA A BARRA SUPER SUAVE
+                    }}
                 />
             </div>
             <div className="speed-gauge-marks">
@@ -29,7 +32,7 @@ const SpeedGauge = ({ currentSpeed, maxSpeed, isBoosting, isDobraAtivada }) => {
                 ))}
             </div>
             <div className="speed-gauge-unit">
-                {isDobraAtivada ? 'VELOCIDADE DE DOBRA' : 'KILOMETROS POR HORA'}
+                {isDobraAtivada ? 'VELOCIDADE DE DOBRA' : 'KILÓMETROS POR HORA'}
             </div>
         </div>
     );
