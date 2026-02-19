@@ -49,7 +49,7 @@ const planetImageMap = {
 const PLANET_MUSIC_CONFIG = {
   mercurio: { src: '/sounds/mercurio/mercurio.mp3', volume: 0.4 },
   marte: { src: '/sounds/marte/marte.mp3', volume: 0.5 },
-  venus: { src: '/sounds/Venus/venus.mp3', volume: 0.5 },
+  venus: { src: '/sounds/marte/venus.mp3', volume: 0.5 },
   lua: { src: '/sounds/lua/lua.mp3', volume: 0.5 },
   acee: { src: '/sounds/ACEE/EstacaoACEE.mp3', volume: 0.5 },
   caronte: { src: '/sounds/carote/caronte.mp3', volume: 0.5 },
@@ -142,10 +142,12 @@ const SpaceView = ({
     }));
   }, []);
 
-  // Áudio Ambiente com Fade (Dobra, Planetas Específicos e Voo Padrão)
-  useEffect(() => {
-    const isNearPlanet = distance <= 1000;
+  // --- CORREÇÃO APLICADA AQUI ---
+  // Transforma a checagem da distância em um Booleano absoluto para evitar
+  // chamadas repetidas no useEffect a cada frame renderizado.
+  const isNearPlanet = distance <= 1000;
 
+  useEffect(() => {
     let targetAudioSrc = '/sounds/02.Navigating-Flying.mp3'; // Música Padrão
     let targetVolume = 1.0;
 
@@ -153,19 +155,19 @@ const SpaceView = ({
       targetAudioSrc = '/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3';
       targetVolume = 1.0;
     } else if (isNearPlanet && PLANET_MUSIC_CONFIG[planetName]) {
-      // Puxa a música e o volume específicos do dicionário lá em cima
       targetAudioSrc = PLANET_MUSIC_CONFIG[planetName].src;
       targetVolume = PLANET_MUSIC_CONFIG[planetName].volume;
     }
 
-    // Passamos a propriedade fade: true para avisar o AudioManager
+    // O React agora só vai chamar essa função quando o booleano 'isNearPlanet' mudar,
+    // garantindo que o Fade aconteça com suavidade e não trave o volume.
     playTrack(targetAudioSrc, {
       loop: true,
       isPrimary: false,
       volume: targetVolume,
       fade: true
     });
-  }, [isWarpActive, distance, planetName, playTrack]);
+  }, [isWarpActive, isNearPlanet, planetName, playTrack]); // <-- 'distance' removido das dependências
 
   // Carregamento da Imagem do Planeta
   useEffect(() => {
