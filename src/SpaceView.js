@@ -49,7 +49,7 @@ const planetImageMap = {
 const PLANET_MUSIC_CONFIG = {
   mercurio: { src: '/sounds/mercurio/mercurio.mp3', volume: 0.4 },
   marte: { src: '/sounds/marte/marte.mp3', volume: 0.5 },
-  venus: { src: '/sounds/marte/venus.mp3', volume: 0.5 },
+  venus: { src: '/sounds/Venus/venus.mp3', volume: 0.5 },
   lua: { src: '/sounds/lua/lua.mp3', volume: 0.5 },
   acee: { src: '/sounds/ACEE/EstacaoACEE.mp3', volume: 0.5 },
   caronte: { src: '/sounds/carote/caronte.mp3', volume: 0.5 },
@@ -59,8 +59,10 @@ const PLANET_MUSIC_CONFIG = {
   jupiter: { src: '/sounds/jupiter/jupiter.mp3', volume: 0.5 }
 };
 
-// Cores estáticas
+// Cores estáticas OTIMIZADAS
 const STAR_HUES = [210, 120, 30, 0, 60];
+// Cores pré-processadas para evitar cálculos repetitivos dentro do loop de renderização (Performance CPU)
+const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 80%)`);
 
 const SpaceView = ({
   distance = 225000000,
@@ -298,7 +300,9 @@ const SpaceView = ({
         planetImageRef.current.style.transform = `scale(${scale})`;
       }
 
-      // Desenhar Estrelas
+      // Desenhar Estrelas (TOTALMENTE OTIMIZADO COM GLOBAL ALPHA)
+      // Reseta o alpha antes de pintar o fundo escuro
+      ctx.globalAlpha = 1.0;
       ctx.fillStyle = '#000014';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -336,13 +340,14 @@ const SpaceView = ({
 
         const size = scale * star.size * 0.3;
 
+        // LÓGICA OTIMIZADA: globalAlpha substitui centenas de cálculos de strings!
+        ctx.globalAlpha = Math.min(1.0, scale * 1.5);
+
         if (starSpeedHigh) {
-          const brightness = Math.min(1.0, scale * 1.5);
-          ctx.fillStyle = `hsla(${STAR_HUES[star.hueIndex]}, 100%, 80%, ${brightness})`;
+          ctx.fillStyle = STAR_COLORS_HSL[star.hueIndex];
           ctx.fillRect(x, y, size * 1.5, size * 1.5);
         } else {
-          const opacity = Math.min(1, scale * 1.5);
-          ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+          ctx.fillStyle = '#ffffff';
           ctx.fillRect(x, y, size, size);
         }
       }
