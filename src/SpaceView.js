@@ -45,13 +45,15 @@ const planetImageMap = {
   boktok: '/images/stations/BOKTOK-Rotacionando.webm'
 };
 
-// Dicionário de Músicas Específicas dos Planetas
-// Nota: Mantive o caminho que você enviou para Vênus (/sounds/marte/venus.mp3)
+// Dicionário de Músicas Específicas dos Planetas e Estações
 const PLANET_MUSIC_CONFIG = {
   mercurio: { src: '/sounds/mercurio/mercurio.mp3', volume: 0.4 },
   marte: { src: '/sounds/marte/marte.mp3', volume: 0.5 },
   venus: { src: '/sounds/marte/venus.mp3', volume: 0.5 },
-  lua: { src: '/sounds/lua/lua.mp3', volume: 0.5 }
+  lua: { src: '/sounds/lua/lua.mp3', volume: 0.5 },
+  acee: { src: '/sounds/ACEE/EstacaoACEE.mp3', volume: 0.5 },
+  caronte: { src: '/sounds/carote/caronte.mp3', volume: 0.5 },
+  ceres: { src: '/sounds/ceres/ceres.mp3', volume: 0.5 }
 };
 
 // Cores estáticas

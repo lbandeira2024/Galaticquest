@@ -14,7 +14,6 @@ const BLOCKED_SOUNDS = new Set([
 const normalizeSrc = (src = "") => String(src).split("?")[0];
 
 // Converte caminho relativo para absoluto para comparação segura
-// Ex: "/sounds/music.mp3" vira "http://localhost:3000/sounds/music.mp3"
 const toAbsolute = (src) => {
   if (!src) return "";
   try {
@@ -35,6 +34,8 @@ export const AudioProvider = ({ children }) => {
   const musicAudioRef = useRef(new Audio());
   // Som primário (decolagem)
   const primaryAudioRef = useRef(new Audio());
+  // Músicas sendo desvanecidas (Fade Out)
+  const fadingAudiosRef = useRef([]);
 
   // Controle
   const isPrimaryActiveRef = useRef(false);
@@ -47,16 +48,14 @@ export const AudioProvider = ({ children }) => {
   const [queuedPrimary, setQueuedPrimary] = useState(null);
   const [queuedSFX, setQueuedSFX] = useState(null);
 
-  // ✅ Pedidos feitos durante o primário
-  // Música pós-primário: first-wins (SpaceView geralmente é a primeira)
+  // Pedidos feitos durante o primário
   const queuedMusicAfterPrimaryRef = useRef(null);
-  // SFX pós-primário: mantém ordem
   const queuedSfxAfterPrimaryRef = useRef([]);
 
-  // ✅ Preloader simples (cache warming)
+  // Preloader simples
   const preloadedRef = useRef(new Map());
 
-  // ✅ Callback do primário (para sincronizar lógica/UX sem timeout fixo)
+  // Callback do primário
   const primaryEndedCallbackRef = useRef(null);
 
   const { isPaused } = usePause();
@@ -79,17 +78,13 @@ export const AudioProvider = ({ children }) => {
     }
   }, []);
 
-  // ✅ Warmup mais forte: usa o PRÓPRIO player de música (musicAudioRef) para baixar buffer
-  // sem tocar (muted + volume 0). Isso reduz MUITO o gap pós-decolagem.
   const warmBackgroundForAfterPrimary = useCallback((src, options = { loop: true }) => {
     const bg = musicAudioRef.current;
     if (!bg) return;
 
-    // Comparação absoluta no warmup também
     const currentAbs = toAbsolute(normalizeSrc(bg.src || ""));
     const incomingAbs = toAbsolute(normalizeSrc(src));
 
-    // Só aquece se ainda não está com a mesma fonte
     if (currentAbs !== incomingAbs) {
       try {
         bg.pause();
@@ -133,13 +128,19 @@ export const AudioProvider = ({ children }) => {
 
   const stopMusic = useCallback(() => {
     const bg = musicAudioRef.current;
-    if (!bg) return;
+    if (bg) {
+      try {
+        bg.pause();
+        bg.currentTime = 0;
+        bg.src = "";
+      } catch { }
+    }
 
-    try {
-      bg.pause();
-      bg.currentTime = 0;
-      bg.src = "";
-    } catch { }
+    // Para imediatamente qualquer música que estava no meio do fade
+    fadingAudiosRef.current.forEach(a => {
+      try { a.pause(); a.src = ""; } catch { }
+    });
+    fadingAudiosRef.current = [];
 
     console.log("🛑 Música de fundo parada (stopMusic).");
   }, []);
@@ -165,13 +166,17 @@ export const AudioProvider = ({ children }) => {
   }, []);
 
   const playMusicNow = useCallback(
-    (src, options = { loop: true, isPrimary: false }) => {
+    (src, options = {}) => {
       if (isBlockedSound(src)) {
         console.warn("🚫 Som bloqueado (música) ignorado:", src);
         return;
       }
 
-      // Se primário ativo, NÃO toca agora — enfileira + aquece o buffer do BG
+      // Configurações Padrão
+      const isLoop = options.loop !== undefined ? options.loop : true;
+      const targetVolume = options.volume !== undefined ? options.volume : 1.0;
+      const useFade = !!options.fade;
+
       if (isPrimaryActiveRef.current) {
         preloadAudio(src);
         warmBackgroundForAfterPrimary(src, options);
@@ -179,56 +184,84 @@ export const AudioProvider = ({ children }) => {
         if (!queuedMusicAfterPrimaryRef.current) {
           queuedMusicAfterPrimaryRef.current = { src, options };
           console.log("🧾 Música enfileirada para pós-primário (first-wins):", src);
-        } else {
-          console.log("🧾 Música ignorada (já existe música pós-primário):", src);
         }
         return;
       }
 
-      const target = musicAudioRef.current;
-
-      // --- CORREÇÃO DE COMPARAÇÃO DE URL ---
-      // 1. Pega URL atual do player (absoluta) e remove params
+      let target = musicAudioRef.current;
       const currentAbs = toAbsolute(normalizeSrc(target.src || ""));
-      // 2. Pega nova URL (pode ser relativa), converte para absoluta e remove params
       const newAbs = toAbsolute(normalizeSrc(src));
-
       const alreadySame = currentAbs === newAbs && newAbs !== "";
-      const hasBuffer = target.readyState >= 3; // HAVE_FUTURE_DATA
 
-      // Se é EXATAMENTE a mesma música (URL absoluta), mantém tocando
+      // Se é a mesma música, só ajusta propriedades e garante que está tocando
       if (alreadySame) {
-        target.loop = !!options.loop;
+        target.loop = isLoop;
+        target.volume = targetVolume;
 
-        // Se estava pausada por algum motivo (mas não pelo pause global), retoma
         if (target.paused && !isPaused) {
           const p = target.play();
           if (p !== undefined) p.catch(() => { });
         }
-
-        // Retorna silenciosamente para não reiniciar
         return;
       }
 
-      // Se for música diferente, faz a troca
-      try {
-        target.pause();
-        target.currentTime = 0;
-      } catch { }
+      // --- LÓGICA DE FADE IN/OUT (CROSSFADE) ---
+      if (useFade && !target.paused && target.src) {
+        const oldAudio = target;
+        fadingAudiosRef.current.push(oldAudio);
+
+        // Fade out da música velha
+        const fadeOutTimer = setInterval(() => {
+          if (oldAudio.volume > 0.05) {
+            oldAudio.volume = Math.max(0, oldAudio.volume - 0.05);
+          } else {
+            oldAudio.pause();
+            oldAudio.src = "";
+            fadingAudiosRef.current = fadingAudiosRef.current.filter(a => a !== oldAudio);
+            clearInterval(fadeOutTimer);
+          }
+        }, 100);
+
+        // Criar um NOVO elemento de áudio para a música que está entrando
+        target = new Audio();
+        musicAudioRef.current = target;
+      } else {
+        // Sem fade, troca bruta
+        try {
+          target.pause();
+          target.currentTime = 0;
+        } catch { }
+      }
 
       target.src = src;
       target.preload = "auto";
-      target.loop = !!options.loop;
+      target.loop = isLoop;
       target.muted = false;
-      target.volume = 1.0;
 
       setActiveAudioEl(target);
 
-      const p = target.play();
-      if (p !== undefined) {
-        p.then(() => console.log(`🎵 Música iniciada (${src})`)).catch((e) => {
-          if (e?.name !== "AbortError") console.error("⚠️ Erro música:", e?.name, e);
-        });
+      if (useFade) {
+        target.volume = 0; // Começa mudo
+        const p = target.play();
+        if (p !== undefined) p.catch(() => { });
+
+        // Fade in da música nova
+        const fadeInTimer = setInterval(() => {
+          if (target.volume < targetVolume - 0.05) {
+            target.volume = Math.min(targetVolume, target.volume + 0.05);
+          } else {
+            target.volume = targetVolume;
+            clearInterval(fadeInTimer);
+          }
+        }, 100);
+      } else {
+        target.volume = targetVolume;
+        const p = target.play();
+        if (p !== undefined) {
+          p.then(() => console.log(`🎵 Música iniciada (${src})`)).catch((e) => {
+            if (e?.name !== "AbortError") console.error("⚠️ Erro música:", e?.name, e);
+          });
+        }
       }
     },
     [preloadAudio, warmBackgroundForAfterPrimary, isPaused]
@@ -270,7 +303,6 @@ export const AudioProvider = ({ children }) => {
       if (!target.__pauseIntercepted) {
         const originalPause = target.pause.bind(target);
         target.pause = () => {
-          console.trace("⛔ primary.pause() foi chamado. Stack:");
           return originalPause();
         };
         target.__pauseIntercepted = true;
@@ -337,7 +369,7 @@ export const AudioProvider = ({ children }) => {
   );
 
   const playTrack = useCallback(
-    (src, options = { loop: true, isPrimary: false, onEnded: null }) => {
+    (src, options = {}) => {
       if (isBlockedSound(src)) {
         console.warn("🚫 Som bloqueado (track) ignorado:", src);
         return;
@@ -407,6 +439,11 @@ export const AudioProvider = ({ children }) => {
       } catch { }
     });
 
+    fadingAudiosRef.current.forEach(a => {
+      try { a.pause(); a.src = ""; } catch { }
+    });
+    fadingAudiosRef.current = [];
+
     soundsRef.current.forEach((s) => {
       try {
         s.pause();
@@ -461,6 +498,7 @@ export const AudioProvider = ({ children }) => {
     if (bg && !bg.paused) bg.pause();
     if (primary && !primary.paused) primary.pause();
 
+    fadingAudiosRef.current.forEach((s) => s.pause());
     soundsRef.current.forEach((s) => s.pause());
   }, [isPaused]);
 
