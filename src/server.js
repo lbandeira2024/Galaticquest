@@ -421,7 +421,18 @@ app.post("/save-planned-route", async (req, res) => {
 app.get('/group/:groupId/all-cds-challenges', async (req, res) => {
   try {
     const desafios = await CDS.find({ grupo: req.params.groupId });
-    res.json({ success: true, challenges: desafios.map(d => ({ desafioId: d.desafioId, escolhaIdLetter: d.escolha.id, timestamp: d.timestamp })) });
+
+    // --- CORREÇÃO: Agora passa o 'texto' que vem do banco para o frontend ---
+    res.json({
+      success: true,
+      challenges: desafios.map(d => ({
+        desafioId: d.desafioId,
+        escolhaIdLetter: d.escolha.id,
+        texto: d.escolha.texto, // <--- ADICIONADO AQUI
+        timestamp: d.timestamp
+      }))
+    });
+
   } catch (error) { res.status(500).json({ success: false }); }
 });
 
