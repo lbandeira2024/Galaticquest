@@ -637,33 +637,32 @@ const DecolagemMarte = () => {
     playSound('/sounds/empuxo.wav');
     setIsDeparting(true);
 
-    // --- CORREÇÃO: Reseta tudo instantaneamente FORA do setTimeout ---
-    const currentIndex = routeIndexRef.current;
-    const currentRoute = plannedRouteRef.current;
-
-    if (currentRoute && currentRoute[currentIndex] && currentRoute[currentIndex + 1]) {
-      setOriginPlanet({ nome: currentRoute[currentIndex].name });
-      setSelectedPlanet({ nome: currentRoute[currentIndex + 1].name });
-      const nextDistance = currentRoute[currentIndex + 1].distance || 300000000;
-      setDistanceKm(nextDistance);
-    } else {
-      setDistanceKm(300000000);
-    }
-
-    setProgress(0);
-    setArrivedAtMars(false);
-    setIsFinalApproach(false);
-    approachSoundPlayed.current = false;
-    setActiveChallengeData(null);
-    setIsDialogueFinished(false);
-    setTravelStarted(true);
-    setDobraCooldownEnd(0);
-    setProcessadorO2(0);
-    // ------------------------------------------------------------------
-
     setTimeout(async () => {
+      // --- Lógica de rota local (Evita pedir dados velhos ao DB e reiniciar a viagem) ---
+      const currentIndex = routeIndexRef.current;
+      const currentRoute = plannedRouteRef.current;
+
+      if (currentRoute && currentRoute[currentIndex] && currentRoute[currentIndex + 1]) {
+        setOriginPlanet({ nome: currentRoute[currentIndex].name });
+        setSelectedPlanet({ nome: currentRoute[currentIndex + 1].name });
+        const nextDistance = currentRoute[currentIndex + 1].distance || 300000000;
+        setDistanceKm(nextDistance);
+      } else {
+        setDistanceKm(300000000);
+      }
+
+      setProgress(0);
+      setArrivedAtMars(false);
+      setIsFinalApproach(false);
+      approachSoundPlayed.current = false;
       minervaEventTriggered.current = true;
       triggerMinervaInterplanetarySpeed();
+      setActiveChallengeData(null);
+      setIsDialogueFinished(false);
+      setTravelStarted(true);
+      setDobraCooldownEnd(0);
+      setProcessadorO2(0);
+
       setIsDeparting(false);
     }, 4000);
   }, [playSound, triggerMinervaInterplanetarySpeed]);
@@ -699,27 +698,21 @@ const DecolagemMarte = () => {
       setIsFinalApproach(false);
       triggerMinervaInterplanetarySpeed();
     } else {
-      playSound('/sounds/empuxo.wav');
-      setIsDeparting(true);
-      setShowStoreModal(false);
-
-      // --- CORREÇÃO: Reseta tudo instantaneamente FORA do setTimeout ---
-      setDistanceKm(300000000);
-      setProgress(0);
-      setArrivedAtMars(false);
-      setIsFinalApproach(false);
-      approachSoundPlayed.current = false;
-      setActiveChallengeData(null);
-      setIsDialogueFinished(false);
-      setTravelStarted(true);
-      setDobraCooldownEnd(0);
-      setProcessadorO2(0);
-      // ------------------------------------------------------------------
-
+      playSound('/sounds/empuxo.wav'); setIsDeparting(true); setShowStoreModal(false);
       setTimeout(async () => {
+        setDistanceKm(300000000);
         await saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
+        setProgress(0);
+        setArrivedAtMars(false);
+        setIsFinalApproach(false);
+        approachSoundPlayed.current = false;
         minervaEventTriggered.current = true;
         triggerMinervaInterplanetarySpeed();
+        setActiveChallengeData(null);
+        setIsDialogueFinished(false);
+        setTravelStarted(true);
+        setDobraCooldownEnd(0);
+        setProcessadorO2(0);
         setRefetchTrigger(prev => prev + 1);
         setIsDeparting(false);
       }, 4000);
@@ -914,6 +907,13 @@ const DecolagemMarte = () => {
   const telemetryInterval = 100;
   const lastRenderTime = useRef(0);
 
+  // --- CORREÇÃO: Refs para evitar re-renderizações após compras na loja ---
+  const syncSpaceCoinsRef = useRef(syncSpaceCoins);
+  useEffect(() => { syncSpaceCoinsRef.current = syncSpaceCoins; }, [syncSpaceCoins]);
+
+  const gameNumberRef = useRef(user?.gameNumber);
+  useEffect(() => { gameNumberRef.current = user?.gameNumber; }, [user?.gameNumber]);
+
   // FETCH GAME DATA
   useEffect(() => {
     const saveIndexForCorrection = async (currentIndex) => {
@@ -936,12 +936,12 @@ const DecolagemMarte = () => {
         if (data.success) {
           if (data._id) setGroupId(data._id);
           if (data.naveEscolhida) setChosenShip(data.naveEscolhida);
-          if (data.spaceCoins !== undefined) syncSpaceCoins(data.spaceCoins);
+          if (data.spaceCoins !== undefined) syncSpaceCoinsRef.current(data.spaceCoins);
           if (data.processadorO2 !== undefined) setProcessadorO2(data.processadorO2);
 
           let photo = data.photoUrl;
-          if (!photo && user && user.gameNumber && data.teamName) {
-            photo = constructPhotoUrl(user.gameNumber, data.teamName);
+          if (!photo && gameNumberRef.current && data.teamName) {
+            photo = constructPhotoUrl(gameNumberRef.current, data.teamName);
           }
           if (photo) setTeamPhotoUrl(photo);
 
@@ -978,7 +978,7 @@ const DecolagemMarte = () => {
       }
     };
     fetchGameData();
-  }, [userId, API_BASE_URL, syncSpaceCoins, refetchTrigger, user]);
+  }, [userId, API_BASE_URL, refetchTrigger]); // <-- AQUI ESTÁ A MÁGICA: Dependências limpas!
 
   // Efeitos de degradação
   useEffect(() => {
