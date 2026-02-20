@@ -597,21 +597,29 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
     const getQuizzLinkText = (desafioId) => QUIZZ_NAMES[desafioId] || `QUIZZ ${desafioId.replace('CSD', '')}`;
 
     const handleQuizzClick = (challenge) => {
-        const { desafioId, escolhaIdLetter, escolha, texto } = challenge;
+        // Log para ajudar a inspecionar os dados no F12 do navegador
+        console.log("Dados do Desafio recebidos da API:", challenge);
+
+        const { desafioId, escolhaIdLetter } = challenge;
         const ruleKey = `${desafioId}-${escolhaIdLetter}`;
         const rule = VIRTUE_RULES[ruleKey];
 
         setShowCupertinoImage(rule?.showImage || false);
         setCsdSpecificLetter(escolhaIdLetter);
 
-        // --- ATUALIZADO: Captura o campo "texto" de forma robusta e infalível ---
-        let textoFinal = "Texto não disponível";
-        if (texto) {
-            textoFinal = texto; // Se vier direto no objeto challenge
-        } else if (escolha && escolha.texto) {
-            textoFinal = escolha.texto; // Se vier dentro do sub-objeto escolha
-        } else if (typeof escolha === 'string') {
-            textoFinal = escolha; // Se vier como uma string pura
+        // --- Nova Extração de Texto à Prova de Falhas ---
+        let textoFinal = "Texto não encontrado na Base de Dados (Verifique o F12)";
+
+        if (challenge.escolha && challenge.escolha.texto) {
+            textoFinal = challenge.escolha.texto;
+        } else if (challenge.escolha && challenge.escolha.descricao) {
+            textoFinal = challenge.escolha.descricao;
+        } else if (challenge.texto) {
+            textoFinal = challenge.texto;
+        } else if (typeof challenge.escolha === 'string') {
+            textoFinal = challenge.escolha;
+        } else if (challenge.resposta && challenge.resposta.texto) {
+            textoFinal = challenge.resposta.texto;
         }
 
         setCsdSpecificText(textoFinal);
@@ -704,7 +712,6 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
                         <button className="close-button" onClick={onClose}>&times;</button>
                     </div>
 
-                    {/* Estrutura HTML do Tooltip (Posicionado à direita, abre para a esquerda) */}
                     {csdSpecificLetter && (
                         <div className="csd-letter-display">
                             {csdSpecificLetter}
