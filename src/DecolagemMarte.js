@@ -182,22 +182,44 @@ const RightMonitorPanel = React.memo(({
   );
 });
 
-// 3. Janela Principal (ATUALIZADA COM TRUQUE DE OPACITY PARA PERFOMANCE)
+// 3. Janela Principal (ATUALIZADA COM REF PARA CONTROLAR O PLAY E PAUSE)
 const MainDisplayWindow = React.memo(({
   mainDisplayState, isDobraAtivada, distanceKm, arrivedAtMars, isPaused,
   selectedPlanet, handleChallengeEnd, isDeparting, showStoreModal,
   showSosSurprise, sosSurpriseEvent, handleSeguirPlano, handleMudarRota,
   handleStoreChallengeImpact, telemetry, plannedRoute, routeIndex
 }) => {
+  const cloudsVideoRef = useRef(null);
+  const dobraVideoRef = useRef(null);
+
+  // Efeito para disparar o vídeo das nuvens SOMENTE na hora certa
+  useEffect(() => {
+    if (mainDisplayState === 'clouds' && cloudsVideoRef.current) {
+      cloudsVideoRef.current.currentTime = 0; // Volta para o começo
+      cloudsVideoRef.current.play().catch(e => console.log("Erro ao tocar clouds:", e));
+    } else if (cloudsVideoRef.current) {
+      cloudsVideoRef.current.pause(); // Pausa para economizar processamento
+    }
+  }, [mainDisplayState]);
+
+  // Efeito para disparar o vídeo da dobra SOMENTE na hora certa
+  useEffect(() => {
+    if (isDobraAtivada && dobraVideoRef.current) {
+      dobraVideoRef.current.play().catch(e => console.log("Erro ao tocar dobra:", e));
+    } else if (dobraVideoRef.current) {
+      dobraVideoRef.current.pause(); // Pausa para economizar processamento
+    }
+  }, [isDobraAtivada]);
+
   return (
     <div className="main-display">
       {mainDisplayState === 'acee' && (<img src="/images/ACEE.png" alt="ACEE" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain', position: 'absolute', zIndex: 10 }} />)}
 
-      {/* VÍDEO DAS NUVENS: Sempre montado, visibilidade controlada via CSS opacity para evitar stuttering na montagem */}
+      {/* VÍDEO DAS NUVENS: Sem autoPlay, controlado via useEffect */}
       <video
+        ref={cloudsVideoRef}
         src="/images/clouds.webm"
         className="cloud-animation-video"
-        autoPlay
         muted
         playsInline
         preload="auto"
@@ -211,10 +233,10 @@ const MainDisplayWindow = React.memo(({
         }}
       />
 
-      {/* VÍDEO DA DOBRA: Sempre montado, visibilidade controlada via CSS opacity para evitar lag ao clicar no botão */}
+      {/* VÍDEO DA DOBRA: Sem autoPlay, controlado via useEffect (mas mantendo o loop) */}
       <video
+        ref={dobraVideoRef}
         src="/images/Vluz-Dobra.webm"
-        autoPlay
         loop
         muted
         playsInline
@@ -240,10 +262,10 @@ const MainDisplayWindow = React.memo(({
         position: 'absolute',
         width: '100%',
         height: '100%',
-        opacity: (mainDisplayState === 'stars' && !isDobraAtivada) ? 1 : 0.01, /* Opacidade mínima para o navegador processar o Canvas sem exibi-lo */
+        opacity: (mainDisplayState === 'stars' && !isDobraAtivada) ? 1 : 0.01,
         pointerEvents: (mainDisplayState === 'stars' && !isDobraAtivada) ? 'auto' : 'none',
         zIndex: 3,
-        transition: 'opacity 0.4s ease' /* Suaviza a transição visual */
+        transition: 'opacity 0.4s ease'
       }}>
         <SpaceView
           distance={distanceKm}
@@ -253,7 +275,7 @@ const MainDisplayWindow = React.memo(({
           selectedPlanet={selectedPlanet}
           onChallengeEnd={handleChallengeEnd}
           isDeparting={isDeparting}
-          isActive={mainDisplayState === 'stars' && !isDobraAtivada} /* Controle de áudio */
+          isActive={mainDisplayState === 'stars' && !isDobraAtivada}
         />
       </div>
 
