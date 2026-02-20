@@ -622,7 +622,7 @@
             "dialogo": [
                 {
                     "personagemId": "cerruti",
-                    "texto": "Pessoal, quero ouvir de vocês o que aconteceu no SIIE. Podemos começar?...",
+                    "texto": "Pessoal, quero ouvir de vocês o que aconteceu no Sistema Internacional de Informações Espaciais (SIIE). Podemos começar?...",
                     "duracao": 5000
                 },
                 {
@@ -642,18 +642,33 @@
                 },
                 {
                     "personagemId": "sisifo",
-                    "texto": "Precisamos conduzir as coisas como se nada tivesse acontecido, até termos em mãos o relatório final do compliance. Acho temerário levantar suspeitas sem qualquer dado de prova.",
+                    "texto": "Precisamos conduzir as coisas como se nada tivesse acontecido, até termos em mãos o relatório final do compliance. ",
+                    "duracao": 10000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": " Acho temerário levantar suspeitas sem qualquer dado de prova.",
                     "duracao": 10000
                 },
                 {
                     "personagemId": "demeter",
-                    "texto": "...A operação do sistema está sob minha responsabilidade. Quero aguardar objetivamente o relatório com as orientações para, então, me posicionar.",
-                    "duracao": 8000
+                    "texto": "...A operação do sistema está sob minha responsabilidade. Quero aguardar objetivamente o relatório com as orientações para,",
+                    "duracao": 4000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "me posicionar.",
+                    "duracao": 1000
                 },
                 {
                     "personagemId": "cerruti",
-                    "texto": "Tenho uma informação adicional a vocês: algumas informações foram repassadas a um de nossos fornecedores da base na Terra... Agradeço a presença, e Aquiles - vamos nos falar em minha sala... Dispensados pessoal.",
-                    "duracao": 10000
+                    "texto": "Tenho uma informação adicional a vocês: algumas informações foram repassadas a um de nossos fornecedores da base na Terra...",
+                    "duracao": 4000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": "Agradeço a presença de todos…. Aquiles, quero falar com você em minha sala…Dispensados pessoal.",
+                    "duracao": 4000
                 }
             ],
             "opcoes": [

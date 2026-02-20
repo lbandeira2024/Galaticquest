@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import './MandalaVirtudes.css';
-import { useConfig } from './ConfigContext'; // <--- IMPORTAÇÃO CORRETA
+import { useConfig } from './ConfigContext';
 
 // --- Dados estáticos movidos para fora do componente para otimização ---
 
@@ -535,11 +535,11 @@ const VIRTUE_RULES = {
 };
 
 const MandalaVirtudes = ({ onClose, groupId }) => {
-    // --- CORREÇÃO: Hook chamado no nível superior ---
     const { apiBaseUrl } = useConfig();
 
     const [virtueStates, setVirtueStates] = useState({});
     const [csdSpecificLetter, setCsdSpecificLetter] = useState(null);
+    const [csdSpecificText, setCsdSpecificText] = useState(null); // --- NOVO: Estado para armazenar o texto da escolha ---
     const [showCupertinoImage, setShowCupertinoImage] = useState(false);
     const [quizzChallenges, setQuizzChallenges] = useState([]);
     const containerRef = useRef(null);
@@ -553,7 +553,6 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
         setQuizzChallenges([]);
         const fetchAllChallenges = async () => {
             try {
-                // --- CORREÇÃO: Uso da variável obtida pelo hook ---
                 const response = await fetch(`${apiBaseUrl}/group/${groupId}/all-cds-challenges`);
                 const data = await response.json();
                 if (data.success && Array.isArray(data.challenges)) {
@@ -567,7 +566,7 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
             }
         };
         fetchAllChallenges();
-    }, [groupId, apiBaseUrl]); // Adicionada dependência apiBaseUrl
+    }, [groupId, apiBaseUrl]);
 
     useEffect(() => {
         const updateSize = () => {
@@ -583,14 +582,12 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
         return () => window.removeEventListener('resize', updateSize);
     }, []);
 
-    // --- CORREÇÃO: Normaliza ID para garantir correspondência (Maiúsculas e sem espaços) ---
     const normalizeId = (id) => id ? id.toString().toUpperCase().replace(/\s/g, '') : '';
 
     const challengesMap = useMemo(() => {
         const map = new Map();
         quizzChallenges.forEach(c => {
             if (c.desafioId) {
-                // Armazena no mapa usando a chave normalizada
                 map.set(normalizeId(c.desafioId), c);
             }
         });
@@ -600,12 +597,19 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
     const getQuizzLinkText = (desafioId) => QUIZZ_NAMES[desafioId] || `QUIZZ ${desafioId.replace('CSD', '')}`;
 
     const handleQuizzClick = (challenge) => {
-        const { desafioId, escolhaIdLetter } = challenge;
+        const { desafioId, escolhaIdLetter, escolha } = challenge;
         const ruleKey = `${desafioId}-${escolhaIdLetter}`;
         const rule = VIRTUE_RULES[ruleKey];
 
         setShowCupertinoImage(rule?.showImage || false);
         setCsdSpecificLetter(escolhaIdLetter);
+
+        // --- NOVO: Captura o texto da escolha ---
+        if (escolha && escolha.texto) {
+            setCsdSpecificText(escolha.texto);
+        } else {
+            setCsdSpecificText("Texto não disponível");
+        }
 
         const newStates = {};
 
@@ -674,8 +678,6 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
                     <div className="quizz-link-container">
                         {Array.from({ length: 25 }).map((_, index) => {
                             const expectedChallengeId = `CSD${index + 1}`;
-
-                            // --- CORREÇÃO: Busca normalizada no mapa ---
                             const normalizedExpectedId = normalizeId(expectedChallengeId);
                             const challenge = challengesMap.get(normalizedExpectedId);
 
@@ -696,9 +698,19 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
                         {containerSize.width > 0 && renderVirtues()}
                         <button className="close-button" onClick={onClose}>&times;</button>
                     </div>
+
+                    {/* --- NOVO: Estrutura HTML do Tooltip adicionada --- */}
                     {csdSpecificLetter && (
-                        <div className="csd-letter-display">{csdSpecificLetter}</div>
+                        <div className="csd-letter-display">
+                            {csdSpecificLetter}
+                            {csdSpecificText && (
+                                <div className="csd-letter-tooltip">
+                                    {csdSpecificText}
+                                </div>
+                            )}
+                        </div>
                     )}
+
                     {showCupertinoImage && (
                         <div style={{ position: 'absolute', bottom: '20px', right: '20px', zIndex: 1006 }}>
                             <img src="../images/ST CUPERTINO/st_cupertino_comemorando.gif" alt="St Cupertino Comemorando" style={{ maxWidth: '300px', height: '210px' }} />
