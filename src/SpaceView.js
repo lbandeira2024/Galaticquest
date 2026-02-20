@@ -47,7 +47,7 @@ const planetImageMap = {
 
 const PLANET_MUSIC_CONFIG = {
   mercurio: { src: '/sounds/mercurio/mercurio.mp3', volume: 0.4 },
-  marte: { src: '/sounds/marte/marte.mp3', volume: 0.5 },
+  marte: { src: '/sounds/marte/Marte.mp3', volume: 0.5 },
   venus: { src: '/sounds/Venus/venus.mp3', volume: 0.5 },
   lua: { src: '/sounds/lua/lua.mp3', volume: 0.5 },
   acee: { src: '/sounds/ACEE/EstacaoACEE.mp3', volume: 0.5 },
@@ -60,7 +60,22 @@ const PLANET_MUSIC_CONFIG = {
   io: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 },
   europa: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 },
   calisto: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 },
-  ganimedes: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 }
+  ganimedes: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 },
+  fobos: { src: '/sounds/luasMarte/luasMarte.mp3', volume: 0.5 },
+  deimos: { src: '/sounds/luasMarte/luasMarte.mp3', volume: 0.5 },
+  tita: { src: '/sounds/luasSaturno/tita_.encelado_mimas.mp3', volume: 0.5 },
+  encelado: { src: '/sounds/luasSaturno/tita_.encelado_mimas.mp3', volume: 0.5 },
+  mimas: { src: '/sounds/luasSaturno/tita_.encelado_mimas.mp3', volume: 0.5 },
+  makemake: { src: '/sounds/makemake/makemake.mp3', volume: 0.5 },
+  netuno: { src: '/sounds/netuno/Netuno.mp3', volume: 0.5 },
+  plutao: { src: '/sounds/Plutao/plutao.mp3', volume: 0.5 },
+  proximacentaurib: { src: '/sounds/ProximaC/proximaCentauri.mp3', volume: 0.5 },
+  saturno: { src: '/sounds/saturno/Saturno.mp3', volume: 0.5 },
+  titania: { src: '/sounds/Titania/titaniaOberon.mp3', volume: 0.5 },
+  trappist: { src: '/sounds/Trappist-1/Trappist-1.mp3', volume: 0.5 },
+  tritao: { src: '/sounds/tritao/tritao.mp3', volume: 0.5 },
+  urano: { src: '/sounds/urano/Urano.mp3', volume: 0.5 },
+  vesta: { src: '/sounds/Vesta/DIMORPHOS_Vesta.mp3', volume: 0.5 }
 };
 
 const STAR_HUES = [210, 120, 30, 0, 60];
