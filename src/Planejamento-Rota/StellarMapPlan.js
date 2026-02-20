@@ -231,10 +231,17 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
     const handleBodyClick = useCallback((body) => {
         if (isRouteConfirmed) return;
         if (visitedDestinations.includes(body.name)) return;
-        if (body.name === "Sol" || (body.name === "Terra" && plannedRoute.steps.length > 1)) {
+
+        // CORREÇÃO: Ignora completamente o clique no Sol
+        if (body.name === "Sol") {
+            return;
+        }
+
+        if (body.name === "Terra" && plannedRoute.steps.length > 1) {
             setSelectedBody(body);
             return;
         }
+
         dispatchRouteAction({ type: 'ADD_STEP', payload: { destination: body.name } });
     }, [isRouteConfirmed, visitedDestinations, plannedRoute.steps.length]);
 
