@@ -199,7 +199,6 @@ const MainDisplayWindow = React.memo(({
         className="cloud-animation-video"
         autoPlay
         muted
-        loop
         playsInline
         preload="auto"
         style={{
