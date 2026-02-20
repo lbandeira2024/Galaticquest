@@ -182,7 +182,7 @@ const RightMonitorPanel = React.memo(({
   );
 });
 
-// 3. Janela Principal (ATUALIZADA COM WARM-UP E ACELERAÇÃO DE HARDWARE)
+// 3. Janela Principal
 const MainDisplayWindow = React.memo(({
   mainDisplayState, isDobraAtivada, distanceKm, arrivedAtMars, isPaused,
   selectedPlanet, handleChallengeEnd, isDeparting, showStoreModal,
@@ -192,7 +192,6 @@ const MainDisplayWindow = React.memo(({
   const cloudsVideoRef = useRef(null);
   const dobraVideoRef = useRef(null);
 
-  // EFEITO WARM-UP: Obriga a GPU a processar os vídeos silenciosamente no primeiro carregamento
   useEffect(() => {
     const warmUpVideos = async () => {
       try {
@@ -215,13 +214,11 @@ const MainDisplayWindow = React.memo(({
     warmUpVideos();
   }, []);
 
-  // Controle das Nuvens
   useEffect(() => {
     let timeout;
     if (mainDisplayState === 'clouds' && cloudsVideoRef.current) {
       cloudsVideoRef.current.play().catch(e => console.log("Erro ao tocar clouds:", e));
     } else if (cloudsVideoRef.current) {
-      // Espera o fade-out acabar (150ms) antes de pausar para não congelar na tela
       timeout = setTimeout(() => {
         if (cloudsVideoRef.current) cloudsVideoRef.current.pause();
       }, 150);
@@ -229,14 +226,12 @@ const MainDisplayWindow = React.memo(({
     return () => clearTimeout(timeout);
   }, [mainDisplayState]);
 
-  // Controle da Dobra
   useEffect(() => {
     let timeout;
     if (isDobraAtivada && dobraVideoRef.current) {
-      dobraVideoRef.current.currentTime = 0; // Garante que começa do 0
+      dobraVideoRef.current.currentTime = 0;
       dobraVideoRef.current.play().catch(e => console.log("Erro ao tocar dobra:", e));
     } else if (dobraVideoRef.current) {
-      // Espera o fade-out acabar antes de pausar
       timeout = setTimeout(() => {
         if (dobraVideoRef.current) dobraVideoRef.current.pause();
       }, 150);
@@ -248,7 +243,6 @@ const MainDisplayWindow = React.memo(({
     <div className="main-display">
       {mainDisplayState === 'acee' && (<img src="/images/ACEE.png" alt="ACEE" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain', position: 'absolute', zIndex: 10 }} />)}
 
-      {/* VÍDEO DAS NUVENS: Acelerado por GPU */}
       <video
         ref={cloudsVideoRef}
         src="/images/clouds.webm"
@@ -260,14 +254,13 @@ const MainDisplayWindow = React.memo(({
           opacity: mainDisplayState === 'clouds' ? 1 : 0,
           pointerEvents: mainDisplayState === 'clouds' ? 'auto' : 'none',
           position: 'absolute',
-          zIndex: mainDisplayState === 'clouds' ? 5 : -1, // Remove do caminho quando invisível
+          zIndex: mainDisplayState === 'clouds' ? 5 : -1,
           transition: 'opacity 0.1s ease-in-out',
           willChange: 'opacity',
-          transform: 'translateZ(0)' // Força aceleração gráfica dedicada
+          transform: 'translateZ(0)'
         }}
       />
 
-      {/* VÍDEO DA DOBRA: Acelerado por GPU */}
       <video
         ref={dobraVideoRef}
         src="/images/Vluz-Dobra.webm"
@@ -282,17 +275,15 @@ const MainDisplayWindow = React.memo(({
           height: '100%',
           objectFit: 'cover',
           position: 'absolute',
-          zIndex: isDobraAtivada ? 8 : -1, // Joga para trás da interface quando inativo
+          zIndex: isDobraAtivada ? 8 : -1,
           transition: 'opacity 0.1s ease-in-out',
           willChange: 'opacity',
-          transform: 'translateZ(0)' // Força aceleração gráfica dedicada
+          transform: 'translateZ(0)'
         }}
       />
 
-      {/* ESTÁTICA */}
       {mainDisplayState === 'static' && <div className="static-animation" style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 6 }}></div>}
 
-      {/* SPACEVIEW */}
       <div style={{
         position: 'absolute',
         width: '100%',
@@ -620,10 +611,11 @@ const DecolagemMarte = () => {
   const triggerMinervaInterplanetarySpeed = useCallback(() => {
     minervaEventTriggered.current = true;
     setShowMinervaOnMonitor(true);
-    playSound('/sounds/Mineva-VelInterplanetaria.mp3');
+    // CORREÇÃO 1: Ficheiro renomeado de volta para Mineva-VelInterplanetaria.mp3
+    playSoundRef.current('/sounds/Mineva-VelInterplanetaria.mp3');
     setTimeout(() => { setShowMinervaOnMonitor(false); }, 5000);
-    setTimeout(() => { setIsBoostingTo60k(true); playSound('/sounds/empuxo.wav'); }, 2000);
-  }, [playSound]);
+    setTimeout(() => { setIsBoostingTo60k(true); playSoundRef.current('/sounds/empuxo.wav'); }, 2000);
+  }, []);
 
   const constructPhotoUrl = (gameNumber, teamName) => {
     if (!gameNumber || !teamName) return null;
@@ -979,12 +971,13 @@ const DecolagemMarte = () => {
 
   useEffect(() => { return () => { stopAllAudio(); }; }, [stopAllAudio]);
 
+  // CORREÇÃO 2: Usa playSoundRef.current no useEffect para garantir que o som toca
   useEffect(() => {
     if (telemetry.velocity.kmh >= 59500 && !isDobraEnabled && !isDobraAtivada && distanceKm > 500000 && !isWarpCooldown) {
       setIsDobraEnabled(true);
-      playSound('/sounds/05.Dobra-Active.mp3');
+      playSoundRef.current('/sounds/05.Dobra-Active.mp3');
     }
-  }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm, playSound, isWarpCooldown]);
+  }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm, isWarpCooldown]);
 
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
@@ -994,8 +987,8 @@ const DecolagemMarte = () => {
       if (distanceKmRef.current <= 0) return;
       if (isForcedMapEditRef.current) return;
 
-      const audio = new Audio('/sounds/minervaSOS.mp3');
-      audio.play().catch(e => console.log("Erro ao tocar áudio SOS:", e));
+      playSoundRef.current('/sounds/minervaSOS.mp3');
+
       setIsSosMinervaActive(true);
       setTimeout(() => { setIsSosMinervaActive(false); }, 5000);
       const randomPlanet = PLANET_DATA_FOR_SOS[Math.floor(Math.random() * PLANET_DATA_FOR_SOS.length)];
@@ -1188,20 +1181,21 @@ const DecolagemMarte = () => {
   }, [isPaused, travelStarted]);
 
   // Evento de velocidade Interplanetaria
+  // CORREÇÃO 3: Usa playSoundRef.current no useEffect
   useEffect(() => {
     if (isPaused || !travelStarted || minervaEventTriggered.current) return;
     if (travelTime >= 60) {
       minervaEventTriggered.current = true;
       setShowMinervaOnMonitor(true);
-      playSound('/sounds/Mineva-VelInterplanetaria.mp3');
+      playSoundRef.current('/sounds/Mineva-VelInterplanetaria.mp3');
       hideMinervaTimerRef.current = setTimeout(() => {
         setShowMinervaOnMonitor(false);
         boostTimerRef.current = setTimeout(() => {
-          if (!isPaused) { playSound('/sounds/empuxo.wav'); setIsBoostingTo60k(true); }
+          if (!isPausedRef.current) { playSoundRef.current('/sounds/empuxo.wav'); setIsBoostingTo60k(true); }
         }, 5000);
       }, 5000);
     }
-  }, [travelTime, travelStarted, isPaused, playSound]);
+  }, [travelTime, travelStarted, isPaused]);
 
   // Monitoramento de Aproximação
   useEffect(() => {
@@ -1213,12 +1207,12 @@ const DecolagemMarte = () => {
       setIsBoostingTo60k(false);
     }
     if (!isMoon && distanceKm <= approachDistanceThreshold && !approachSoundPlayed.current) {
-      playSound('/sounds/empuxo.wav');
+      playSoundRef.current('/sounds/empuxo.wav');
       approachSoundPlayed.current = true;
       setIsFinalApproach(true);
       setIsBoostingTo60k(false);
     }
-  }, [distanceKm, isDobraAtivada, selectedPlanet.nome, playSound, isPaused, isLoadingRoute]);
+  }, [distanceKm, isDobraAtivada, selectedPlanet.nome, isPaused, isLoadingRoute]);
 
   // SOS Logic
   const isSystemCritical = telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20;
