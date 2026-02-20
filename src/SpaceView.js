@@ -45,7 +45,6 @@ const planetImageMap = {
   boktok: '/images/stations/BOKTOK-Rotacionando.webm'
 };
 
-// Dicionário de Músicas Específicas dos Planetas e Estações
 const PLANET_MUSIC_CONFIG = {
   mercurio: { src: '/sounds/mercurio/mercurio.mp3', volume: 0.4 },
   marte: { src: '/sounds/marte/marte.mp3', volume: 0.5 },
@@ -59,9 +58,7 @@ const PLANET_MUSIC_CONFIG = {
   jupiter: { src: '/sounds/jupiter/jupiter.mp3', volume: 0.5 }
 };
 
-// Cores estáticas OTIMIZADAS
 const STAR_HUES = [210, 120, 30, 0, 60];
-// Cores pré-processadas para evitar cálculos repetitivos dentro do loop de renderização (Performance CPU)
 const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 80%)`);
 
 const SpaceView = ({
@@ -81,13 +78,10 @@ const SpaceView = ({
   const animationFrameRef = useRef(null);
   const lastTimeRef = useRef(0);
 
-  // Refs para performance (evita re-render no loop)
   const distanceRef = useRef(distance);
   const forceLargeRef = useRef(forceLarge);
   const isDepartingRef = useRef(isDeparting);
   const isWarpActiveRef = useRef(isWarpActive);
-
-  // NOVO: Ref para interpolação visual suave
   const currentVisualDistanceRef = useRef(distance);
 
   const [planetImageLoaded, setPlanetImageLoaded] = useState(false);
@@ -103,7 +97,6 @@ const SpaceView = ({
 
   const { playTrack } = useAudio();
 
-  // Atualiza refs quando as props mudam
   useEffect(() => { distanceRef.current = distance; }, [distance]);
   useEffect(() => { forceLargeRef.current = forceLarge; }, [forceLarge]);
   useEffect(() => { isDepartingRef.current = isDeparting; }, [isDeparting]);
@@ -113,7 +106,6 @@ const SpaceView = ({
     targetStarSpeedRef.current = isWarpActive ? WARP_SPEED : NORMAL_SPEED;
   }, [isWarpActive]);
 
-  // Inicializa estrelas apenas UMA vez
   useEffect(() => {
     if (starsRef.current.length === 0) {
       starsRef.current = Array.from({ length: 400 }, () => ({
@@ -127,7 +119,6 @@ const SpaceView = ({
     }
   }, []);
 
-  // Fast Stars (Memoized)
   const fastStars = useMemo(() => {
     const starClasses = ['star-blue', 'star-green', 'star-orange', 'star-red', 'star-yellow'];
     return Array.from({ length: 40 }, (_, i) => ({
@@ -144,11 +135,10 @@ const SpaceView = ({
     }));
   }, []);
 
-  // Áudio Ambiente com Fade (Dobra, Planetas Específicos e Voo Padrão)
   const isNearPlanet = distance <= 1000;
 
   useEffect(() => {
-    let targetAudioSrc = '/sounds/02.Navigating-Flying.mp3'; // Música Padrão
+    let targetAudioSrc = '/sounds/02.Navigating-Flying.mp3';
     let targetVolume = 1.0;
 
     if (isWarpActive) {
@@ -167,11 +157,13 @@ const SpaceView = ({
     });
   }, [isWarpActive, isNearPlanet, planetName, playTrack]);
 
-  // Carregamento da Imagem do Planeta
   useEffect(() => {
     let planetNameFromProps = selectedPlanet?.nome || 'marte';
     const planetNameNormalized = planetNameFromProps.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
     setPlanetName(planetNameNormalized);
+
+    // CORREÇÃO: Reset instantâneo da distância visual ao mudar o planeta
+    currentVisualDistanceRef.current = distanceRef.current;
 
     let imagePath;
     if (planetNameNormalized === 'boctok') {
@@ -196,7 +188,6 @@ const SpaceView = ({
     }
   }, [selectedPlanet?.nome]);
 
-  // LOOP DE ANIMAÇÃO (CANVAS)
   useEffect(() => {
     if (isPaused) {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
@@ -234,7 +225,6 @@ const SpaceView = ({
       const isWarping = isWarpActiveRef.current;
       const starSpeedHigh = currentStarSpeedRef.current > 5;
 
-      // Movimento suave da câmera
       if (!isWarping) {
         const time = now * 0.0005;
         velocity.current.x = Math.sin(time) * 0.05;
@@ -247,15 +237,10 @@ const SpaceView = ({
         planetContainerRef.current.style.transform = `translate(calc(-50% + ${position.current.x}px), calc(-50% + ${position.current.y}px))`;
       }
 
-      // --- INTERPOLAÇÃO VISUAL DA DISTÂNCIA ---
       const targetDist = distanceRef.current;
-
-      // Se a diferença for gigantesca (ex: o jogo acabou de iniciar e saltou para 300 milhões),
-      // a câmara corta diretamente para o alvo para evitar o efeito de encolhimento.
       if (Math.abs(targetDist - currentVisualDistanceRef.current) > 5000000) {
         currentVisualDistanceRef.current = targetDist;
       } else {
-        // "Desliza" o valor visual em direção ao valor real (efeito smooth) durante o voo normal
         currentVisualDistanceRef.current += (targetDist - currentVisualDistanceRef.current) * 0.1;
       }
 
@@ -263,7 +248,6 @@ const SpaceView = ({
         currentVisualDistanceRef.current = targetDist;
       }
 
-      // Manipulação do Planeta (Opacidade/Escala)
       if (planetImageRef.current && planetImageLoaded && !isWarping) {
         const visualDist = currentVisualDistanceRef.current;
         const force = forceLargeRef.current;
@@ -292,7 +276,6 @@ const SpaceView = ({
             const MAX_SCALE = 2.8;
             const MIN_SCALE = 0.05;
             const OPTICAL_FACTOR = 1500000;
-
             scale = MAX_SCALE / (1 + (visualDist / OPTICAL_FACTOR));
             scale = Math.max(MIN_SCALE, scale);
           }
@@ -300,8 +283,6 @@ const SpaceView = ({
         planetImageRef.current.style.transform = `scale(${scale})`;
       }
 
-      // Desenhar Estrelas (TOTALMENTE OTIMIZADO COM GLOBAL ALPHA)
-      // Reseta o alpha antes de pintar o fundo escuro
       ctx.globalAlpha = 1.0;
       ctx.fillStyle = '#000014';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -339,8 +320,6 @@ const SpaceView = ({
         if (x < 0 || x > width || y < 0 || y > height) continue;
 
         const size = scale * star.size * 0.3;
-
-        // LÓGICA OTIMIZADA: globalAlpha substitui centenas de cálculos de strings!
         ctx.globalAlpha = Math.min(1.0, scale * 1.5);
 
         if (starSpeedHigh) {

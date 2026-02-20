@@ -637,36 +637,33 @@ const DecolagemMarte = () => {
     playSound('/sounds/empuxo.wav');
     setIsDeparting(true);
 
+    // --- CORREÇÃO: Reseta tudo instantaneamente FORA do setTimeout ---
+    const currentIndex = routeIndexRef.current;
+    const currentRoute = plannedRouteRef.current;
+
+    if (currentRoute && currentRoute[currentIndex] && currentRoute[currentIndex + 1]) {
+      setOriginPlanet({ nome: currentRoute[currentIndex].name });
+      setSelectedPlanet({ nome: currentRoute[currentIndex + 1].name });
+      const nextDistance = currentRoute[currentIndex + 1].distance || 300000000;
+      setDistanceKm(nextDistance);
+    } else {
+      setDistanceKm(300000000);
+    }
+
+    setProgress(0);
+    setArrivedAtMars(false);
+    setIsFinalApproach(false);
+    approachSoundPlayed.current = false;
+    setActiveChallengeData(null);
+    setIsDialogueFinished(false);
+    setTravelStarted(true);
+    setDobraCooldownEnd(0);
+    setProcessadorO2(0);
+    // ------------------------------------------------------------------
+
     setTimeout(async () => {
-      // --- CORREÇÃO APLICADA AQUI ---
-      // Lógica de rota local (Evita pedir dados velhos ao DB e reiniciar a viagem)
-      const currentIndex = routeIndexRef.current;
-      const currentRoute = plannedRouteRef.current;
-
-      if (currentRoute && currentRoute[currentIndex] && currentRoute[currentIndex + 1]) {
-        setOriginPlanet({ nome: currentRoute[currentIndex].name });
-        setSelectedPlanet({ nome: currentRoute[currentIndex + 1].name });
-        const nextDistance = currentRoute[currentIndex + 1].distance || 300000000;
-        setDistanceKm(nextDistance);
-      } else {
-        setDistanceKm(300000000);
-      }
-
-      setProgress(0);
-      setArrivedAtMars(false);
-      setIsFinalApproach(false);
-      approachSoundPlayed.current = false;
       minervaEventTriggered.current = true;
       triggerMinervaInterplanetarySpeed();
-      setActiveChallengeData(null);
-      setIsDialogueFinished(false);
-      setTravelStarted(true);
-      setDobraCooldownEnd(0);
-      setProcessadorO2(0);
-
-      // REMOVIDO: setRefetchTrigger(prev => prev + 1);
-      // Isso é o que causava o "reset" do planeta!
-
       setIsDeparting(false);
     }, 4000);
   }, [playSound, triggerMinervaInterplanetarySpeed]);
@@ -702,21 +699,27 @@ const DecolagemMarte = () => {
       setIsFinalApproach(false);
       triggerMinervaInterplanetarySpeed();
     } else {
-      playSound('/sounds/empuxo.wav'); setIsDeparting(true); setShowStoreModal(false);
+      playSound('/sounds/empuxo.wav');
+      setIsDeparting(true);
+      setShowStoreModal(false);
+
+      // --- CORREÇÃO: Reseta tudo instantaneamente FORA do setTimeout ---
+      setDistanceKm(300000000);
+      setProgress(0);
+      setArrivedAtMars(false);
+      setIsFinalApproach(false);
+      approachSoundPlayed.current = false;
+      setActiveChallengeData(null);
+      setIsDialogueFinished(false);
+      setTravelStarted(true);
+      setDobraCooldownEnd(0);
+      setProcessadorO2(0);
+      // ------------------------------------------------------------------
+
       setTimeout(async () => {
-        setDistanceKm(300000000);
         await saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
-        setProgress(0);
-        setArrivedAtMars(false);
-        setIsFinalApproach(false);
-        approachSoundPlayed.current = false;
         minervaEventTriggered.current = true;
         triggerMinervaInterplanetarySpeed();
-        setActiveChallengeData(null);
-        setIsDialogueFinished(false);
-        setTravelStarted(true);
-        setDobraCooldownEnd(0);
-        setProcessadorO2(0);
         setRefetchTrigger(prev => prev + 1);
         setIsDeparting(false);
       }, 4000);

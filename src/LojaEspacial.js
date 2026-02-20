@@ -31,7 +31,7 @@ const itemsForSale = [
         name: 'Provisões da Tripulação',
         description: 'Ração especial e lazer. Recupera 10% de Produtividade e 10% de Engajamento.',
         price: 15000,
-        image: '/images/Provisoes.png',
+        image: '/images/provisoes.png',
         type: 'mantimentos',
         effects: [
             { field: 'productivity', value: 10 },
