@@ -25,7 +25,7 @@ const planetImageMap = {
   europa: '/images/Planets/europa-rotacionando.gif',
   calisto: '/images/Planets/calisto-rotacionando.gif',
   encelado: '/images/Planets/encelado-rotacionando.gif',
-  gaminedes: '/images/Planets/gaminedes-rotacionando.gif',
+  ganimedes: '/images/Planets/ganimedes-rotacionando.gif',
   pallas: '/images/Planets/pallas-rotacionando.gif',
   Kepler_186f: '/images/Planets/kepler-rotacionando.gif',
   mimas: '/images/Planets/mimas-rotacionando.gif',
@@ -60,7 +60,7 @@ const PLANET_MUSIC_CONFIG = {
   io: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 },
   europa: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 },
   calisto: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 },
-  gaminedes: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 }
+  ganimedes: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 }
 };
 
 const STAR_HUES = [210, 120, 30, 0, 60];
