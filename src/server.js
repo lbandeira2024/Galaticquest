@@ -641,5 +641,6 @@ app.get("/games/:gameNumber/groups-details", async (req, res) => {
   } catch (error) { res.status(500).json({ success: false }); }
 });
 
+
 const PORT = process.env.PORT || config.serverPort || 5000;
 app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Servidor rodando na porta ${PORT}`));
