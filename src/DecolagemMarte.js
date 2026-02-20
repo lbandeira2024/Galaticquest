@@ -182,7 +182,7 @@ const RightMonitorPanel = React.memo(({
   );
 });
 
-// 3. Janela Principal (ATUALIZADA com isActive para o áudio)
+// 3. Janela Principal (ATUALIZADA COM TRUQUE DE OPACITY PARA PERFOMANCE)
 const MainDisplayWindow = React.memo(({
   mainDisplayState, isDobraAtivada, distanceKm, arrivedAtMars, isPaused,
   selectedPlanet, handleChallengeEnd, isDeparting, showStoreModal,
@@ -193,7 +193,7 @@ const MainDisplayWindow = React.memo(({
     <div className="main-display">
       {mainDisplayState === 'acee' && (<img src="/images/ACEE.png" alt="ACEE" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain', position: 'absolute', zIndex: 10 }} />)}
 
-      {/* VÍDEO DAS NUVENS: Sempre montado, visibilidade controlada via CSS inline para evitar stuttering na montagem */}
+      {/* VÍDEO DAS NUVENS: Sempre montado, visibilidade controlada via CSS opacity para evitar stuttering na montagem */}
       <video
         src="/images/clouds.webm"
         className="cloud-animation-video"
@@ -203,13 +203,16 @@ const MainDisplayWindow = React.memo(({
         playsInline
         preload="auto"
         style={{
-          display: mainDisplayState === 'clouds' ? 'block' : 'none',
+          opacity: mainDisplayState === 'clouds' ? 1 : 0,
+          visibility: mainDisplayState === 'clouds' ? 'visible' : 'hidden',
+          pointerEvents: mainDisplayState === 'clouds' ? 'auto' : 'none',
           position: 'absolute',
-          zIndex: 5
+          zIndex: 5,
+          transition: 'opacity 0.1s ease-in-out'
         }}
       />
 
-      {/* VÍDEO DA DOBRA: Sempre montado para evitar lag ao clicar no botão */}
+      {/* VÍDEO DA DOBRA: Sempre montado, visibilidade controlada via CSS opacity para evitar lag ao clicar no botão */}
       <video
         src="/images/Vluz-Dobra.webm"
         autoPlay
@@ -218,12 +221,15 @@ const MainDisplayWindow = React.memo(({
         playsInline
         preload="auto"
         style={{
-          display: isDobraAtivada ? 'block' : 'none',
+          opacity: isDobraAtivada ? 1 : 0,
+          visibility: isDobraAtivada ? 'visible' : 'hidden',
+          pointerEvents: isDobraAtivada ? 'auto' : 'none',
           width: '100%',
           height: '100%',
           objectFit: 'cover',
           position: 'absolute',
-          zIndex: 8
+          zIndex: 8,
+          transition: 'opacity 0.1s ease-in-out'
         }}
       />
 
