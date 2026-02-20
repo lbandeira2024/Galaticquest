@@ -182,7 +182,7 @@ const RightMonitorPanel = React.memo(({
   );
 });
 
-// 3. Janela Principal
+// 3. Janela Principal (ATUALIZADA)
 const MainDisplayWindow = React.memo(({
   mainDisplayState, isDobraAtivada, distanceKm, arrivedAtMars, isPaused,
   selectedPlanet, handleChallengeEnd, isDeparting, showStoreModal,
@@ -191,12 +191,55 @@ const MainDisplayWindow = React.memo(({
 }) => {
   return (
     <div className="main-display">
-      {mainDisplayState === 'acee' && (<img src="/images/ACEE.png" alt="ACEE" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain' }} />)}
-      {mainDisplayState === 'clouds' && (<video src="/images/clouds.webm" className="cloud-animation-video" autoPlay muted loop playsInline preload="auto" />)}
-      {mainDisplayState === 'static' && <div className="static-animation"></div>}
-      {isDobraAtivada ? (
-        <video src="/images/Vluz-Dobra.webm" autoPlay loop muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-      ) : (mainDisplayState === 'stars' && (
+      {mainDisplayState === 'acee' && (<img src="/images/ACEE.png" alt="ACEE" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain', position: 'absolute', zIndex: 10 }} />)}
+
+      {/* VÍDEO DAS NUVENS: Sempre montado, visibilidade controlada via CSS inline para evitar stuttering na montagem */}
+      <video
+        src="/images/clouds.webm"
+        className="cloud-animation-video"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        style={{
+          display: mainDisplayState === 'clouds' ? 'block' : 'none',
+          position: 'absolute',
+          zIndex: 5
+        }}
+      />
+
+      {/* VÍDEO DA DOBRA: Sempre montado para evitar lag ao clicar no botão */}
+      <video
+        src="/images/Vluz-Dobra.webm"
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        style={{
+          display: isDobraAtivada ? 'block' : 'none',
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          position: 'absolute',
+          zIndex: 8
+        }}
+      />
+
+      {/* ESTÁTICA: Renderizada por cima do SpaceView quando está ativa */}
+      {mainDisplayState === 'static' && <div className="static-animation" style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 6 }}></div>}
+
+      {/* SPACEVIEW: Montado antecipadamente, visível dependendo do estado e da dobra para o Canvas renderizar sem causar GAP */}
+      <div style={{
+        position: 'absolute',
+        width: '100%',
+        height: '100%',
+        opacity: (mainDisplayState === 'stars' && !isDobraAtivada) ? 1 : 0.01, /* Opacidade mínima para o navegador processar o Canvas sem exibi-lo */
+        pointerEvents: (mainDisplayState === 'stars' && !isDobraAtivada) ? 'auto' : 'none',
+        zIndex: 3,
+        transition: 'opacity 0.4s ease' /* Suaviza a transição visual */
+      }}>
         <SpaceView
           distance={distanceKm}
           forceLarge={arrivedAtMars}
@@ -206,7 +249,8 @@ const MainDisplayWindow = React.memo(({
           onChallengeEnd={handleChallengeEnd}
           isDeparting={isDeparting}
         />
-      ))}
+      </div>
+
       {showStoreModal && (
         <LojaEspacial
           onClose={() => { }}
