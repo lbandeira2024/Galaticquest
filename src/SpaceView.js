@@ -88,7 +88,7 @@ const SpaceView = ({
   isPaused = false,
   selectedPlanet = { nome: 'marte' },
   isDeparting = false,
-  isActive = true // Nova prop para gerenciar o áudio corretamente
+  isActive = true // Prop para gerenciar o áudio corretamente
 }) => {
   const NORMAL_SPEED = 1.0;
   const WARP_SPEED = 80.0;
@@ -175,7 +175,7 @@ const SpaceView = ({
 
     playTrack(targetAudioSrc, {
       loop: true,
-      isPrimary: false,
+      isPrimary: true, // <--- CORREÇÃO AQUI: Define como faixa principal para substituir a antiga!
       volume: targetVolume,
       fade: true
     });
@@ -447,6 +447,6 @@ export default React.memo(SpaceView, (prevProps, nextProps) => {
     prevProps.forceLarge === nextProps.forceLarge &&
     prevProps.isDeparting === nextProps.isDeparting &&
     prevProps.distance === nextProps.distance &&
-    prevProps.isActive === nextProps.isActive // Dependência fundamental para o React.memo recarregar o áudio
+    prevProps.isActive === nextProps.isActive
   );
 });
