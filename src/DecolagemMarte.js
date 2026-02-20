@@ -619,7 +619,6 @@ const DecolagemMarte = () => {
     });
   }, []);
 
-  // USA A FUNÇÃO DE FORÇA BRUTA (playSFX) AQUI!
   const triggerMinervaInterplanetarySpeed = useCallback(() => {
     minervaEventTriggered.current = true;
     setShowMinervaOnMonitor(true);
@@ -744,7 +743,7 @@ const DecolagemMarte = () => {
     setShowStoreModal(false);
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
-    playSFX('/sounds/empuxo.wav'); // Usa força bruta aqui também
+    playSFX('/sounds/empuxo.wav');
     setIsDeparting(true);
 
     setTimeout(async () => {
@@ -807,7 +806,7 @@ const DecolagemMarte = () => {
       setIsFinalApproach(false);
       triggerMinervaInterplanetarySpeed();
     } else {
-      playSFX('/sounds/empuxo.wav'); // Usa força bruta
+      playSFX('/sounds/empuxo.wav');
       setIsDeparting(true);
       setShowStoreModal(false);
       setTimeout(async () => {
@@ -865,17 +864,19 @@ const DecolagemMarte = () => {
     if (!isDobraEnabled || isDobraAtivada || isPaused) return;
 
     if (telemetryRef.current.atmosphere.o2 <= 0 || telemetryRef.current.propulsion.powerOutput <= 0) {
-      playSound('/sounds/ui-click.mp3'); // Clique do utilizador pode usar playSound normal
+      playSound('/sounds/ui-click.mp3');
       setShowCriticalWarpFail(true);
       setTimeout(() => setShowCriticalWarpFail(false), 7000);
       return;
     }
 
-    stopAllAudio();
+    // Usando blindagem try-catch para evitar crash do navegador e travar a viagem
+    try { stopAllAudio(); } catch (e) { console.error(e); }
+
     setIsDobraAtivada(true);
     setIsDobraEnabled(false);
     setMinervaImage('/images/Minerva/Minerva-Vluz.gif');
-    playSFX('/sounds/05.Dobra-Active.mp3'); // Usa a força bruta
+    playSFX('/sounds/05.Dobra-Active.mp3');
     playTrack('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3', { loop: true, isPrimary: true });
 
     const COOLDOWN_IN_MS = 3 * 60 * 1000;
@@ -884,7 +885,8 @@ const DecolagemMarte = () => {
 
     if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
     dobraTimerRef.current = setTimeout(() => {
-      stopAllAudio();
+
+      try { stopAllAudio(); } catch (e) { console.error(e); }
       playSFX('/sounds/power-down-Warp.mp3');
 
       setTimeout(() => {
@@ -981,7 +983,6 @@ const DecolagemMarte = () => {
     return () => { clearTimeout(monitorTimer1); clearTimeout(monitorTimer2); clearTimeout(monitorTimer3); };
   }, [isLoadingRoute, routeIndex, unlockAudio, playTrack, stopAllAudio]);
 
-  // CORREÇÃO 2: USA FORÇA BRUTA AQUI AOS 60.000 KM/H
   useEffect(() => {
     if (telemetry.velocity.kmh >= 59500 && !isDobraEnabled && !isDobraAtivada && distanceKm > 500000 && !isWarpCooldown) {
       setIsDobraEnabled(true);
@@ -989,7 +990,6 @@ const DecolagemMarte = () => {
     }
   }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm, isWarpCooldown, playSFX]);
 
-  // CORREÇÃO 3: USA FORÇA BRUTA NO SINAL DE SOS
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
@@ -1133,7 +1133,7 @@ const DecolagemMarte = () => {
         if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
         isDobraAtivadaRef.current = false;
         setIsDobraAtivada(false);
-        stopAllAudio();
+        try { stopAllAudio(); } catch (e) { console.error(e); } // Protegido!
         setShowCriticalWarpFail(true);
         setTimeout(() => setShowCriticalWarpFail(false), 7000);
       }
@@ -1209,7 +1209,7 @@ const DecolagemMarte = () => {
       setIsBoostingTo60k(false);
     }
     if (!isMoon && distanceKm <= approachDistanceThreshold && !approachSoundPlayed.current) {
-      playSFX('/sounds/empuxo.wav'); // Usa a função forte
+      playSFX('/sounds/empuxo.wav');
       approachSoundPlayed.current = true;
       setIsFinalApproach(true);
       setIsBoostingTo60k(false);
@@ -1271,146 +1271,149 @@ const DecolagemMarte = () => {
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
 
 
-  // --- GAME LOOP OTIMIZADO (Dependência Vazia) ---
+  // --- GAME LOOP OTIMIZADO COM BLINDAGEM ANTI-CRASH ---
   useEffect(() => {
     const gameLoop = (timestamp) => {
-      // Usa Refs para verificar estado sem depender do State
       if (isPausedRef.current) {
         lastUpdateTime.current = timestamp;
         animationFrameId.current = requestAnimationFrame(gameLoop);
         return;
       }
 
-      if (lastUpdateTime.current === 0) lastUpdateTime.current = timestamp;
-      const deltaTime = timestamp - lastUpdateTime.current;
+      // TUDO ENVOLVIDO NUM TRY-CATCH PARA QUE O JOGO NUNCA CONGELE!
+      try {
+        if (lastUpdateTime.current === 0) lastUpdateTime.current = timestamp;
+        const deltaTime = timestamp - lastUpdateTime.current;
 
-      // Física (a cada ~100ms)
-      if (deltaTime >= telemetryInterval) {
-        lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
-        const dobraAtiva = isDobraAtivadaRef.current;
-        const accelConfig = accelerationRates[chosenShipRef.current] || accelerationRates.default;
-        const WARP_MULTIPLIER = 6.726;
+        if (deltaTime >= telemetryInterval) {
+          lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
+          const dobraAtiva = isDobraAtivadaRef.current;
+          const accelConfig = accelerationRates[chosenShipRef.current] || accelerationRates.default;
+          const WARP_MULTIPLIER = 6.726;
 
-        let targetSpeed = 45000;
-        if (dobraAtiva) { targetSpeed = 100000000; }
-        else if (isBoostingTo60kRef.current) { targetSpeed = 60000; }
-        else if (isFinalApproachRef.current) { targetSpeed = 45000; }
+          let targetSpeed = 45000;
+          if (dobraAtiva) { targetSpeed = 100000000; }
+          else if (isBoostingTo60kRef.current) { targetSpeed = 60000; }
+          else if (isFinalApproachRef.current) { targetSpeed = 45000; }
 
-        let newKmh;
-        const currentSpeed = telemetryRef.current.velocity.kmh;
+          let newKmh;
+          const currentSpeed = telemetryRef.current.velocity.kmh;
 
-        if (dobraAtiva) {
-          const warpAcceleration = Math.floor(accelConfig.perTick * WARP_MULTIPLIER);
-          newKmh = currentSpeed + warpAcceleration;
-        } else {
-          let speedChange = accelConfig.perTick;
-          if (currentSpeed > 65000) { newKmh = 60000; }
-          else {
-            if (currentSpeed < targetSpeed) { newKmh = Math.min(currentSpeed + speedChange, targetSpeed); }
-            else { let brakePower = speedChange * 2; newKmh = Math.max(currentSpeed - brakePower, targetSpeed); }
+          if (dobraAtiva) {
+            const warpAcceleration = Math.floor(accelConfig.perTick * WARP_MULTIPLIER);
+            newKmh = currentSpeed + warpAcceleration;
+          } else {
+            let speedChange = accelConfig.perTick;
+            if (currentSpeed > 65000) { newKmh = 60000; }
+            else {
+              if (currentSpeed < targetSpeed) { newKmh = Math.min(currentSpeed + speedChange, targetSpeed); }
+              else { let brakePower = speedChange * 2; newKmh = Math.max(currentSpeed - brakePower, targetSpeed); }
+            }
+          }
+
+          if (travelStartedRef.current) {
+            const SPEED_OF_LIGHT_KMH = 1079252848.8;
+            telemetryRef.current = { ...telemetryRef.current, velocity: { kmh: newKmh, ms: newKmh / 3.6, rel: `${(newKmh / SPEED_OF_LIGHT_KMH).toFixed(7)}c` } };
+
+            if (timestamp - lastRenderTime.current > 100) {
+              setTelemetry({ ...telemetryRef.current });
+              lastRenderTime.current = timestamp;
+            }
           }
         }
 
-        if (travelStartedRef.current) {
-          const SPEED_OF_LIGHT_KMH = 1079252848.8;
-          telemetryRef.current = { ...telemetryRef.current, velocity: { kmh: newKmh, ms: newKmh / 3.6, rel: `${(newKmh / SPEED_OF_LIGHT_KMH).toFixed(7)}c` } };
-
-          // UI Throttling
-          if (timestamp - lastRenderTime.current > 100) {
-            setTelemetry({ ...telemetryRef.current });
-            lastRenderTime.current = timestamp;
+        if (travelStartedRef.current && !routeChangeLockRef.current) {
+          const currentSpeedKmh = telemetryRef.current.velocity.kmh;
+          let distanceToDecrease = 0;
+          if (currentSpeedKmh >= 60000) {
+            distanceToDecrease = (currentSpeedKmh * 9172) / 3000 / 3.125;
+          } else {
+            distanceToDecrease = 7172 / 3.125;
           }
-        }
-      }
 
-      // Distância (Suavizada)
-      if (travelStartedRef.current && !routeChangeLockRef.current) {
-        const currentSpeedKmh = telemetryRef.current.velocity.kmh;
-        let distanceToDecrease = 0;
-        if (currentSpeedKmh >= 60000) {
-          distanceToDecrease = (currentSpeedKmh * 9172) / 3000 / 3.125;
-        } else {
-          distanceToDecrease = 7172 / 3.125;
-        }
+          const newDistance = Math.max(0, distanceKmRef.current - distanceToDecrease);
+          distanceKmRef.current = newDistance;
+          setDistanceKm(Math.round(newDistance));
 
-        const newDistance = Math.max(0, distanceKmRef.current - distanceToDecrease);
-        distanceKmRef.current = newDistance;
-        setDistanceKm(Math.round(newDistance));
+          const selPlanet = selectedPlanetRef.current;
+          const isSosDestination = selPlanet && selPlanet.nome && selPlanet.nome.startsWith("S.O.S");
 
-        // Chegada e Eventos
-        const selPlanet = selectedPlanetRef.current;
-        const isSosDestination = selPlanet && selPlanet.nome && selPlanet.nome.startsWith("S.O.S");
-
-        if (isSosDestination && !isForcedMapEditRef.current) {
-          if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEventRef.current) {
-            const randIndex = Math.floor(Math.random() * 4);
-            setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
-          }
-          if (newDistance <= 0 && !arrivedAtMarsRef.current) {
-            setArrivedAtMars(true); setSpeed(0);
-            if (!sosSurpriseEventRef.current) {
+          if (isSosDestination && !isForcedMapEditRef.current) {
+            if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEventRef.current) {
               const randIndex = Math.floor(Math.random() * 4);
               setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
             }
+            if (newDistance <= 0 && !arrivedAtMarsRef.current) {
+              setArrivedAtMars(true); setSpeed(0);
+              if (!sosSurpriseEventRef.current) {
+                const randIndex = Math.floor(Math.random() * 4);
+                setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
+              }
 
+              const newRouteIndex = routeIndexRef.current + 1;
+              setRouteIndex(newRouteIndex);
+              saveCurrentProgressRef.current(newRouteIndex);
+
+              setShowSosSurprise(true);
+            }
+          }
+
+          if (newDistance <= 150000 && isDobraAtivadaRef.current) {
+            if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
+
+            // O GRANDE VILÃO DO CONGELAMENTO RESOLVIDO AQUI:
+            try { stopAllAudioRef.current(); } catch (e) { console.error(e); }
+
+            isDobraAtivadaRef.current = false;
+            setIsDobraAtivada(false);
+            setIsFinalApproach(true);
+            setIsBoostingTo60k(false);
+            approachSoundPlayed.current = true;
+            saveTelemetryDataRef.current();
+            setShowWarpDisabledMessage(true);
+            setMinervaImage('/images/Minerva/Minerva_Active.gif');
+            playSFX('/sounds/power-down-Warp.mp3');
+            setTimeout(() => playSFX('/sounds/empuxo.wav'), 800);
+            setTimeout(() => setShowWarpDisabledMessage(false), 10000);
+            setIsWarpCooldown(true);
+            setTimeout(() => { setIsWarpCooldown(false); }, 20000);
+          } else if (newDistance <= 0 && !arrivedAtMarsRef.current && !isForcedMapEditRef.current && !isSosDestination) {
+            setArrivedAtMars(true); setSpeed(45000);
+            const normalizeName = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+            const targetName = normalizeName(selPlanet.nome);
+            const isStation = STATION_NAMES.some(s => targetName.includes(s));
+            if (isStation) { setTimeout(() => { setShowStoreModal(true); }, 2500); }
+            else {
+              const desafioEncontrado = desafiosData.desafios?.find(d => normalizeName(d.planeta) === targetName || d.id === selPlanet.desafioId);
+              if (desafioEncontrado) { setActiveChallengeData(desafioEncontrado); setShowDesafioModal(true); }
+            }
+
+            let newProcessadorO2Value = processadorO2Ref.current;
+            const planetNameInput = selPlanet?.nome || '';
+            const hasWater = Array.from(hasWaterList).some(p => p.toLowerCase() === planetNameInput.toLowerCase().trim());
+            if (hasWater) { const o2Bonus = Math.floor(Math.random() * 5) + 1; newProcessadorO2Value = Math.min(5, processadorO2Ref.current + o2Bonus); }
             const newRouteIndex = routeIndexRef.current + 1;
-            setRouteIndex(newRouteIndex);
-            saveCurrentProgressRef.current(newRouteIndex);
 
-            setShowSosSurprise(true);
-          }
-        }
-
-        if (newDistance <= 150000 && isDobraAtivadaRef.current) {
-          if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
-          stopAllAudioRef.current();
-          isDobraAtivadaRef.current = false;
-          setIsDobraAtivada(false);
-          setIsFinalApproach(true);
-          setIsBoostingTo60k(false);
-          approachSoundPlayed.current = true;
-          saveTelemetryDataRef.current();
-          setShowWarpDisabledMessage(true);
-          setMinervaImage('/images/Minerva/Minerva_Active.gif');
-          playSFX('/sounds/power-down-Warp.mp3'); // Força bruta
-          setTimeout(() => playSFX('/sounds/empuxo.wav'), 800);
-          setTimeout(() => setShowWarpDisabledMessage(false), 10000);
-          setIsWarpCooldown(true);
-          setTimeout(() => { setIsWarpCooldown(false); }, 20000);
-        } else if (newDistance <= 0 && !arrivedAtMarsRef.current && !isForcedMapEditRef.current && !isSosDestination) {
-          setArrivedAtMars(true); setSpeed(45000);
-          const normalizeName = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
-          const targetName = normalizeName(selPlanet.nome);
-          const isStation = STATION_NAMES.some(s => targetName.includes(s));
-          if (isStation) { setTimeout(() => { setShowStoreModal(true); }, 2500); }
-          else {
-            const desafioEncontrado = desafiosData.desafios?.find(d => normalizeName(d.planeta) === targetName || d.id === selPlanet.desafioId);
-            if (desafioEncontrado) { setActiveChallengeData(desafioEncontrado); setShowDesafioModal(true); }
+            (async () => {
+              await saveCurrentProgressRef.current(newRouteIndex);
+              try {
+                await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ routeIndex: newRouteIndex, processadorO2: newProcessadorO2Value, telemetryState: { oxygen: telemetryRef.current.atmosphere.o2, nuclearPropulsion: telemetryRef.current.propulsion.powerOutput, direction: telemetryRef.current.direction, stability: telemetryRef.current.stability, productivity: telemetryRef.current.productivity, interdependence: telemetryRef.current.interdependence, engagement: telemetryRef.current.engagement } }),
+                });
+              } catch (error) { console.error("ERRO", error); }
+              setProcessadorO2(newProcessadorO2Value); setRouteIndex(newRouteIndex); handleChallengeEndRef.current();
+            })();
           }
 
-          let newProcessadorO2Value = processadorO2Ref.current;
-          const planetNameInput = selPlanet?.nome || '';
-          const hasWater = Array.from(hasWaterList).some(p => p.toLowerCase() === planetNameInput.toLowerCase().trim());
-          if (hasWater) { const o2Bonus = Math.floor(Math.random() * 5) + 1; newProcessadorO2Value = Math.min(5, processadorO2Ref.current + o2Bonus); }
-          const newRouteIndex = routeIndexRef.current + 1;
-
-          (async () => {
-            await saveCurrentProgressRef.current(newRouteIndex);
-            try {
-              await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
-                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ routeIndex: newRouteIndex, processadorO2: newProcessadorO2Value, telemetryState: { oxygen: telemetryRef.current.atmosphere.o2, nuclearPropulsion: telemetryRef.current.propulsion.powerOutput, direction: telemetryRef.current.direction, stability: telemetryRef.current.stability, productivity: telemetryRef.current.productivity, interdependence: telemetryRef.current.interdependence, engagement: telemetryRef.current.engagement } }),
-              });
-            } catch (error) { console.error("ERRO", error); }
-            setProcessadorO2(newProcessadorO2Value); setRouteIndex(newRouteIndex); handleChallengeEndRef.current();
-          })();
+          const destinationStepIndex = routeIndexRef.current + 1;
+          const initialDistanceForLeg = (plannedRouteRef.current && plannedRouteRef.current[destinationStepIndex] ? plannedRouteRef.current[destinationStepIndex].distance : null) || newDistance || 1;
+          const distanceTraveled = initialDistanceForLeg - newDistance;
+          const progressPercentage = Math.min(Math.floor((distanceTraveled / initialDistanceForLeg) * 100), 100);
+          setProgress(progressPercentage);
         }
-
-        const destinationStepIndex = routeIndexRef.current + 1;
-        const initialDistanceForLeg = (plannedRouteRef.current && plannedRouteRef.current[destinationStepIndex] ? plannedRouteRef.current[destinationStepIndex].distance : null) || newDistance || 1;
-        const distanceTraveled = initialDistanceForLeg - newDistance;
-        const progressPercentage = Math.min(Math.floor((distanceTraveled / initialDistanceForLeg) * 100), 100);
-        setProgress(progressPercentage);
+      } catch (fatalError) {
+        console.error("Game Loop Anti-Crash ativado. Um erro foi suprimido:", fatalError);
       }
 
       animationFrameId.current = requestAnimationFrame(gameLoop);
@@ -1418,7 +1421,7 @@ const DecolagemMarte = () => {
 
     animationFrameId.current = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animationFrameId.current);
-  }, [API_BASE_URL, userId]); // Dependências mínimas
+  }, [API_BASE_URL, userId, playSFX]);
 
   // Static Screen Effect
   useEffect(() => {
@@ -1442,15 +1445,12 @@ const DecolagemMarte = () => {
 
   const handleCloseEscolhaModal = useCallback(() => { setShowEscolhaModal(false); }, []);
 
-  // ALTERAÇÃO: Atualizado para aceitar 'type' e reabrir ModalDesafio se 'all'
   const handleSpendCoins = useCallback((amount, type) => {
     setSpaceCoins(prev => (prev || 0) - amount);
 
     if (type === 'all') {
       setShowDesafioModal(true);
-      // Fecha o modal de escolha, pois o desafio vai abrir por cima ou no lugar
       setShowEscolhaModal(false);
-      // Reseta o estado do diálogo para que ele comece do zero
       setIsTransmissionStarting(false);
       setIsDialogueFinished(false);
       setDialogueIndex(0);
