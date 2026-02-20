@@ -87,7 +87,8 @@ const SpaceView = ({
   isWarpActive = false,
   isPaused = false,
   selectedPlanet = { nome: 'marte' },
-  isDeparting = false
+  isDeparting = false,
+  isActive = true // Nova prop para gerenciar o áudio corretamente
 }) => {
   const NORMAL_SPEED = 1.0;
   const WARP_SPEED = 80.0;
@@ -157,7 +158,10 @@ const SpaceView = ({
 
   const isNearPlanet = distance <= 1000;
 
+  // Efeito de Áudio Inteligente (Bloqueado se não estiver Ativo)
   useEffect(() => {
+    if (!isActive) return; // Garante que a música não dispare durante as nuvens/estática
+
     let targetAudioSrc = '/sounds/02.Navigating-Flying.mp3';
     let targetVolume = 1.0;
 
@@ -175,14 +179,14 @@ const SpaceView = ({
       volume: targetVolume,
       fade: true
     });
-  }, [isWarpActive, isNearPlanet, planetName, playTrack]);
+  }, [isWarpActive, isNearPlanet, planetName, playTrack, isActive]);
 
   useEffect(() => {
     let planetNameFromProps = selectedPlanet?.nome || 'marte';
     const planetNameNormalized = planetNameFromProps.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
     setPlanetName(planetNameNormalized);
 
-    // CORREÇÃO: Reset instantâneo da distância visual ao mudar o planeta
+    // Reset instantâneo da distância visual ao mudar o planeta
     currentVisualDistanceRef.current = distanceRef.current;
 
     let imagePath;
@@ -442,6 +446,7 @@ export default React.memo(SpaceView, (prevProps, nextProps) => {
     prevProps.isPaused === nextProps.isPaused &&
     prevProps.forceLarge === nextProps.forceLarge &&
     prevProps.isDeparting === nextProps.isDeparting &&
-    prevProps.distance === nextProps.distance
+    prevProps.distance === nextProps.distance &&
+    prevProps.isActive === nextProps.isActive // Dependência fundamental para o React.memo recarregar o áudio
   );
 });

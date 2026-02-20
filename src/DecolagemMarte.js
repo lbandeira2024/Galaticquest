@@ -182,7 +182,7 @@ const RightMonitorPanel = React.memo(({
   );
 });
 
-// 3. Janela Principal (ATUALIZADA)
+// 3. Janela Principal (ATUALIZADA com isActive para o áudio)
 const MainDisplayWindow = React.memo(({
   mainDisplayState, isDobraAtivada, distanceKm, arrivedAtMars, isPaused,
   selectedPlanet, handleChallengeEnd, isDeparting, showStoreModal,
@@ -248,6 +248,7 @@ const MainDisplayWindow = React.memo(({
           selectedPlanet={selectedPlanet}
           onChallengeEnd={handleChallengeEnd}
           isDeparting={isDeparting}
+          isActive={mainDisplayState === 'stars' && !isDobraAtivada} /* Controle de áudio */
         />
       </div>
 
