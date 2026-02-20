@@ -182,7 +182,7 @@ const RightMonitorPanel = React.memo(({
   );
 });
 
-// 3. Janela Principal (ATUALIZADA COM REF PARA CONTROLAR O PLAY E PAUSE)
+// 3. Janela Principal (ATUALIZADA COM MICRO-ATRASO PARA PERFORMANCE)
 const MainDisplayWindow = React.memo(({
   mainDisplayState, isDobraAtivada, distanceKm, arrivedAtMars, isPaused,
   selectedPlanet, handleChallengeEnd, isDeparting, showStoreModal,
@@ -195,19 +195,32 @@ const MainDisplayWindow = React.memo(({
   // Efeito para disparar o vídeo das nuvens SOMENTE na hora certa
   useEffect(() => {
     if (mainDisplayState === 'clouds' && cloudsVideoRef.current) {
-      cloudsVideoRef.current.currentTime = 0; // Volta para o começo
-      cloudsVideoRef.current.play().catch(e => console.log("Erro ao tocar clouds:", e));
+      // O micro-atraso de 50ms permite que o React processe outras tarefas primeiro
+      setTimeout(() => {
+        if (cloudsVideoRef.current) {
+          cloudsVideoRef.current.play().catch(e => console.log("Erro ao tocar clouds:", e));
+        }
+      }, 50);
     } else if (cloudsVideoRef.current) {
-      cloudsVideoRef.current.pause(); // Pausa para economizar processamento
+      cloudsVideoRef.current.pause();
+      // O SEGREDO 1: Forçar a agulha para o início obriga a placa gráfica a pré-renderizar o frame 0
+      cloudsVideoRef.current.currentTime = 0;
     }
   }, [mainDisplayState]);
 
   // Efeito para disparar o vídeo da dobra SOMENTE na hora certa
   useEffect(() => {
     if (isDobraAtivada && dobraVideoRef.current) {
-      dobraVideoRef.current.play().catch(e => console.log("Erro ao tocar dobra:", e));
+      // O micro-atraso impede que o carregamento do áudio "atropele" a descodificação do vídeo
+      setTimeout(() => {
+        if (dobraVideoRef.current) {
+          dobraVideoRef.current.play().catch(e => console.log("Erro ao tocar dobra:", e));
+        }
+      }, 50);
     } else if (dobraVideoRef.current) {
-      dobraVideoRef.current.pause(); // Pausa para economizar processamento
+      dobraVideoRef.current.pause();
+      // O SEGREDO 2: Manter o primeiro frame quente e pronto a exibir
+      dobraVideoRef.current.currentTime = 0;
     }
   }, [isDobraAtivada]);
 
