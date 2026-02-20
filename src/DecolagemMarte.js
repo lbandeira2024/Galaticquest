@@ -182,7 +182,7 @@ const RightMonitorPanel = React.memo(({
   );
 });
 
-// 3. Janela Principal (ATUALIZADA COM MICRO-ATRASO PARA PERFORMANCE)
+// 3. Janela Principal (ATUALIZADA COM WARM-UP E ACELERAÇÃO DE HARDWARE)
 const MainDisplayWindow = React.memo(({
   mainDisplayState, isDobraAtivada, distanceKm, arrivedAtMars, isPaused,
   selectedPlanet, handleChallengeEnd, isDeparting, showStoreModal,
@@ -192,43 +192,63 @@ const MainDisplayWindow = React.memo(({
   const cloudsVideoRef = useRef(null);
   const dobraVideoRef = useRef(null);
 
-  // Efeito para disparar o vídeo das nuvens SOMENTE na hora certa
+  // EFEITO WARM-UP: Obriga a GPU a processar os vídeos silenciosamente no primeiro carregamento
   useEffect(() => {
-    if (mainDisplayState === 'clouds' && cloudsVideoRef.current) {
-      // O micro-atraso de 50ms permite que o React processe outras tarefas primeiro
-      setTimeout(() => {
+    const warmUpVideos = async () => {
+      try {
         if (cloudsVideoRef.current) {
-          cloudsVideoRef.current.play().catch(e => console.log("Erro ao tocar clouds:", e));
+          cloudsVideoRef.current.muted = true;
+          await cloudsVideoRef.current.play();
+          cloudsVideoRef.current.pause();
+          cloudsVideoRef.current.currentTime = 0;
         }
-      }, 50);
+        if (dobraVideoRef.current) {
+          dobraVideoRef.current.muted = true;
+          await dobraVideoRef.current.play();
+          dobraVideoRef.current.pause();
+          dobraVideoRef.current.currentTime = 0;
+        }
+      } catch (e) {
+        console.log("Warm-up interrompido pelo navegador (normal):", e);
+      }
+    };
+    warmUpVideos();
+  }, []);
+
+  // Controle das Nuvens
+  useEffect(() => {
+    let timeout;
+    if (mainDisplayState === 'clouds' && cloudsVideoRef.current) {
+      cloudsVideoRef.current.play().catch(e => console.log("Erro ao tocar clouds:", e));
     } else if (cloudsVideoRef.current) {
-      cloudsVideoRef.current.pause();
-      // O SEGREDO 1: Forçar a agulha para o início obriga a placa gráfica a pré-renderizar o frame 0
-      cloudsVideoRef.current.currentTime = 0;
+      // Espera o fade-out acabar (150ms) antes de pausar para não congelar na tela
+      timeout = setTimeout(() => {
+        if (cloudsVideoRef.current) cloudsVideoRef.current.pause();
+      }, 150);
     }
+    return () => clearTimeout(timeout);
   }, [mainDisplayState]);
 
-  // Efeito para disparar o vídeo da dobra SOMENTE na hora certa
+  // Controle da Dobra
   useEffect(() => {
+    let timeout;
     if (isDobraAtivada && dobraVideoRef.current) {
-      // O micro-atraso impede que o carregamento do áudio "atropele" a descodificação do vídeo
-      setTimeout(() => {
-        if (dobraVideoRef.current) {
-          dobraVideoRef.current.play().catch(e => console.log("Erro ao tocar dobra:", e));
-        }
-      }, 50);
+      dobraVideoRef.current.currentTime = 0; // Garante que começa do 0
+      dobraVideoRef.current.play().catch(e => console.log("Erro ao tocar dobra:", e));
     } else if (dobraVideoRef.current) {
-      dobraVideoRef.current.pause();
-      // O SEGREDO 2: Manter o primeiro frame quente e pronto a exibir
-      dobraVideoRef.current.currentTime = 0;
+      // Espera o fade-out acabar antes de pausar
+      timeout = setTimeout(() => {
+        if (dobraVideoRef.current) dobraVideoRef.current.pause();
+      }, 150);
     }
+    return () => clearTimeout(timeout);
   }, [isDobraAtivada]);
 
   return (
     <div className="main-display">
       {mainDisplayState === 'acee' && (<img src="/images/ACEE.png" alt="ACEE" style={{ maxWidth: '80%', maxHeight: '80%', objectFit: 'contain', position: 'absolute', zIndex: 10 }} />)}
 
-      {/* VÍDEO DAS NUVENS: Sem autoPlay, controlado via useEffect */}
+      {/* VÍDEO DAS NUVENS: Acelerado por GPU */}
       <video
         ref={cloudsVideoRef}
         src="/images/clouds.webm"
@@ -238,15 +258,16 @@ const MainDisplayWindow = React.memo(({
         preload="auto"
         style={{
           opacity: mainDisplayState === 'clouds' ? 1 : 0,
-          visibility: mainDisplayState === 'clouds' ? 'visible' : 'hidden',
           pointerEvents: mainDisplayState === 'clouds' ? 'auto' : 'none',
           position: 'absolute',
-          zIndex: 5,
-          transition: 'opacity 0.1s ease-in-out'
+          zIndex: mainDisplayState === 'clouds' ? 5 : -1, // Remove do caminho quando invisível
+          transition: 'opacity 0.1s ease-in-out',
+          willChange: 'opacity',
+          transform: 'translateZ(0)' // Força aceleração gráfica dedicada
         }}
       />
 
-      {/* VÍDEO DA DOBRA: Sem autoPlay, controlado via useEffect (mas mantendo o loop) */}
+      {/* VÍDEO DA DOBRA: Acelerado por GPU */}
       <video
         ref={dobraVideoRef}
         src="/images/Vluz-Dobra.webm"
@@ -256,21 +277,22 @@ const MainDisplayWindow = React.memo(({
         preload="auto"
         style={{
           opacity: isDobraAtivada ? 1 : 0,
-          visibility: isDobraAtivada ? 'visible' : 'hidden',
           pointerEvents: isDobraAtivada ? 'auto' : 'none',
           width: '100%',
           height: '100%',
           objectFit: 'cover',
           position: 'absolute',
-          zIndex: 8,
-          transition: 'opacity 0.1s ease-in-out'
+          zIndex: isDobraAtivada ? 8 : -1, // Joga para trás da interface quando inativo
+          transition: 'opacity 0.1s ease-in-out',
+          willChange: 'opacity',
+          transform: 'translateZ(0)' // Força aceleração gráfica dedicada
         }}
       />
 
-      {/* ESTÁTICA: Renderizada por cima do SpaceView quando está ativa */}
+      {/* ESTÁTICA */}
       {mainDisplayState === 'static' && <div className="static-animation" style={{ position: 'absolute', width: '100%', height: '100%', zIndex: 6 }}></div>}
 
-      {/* SPACEVIEW: Montado antecipadamente, visível dependendo do estado e da dobra para o Canvas renderizar sem causar GAP */}
+      {/* SPACEVIEW */}
       <div style={{
         position: 'absolute',
         width: '100%',
