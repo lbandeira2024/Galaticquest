@@ -539,7 +539,7 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
 
     const [virtueStates, setVirtueStates] = useState({});
     const [csdSpecificLetter, setCsdSpecificLetter] = useState(null);
-    const [csdSpecificText, setCsdSpecificText] = useState(null); // --- NOVO: Estado para armazenar o texto da escolha ---
+    const [csdSpecificText, setCsdSpecificText] = useState(null);
     const [showCupertinoImage, setShowCupertinoImage] = useState(false);
     const [quizzChallenges, setQuizzChallenges] = useState([]);
     const containerRef = useRef(null);
@@ -597,19 +597,24 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
     const getQuizzLinkText = (desafioId) => QUIZZ_NAMES[desafioId] || `QUIZZ ${desafioId.replace('CSD', '')}`;
 
     const handleQuizzClick = (challenge) => {
-        const { desafioId, escolhaIdLetter, escolha } = challenge;
+        const { desafioId, escolhaIdLetter, escolha, texto } = challenge;
         const ruleKey = `${desafioId}-${escolhaIdLetter}`;
         const rule = VIRTUE_RULES[ruleKey];
 
         setShowCupertinoImage(rule?.showImage || false);
         setCsdSpecificLetter(escolhaIdLetter);
 
-        // --- NOVO: Captura o texto da escolha ---
-        if (escolha && escolha.texto) {
-            setCsdSpecificText(escolha.texto);
-        } else {
-            setCsdSpecificText("Texto não disponível");
+        // --- ATUALIZADO: Captura o campo "texto" de forma robusta e infalível ---
+        let textoFinal = "Texto não disponível";
+        if (texto) {
+            textoFinal = texto; // Se vier direto no objeto challenge
+        } else if (escolha && escolha.texto) {
+            textoFinal = escolha.texto; // Se vier dentro do sub-objeto escolha
+        } else if (typeof escolha === 'string') {
+            textoFinal = escolha; // Se vier como uma string pura
         }
+
+        setCsdSpecificText(textoFinal);
 
         const newStates = {};
 
@@ -699,7 +704,7 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
                         <button className="close-button" onClick={onClose}>&times;</button>
                     </div>
 
-                    {/* --- NOVO: Estrutura HTML do Tooltip adicionada --- */}
+                    {/* Estrutura HTML do Tooltip (Posicionado à direita, abre para a esquerda) */}
                     {csdSpecificLetter && (
                         <div className="csd-letter-display">
                             {csdSpecificLetter}
