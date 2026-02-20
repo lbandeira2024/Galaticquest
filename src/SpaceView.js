@@ -55,7 +55,12 @@ const PLANET_MUSIC_CONFIG = {
   ceres: { src: '/sounds/ceres/ceres.mp3', volume: 0.5 },
   eris: { src: '/sounds/Eris/Eris.mp3', volume: 0.5 },
   haumea: { src: '/sounds/Haumea/haumea.mp3', volume: 0.5 },
-  jupiter: { src: '/sounds/jupiter/jupiter.mp3', volume: 0.5 }
+  jupiter: { src: '/sounds/jupiter/jupiter.mp3', volume: 0.5 },
+  kepler: { src: '/sounds/Kepler/kepler.mp3', volume: 0.5 },
+  io: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 },
+  europa: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 },
+  calisto: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 },
+  gaminedes: { src: '/sounds/LuasJupiter/luasJupiter.mp3', volume: 0.5 }
 };
 
 const STAR_HUES = [210, 120, 30, 0, 60];
