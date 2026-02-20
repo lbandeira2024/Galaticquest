@@ -4,10 +4,10 @@ import axios from 'axios';
 import './AdminPage.css';
 import { useAuth } from './AuthContext';
 import { useAudio } from './AudioManager';
-import { useConfig } from './ConfigContext'; // 1. IMPORTAR O HOOK
+import { useConfig } from './ConfigContext';
 
 const AdminPage = () => {
-    const { apiBaseUrl } = useConfig(); // 2. OBTER A URL DA API DO CONTEXTO
+    const { apiBaseUrl } = useConfig();
     const navigate = useNavigate();
     const { user, logout } = useAuth();
     const { musicAudioRef } = useAudio();
@@ -19,6 +19,9 @@ const AdminPage = () => {
     const [scheduledGames, setScheduledGames] = useState([]);
     const [isMuted, setIsMuted] = useState(musicAudioRef.current ? musicAudioRef.current.muted : false);
     const [pastDateError, setPastDateError] = useState(false);
+
+    // NOVO ESTADO: Controla a mensagem de feedback na tela
+    const [statusMessage, setStatusMessage] = useState({ text: '', type: '' });
 
     const handleLogout = () => {
         if (logout) {
@@ -36,9 +39,8 @@ const AdminPage = () => {
     };
 
     const fetchGames = async () => {
-        if (!apiBaseUrl) return; // Garante que a URL foi carregada
+        if (!apiBaseUrl) return;
         try {
-            // 3. USAR A URL DA API
             const response = await axios.get(`${apiBaseUrl}/games`);
             if (response.data.success) {
                 const gamesWithDates = response.data.games.map(game => ({
@@ -55,7 +57,7 @@ const AdminPage = () => {
 
     useEffect(() => {
         fetchGames();
-    }, [apiBaseUrl]); // 4. Adicionar apiBaseUrl como dependência para refazer a chamada se a URL mudar
+    }, [apiBaseUrl]);
 
     const todayFormatted = new Date().toLocaleDateString('pt-BR', {
         weekday: 'long',
@@ -139,10 +141,9 @@ const AdminPage = () => {
 
     useEffect(() => {
         const fetchNextGameNumber = async () => {
-            if (selectedDates.length === 2 && apiBaseUrl) { // Garante que a URL foi carregada
+            if (selectedDates.length === 2 && apiBaseUrl) {
                 setIsLoadingGameNumber(true);
                 try {
-                    // 5. USAR A URL DA API
                     const response = await axios.get(`${apiBaseUrl}/games/next-number`);
                     if (response.data.success) {
                         setNextGameNumber(response.data.nextGameNumber);
@@ -156,7 +157,7 @@ const AdminPage = () => {
         };
 
         fetchNextGameNumber();
-    }, [selectedDates, apiBaseUrl]); // 6. Adicionar apiBaseUrl como dependência
+    }, [selectedDates, apiBaseUrl]);
 
     const calendarData = useMemo(() => {
         const year = currentDate.getFullYear();
@@ -179,6 +180,9 @@ const AdminPage = () => {
 
     const handleDayClick = (day) => {
         if (!day) return;
+
+        // Limpa mensagens anteriores ao clicar em um novo dia
+        setStatusMessage({ text: '', type: '' });
 
         const newDate = new Date(calendarData.year, calendarData.month, day);
         newDate.setHours(0, 0, 0, 0);
@@ -209,24 +213,34 @@ const AdminPage = () => {
 
     const handleSaveGame = async (e) => {
         e.preventDefault();
-        if (selectedDates.length !== 2 || !apiBaseUrl) return; // Garante que a URL foi carregada
+        if (selectedDates.length !== 2 || !apiBaseUrl) return;
         try {
-            // 7. USAR A URL DA API
             const response = await axios.post(`${apiBaseUrl}/games`, {
                 startDate: selectedDates[0],
                 endDate: selectedDates[1]
             });
             if (response.data.success) {
-                alert(response.data.message);
+                // MODIFICADO: Define a mensagem de sucesso no estado em vez do alert
+                setStatusMessage({
+                    text: response.data.message || "✅ Jogo agendado com sucesso!",
+                    type: 'success'
+                });
                 setSelectedDates([]);
                 setNextGameNumber(null);
                 fetchGames();
                 setPastDateError(false);
+
+                // Opcional: Limpar a mensagem de sucesso após alguns segundos
+                setTimeout(() => setStatusMessage({ text: '', type: '' }), 5000);
             }
         } catch (error) {
             console.error("Erro ao salvar o jogo:", error);
             const errorMessage = error.response?.data?.message || "Não foi possível salvar o jogo.";
-            alert(`❌ Erro: ${errorMessage}`);
+            // MODIFICADO: Define a mensagem de erro no estado em vez do alert
+            setStatusMessage({
+                text: `❌ Erro: ${errorMessage}`,
+                type: 'error'
+            });
         }
     };
 
@@ -381,9 +395,18 @@ const AdminPage = () => {
                                 })}
                             </div>
                         </div>
+
+                        {/* Mensagem de erro para datas passadas */}
                         {pastDateError && (
                             <p className="restriction-message">
                                 ❌ Não é possível agendar jogos em datas passadas.
+                            </p>
+                        )}
+
+                        {/* NOVO: Renderiza a mensagem de sucesso ou erro do formulário */}
+                        {statusMessage.text && (
+                            <p className={`restriction-message ${statusMessage.type === 'success' ? 'success-message' : ''}`}>
+                                {statusMessage.text}
                             </p>
                         )}
                     </main>

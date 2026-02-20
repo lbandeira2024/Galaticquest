@@ -180,17 +180,17 @@
                 {
                     "personagemId": "ares",
                     "texto": "...Oi pessoal, vamos nessa, Mae tem razão: o primeiro passo é olhar o sistema central que vai nos ajudar com os indicadores. ",
-                    "duracao": 8000
+                    "duracao": 4000
                 },
                 {
                     "personagemId": "ares",
                     "texto": "Mae, você pode me ajudar nisso para encontrarmos a melhor solução.",
-                    "duracao": 5000
+                    "duracao": 2000
                 },
                 {
                     "personagemId": "neo",
                     "texto": "Não, não, prefiro que Mae fique aqui com Tamara. Subiremos Ares e eu, enquanto Mae e Tamara permanecem aqui nos comunicando o ",
-                    "duracao": 8000
+                    "duracao": 4000
                 },
                 {
                     "personagemId": "neo",
@@ -200,22 +200,22 @@
                 {
                     "personagemId": "mae",
                     "texto": "Mas,... Sabe, tive um sonho. Eu caminhava com outro astronauta e ouvimos uma voz no solo de Marte que dizia: “Podes fugir dos",
-                    "duracao": 8000
+                    "duracao": 3000
                 },
                 {
                     "personagemId": "mae",
                     "texto": "outros, mas não de ti mesmo”... É tudo muito estranho isso que me ocorre agora. Estranho.",
-                    "duracao": 7000
+                    "duracao": 3000
                 },
                 {
                     "personagemId": "mae",
                     "texto": " “Podes fugir dos outros, mas não de ti mesmo”... É tudo muito estranho isso que me ocorre agora. Estranho.",
-                    "duracao": 7000
+                    "duracao": 3000
                 },
                 {
                     "personagemId": "neo",
                     "texto": "...É isso gente!... Vamos para lá Ares, sua experiência vai valer agora..",
-                    "duracao": 6000
+                    "duracao": 3000
                 }
             ],
             "opcoes": [
@@ -543,8 +543,28 @@
             "dialogo": [
                 {
                     "personagemId": "demeter",
-                    "texto": "Pessoal: ...Dra. Maureen, Capitão Kirk, Gorjah, Atena e Mae, meu obrigado por atenderem ao meu chamado de urgência. Temos um desafio enorme agora, que é nos salvarmos e aos colegas também da Lannús que vem em nossa direção. Não podemos nos esquecer de quem somos. Aqui não importa a gente como individuo, importa o coletivo, importa a nossa comunidade... Saber quem ela é, o que representa de verdade e para onde ela está indo... Capito? A força do todo é maior do que as partes. Para mim, tudo isso é como um ato de fé.",
-                    "duracao": 15000
+                    "texto": "Pessoal: ...Dra. Maureen, Capitão Kirk, Gorjah, Atena e Mae, meu obrigado por atenderem ao meu chamado de urgência.",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "Temos um desafio enorme agora, que é nos salvarmos e aos colegas também da Lannús que vem em nossa direção. ",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "Não podemos nos esquecer de quem somos. Aqui não importa a gente como individuo, importa o coletivo, importa a nossa comunidade",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "... Saber quem ela é, o que representa de verdade e para onde ela está indo... Capito? A força do todo é maior do que as partes. Para mim, tudo isso é como um ato de fé.",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": " Para mim, tudo isso é como um ato de fé.",
+                    "duracao": 2000
                 }
             ],
             "opcoes": [
@@ -627,18 +647,48 @@
                 },
                 {
                     "personagemId": "kopenawa",
-                    "texto": "...Estamos falando de uma sabotagem e provável uso indevido de informações. Não tenho ideia onde possa ter ocorrido isso. Até onde verificamos não teço nenhuma hipótese sobre quem fez, ou foi o mentor do roubo.",
+                    "texto": "...Estamos falando de uma sabotagem e provável uso indevido de informações. Não tenho ideia onde possa ter ocorrido isso.",
+                    "duracao": 10000
+                },
+                {
+                    "personagemId": "kopenawa",
+                    "texto": " Até onde verificamos não teço nenhuma hipótese sobre quem fez, ou foi o mentor do roubo.",
                     "duracao": 10000
                 },
                 {
                     "personagemId": "aletheia",
-                    "texto": "Temos a avaliação do desempenho das pessoas em dia, but não de algo tão grave provocado por alguém. Todos, até se prove o contrário, são de nossa inteira confiança. À princípio, todos têm a presunção de inocência, se não houver nenhum dado relevante sobre o “roubo” a que se refere kopenawa. Temos que tomar cuidado com os ruídos produzidos sem conhecimento de causa e os vieses que carecem de fundamentação... Nossa liderança, parceiros, está sendo testada junto a galera neste momento, acreditem nisso.",
-                    "duracao": 18000
+                    "texto": "Temos a avaliação do desempenho das pessoas em dia, but não de algo tão grave provocado por alguém. Todos, até se prove",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": " o contrário, são de nossa inteira confiança. À princípio, todos têm a presunção de inocência, se não houver nenhum dado ",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": "relevante sobre o “roubo” a que se refere kopenawa. Temos que tomar cuidado com os ruídos produzidos sem conhecimento de causa",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": " e os vieses que carecem de fundamentação... Nossa liderança, parceiros, está sendo testada junto a galera neste momento,",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": " acreditem nisso.",
+                    "duracao": 2000
                 },
                 {
                     "personagemId": "aquiles",
-                    "texto": "Poderia supor algumas pessoas, mas elas não atuam na minha equipe. Por isso, não gostaria de me adiantar. Se você, Cerruti, quiser falar no privado, estou à sua disposição.",
-                    "duracao": 10000
+                    "texto": "Poderia supor algumas pessoas, mas elas não atuam na minha equipe. Por isso, não gostaria de me adiantar. Se você, Cerruti,",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": " quiser falar no privado, estou à sua disposição.",
+                    "duracao": 2000
                 },
                 {
                     "personagemId": "sisifo",
