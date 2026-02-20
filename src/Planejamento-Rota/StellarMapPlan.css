@@ -165,6 +165,7 @@
 
 .moon:hover {
     box-shadow: 0 0 15px white;
+    z-index: 100;
 }
 
 .sun {
@@ -259,14 +260,6 @@
     z-index: 5;
 }
 
-/* --- CLASSE EXCLUSIVA PARA POSICIONAR O TEXTO DAS LUAS NA ESQUERDA --- */
-.moon-label-container {
-    bottom: auto !important;
-    top: 50% !important;
-    left: auto !important;
-    right: calc(100% + 6px) !important;
-}
-
 .body-label {
     color: white !important;
     font-size: 10px;
@@ -280,23 +273,42 @@
     display: inline-block;
 }
 
-/* --- ESTILIZAÇÃO DO TEXTO DA LUA (Verde e Oculto por padrão) --- */
-.moon-label {
-    color: #00ff00 !important;
-    /* Cor Verde Brilhante */
-    font-size: 10px !important;
-    font-weight: bold !important;
-    opacity: 0;
-    /* Começa invisível */
-    transition: opacity 0.3s ease, transform 0.2s ease;
+/* =========================================
+   REGRAS ESPECÍFICAS PARA TODAS AS LUAS
+========================================= */
+
+/* Forçar o contentor do texto para a ESQUERDA da lua */
+.celestial-body.moon .label-container.moon-label-container {
+    top: 50% !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: calc(100% + 8px) !important;
 }
 
-/* Só aparece quando o rato passa em cima da lua */
-.moon:hover .moon-label {
-    opacity: 1 !important;
-    transform: scale(1.15);
-    /* Um ligeiro aumento quando passa o rato por cima */
+/* Forçar a invisibilidade padrão e a cor verde em todos os textos das luas */
+.celestial-body.moon .body-label.moon-label {
+    color: #00ff00 !important;
+    font-weight: bold !important;
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5) !important;
+    background: rgba(0, 40, 0, 0.7) !important;
+    border: 1px solid #00ff00 !important;
+
+    /* INVISÍVEL POR PADRÃO (Sem causar "Ghost hovers") */
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transition: all 0.2s ease !important;
+
+    pointer-events: auto !important;
 }
+
+/* Quando o utilizador passa o rato em cima do "corpo" da lua, o texto surge à esquerda */
+.celestial-body.moon:hover .body-label.moon-label {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: scale(1.1) !important;
+}
+
+/* ========================================= */
 
 .dwarf-planet-label {
     color: #d7bde2 !important;

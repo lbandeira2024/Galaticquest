@@ -64,17 +64,11 @@ const solarSystem = {
 
 const calculatePercentage = (value, max) => Math.min(Math.round((value / max) * 100), 100);
 
-// --- HELPER DE DISTÂNCIA CORRIGIDO ---
-// Agora suporta 'S.O.S próximo a X' para calcular combustível baseado no host real
 const getDistanceValue = (name) => {
-    // Se o nome está no mapa padrão, retorna
     if (realDistances[name]) return realDistances[name];
-
-    // Se for um SOS, extrai o nome do host e retorna a distância dele (coerência física)
     if (name.includes("S.O.S próximo a ")) {
         const host = name.replace("S.O.S próximo a ", "");
         if (realDistances[host]) {
-            // Retorna a distância do planeta + um offset mínimo
             return realDistances[host] + 0.355;
         }
     }
@@ -180,9 +174,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
     const [rotationAngles, setRotationAngles] = useState({});
     const [userId, setUserId] = useState(null);
 
-    // O S.O.S agora é gerenciado pelo componente pai e passado via prop
     const sosSignal = sosSignalData;
-
     const containerRef = useRef(null);
     const [isLoadingProgress, setIsLoadingProgress] = useState(false);
 
@@ -191,7 +183,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
         opacity: 0.1 + Math.random() * 0.9, delay: Math.random() * 10, duration: 3 + Math.random() * 7
     })), []);
 
-    // Verifica se o SOS já foi adicionado na rota atual
     const isSosAdded = useMemo(() => {
         if (!sosSignal) return false;
         return plannedRoute.steps.some(step => step.name === sosSignal.name);
@@ -213,9 +204,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
         const updateAngles = () => {
             const newRotationAngles = {};
             solarSystem.planets.forEach(planet => {
-                // Atualiza ângulo orbital (posição na órbita)
                 if (planet.orbitSpeed > 0) planet.angle = (planet.angle + planet.orbitSpeed) % 360;
-                // Atualiza ângulo de rotação (giro do planeta)
                 if (planet.rotationSpeed > 0) newRotationAngles[planet.name] = (rotationAngles[planet.name] || 0) + planet.rotationSpeed;
 
                 planet.moons.forEach(moon => {
@@ -405,8 +394,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                     <span className="body-label">{solarSystem.sun.name}</span>
                 </div>
 
-                {/* --- RENDERIZAÇÃO CORRIGIDA DO S.O.S --- */}
-                {/* Calcula a posição baseada no planeta HOSPEDEIRO, não no Sol */}
                 {sosSignal && !isSosAdded && (() => {
                     const hostName = sosSignal.name.replace("S.O.S próximo a ", "");
                     const hostPlanet = solarSystem.planets.find(p => p.name === hostName);
@@ -440,7 +427,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                     );
                 })()}
 
-                {/* --- RENDERIZAÇÃO DOS PLANETAS --- */}
+                {/* --- RENDERIZAÇÃO UNIVERSAL DOS PLANETAS E LUAS --- */}
                 {solarSystem.planets.map((planet, index) => {
                     const planetX = solarSystem.sun.x + Math.cos(planet.angle) * planet.orbitRadius;
                     const planetY = solarSystem.sun.y + Math.sin(planet.angle) * planet.orbitRadius;
@@ -481,20 +468,26 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                         </span>
                                     </div>
 
+                                    {/* LOOP QUE GERA TODAS AS LUAS DE TODOS OS PLANETAS */}
                                     {planet.moons.map((moon, moonIndex) => {
                                         const moonX = planetX + Math.cos(moon.angle) * moon.orbitRadius;
                                         const moonY = planetY + Math.sin(moon.angle) * moon.orbitRadius;
                                         const moonStatus = moon.name === nextDestination ? 'next-destination'
                                             : visitedDestinations.includes(moon.name) ? 'visited'
                                                 : '';
+                                        const currentMoonRotation = rotationAngles[moon.name] || 0;
+
                                         return (
                                             <div key={moonIndex} className={`celestial-body moon ${moonStatus}`} style={{
                                                 width: `${moon.radius}px`, height: `${moon.radius}px`,
                                                 left: `${moonX}%`, top: `${moonY}%`,
-                                                transform: `translate(-50%, -50%) rotate(${rotationAngles[moon.name] || 0}deg)`
+                                                transform: `translate(-50%, -50%) rotate(${currentMoonRotation}deg)`
                                             }} onClick={(e) => { e.stopPropagation(); handleBodyClick(moon); }}>
 
-                                                <div className="label-container">
+                                                {/* LABEL DA LUA - RECEBE AS REGRAS DO CSS PARA ESQUERDA/VERDE/OCULTO */}
+                                                <div className="label-container moon-label-container" style={{
+                                                    transform: `translateY(-50%) rotate(${-currentMoonRotation}deg)`
+                                                }}>
                                                     <span className="body-label moon-label">{moon.name}</span>
                                                 </div>
                                             </div>
