@@ -60,8 +60,8 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
               opacity: isInSpace ? 1 : 0.6 // Fica mais apagado durante a decolagem
             }}
           >
-            {/* Texto dinâmico dependendo da fase */}
-            <span>{isInSpace ? "Atual" : "Decolando..."}</span>
+            {/* Texto dinâmico removido, fica "Atual" sempre */}
+            <span>Atual</span>
             <div className={`pulse-dot ${!isInSpace ? 'pulse-fast' : ''}`}></div>
           </div>
           <div className="distance-readout">

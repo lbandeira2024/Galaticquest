@@ -507,6 +507,9 @@ const DecolagemMarte = () => {
   const [mainDisplayState, setMainDisplayState] = useState('acee');
   const [staticScreenSeed, setStaticScreenSeed] = useState(Math.random());
 
+  // NOVA REFERÊNCIA PARA MANIPULAR ACELERAÇÃO
+  const mainDisplayStateRef = useRef(mainDisplayState);
+
   const [plannedRoute, setPlannedRoute] = useState([]);
   const plannedRouteRef = useRef(plannedRoute);
 
@@ -609,6 +612,7 @@ const DecolagemMarte = () => {
   useEffect(() => { processadorO2Ref.current = processadorO2; }, [processadorO2]);
   useEffect(() => { sosSurpriseEventRef.current = sosSurpriseEvent; }, [sosSurpriseEvent]);
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
+  useEffect(() => { mainDisplayStateRef.current = mainDisplayState; }, [mainDisplayState]);
 
   // Novas Refs para controle de bloqueio de UI (Map Disabled)
   const showStoreModalRef = useRef(showStoreModal);
@@ -1332,6 +1336,14 @@ const DecolagemMarte = () => {
             newKmh = currentSpeed + warpAcceleration;
           } else {
             let speedChange = accelConfig.perTick;
+
+            // --- NOVA LÓGICA DE ACELERAÇÃO INICIAL ---
+            // Se ainda não estamos no espaço (fase de nuvens/estática), 
+            // forçamos uma aceleração maior para chegar a 45000 em exatos 30s.
+            if (mainDisplayStateRef.current !== 'stars' && currentSpeed < targetSpeed) {
+              speedChange = Math.max(150, accelConfig.perTick);
+            }
+
             if (currentSpeed > 65000) { newKmh = 60000; }
             else {
               if (currentSpeed < targetSpeed) { newKmh = Math.min(currentSpeed + speedChange, targetSpeed); }
