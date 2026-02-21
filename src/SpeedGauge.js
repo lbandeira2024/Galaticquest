@@ -32,7 +32,7 @@ const SpeedGauge = ({ currentSpeed, maxSpeed, isBoosting, isDobraAtivada }) => {
                 ))}
             </div>
             <div className="speed-gauge-unit">
-                {isDobraAtivada ? 'VELOCIDADE DE DOBRA' : 'KILÓMETROS POR HORA'}
+                {isDobraAtivada ? 'VELOCIDADE DE DOBRA' : 'KM POR HORA'}
             </div>
         </div>
     );

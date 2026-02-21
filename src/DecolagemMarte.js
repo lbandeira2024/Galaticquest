@@ -608,6 +608,18 @@ const DecolagemMarte = () => {
   useEffect(() => { sosSurpriseEventRef.current = sosSurpriseEvent; }, [sosSurpriseEvent]);
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
 
+  // Novas Refs para controle de bloqueio de UI (Map Disabled)
+  const showStoreModalRef = useRef(showStoreModal);
+  useEffect(() => { showStoreModalRef.current = showStoreModal; }, [showStoreModal]);
+  const showDesafioModalRef = useRef(showDesafioModal);
+  useEffect(() => { showDesafioModalRef.current = showDesafioModal; }, [showDesafioModal]);
+  const showEscolhaModalRef = useRef(showEscolhaModal);
+  useEffect(() => { showEscolhaModalRef.current = showEscolhaModal; }, [showEscolhaModal]);
+  const showSosSurpriseRef = useRef(showSosSurprise);
+  useEffect(() => { showSosSurpriseRef.current = showSosSurprise; }, [showSosSurprise]);
+  const showConfirmacaoModalRef = useRef(showConfirmacaoModal);
+  useEffect(() => { showConfirmacaoModalRef.current = showConfirmacaoModal; }, [showConfirmacaoModal]);
+
   useEffect(() => {
     const videosToPreload = ["/images/Vluz-Dobra.webm", "/images/clouds.webm"];
     videosToPreload.forEach((src) => {
@@ -719,6 +731,8 @@ const DecolagemMarte = () => {
     if (monitorStateRef.current !== 'on') return;
     if (isDepartingRef.current) return;
     if (isForcedMapEditRef.current) return;
+    if (isPausedRef.current) return; // Trava de segurança
+    if (distanceKmRef.current <= 0) return; // Trava de segurança
 
     setIsSosMinervaActive(true);
     setTimeout(() => { setIsSosMinervaActive(false); }, 5000);
@@ -870,7 +884,6 @@ const DecolagemMarte = () => {
       return;
     }
 
-    // Usando blindagem try-catch para evitar crash do navegador e travar a viagem
     try { stopAllAudio(); } catch (e) { console.error(e); }
 
     setIsDobraAtivada(true);
@@ -990,13 +1003,18 @@ const DecolagemMarte = () => {
     }
   }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm, isWarpCooldown, playSFX]);
 
+  // CORREÇÃO: Bloco de segurança total para S.O.S
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
+      // Regras de Bloqueio Rígidas - Se o mapa estiver desabilitado, ou UI bloqueada, anula o S.O.S.
       if (isDobraAtivadaRef.current) return;
       if (monitorStateRef.current !== 'on') return;
-      if (distanceKmRef.current <= 0) return;
-      if (isForcedMapEditRef.current) return;
+      if (distanceKmRef.current <= 0) return; // Distância 0 = mapa desabilitado obrigatoriamente
+      if (isForcedMapEditRef.current) return; // Mapa forçado para edição
+      if (isPausedRef.current) return; // Jogo pausado = mapa inacessível
+      if (isDepartingRef.current) return; // Nave em decolagem
+      if (showStoreModalRef.current || showDesafioModalRef.current || showEscolhaModalRef.current || showSosSurpriseRef.current || showConfirmacaoModalRef.current) return; // Modais abertos = mapa inacessível
 
       playSFX('/sounds/minervaSOS.mp3');
 
@@ -1009,7 +1027,7 @@ const DecolagemMarte = () => {
       setActiveSosSignal(newSignal);
       setTimeout(() => { setActiveSosSignal(null); }, 300000);
     };
-    const interval = setInterval(triggerSosEvent, 180000);
+    const interval = setInterval(triggerSosEvent, 180000); // Aciona a cada 3 minutos
     return () => clearInterval(interval);
   }, [travelStarted, routeIndex, playSFX]);
 
@@ -1089,7 +1107,7 @@ const DecolagemMarte = () => {
       }
     };
     fetchGameData();
-  }, [userId, API_BASE_URL, refetchTrigger]); // <-- AQUI ESTÁ A MÁGICA: Dependências limpas!
+  }, [userId, API_BASE_URL, refetchTrigger]);
 
   // Efeitos de degradação
   useEffect(() => {
@@ -1133,7 +1151,7 @@ const DecolagemMarte = () => {
         if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
         isDobraAtivadaRef.current = false;
         setIsDobraAtivada(false);
-        try { stopAllAudio(); } catch (e) { console.error(e); } // Protegido!
+        try { stopAllAudio(); } catch (e) { console.error(e); }
         setShowCriticalWarpFail(true);
         setTimeout(() => setShowCriticalWarpFail(false), 7000);
       }
@@ -1201,20 +1219,25 @@ const DecolagemMarte = () => {
 
   // Monitoramento de Aproximação
   useEffect(() => {
-    if (isPaused || isDobraAtivada || isLoadingRoute) return;
-    const isMoon = selectedPlanet.nome.toLowerCase() === 'lua';
+    // FIX: Adicionado travelTime === 0 para evitar o falso positivo no recarregamento da página
+    if (isPaused || isDobraAtivada || isLoadingRoute || travelTime === 0) return;
+
+    const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
     const approachDistanceThreshold = 800000;
+
     if (distanceKm <= 1000 && distanceKm > 0 && !isFinalApproachRef.current) {
       setIsFinalApproach(true);
       setIsBoostingTo60k(false);
     }
-    if (!isMoon && distanceKm <= approachDistanceThreshold && !approachSoundPlayed.current) {
+
+    // FIX: Adicionado também distanceKm > 0 e a trava do approachSoundPlayed
+    if (!isMoon && distanceKm <= approachDistanceThreshold && distanceKm > 0 && !approachSoundPlayed.current) {
       playSFX('/sounds/empuxo.wav');
       approachSoundPlayed.current = true;
       setIsFinalApproach(true);
       setIsBoostingTo60k(false);
     }
-  }, [distanceKm, isDobraAtivada, selectedPlanet.nome, isPaused, isLoadingRoute, playSFX]);
+  }, [distanceKm, isDobraAtivada, selectedPlanet, isPaused, isLoadingRoute, playSFX, travelTime]);
 
   // SOS Logic
   const isSystemCritical = telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20;
@@ -1280,7 +1303,6 @@ const DecolagemMarte = () => {
         return;
       }
 
-      // TUDO ENVOLVIDO NUM TRY-CATCH PARA QUE O JOGO NUNCA CONGELE!
       try {
         if (lastUpdateTime.current === 0) lastUpdateTime.current = timestamp;
         const deltaTime = timestamp - lastUpdateTime.current;
@@ -1361,7 +1383,6 @@ const DecolagemMarte = () => {
           if (newDistance <= 150000 && isDobraAtivadaRef.current) {
             if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
 
-            // O GRANDE VILÃO DO CONGELAMENTO RESOLVIDO AQUI:
             try { stopAllAudioRef.current(); } catch (e) { console.error(e); }
 
             isDobraAtivadaRef.current = false;
