@@ -1047,6 +1047,7 @@ const DecolagemMarte = () => {
   const lastUpdateTime = useRef(0);
   const telemetryInterval = 100;
   const lastRenderTime = useRef(0);
+  const lastDistanceRenderTime = useRef(0);
 
   // --- CORREÇÃO: Refs para evitar re-renderizações após compras na loja ---
   const syncSpaceCoinsRef = useRef(syncSpaceCoins);
@@ -1337,9 +1338,7 @@ const DecolagemMarte = () => {
           } else {
             let speedChange = accelConfig.perTick;
 
-            // --- NOVA LÓGICA DE ACELERAÇÃO INICIAL ---
-            // Se ainda não estamos no espaço (fase de nuvens/estática), 
-            // forçamos uma aceleração maior para chegar a 45000 em exatos 30s.
+            // --- LÓGICA DE ACELERAÇÃO INICIAL ---
             if (mainDisplayStateRef.current !== 'stars' && currentSpeed < targetSpeed) {
               speedChange = Math.max(150, accelConfig.perTick);
             }
@@ -1365,15 +1364,30 @@ const DecolagemMarte = () => {
         if (travelStartedRef.current && !routeChangeLockRef.current) {
           const currentSpeedKmh = telemetryRef.current.velocity.kmh;
           let distanceToDecrease = 0;
+
           if (currentSpeedKmh >= 60000) {
             distanceToDecrease = (currentSpeedKmh * 9172) / 3000 / 3.125;
           } else {
-            distanceToDecrease = 7172 / 3.125;
+            // Nova lógica: escala com a velocidade, mas começa com valor mínimo alto para fluidez
+            distanceToDecrease = (currentSpeedKmh * 8000) / 3000 / 3.125;
+            if (distanceToDecrease < 2500) distanceToDecrease = 2500;
+          }
+
+          // --- BOOST VISUAL NA PARTIDA ---
+          // Se estiver na fase de decolagem, a quilometragem desce muito mais rápido
+          if (mainDisplayStateRef.current !== 'stars') {
+            distanceToDecrease *= 4;
           }
 
           const newDistance = Math.max(0, distanceKmRef.current - distanceToDecrease);
           distanceKmRef.current = newDistance;
-          setDistanceKm(Math.round(newDistance));
+
+          // --- TRAVA ANTI-STUTTER ---
+          // Atualiza o estado visual a cada 80ms para evitar o "travamento" (gargalo de renderização do React)
+          if (timestamp - lastDistanceRenderTime.current > 80) {
+            setDistanceKm(Math.round(newDistance));
+            lastDistanceRenderTime.current = timestamp;
+          }
 
           const selPlanet = selectedPlanetRef.current;
           const isSosDestination = selPlanet && selPlanet.nome && selPlanet.nome.startsWith("S.O.S");
