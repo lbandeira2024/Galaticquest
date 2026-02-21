@@ -1,20 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './RouteMonitor.css';
 
-// MODIFICADO: A assinatura da função aceita originPlanet e destinationPlanet para maior clareza.
-const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, originPlanet, destinationPlanet }) => {
+const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, originPlanet, destinationPlanet, mainDisplayState = 'stars' }) => {
+  // Guarda a distância inicial para travar a tela durante a decolagem
+  const [initialDistance, setInitialDistance] = useState(distanceKm);
+
+  useEffect(() => {
+    // Atualiza a distância inicial se mudar de rota ou se a viagem não tiver começado (acee)
+    if (distanceKm > initialDistance || mainDisplayState === 'acee') {
+      setInitialDistance(distanceKm);
+    }
+  }, [distanceKm, mainDisplayState, initialDistance]);
+
+  // Verifica se a nave já está no espaço
+  const isInSpace = mainDisplayState === 'stars';
+
+  // Define os valores que aparecem na tela (Travados na decolagem, reais no espaço)
+  const displayDistance = isInSpace ? distanceKm : initialDistance;
+  const displayProgress = isInSpace ? progress : 0;
+
   // Calcula o progresso em degraus estritos de 10%
-  const discreteProgress = Math.floor(progress / 10) * 10;
+  const discreteProgress = Math.floor(displayProgress / 10) * 10;
 
   // Aplica efeito de dobra sem alterar a posição discreta
-  const visualProgress = isDobraAtivada
+  const visualProgress = isDobraAtivada && isInSpace
     ? discreteProgress + (currentSpeed / 1000000)
     : discreteProgress;
 
   // Garante que não ultrapasse 100%
   const clampedProgress = Math.min(visualProgress, 100);
 
-  // MODIFICADO: O mapa de emojis agora inclui a Terra para quando for a origem.
   const planetEmojis = {
     "Terra": "🌍",
     "Marte": "🔴",
@@ -32,7 +47,6 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
     <div className="route-monitor">
       <h4>Rota Atual</h4>
       <div className="route-box">
-        {/* MODIFICADO: A origem agora é dinâmica, baseada na prop originPlanet. */}
         <div className="planet origin">
           {planetEmojis[originPlanet] || "🌍"}
           <span>{originPlanet || "Origem"}</span>
@@ -42,17 +56,18 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
             className="current-position"
             style={{
               left: `${clampedProgress}%`,
-              transition: isDobraAtivada ? 'left 0.2s linear' : 'left 0.5s ease-out'
+              transition: isDobraAtivada ? 'left 0.2s linear' : 'left 0.5s ease-out',
+              opacity: isInSpace ? 1 : 0.6 // Fica mais apagado durante a decolagem
             }}
           >
-            <span>Atual</span>
-            <div className="pulse-dot"></div>
+            {/* Texto dinâmico dependendo da fase */}
+            <span>{isInSpace ? "Atual" : "Decolando..."}</span>
+            <div className={`pulse-dot ${!isInSpace ? 'pulse-fast' : ''}`}></div>
           </div>
           <div className="distance-readout">
-            {Math.max(0, distanceKm).toLocaleString()} km
+            {Math.max(0, displayDistance).toLocaleString()} km
           </div>
         </div>
-        {/* MODIFICADO: O destino usa a prop destinationPlanet para maior clareza. */}
         <div className="planet destination">
           {planetEmojis[destinationPlanet] || "🪐"}
           <span>{destinationPlanet || "Destino"}</span>

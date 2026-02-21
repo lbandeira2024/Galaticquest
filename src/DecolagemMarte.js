@@ -27,7 +27,8 @@ const LeftControlPanel = React.memo(({
   telemetry, distanceKm, progress, isDobraAtivada, isDobraEnabled, isPaused,
   originPlanet, destinationPlanet, maxSpeed, isBoosting,
   handleDobraEspacial, handleInventory, minervaImage, handleMinervaClick,
-  isMinervaHighlighted, processadorO2, isO2TransferDisabled, handleOpenO2Modal
+  isMinervaHighlighted, processadorO2, isO2TransferDisabled, handleOpenO2Modal,
+  mainDisplayState
 }) => {
   return (
     <div className="left-panel-3d">
@@ -39,6 +40,7 @@ const LeftControlPanel = React.memo(({
           isDobraAtivada={isDobraAtivada}
           originPlanet={originPlanet}
           destinationPlanet={destinationPlanet}
+          mainDisplayState={mainDisplayState}
         />
       </div>
       <div className="dobra-buttons-container">
@@ -632,7 +634,13 @@ const DecolagemMarte = () => {
   }, []);
 
   const triggerMinervaInterplanetarySpeed = useCallback(() => {
-    minervaEventTriggered.current = true;
+    minervaEventTriggered.current = true; // Marca como acionado para não ficar tentando repetir
+
+    // NOVA TRAVA: Se a distância for menor que 300.000 km, aborta o aviso e a aceleração
+    if (distanceKmRef.current < 300000) {
+      return;
+    }
+
     setShowMinervaOnMonitor(true);
     playSFX('/sounds/Mineva-VelInterplanetaria.mp3');
     setTimeout(() => { setShowMinervaOnMonitor(false); }, 5000);
@@ -1219,7 +1227,6 @@ const DecolagemMarte = () => {
 
   // Monitoramento de Aproximação
   useEffect(() => {
-    // FIX: Adicionado travelTime === 0 para evitar o falso positivo no recarregamento da página
     if (isPaused || isDobraAtivada || isLoadingRoute || travelTime === 0) return;
 
     const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
@@ -1230,7 +1237,6 @@ const DecolagemMarte = () => {
       setIsBoostingTo60k(false);
     }
 
-    // FIX: Adicionado também distanceKm > 0 e a trava do approachSoundPlayed
     if (!isMoon && distanceKm <= approachDistanceThreshold && distanceKm > 0 && !approachSoundPlayed.current) {
       playSFX('/sounds/empuxo.wav');
       approachSoundPlayed.current = true;
@@ -1535,6 +1541,7 @@ const DecolagemMarte = () => {
           processadorO2={processadorO2}
           isO2TransferDisabled={isO2TransferDisabled}
           handleOpenO2Modal={handleOpenO2Modal}
+          mainDisplayState={mainDisplayState}
         />
         <RightMonitorPanel
           isPaused={isPaused}
