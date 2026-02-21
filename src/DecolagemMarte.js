@@ -507,7 +507,6 @@ const DecolagemMarte = () => {
   const [mainDisplayState, setMainDisplayState] = useState('acee');
   const [staticScreenSeed, setStaticScreenSeed] = useState(Math.random());
 
-  // NOVA REFERÊNCIA PARA MANIPULAR ACELERAÇÃO
   const mainDisplayStateRef = useRef(mainDisplayState);
 
   const [plannedRoute, setPlannedRoute] = useState([]);
@@ -589,6 +588,9 @@ const DecolagemMarte = () => {
   const restoreIntervalRef = useRef(null);
   const cockpitRef = useRef(null);
 
+  // --- TRAVA DE DISTÂNCIA MESTRA ---
+  const canDecreaseDistanceRef = useRef(false);
+
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
   const isPausedRef = useRef(isPaused);
@@ -637,10 +639,29 @@ const DecolagemMarte = () => {
     });
   }, []);
 
-  const triggerMinervaInterplanetarySpeed = useCallback(() => {
-    minervaEventTriggered.current = true; // Marca como acionado para não ficar tentando repetir
+  // --- LÓGICA DO TEMPORIZADOR DE 20s ---
+  useEffect(() => {
+    let timer;
+    if (mainDisplayState === 'stars') {
+      if (routeIndexRef.current > 0) {
+        // Já no espaço (mid-game ou trocando de planeta), não precisa esperar
+        canDecreaseDistanceRef.current = true;
+      } else {
+        // Decolagem inicial (da Terra): espera 20s após as estrelas entrarem na tela
+        timer = setTimeout(() => {
+          canDecreaseDistanceRef.current = true;
+        }, 20000);
+      }
+    } else {
+      // Travado completamente durante nuvens, estática e ACEE
+      canDecreaseDistanceRef.current = false;
+    }
+    return () => { if (timer) clearTimeout(timer); };
+  }, [mainDisplayState]);
 
-    // NOVA TRAVA: Se a distância for menor que 300.000 km, aborta o aviso e a aceleração
+  const triggerMinervaInterplanetarySpeed = useCallback(() => {
+    minervaEventTriggered.current = true;
+
     if (distanceKmRef.current < 300000) {
       return;
     }
@@ -743,8 +764,8 @@ const DecolagemMarte = () => {
     if (monitorStateRef.current !== 'on') return;
     if (isDepartingRef.current) return;
     if (isForcedMapEditRef.current) return;
-    if (isPausedRef.current) return; // Trava de segurança
-    if (distanceKmRef.current <= 0) return; // Trava de segurança
+    if (isPausedRef.current) return;
+    if (distanceKmRef.current <= 0) return;
 
     setIsSosMinervaActive(true);
     setTimeout(() => { setIsSosMinervaActive(false); }, 5000);
@@ -1019,14 +1040,13 @@ const DecolagemMarte = () => {
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
-      // Regras de Bloqueio Rígidas - Se o mapa estiver desabilitado, ou UI bloqueada, anula o S.O.S.
       if (isDobraAtivadaRef.current) return;
       if (monitorStateRef.current !== 'on') return;
-      if (distanceKmRef.current <= 0) return; // Distância 0 = mapa desabilitado obrigatoriamente
-      if (isForcedMapEditRef.current) return; // Mapa forçado para edição
-      if (isPausedRef.current) return; // Jogo pausado = mapa inacessível
-      if (isDepartingRef.current) return; // Nave em decolagem
-      if (showStoreModalRef.current || showDesafioModalRef.current || showEscolhaModalRef.current || showSosSurpriseRef.current || showConfirmacaoModalRef.current) return; // Modais abertos = mapa inacessível
+      if (distanceKmRef.current <= 0) return;
+      if (isForcedMapEditRef.current) return;
+      if (isPausedRef.current) return;
+      if (isDepartingRef.current) return;
+      if (showStoreModalRef.current || showDesafioModalRef.current || showEscolhaModalRef.current || showSosSurpriseRef.current || showConfirmacaoModalRef.current) return;
 
       playSFX('/sounds/minervaSOS.mp3');
 
@@ -1039,7 +1059,7 @@ const DecolagemMarte = () => {
       setActiveSosSignal(newSignal);
       setTimeout(() => { setActiveSosSignal(null); }, 300000);
     };
-    const interval = setInterval(triggerSosEvent, 180000); // Aciona a cada 3 minutos
+    const interval = setInterval(triggerSosEvent, 180000);
     return () => clearInterval(interval);
   }, [travelStarted, routeIndex, playSFX]);
 
@@ -1049,7 +1069,6 @@ const DecolagemMarte = () => {
   const lastRenderTime = useRef(0);
   const lastDistanceRenderTime = useRef(0);
 
-  // --- CORREÇÃO: Refs para evitar re-renderizações após compras na loja ---
   const syncSpaceCoinsRef = useRef(syncSpaceCoins);
   useEffect(() => { syncSpaceCoinsRef.current = syncSpaceCoins; }, [syncSpaceCoins]);
 
@@ -1305,7 +1324,7 @@ const DecolagemMarte = () => {
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
 
 
-  // --- GAME LOOP OTIMIZADO COM BLINDAGEM ANTI-CRASH ---
+  // --- GAME LOOP OTIMIZADO COM BLINDAGEM ANTI-CRASH E TRAVA DE DISTÂNCIA ---
   useEffect(() => {
     const gameLoop = (timestamp) => {
       if (isPausedRef.current) {
@@ -1338,7 +1357,7 @@ const DecolagemMarte = () => {
           } else {
             let speedChange = accelConfig.perTick;
 
-            // --- LÓGICA DE ACELERAÇÃO INICIAL ---
+            // LÓGICA DE ACELERAÇÃO INICIAL
             if (mainDisplayStateRef.current !== 'stars' && currentSpeed < targetSpeed) {
               speedChange = Math.max(150, accelConfig.perTick);
             }
@@ -1361,29 +1380,21 @@ const DecolagemMarte = () => {
           }
         }
 
-        if (travelStartedRef.current && !routeChangeLockRef.current) {
+        // A distância só começa a cair se a Trava Mestra permitir (20s após as estrelas)
+        if (travelStartedRef.current && !routeChangeLockRef.current && canDecreaseDistanceRef.current) {
           const currentSpeedKmh = telemetryRef.current.velocity.kmh;
           let distanceToDecrease = 0;
 
           if (currentSpeedKmh >= 60000) {
             distanceToDecrease = (currentSpeedKmh * 9172) / 3000 / 3.125;
           } else {
-            // Nova lógica: escala com a velocidade, mas começa com valor mínimo alto para fluidez
             distanceToDecrease = (currentSpeedKmh * 8000) / 3000 / 3.125;
             if (distanceToDecrease < 2500) distanceToDecrease = 2500;
-          }
-
-          // --- BOOST VISUAL NA PARTIDA ---
-          // Se estiver na fase de decolagem, a quilometragem desce muito mais rápido
-          if (mainDisplayStateRef.current !== 'stars') {
-            distanceToDecrease *= 4;
           }
 
           const newDistance = Math.max(0, distanceKmRef.current - distanceToDecrease);
           distanceKmRef.current = newDistance;
 
-          // --- TRAVA ANTI-STUTTER ---
-          // Atualiza o estado visual a cada 80ms para evitar o "travamento" (gargalo de renderização do React)
           if (timestamp - lastDistanceRenderTime.current > 80) {
             setDistanceKm(Math.round(newDistance));
             lastDistanceRenderTime.current = timestamp;

@@ -68,6 +68,26 @@ const CadastroForm = () => {
   const [emailChecked, setEmailChecked] = useState(false);
   const canvasRef = useRef(null);
 
+  // --- NOVO: FORZAR LIMPEZA DE CACHÉ AO ENTRAR NA TELA ---
+  useEffect(() => {
+    const forceClearCache = async () => {
+      if ('caches' in window) {
+        try {
+          const cacheNames = await caches.keys();
+          await Promise.all(
+            cacheNames.map((cacheName) => caches.delete(cacheName))
+          );
+          console.log("✅ Caché de ficheiros limpa con éxito!");
+        } catch (error) {
+          console.error("❌ Erro ao limpar a caché de ficheiros:", error);
+        }
+      }
+    };
+
+    forceClearCache();
+  }, []);
+  // --------------------------------------------------------
+
   // --- BUSCAR LISTAS ---
   useEffect(() => {
     const fetchLists = async () => {
