@@ -81,7 +81,7 @@ const PLANET_MUSIC_CONFIG = {
 const STAR_HUES = [210, 120, 30, 0, 60];
 const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 80%)`);
 
-// --- NOVO: Função para definir a escala baseada no tipo de corpo celeste ---
+// --- Função para definir a escala baseada no tipo de corpo celeste ---
 const getPlanetScale = (planetName) => {
   const giants = ['jupiter', 'saturno', 'urano', 'netuno'];
   const dwarfs = ['lua', 'ceres', 'plutao', 'makemake', 'eris', 'haumea', 'vesta', 'io', 'europa', 'calisto', 'encelado', 'ganimedes', 'pallas', 'mimas', 'tita', 'titania', 'oberon', 'tritao', 'caronte', 'fobos', 'deimos', 'kaapa'];
@@ -141,7 +141,8 @@ const SpaceView = ({
 
   useEffect(() => {
     if (starsRef.current.length === 0) {
-      starsRef.current = Array.from({ length: 400 }, () => ({
+      // Otimização de performance: Reduzido de 400 para 250 estrelas
+      starsRef.current = Array.from({ length: 250 }, () => ({
         x: (Math.random() - 0.5) * window.innerWidth,
         y: (Math.random() - 0.5) * window.innerHeight,
         z: Math.random() * window.innerWidth,
@@ -154,7 +155,8 @@ const SpaceView = ({
 
   const fastStars = useMemo(() => {
     const starClasses = ['star-blue', 'star-green', 'star-orange', 'star-red', 'star-yellow'];
-    return Array.from({ length: 40 }, (_, i) => ({
+    // Otimização de performance: Reduzido de 40 para 30
+    return Array.from({ length: 30 }, (_, i) => ({
       id: `fast-star-${i}`,
       top: `${Math.random() * 100}%`,
       left: `${Math.random() * 100}%`,
@@ -187,7 +189,7 @@ const SpaceView = ({
 
     playTrack(targetAudioSrc, {
       loop: true,
-      isPrimary: true, // <--- CORREÇÃO AQUI: Define como faixa principal para substituir a antiga!
+      isPrimary: true, // Define como faixa principal para substituir a antiga
       volume: targetVolume,
       fade: true
     });
@@ -225,7 +227,7 @@ const SpaceView = ({
   }, [selectedPlanet?.nome]);
 
   useEffect(() => {
-    if (isPaused) {
+    if (isPaused || !isActive) {
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
       return;
     }
@@ -261,7 +263,7 @@ const SpaceView = ({
       const now = timestamp || performance.now();
       let dt = (now - lastTimeRef.current) / 1000;
       lastTimeRef.current = now;
-      if (dt > 0.1) dt = 0.016;
+      if (dt > 0.1) dt = 0.016; // Trava contra pulos grandes de tempo
 
       const diff = targetStarSpeedRef.current - currentStarSpeedRef.current;
       if (Math.abs(diff) < 0.1) currentStarSpeedRef.current = targetStarSpeedRef.current;
@@ -388,7 +390,7 @@ const SpaceView = ({
       cancelAnimationFrame(animationFrameRef.current);
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, [isPaused, planetImageLoaded, selectedPlanet]);
+  }, [isPaused, isActive, planetImageLoaded, selectedPlanet]);
 
   const isStation = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boktok', 'boctok'].includes(planetName);
   const baseSize = forceLarge ? '50vmin' : '40vmin';
@@ -463,6 +465,7 @@ const SpaceView = ({
   );
 };
 
+// O React.memo compara as propriedades críticas para saber se deve ou não redesenhar todo o componente de espaço.
 export default React.memo(SpaceView, (prevProps, nextProps) => {
   return (
     prevProps.selectedPlanet?.nome === nextProps.selectedPlanet?.nome &&
