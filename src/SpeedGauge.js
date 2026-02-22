@@ -22,7 +22,7 @@ const SpeedGauge = ({ currentSpeed, maxSpeed, isBoosting, isDobraAtivada }) => {
                     className={`speed-gauge-fill ${isBoosting ? 'is-boosting' : ''} ${isDobraAtivada ? 'is-dobra-active' : ''}`}
                     style={{
                         width: `${percentage}%`,
-                        transition: 'width 0.3s ease-out' // <-- ISSO DEIXA A BARRA SUPER SUAVE
+                        transition: 'width 0.1s linear' // <-- AJUSTADO PARA ACOMPANHAR O LOOP DE 100ms
                     }}
                 />
             </div>

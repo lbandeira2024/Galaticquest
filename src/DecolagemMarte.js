@@ -1357,9 +1357,9 @@ const DecolagemMarte = () => {
           } else {
             let speedChange = accelConfig.perTick;
 
-            // LÓGICA DE ACELERAÇÃO INICIAL
+            // LÓGICA DE ACELERAÇÃO INICIAL OTIMIZADA AQUI
             if (mainDisplayStateRef.current !== 'stars' && currentSpeed < targetSpeed) {
-              speedChange = Math.max(150, accelConfig.perTick);
+              speedChange = Math.max(450, accelConfig.perTick * 5); // MULTIPLICADOR AUMENTADO
             }
 
             if (currentSpeed > 65000) { newKmh = 60000; }
