@@ -4,7 +4,7 @@ import { useAudio } from './AudioManager';
 
 const planetImageMap = {
   marte: '/images/Planets/Marte-Rotacionando.webm',
-  lua: '/images/Planets/Lua.png',
+  lua: '/images/Planets/lua-rotacionando.webm',
   mercurio: '/images/Planets/Mercurio-Rotacionando.gif',
   venus: '/images/Planets/venus-rotacionando.webm',
   jupiter: '/images/Planets/jupiter_rotacionando.webm',
@@ -80,6 +80,18 @@ const PLANET_MUSIC_CONFIG = {
 
 const STAR_HUES = [210, 120, 30, 0, 60];
 const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 80%)`);
+
+// --- NOVO: Função para definir a escala baseada no tipo de corpo celeste ---
+const getPlanetScale = (planetName) => {
+  const giants = ['jupiter', 'saturno', 'urano', 'netuno'];
+  const dwarfs = ['lua', 'ceres', 'plutao', 'makemake', 'eris', 'haumea', 'vesta', 'io', 'europa', 'calisto', 'encelado', 'ganimedes', 'pallas', 'mimas', 'tita', 'titania', 'oberon', 'tritao', 'caronte', 'fobos', 'deimos', 'kaapa'];
+  const stations = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boktok', 'boctok'];
+
+  if (giants.includes(planetName)) return 1.8; // Gigantes Gasosos
+  if (dwarfs.includes(planetName)) return 0.5; // Luas e Planetas Anões
+  if (stations.includes(planetName)) return 0.35; // Estações Espaciais
+  return 1.0; // Planetas Terrestres e Padrão (Marte, Vênus, Terra, etc)
+};
 
 const SpaceView = ({
   distance = 225000000,
@@ -235,6 +247,16 @@ const SpaceView = ({
 
     lastTimeRef.current = performance.now();
 
+    // Calcula o multiplicador de escala baseado no planeta atual para a animação
+    const planetNameNormalized = (selectedPlanet?.nome || 'marte')
+      .toString()
+      .toLowerCase()
+      .trim()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, "");
+    const typeScale = getPlanetScale(planetNameNormalized);
+
     const animate = (timestamp) => {
       const now = timestamp || performance.now();
       let dt = (now - lastTimeRef.current) / 1000;
@@ -281,6 +303,7 @@ const SpaceView = ({
         if (departing) {
           opacity = 1;
         } else {
+          // As estações/luas podem aparecer um pouco mais tarde, mas mantemos a logica do FADE para suavidade
           const FADE_START_DIST = 100000000;
           if (visualDist <= 0) {
             opacity = 1;
@@ -292,12 +315,13 @@ const SpaceView = ({
 
         let scale = 1.0;
         if (force) {
-          scale = 2.8;
+          scale = 2.8 * typeScale; // Aplica o multiplicador de escala
         } else {
           if (departing) {
-            scale = Math.max(0.05, 2.5 / (1 + (visualDist / 100000)));
+            scale = Math.max(0.05, (2.5 * typeScale) / (1 + (visualDist / 100000)));
           } else {
-            const MAX_SCALE = 2.8;
+            // Aplicando a escala da categoria ao MAX_SCALE
+            const MAX_SCALE = 2.8 * typeScale;
             const MIN_SCALE = 0.05;
             const OPTICAL_FACTOR = 1500000;
             scale = MAX_SCALE / (1 + (visualDist / OPTICAL_FACTOR));
