@@ -81,16 +81,15 @@ const PLANET_MUSIC_CONFIG = {
 const STAR_HUES = [210, 120, 30, 0, 60];
 const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 80%)`);
 
-// --- Função para definir a escala baseada no tipo de corpo celeste ---
 const getPlanetScale = (planetName) => {
   const giants = ['jupiter', 'saturno', 'urano', 'netuno'];
   const dwarfs = ['lua', 'ceres', 'plutao', 'makemake', 'eris', 'haumea', 'vesta', 'io', 'europa', 'calisto', 'encelado', 'ganimedes', 'pallas', 'mimas', 'tita', 'titania', 'oberon', 'tritao', 'caronte', 'fobos', 'deimos', 'kaapa'];
   const stations = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boktok', 'boctok'];
 
-  if (giants.includes(planetName)) return 1.8; // Gigantes Gasosos
-  if (dwarfs.includes(planetName)) return 0.5; // Luas e Planetas Anões
-  if (stations.includes(planetName)) return 0.35; // Estações Espaciais
-  return 1.0; // Planetas Terrestres e Padrão (Marte, Vênus, Terra, etc)
+  if (giants.includes(planetName)) return 1.8;
+  if (dwarfs.includes(planetName)) return 0.5;
+  if (stations.includes(planetName)) return 0.35;
+  return 1.0;
 };
 
 const SpaceView = ({
@@ -100,7 +99,7 @@ const SpaceView = ({
   isPaused = false,
   selectedPlanet = { nome: 'marte' },
   isDeparting = false,
-  isActive = true // Prop para gerenciar o áudio corretamente
+  isActive = true
 }) => {
   const NORMAL_SPEED = 1.0;
   const WARP_SPEED = 80.0;
@@ -141,7 +140,6 @@ const SpaceView = ({
 
   useEffect(() => {
     if (starsRef.current.length === 0) {
-      // Otimização de performance: Reduzido de 400 para 250 estrelas
       starsRef.current = Array.from({ length: 250 }, () => ({
         x: (Math.random() - 0.5) * window.innerWidth,
         y: (Math.random() - 0.5) * window.innerHeight,
@@ -155,7 +153,6 @@ const SpaceView = ({
 
   const fastStars = useMemo(() => {
     const starClasses = ['star-blue', 'star-green', 'star-orange', 'star-red', 'star-yellow'];
-    // Otimização de performance: Reduzido de 40 para 30
     return Array.from({ length: 30 }, (_, i) => ({
       id: `fast-star-${i}`,
       top: `${Math.random() * 100}%`,
@@ -172,9 +169,8 @@ const SpaceView = ({
 
   const isNearPlanet = distance <= 1000;
 
-  // Efeito de Áudio Inteligente (Bloqueado se não estiver Ativo)
   useEffect(() => {
-    if (!isActive) return; // Garante que a música não dispare durante as nuvens/estática
+    if (!isActive) return;
 
     let targetAudioSrc = '/sounds/02.Navigating-Flying.mp3';
     let targetVolume = 1.0;
@@ -189,7 +185,7 @@ const SpaceView = ({
 
     playTrack(targetAudioSrc, {
       loop: true,
-      isPrimary: true, // Define como faixa principal para substituir a antiga
+      isPrimary: true,
       volume: targetVolume,
       fade: true
     });
@@ -200,7 +196,6 @@ const SpaceView = ({
     const planetNameNormalized = planetNameFromProps.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
     setPlanetName(planetNameNormalized);
 
-    // Reset instantâneo da distância visual ao mudar o planeta
     currentVisualDistanceRef.current = distanceRef.current;
 
     let imagePath;
@@ -213,9 +208,8 @@ const SpaceView = ({
     setPlanetImageLoaded(false);
     setPlanetImage(imagePath);
 
-    if (imagePath && imagePath.endsWith('.webm')) {
-      setTimeout(() => setPlanetImageLoaded(true), 100);
-    } else {
+    // CORREÇÃO: Removido o setTimeout problemático do webm. Agora o video avisa quando está pronto através do onLoadedData no JSX
+    if (!imagePath || !imagePath.endsWith('.webm')) {
       const img = new Image();
       img.src = imagePath;
       img.onload = () => setPlanetImageLoaded(true);
@@ -249,7 +243,6 @@ const SpaceView = ({
 
     lastTimeRef.current = performance.now();
 
-    // Calcula o multiplicador de escala baseado no planeta atual para a animação
     const planetNameNormalized = (selectedPlanet?.nome || 'marte')
       .toString()
       .toLowerCase()
@@ -263,7 +256,7 @@ const SpaceView = ({
       const now = timestamp || performance.now();
       let dt = (now - lastTimeRef.current) / 1000;
       lastTimeRef.current = now;
-      if (dt > 0.1) dt = 0.016; // Trava contra pulos grandes de tempo
+      if (dt > 0.1) dt = 0.016;
 
       const diff = targetStarSpeedRef.current - currentStarSpeedRef.current;
       if (Math.abs(diff) < 0.1) currentStarSpeedRef.current = targetStarSpeedRef.current;
@@ -305,7 +298,6 @@ const SpaceView = ({
         if (departing) {
           opacity = 1;
         } else {
-          // As estações/luas podem aparecer um pouco mais tarde, mas mantemos a logica do FADE para suavidade
           const FADE_START_DIST = 100000000;
           if (visualDist <= 0) {
             opacity = 1;
@@ -317,12 +309,11 @@ const SpaceView = ({
 
         let scale = 1.0;
         if (force) {
-          scale = 2.8 * typeScale; // Aplica o multiplicador de escala
+          scale = 2.8 * typeScale;
         } else {
           if (departing) {
             scale = Math.max(0.05, (2.5 * typeScale) / (1 + (visualDist / 100000)));
           } else {
-            // Aplicando a escala da categoria ao MAX_SCALE
             const MAX_SCALE = 2.8 * typeScale;
             const MIN_SCALE = 0.05;
             const OPTICAL_FACTOR = 1500000;
@@ -433,6 +424,7 @@ const SpaceView = ({
             loop
             muted
             playsInline
+            onLoadedData={() => setPlanetImageLoaded(true)} /* CORREÇÃO DO VIDEO WEBM */
             style={{
               width: baseSize,
               height: baseSize,
@@ -465,7 +457,6 @@ const SpaceView = ({
   );
 };
 
-// O React.memo compara as propriedades críticas para saber se deve ou não redesenhar todo o componente de espaço.
 export default React.memo(SpaceView, (prevProps, nextProps) => {
   return (
     prevProps.selectedPlanet?.nome === nextProps.selectedPlanet?.nome &&

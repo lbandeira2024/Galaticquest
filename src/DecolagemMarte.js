@@ -442,7 +442,7 @@ const DecolagemMarte = () => {
   const { spaceCoins, setSpaceCoins, syncSpaceCoins } = useSpaceCoins();
   const alarmAudio = useMemo(() => new Audio('/sounds/evacuation-alarm.mp3'), []);
 
-  // FUNÇÃO MESTRE PARA FORÇAR O ÁUDIO A TOCAR (Ignora bloqueios do React)
+  // FUNÇÃO MESTRE PARA FORÇAR O ÁUDIO A TOCAR
   const playSFX = useCallback((url) => {
     try {
       const audio = new Audio(url);
@@ -639,25 +639,26 @@ const DecolagemMarte = () => {
     });
   }, []);
 
-  // --- LÓGICA DO TEMPORIZADOR DE 20s ---
+  // --- CORREÇÃO: LÓGICA DO TEMPORIZADOR DE SAÍDA E DISTÂNCIA ---
   useEffect(() => {
     let timer;
     if (mainDisplayState === 'stars') {
-      if (routeIndexRef.current > 0) {
-        // Já no espaço (mid-game ou trocando de planeta), não precisa esperar
-        canDecreaseDistanceRef.current = true;
+      if (routeIndex > 0) {
+        // CORREÇÃO: Dá tempo para a animação de saída (isDeparting = 4s) terminar antes da distância começar a cair
+        timer = setTimeout(() => {
+          canDecreaseDistanceRef.current = true;
+        }, 4500);
       } else {
-        // Decolagem inicial (da Terra): espera 20s após as estrelas entrarem na tela
+        // Decolagem da Terra (20s)
         timer = setTimeout(() => {
           canDecreaseDistanceRef.current = true;
         }, 20000);
       }
     } else {
-      // Travado completamente durante nuvens, estática e ACEE
       canDecreaseDistanceRef.current = false;
     }
     return () => { if (timer) clearTimeout(timer); };
-  }, [mainDisplayState]);
+  }, [mainDisplayState, routeIndex]);
 
   const triggerMinervaInterplanetarySpeed = useCallback(() => {
     minervaEventTriggered.current = true;
@@ -1036,7 +1037,6 @@ const DecolagemMarte = () => {
     }
   }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm, isWarpCooldown, playSFX]);
 
-  // CORREÇÃO: Bloco de segurança total para S.O.S
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
@@ -1075,7 +1075,6 @@ const DecolagemMarte = () => {
   const gameNumberRef = useRef(user?.gameNumber);
   useEffect(() => { gameNumberRef.current = user?.gameNumber; }, [user?.gameNumber]);
 
-  // FETCH GAME DATA
   useEffect(() => {
     const saveIndexForCorrection = async (currentIndex) => {
       if (!userId || !API_BASE_URL) return;
@@ -1141,7 +1140,6 @@ const DecolagemMarte = () => {
     fetchGameData();
   }, [userId, API_BASE_URL, refetchTrigger]);
 
-  // Efeitos de degradação
   useEffect(() => {
     if (isPaused || !chosenShip || isDobraAtivada) return;
     const rates = degradationRates[chosenShip] || degradationRates.default;
@@ -1170,7 +1168,6 @@ const DecolagemMarte = () => {
     return () => intervals.forEach(clearInterval);
   }, [isPaused, chosenShip, isDobraAtivada]);
 
-  // Consumo durante Dobra
   useEffect(() => {
     if (!isDobraAtivada || isPaused) return;
     const warpConsumptionInterval = setInterval(() => {
@@ -1191,7 +1188,6 @@ const DecolagemMarte = () => {
     return () => clearInterval(warpConsumptionInterval);
   }, [isDobraAtivada, isPaused, stopAllAudio]);
 
-  // Decolagem Inicial
   useEffect(() => {
     let delayTimer, takeoffInterval;
     if (chosenShip && originPlanet.nome === 'Terra' && !takeoffApplied.current) {
@@ -1218,7 +1214,6 @@ const DecolagemMarte = () => {
     return () => { clearTimeout(delayTimer); clearInterval(takeoffInterval); };
   }, [chosenShip, originPlanet.nome]);
 
-  // Check Minerva CDS
   useEffect(() => {
     if (!groupId || isPaused || isMinervaHighlighted || !API_BASE_URL) return;
     const checkMinervaHighlight = async () => {
@@ -1234,14 +1229,12 @@ const DecolagemMarte = () => {
     return () => clearInterval(interval);
   }, [groupId, isPaused, isMinervaHighlighted, API_BASE_URL]);
 
-  // Timer de Missão
   useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => { if (travelStarted) setTravelTime(prev => prev + 1); }, 1000);
     return () => clearInterval(interval);
   }, [isPaused, travelStarted]);
 
-  // Evento de velocidade Interplanetaria
   useEffect(() => {
     if (isPaused || !travelStarted || minervaEventTriggered.current) return;
     if (travelTime >= 60) {
@@ -1249,7 +1242,6 @@ const DecolagemMarte = () => {
     }
   }, [travelTime, travelStarted, isPaused, triggerMinervaInterplanetarySpeed]);
 
-  // Monitoramento de Aproximação
   useEffect(() => {
     if (isPaused || isDobraAtivada || isLoadingRoute || travelTime === 0) return;
 
@@ -1269,7 +1261,6 @@ const DecolagemMarte = () => {
     }
   }, [distanceKm, isDobraAtivada, selectedPlanet, isPaused, isLoadingRoute, playSFX, travelTime]);
 
-  // SOS Logic
   const isSystemCritical = telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20;
   const hasFundsForSOS = (spaceCoins || 0) > 0;
   const isSOSActive = isSystemCritical && !isPaused && !isDobraAtivada && !isRestoringSOS && hasFundsForSOS;
@@ -1324,7 +1315,7 @@ const DecolagemMarte = () => {
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
 
 
-  // --- GAME LOOP OTIMIZADO COM BLINDAGEM ANTI-CRASH E TRAVA DE DISTÂNCIA ---
+  // --- GAME LOOP OTIMIZADO COM SUAVIZADOR DE DISTÂNCIAS CURTAS ---
   useEffect(() => {
     const gameLoop = (timestamp) => {
       if (isPausedRef.current) {
@@ -1357,9 +1348,8 @@ const DecolagemMarte = () => {
           } else {
             let speedChange = accelConfig.perTick;
 
-            // LÓGICA DE ACELERAÇÃO INICIAL OTIMIZADA AQUI
             if (mainDisplayStateRef.current !== 'stars' && currentSpeed < targetSpeed) {
-              speedChange = Math.max(450, accelConfig.perTick * 5); // MULTIPLICADOR AUMENTADO
+              speedChange = Math.max(450, accelConfig.perTick * 5);
             }
 
             if (currentSpeed > 65000) { newKmh = 60000; }
@@ -1380,16 +1370,22 @@ const DecolagemMarte = () => {
           }
         }
 
-        // A distância só começa a cair se a Trava Mestra permitir (20s após as estrelas)
+        // --- CORREÇÃO: SUAVIZADOR DE DISTÂNCIA PARA A LUA E ESTAÇÕES ---
         if (travelStartedRef.current && !routeChangeLockRef.current && canDecreaseDistanceRef.current) {
           const currentSpeedKmh = telemetryRef.current.velocity.kmh;
           let distanceToDecrease = 0;
 
+          // Se a distância for menor que 2 Milhões (ex: Lua = 384 mil), reduz o desconto para 5%
+          // Isso garante que a viagem dure pelo menos alguns segundos, evitando que todos os eventos disparem juntos
+          const nextLeg = plannedRouteRef.current?.[routeIndexRef.current + 1];
+          const isShortTrip = nextLeg && nextLeg.distance < 2000000;
+          const distanceScale = isShortTrip ? 0.05 : 1;
+
           if (currentSpeedKmh >= 60000) {
-            distanceToDecrease = (currentSpeedKmh * 9172) / 3000 / 3.125;
+            distanceToDecrease = ((currentSpeedKmh * 9172) / 3000 / 3.125) * distanceScale;
           } else {
-            distanceToDecrease = (currentSpeedKmh * 8000) / 3000 / 3.125;
-            if (distanceToDecrease < 2500) distanceToDecrease = 2500;
+            distanceToDecrease = ((currentSpeedKmh * 8000) / 3000 / 3.125) * distanceScale;
+            if (distanceToDecrease < (2500 * distanceScale)) distanceToDecrease = (2500 * distanceScale);
           }
 
           const newDistance = Math.max(0, distanceKmRef.current - distanceToDecrease);
@@ -1444,7 +1440,6 @@ const DecolagemMarte = () => {
           } else if (newDistance <= 0 && !arrivedAtMarsRef.current && !isForcedMapEditRef.current && !isSosDestination) {
             setArrivedAtMars(true); setSpeed(45000);
 
-            // CORREÇÃO: NORMALIZE NAME AGRESSIVO
             const normalizeName = (str) => str ? str.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "") : "";
 
             const targetName = normalizeName(selPlanet.nome);
@@ -1548,7 +1543,6 @@ const DecolagemMarte = () => {
     }
   }, [activeChallengeData, dialogueIndex, playSound]);
 
-  // CORREÇÃO: PULO AUTOMÁTICO PARA DESAFIOS SEM DIÁLOGOS
   useEffect(() => {
     if (!isTransmissionStarting || !activeChallengeData || !activeChallengeData.dialogo) return;
 
@@ -1706,5 +1700,6 @@ const DecolagemMarte = () => {
     </div>
   );
 };
+
 
 export default DecolagemMarte;
