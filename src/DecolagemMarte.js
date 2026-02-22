@@ -1443,13 +1443,23 @@ const DecolagemMarte = () => {
             setTimeout(() => { setIsWarpCooldown(false); }, 20000);
           } else if (newDistance <= 0 && !arrivedAtMarsRef.current && !isForcedMapEditRef.current && !isSosDestination) {
             setArrivedAtMars(true); setSpeed(45000);
-            const normalizeName = (str) => str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+
+            // CORREÇÃO: NORMALIZE NAME AGRESSIVO
+            const normalizeName = (str) => str ? str.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "") : "";
+
             const targetName = normalizeName(selPlanet.nome);
             const isStation = STATION_NAMES.some(s => targetName.includes(s));
-            if (isStation) { setTimeout(() => { setShowStoreModal(true); }, 2500); }
-            else {
+
+            if (isStation) {
+              setTimeout(() => { setShowStoreModal(true); }, 2500);
+            } else {
               const desafioEncontrado = desafiosData.desafios?.find(d => normalizeName(d.planeta) === targetName || d.id === selPlanet.desafioId);
-              if (desafioEncontrado) { setActiveChallengeData(desafioEncontrado); setShowDesafioModal(true); }
+              if (desafioEncontrado) {
+                setActiveChallengeData(desafioEncontrado);
+                setShowDesafioModal(true);
+              } else {
+                console.warn("⚠️ Desafio não encontrado para o destino:", targetName);
+              }
             }
 
             let newProcessadorO2Value = processadorO2Ref.current;
@@ -1538,12 +1548,23 @@ const DecolagemMarte = () => {
     }
   }, [activeChallengeData, dialogueIndex, playSound]);
 
+  // CORREÇÃO: PULO AUTOMÁTICO PARA DESAFIOS SEM DIÁLOGOS
   useEffect(() => {
     if (!isTransmissionStarting || !activeChallengeData || !activeChallengeData.dialogo) return;
+
+    if (activeChallengeData.dialogo.length === 0) {
+      setIsTransmissionStarting(false);
+      setIsDialogueFinished(true);
+      setShowEscolhaModal(true);
+      return;
+    }
+
     const currentStep = activeChallengeData.dialogo[dialogueIndex];
     if (!currentStep) return;
+
     const duration = currentStep.duracao || (currentStep.texto.length * 50 + 2000);
     const timer = setTimeout(() => { handleNextDialogue(); }, duration);
+
     return () => clearTimeout(timer);
   }, [dialogueIndex, isTransmissionStarting, activeChallengeData, handleNextDialogue]);
 
