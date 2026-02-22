@@ -208,11 +208,14 @@ const SpaceView = ({
     setPlanetImageLoaded(false);
     setPlanetImage(imagePath);
 
-    // CORREÇÃO: Removido o setTimeout problemático do webm. Agora o video avisa quando está pronto através do onLoadedData no JSX
     if (!imagePath || !imagePath.endsWith('.webm')) {
       const img = new Image();
       img.src = imagePath;
-      img.onload = () => setPlanetImageLoaded(true);
+      img.onload = () => {
+        setPlanetImageLoaded(true);
+        // Garante que a imagem inicie invisível de forma limpa
+        if (planetImageRef.current) planetImageRef.current.style.opacity = 0;
+      };
       img.onerror = () => {
         setPlanetImage('/images/planets/Marte-Rotacionando.gif');
         setPlanetImageLoaded(true);
@@ -424,15 +427,19 @@ const SpaceView = ({
             loop
             muted
             playsInline
-            onLoadedData={() => setPlanetImageLoaded(true)} /* CORREÇÃO DO VIDEO WEBM */
+            onLoadedData={() => {
+              setPlanetImageLoaded(true);
+              // Inicia seguro pelo DOM, fora do alcance de renderização do React
+              if (planetImageRef.current) planetImageRef.current.style.opacity = 0;
+            }}
+            // CORREÇÃO: Removido o 'opacity: 0' do style do React
             style={{
               width: baseSize,
               height: baseSize,
               zIndex: forceLarge ? 1000 : 10,
               objectFit: 'contain',
               transformOrigin: 'center center',
-              willChange: 'transform, opacity',
-              opacity: 0
+              willChange: 'transform, opacity'
             }}
           />
         ) : (
@@ -442,13 +449,13 @@ const SpaceView = ({
             src={planetImage}
             alt={`Planet ${planetName}`}
             className={`planet-image ${planetName}-planet ${isStation ? 'is-station' : ''}`}
+            // CORREÇÃO: Removido o 'opacity: 0' do style do React
             style={{
               width: baseSize,
               height: baseSize,
               zIndex: forceLarge ? 1000 : 10,
               transformOrigin: 'center center',
-              willChange: 'transform, opacity',
-              opacity: 0
+              willChange: 'transform, opacity'
             }}
           />
         )}
