@@ -76,7 +76,10 @@ const LeftControlPanel = React.memo(({
         </div>
       </div>
       <div className="o2-processor-display">
-        <span className="o2-processor-label">PROCESSADOR O2</span>
+        {/* CORREÇÃO DO VISUAL DO O2 AQUI */}
+        <span className="o2-processor-label">
+          PROCESSADOR <span style={{ fontSize: '1.4em', fontWeight: '900', color: '#0bf', textShadow: '0 0 10px #0bf' }}>O</span><sub style={{ fontSize: '0.6em', verticalAlign: 'sub' }}>2</sub>
+        </span>
         <div className="o2-meter-visual">
           {[1, 2, 3, 4, 5].map(unit => (<div key={unit} className={`o2-unit ${processadorO2 >= unit ? 'filled' : ''}`}></div>))}
         </div>
@@ -639,17 +642,15 @@ const DecolagemMarte = () => {
     });
   }, []);
 
-  // --- CORREÇÃO: LÓGICA DO TEMPORIZADOR DE SAÍDA E DISTÂNCIA ---
+  // --- LÓGICA DO TEMPORIZADOR DE SAÍDA E DISTÂNCIA ---
   useEffect(() => {
     let timer;
     if (mainDisplayState === 'stars') {
       if (routeIndex > 0) {
-        // CORREÇÃO: Dá tempo para a animação de saída (isDeparting = 4s) terminar antes da distância começar a cair
         timer = setTimeout(() => {
           canDecreaseDistanceRef.current = true;
         }, 4500);
       } else {
-        // Decolagem da Terra (20s)
         timer = setTimeout(() => {
           canDecreaseDistanceRef.current = true;
         }, 20000);
@@ -1370,13 +1371,10 @@ const DecolagemMarte = () => {
           }
         }
 
-        // --- CORREÇÃO: SUAVIZADOR DE DISTÂNCIA PARA A LUA E ESTAÇÕES ---
         if (travelStartedRef.current && !routeChangeLockRef.current && canDecreaseDistanceRef.current) {
           const currentSpeedKmh = telemetryRef.current.velocity.kmh;
           let distanceToDecrease = 0;
 
-          // Se a distância for menor que 2 Milhões (ex: Lua = 384 mil), reduz o desconto para 5%
-          // Isso garante que a viagem dure pelo menos alguns segundos, evitando que todos os eventos disparem juntos
           const nextLeg = plannedRouteRef.current?.[routeIndexRef.current + 1];
           const isShortTrip = nextLeg && nextLeg.distance < 2000000;
           const distanceScale = isShortTrip ? 0.05 : 1;
@@ -1685,11 +1683,12 @@ const DecolagemMarte = () => {
           </div>
         </div>
       )}
+      {/* CORREÇÃO DO VISUAL DO O2 NO MODAL AQUI */}
       {showO2Modal && (
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: '500px', textAlign: 'center', fontFamily: "'Courier New', monospace", color: '#fff', border: '2px solid #0bf', boxShadow: '0 0 20px #0bf' }}>
             <h3 style={{ textShadow: '0 0 10px #0bf' }}>TRANSFERÊNCIA DE OXIGÊNIO</h3>
-            <p style={{ fontSize: '1.1em', margin: '20px 0' }}>Deseja transferir <strong style={{ color: '#0bf' }}>{processadorO2} unidades</strong> do Processador de O2 para o suporte de vida da nave?</p>
+            <p style={{ fontSize: '1.1em', margin: '20px 0' }}>Deseja transferir <strong style={{ color: '#0bf' }}>{processadorO2} unidades</strong> do Processador de <strong style={{ fontSize: '1.3em', color: '#0bf', textShadow: '0 0 8px #0bf' }}>O</strong><sub style={{ fontSize: '0.7em', verticalAlign: 'sub' }}>2</sub> para o suporte de vida da nave?</p>
             <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '30px' }}>
               <button onClick={() => setShowO2Modal(false)} style={{ padding: '10px 20px', background: '#444', color: 'white', border: '1px solid #777', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold' }}>CANCELAR</button>
               <button onClick={() => { handleTransferO2(); setShowO2Modal(false); }} style={{ padding: '10px 20px', background: 'linear-gradient(145deg, #0055ff, #0033cc)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold', boxShadow: '0 0 10px #0055ff' }}>CONFIRMAR</button>
@@ -1700,6 +1699,5 @@ const DecolagemMarte = () => {
     </div>
   );
 };
-
 
 export default DecolagemMarte;
