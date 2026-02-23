@@ -127,19 +127,28 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
   return (
     <div className="route-monitor">
       <h4>Rota Atual</h4>
-      {/* Retiramos as manipulações inline da caixa principal, usamos o CSS puro */}
       <div className="route-box">
 
         {/* PONTO DE ORIGEM */}
         <div className="planet origin">
-          {/* Este div atua como um substituto exato do <img width="40px"> */}
-          <div style={{ fontSize: '32px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+          {/* Caixa RÍGIDA que imita exatamente uma tag <img> de 40px */}
+          <div style={{
+            width: '40px',
+            height: '40px',
+            margin: '0 auto 5px auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '30px', /* Tamanho do ícone um pouco menor que a caixa */
+            lineHeight: '1',
+            overflow: 'hidden' /* Corta qualquer espaço invisível do Emoji que tente alargar o container */
+          }}>
             {getEntityIcon(originPlanet)}
           </div>
           <span>{getDisplayName(originPlanet) || "Origem"}</span>
         </div>
 
-        {/* LINHA DE ROTA E NAVE - Pura do CSS original para manter o tracejado perfeito */}
+        {/* LINHA DE ROTA E NAVE - Intacta, baseada puramente no seu CSS original */}
         <div className="route-line">
           <div
             className="current-position"
@@ -159,8 +168,18 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
 
         {/* PONTO DE DESTINO */}
         <div className="planet destination">
-          {/* Este div atua como um substituto exato do <img width="40px"> */}
-          <div style={{ fontSize: '32px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
+          {/* Caixa RÍGIDA que imita exatamente uma tag <img> de 40px */}
+          <div style={{
+            width: '40px',
+            height: '40px',
+            margin: '0 auto 5px auto',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '30px', /* Tamanho do ícone um pouco menor que a caixa */
+            lineHeight: '1',
+            overflow: 'hidden' /* Corta qualquer espaço invisível do Emoji que tente alargar o container */
+          }}>
             {getEntityIcon(destinationPlanet)}
           </div>
           <span>{getDisplayName(destinationPlanet) || "Destino"}</span>
