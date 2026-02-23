@@ -127,19 +127,20 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
   return (
     <div className="route-monitor">
       <h4>Rota Atual</h4>
-      {/* Forçamos o padding menor no container para garantir espaço */}
-      <div className="route-box" style={{ padding: '10px 20px', justifyContent: 'space-evenly' }}>
+      {/* Retiramos as manipulações inline da caixa principal, usamos o CSS puro */}
+      <div className="route-box">
 
         {/* PONTO DE ORIGEM */}
-        <div className="planet origin" style={{ margin: 0 }}>
-          <div style={{ fontSize: '24px', lineHeight: '1', marginBottom: '2px' }}>
+        <div className="planet origin">
+          {/* Este div atua como um substituto exato do <img width="40px"> */}
+          <div style={{ fontSize: '32px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
             {getEntityIcon(originPlanet)}
           </div>
-          <span style={{ margin: 0 }}>{getDisplayName(originPlanet) || "Origem"}</span>
+          <span>{getDisplayName(originPlanet) || "Origem"}</span>
         </div>
 
-        {/* LINHA DE ROTA E NAVE - Forçamos margens muito menores para não estourar a caixa */}
-        <div className="route-line" style={{ margin: '20px 0', width: '90%' }}>
+        {/* LINHA DE ROTA E NAVE - Pura do CSS original para manter o tracejado perfeito */}
+        <div className="route-line">
           <div
             className="current-position"
             style={{
@@ -149,21 +150,20 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
             }}
           >
             <span>Atual</span>
-            {/* Margem do ponto reduzida de 25px para 10px */}
-            <div className={`pulse-dot ${!isTrackingActive ? 'pulse-fast' : ''}`} style={{ marginBottom: '10px' }}></div>
+            <div className={`pulse-dot ${!isTrackingActive ? 'pulse-fast' : ''}`}></div>
           </div>
-          {/* Margem da distância reduzida de 25px para 10px */}
-          <div className="distance-readout" style={{ marginTop: '10px' }}>
+          <div className="distance-readout">
             {Math.max(0, displayDistance).toLocaleString()} km
           </div>
         </div>
 
         {/* PONTO DE DESTINO */}
-        <div className="planet destination" style={{ margin: 0 }}>
-          <div style={{ fontSize: '24px', lineHeight: '1', marginBottom: '2px' }}>
+        <div className="planet destination">
+          {/* Este div atua como um substituto exato do <img width="40px"> */}
+          <div style={{ fontSize: '32px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto' }}>
             {getEntityIcon(destinationPlanet)}
           </div>
-          <span style={{ margin: 0 }}>{getDisplayName(destinationPlanet) || "Destino"}</span>
+          <span>{getDisplayName(destinationPlanet) || "Destino"}</span>
         </div>
 
       </div>
