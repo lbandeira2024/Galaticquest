@@ -28,65 +28,20 @@ const getDisplayName = (name) => {
 // --- DICIONÁRIO DE ÍCONES POR CORPO CELESTE ---
 const getEntityIcon = (name) => {
   if (!name) return "🌍";
-
   if (name.includes("S.O.S")) return "🆘";
 
   const icons = {
-    // Estrela
-    "Sol": "☀️",
-
-    // Planetas Principais
-    "Mercurio": "🟤",
-    "Venus": "🟡",
-    "Terra": "🌍",
-    "Marte": "🔴",
-    "Jupiter": "🟠",
-    "Saturno": "🪐",
-    "Urano": "🧊",
-    "Netuno": "🔵",
-
-    // Luas Principais
-    "Lua": "🌕",
-    "Fobos": "🪨",
-    "Deimos": "🪨",
-    "Io": "🟡",
-    "Europa": "❄️",
-    "Ganímedes": "🌖",
-    "Calisto": "🌑",
-    "Titã": "🟠",
-    "Encelado": "❄️",
-    "Mimas": "🌑",
-    "Titania": "🌑",
-    "Oberon": "🌑",
-    "Tritao": "🧊",
-    "Proteu": "🪨",
-    "Caronte": "🌑",
-
-    // Planetas Anões e Asteroides
-    "Ceres": "🪨",
-    "Plutao": "❄️",
-    "Haumea": "🥚",
-    "Makemake": "🔴",
-    "Eris": "⚪",
-    "Vesta": "🪨",
-    "Pallas": "🪨",
-    "Cinturão": "☄️",
-    "Kuiper": "☄️",
-
-    // Exoplanetas
-    "Proxima Centauri b": "🌌",
-    "TRAPPIST-1e": "🌌",
-    "Kepler-186f": "🌌",
-
-    // Estações Espaciais
-    "ACEE": "🛰️",
-    "Salyut": "🛰️",
-    "Delfos": "🛰️",
-    "Mol": "🛰️",
-    "Skylab": "🛰️",
-    "Almaz": "🛰️",
-    "Tiangong": "🛰️",
-    "Boktok": "🛰️"
+    "Sol": "☀️", "Mercurio": "🟤", "Venus": "🟡", "Terra": "🌍", "Marte": "🔴",
+    "Jupiter": "🟠", "Saturno": "🪐", "Urano": "🧊", "Netuno": "🔵",
+    "Lua": "🌕", "Fobos": "🪨", "Deimos": "🪨", "Io": "🟡", "Europa": "❄️",
+    "Ganímedes": "🌖", "Calisto": "🌑", "Titã": "🟠", "Encelado": "❄️",
+    "Mimas": "🌑", "Titania": "🌑", "Oberon": "🌑", "Tritao": "🧊",
+    "Proteu": "🪨", "Caronte": "🌑", "Ceres": "🪨", "Plutao": "❄️",
+    "Haumea": "🥚", "Makemake": "🔴", "Eris": "⚪", "Vesta": "🪨",
+    "Pallas": "🪨", "Cinturão": "☄️", "Kuiper": "☄️",
+    "Proxima Centauri b": "🌌", "TRAPPIST-1e": "🌌", "Kepler-186f": "🌌",
+    "ACEE": "🛰️", "Salyut": "🛰️", "Delfos": "🛰️", "Mol": "🛰️",
+    "Skylab": "🛰️", "Almaz": "🛰️", "Tiangong": "🛰️", "Boktok": "🛰️"
   };
 
   return icons[name] || "🛸";
@@ -131,24 +86,11 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
 
         {/* PONTO DE ORIGEM */}
         <div className="planet origin">
-          {/* Caixa RÍGIDA que imita exatamente uma tag <img> de 40px */}
-          <div style={{
-            width: '40px',
-            height: '40px',
-            margin: '0 auto 5px auto',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '30px', /* Tamanho do ícone um pouco menor que a caixa */
-            lineHeight: '1',
-            overflow: 'hidden' /* Corta qualquer espaço invisível do Emoji que tente alargar o container */
-          }}>
-            {getEntityIcon(originPlanet)}
-          </div>
+          <div className="planet-icon">{getEntityIcon(originPlanet)}</div>
           <span>{getDisplayName(originPlanet) || "Origem"}</span>
         </div>
 
-        {/* LINHA DE ROTA E NAVE - Intacta, baseada puramente no seu CSS original */}
+        {/* LINHA DE ROTA E NAVE */}
         <div className="route-line">
           <div
             className="current-position"
@@ -168,20 +110,7 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
 
         {/* PONTO DE DESTINO */}
         <div className="planet destination">
-          {/* Caixa RÍGIDA que imita exatamente uma tag <img> de 40px */}
-          <div style={{
-            width: '40px',
-            height: '40px',
-            margin: '0 auto 5px auto',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '30px', /* Tamanho do ícone um pouco menor que a caixa */
-            lineHeight: '1',
-            overflow: 'hidden' /* Corta qualquer espaço invisível do Emoji que tente alargar o container */
-          }}>
-            {getEntityIcon(destinationPlanet)}
-          </div>
+          <div className="planet-icon">{getEntityIcon(destinationPlanet)}</div>
           <span>{getDisplayName(destinationPlanet) || "Destino"}</span>
         </div>
 
