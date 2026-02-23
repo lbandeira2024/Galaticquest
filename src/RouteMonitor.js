@@ -10,6 +10,8 @@ const displayNames = {
   "Tritao": "Tritão",
   "Titania": "Titânia",
   "Encelado": "Encélado",
+  "Eris": "Éris",
+  "Proxima Centauri b": "Próxima Centauri b",
   "Cinturão": "Cinturão de Asteroides",
   "Kuiper": "Cinturão de Kuiper"
 };
@@ -128,9 +130,18 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
       <div className="route-box">
 
         {/* PONTO DE ORIGEM */}
-        <div className="planet origin">
-          {/* Ajuste de tamanho proporcional às imagens antigas */}
-          <div style={{ fontSize: '35px', lineHeight: '1', marginBottom: '5px' }}>
+        <div className="planet origin" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {/* Caixa com altura e largura travadas para não estourar o container */}
+          <div style={{
+            height: '35px',
+            width: '35px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '28px',
+            lineHeight: '1',
+            marginBottom: '5px'
+          }}>
             {getEntityIcon(originPlanet)}
           </div>
           <span>{getDisplayName(originPlanet) || "Origem"}</span>
@@ -155,9 +166,18 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
         </div>
 
         {/* PONTO DE DESTINO */}
-        <div className="planet destination">
-          {/* Ajuste de tamanho proporcional às imagens antigas */}
-          <div style={{ fontSize: '35px', lineHeight: '1', marginBottom: '5px' }}>
+        <div className="planet destination" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          {/* Caixa com altura e largura travadas para não estourar o container */}
+          <div style={{
+            height: '35px',
+            width: '35px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '28px',
+            lineHeight: '1',
+            marginBottom: '5px'
+          }}>
             {getEntityIcon(destinationPlanet)}
           </div>
           <span>{getDisplayName(destinationPlanet) || "Destino"}</span>

@@ -11,9 +11,11 @@ const displayNames = {
     "Plutao": "Plutão",
     "Tritao": "Tritão",
     "Titania": "Titânia",
-    "Encelado": "Encélado"
-    // Adicione outros aqui se necessário. 
-    // Nota: Ganímedes e Titã já estavam com acento no seu código original.
+    "Encelado": "Encélado",
+    "Eris": "Éris",
+    "Proxima Centauri b": "Próxima Centauri b",
+    "Cinturão": "Cinturão de Asteroides",
+    "Kuiper": "Cinturão de Kuiper"
 };
 
 const getDisplayName = (name) => {
@@ -254,7 +256,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
         if (isRouteConfirmed) return;
         if (visitedDestinations.includes(body.name)) return;
 
-        // CORREÇÃO: Ignora completamente o clique no Sol
+        // Ignora completamente o clique no Sol
         if (body.name === "Sol") {
             return;
         }
@@ -382,7 +384,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                 const markerClass = index <= currentIndex ? "origin-marker" : index === currentIndex + 1 ? "next-destination-marker" : "normal-marker";
                                 const isStepLocked = index <= (currentIndex + 1);
 
-                                // NOVA LÓGICA DE NOME PARA A ROTA (COM ACENTOS)
+                                // LÓGICA DE NOME PARA A ROTA (COM ACENTOS)
                                 const rawDisplayName = getDisplayName(step.name);
                                 const displayName = hasWaterList.has(step.name) ? `${rawDisplayName} 💧` : rawDisplayName;
 
@@ -516,7 +518,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                                 transform: `translate(-50%, -50%) rotate(${currentMoonRotation}deg)`
                                             }} onClick={(e) => { e.stopPropagation(); handleBodyClick(moon); }}>
 
-                                                {/* LABEL DA LUA - RECEBE AS REGRAS DO CSS PARA ESQUERDA/VERDE/OCULTO */}
                                                 <div className="label-container moon-label-container" style={{
                                                     transform: `translateY(-50%) rotate(${-currentMoonRotation}deg)`
                                                 }}>
