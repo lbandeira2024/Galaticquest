@@ -1,6 +1,97 @@
 import React, { useState, useEffect } from 'react';
 import './RouteMonitor.css';
 
+// --- DICIONÁRIO DE NOMES PARA EXIBIÇÃO (VISUAL APENAS) ---
+const displayNames = {
+  "Mercurio": "Mercúrio",
+  "Venus": "Vênus",
+  "Jupiter": "Júpiter",
+  "Plutao": "Plutão",
+  "Tritao": "Tritão",
+  "Titania": "Titânia",
+  "Encelado": "Encélado",
+  "Cinturão": "Cinturão de Asteroides",
+  "Kuiper": "Cinturão de Kuiper"
+};
+
+const getDisplayName = (name) => {
+  if (!name) return "";
+  if (name.includes("S.O.S próximo a ")) {
+    const host = name.replace("S.O.S próximo a ", "");
+    return `S.O.S próximo a ${displayNames[host] || host}`;
+  }
+  return displayNames[name] || name;
+};
+
+// --- DICIONÁRIO DE ÍCONES POR CORPO CELESTE ---
+const getEntityIcon = (name) => {
+  if (!name) return "🌍";
+
+  // Se for um S.O.S, devolve o ícone de emergência
+  if (name.includes("S.O.S")) return "🆘";
+
+  const icons = {
+    // Estrela
+    "Sol": "☀️",
+
+    // Planetas Principais
+    "Mercurio": "🟤",
+    "Venus": "🟡",
+    "Terra": "🌍",
+    "Marte": "🔴",
+    "Jupiter": "🟠",
+    "Saturno": "🪐",
+    "Urano": "🧊", // Planeta gelado
+    "Netuno": "🔵",
+
+    // Luas Principais
+    "Lua": "🌕",
+    "Fobos": "🪨",
+    "Deimos": "🪨",
+    "Io": "🟡",
+    "Europa": "❄️",
+    "Ganímedes": "🌖",
+    "Calisto": "🌑",
+    "Titã": "🟠",
+    "Encelado": "❄️",
+    "Mimas": "🌑",
+    "Titania": "🌑",
+    "Oberon": "🌑",
+    "Tritao": "🧊",
+    "Proteu": "🪨",
+    "Caronte": "🌑",
+
+    // Planetas Anões e Asteroides
+    "Ceres": "🪨",
+    "Plutao": "❄️",
+    "Haumea": "🥚", // Forma ovalada
+    "Makemake": "🔴",
+    "Eris": "⚪",
+    "Vesta": "🪨",
+    "Pallas": "🪨",
+    "Cinturão": "☄️",
+    "Kuiper": "☄️",
+
+    // Exoplanetas
+    "Proxima Centauri b": "🌌",
+    "TRAPPIST-1e": "🌌",
+    "Kepler-186f": "🌌",
+
+    // Estações Espaciais
+    "ACEE": "🛰️",
+    "Salyut": "🛰️",
+    "Delfos": "🛰️",
+    "Mol": "🛰️",
+    "Skylab": "🛰️",
+    "Almaz": "🛰️",
+    "Tiangong": "🛰️",
+    "Boktok": "🛰️"
+  };
+
+  // Se o nome não estiver na lista, devolve um ícone genérico (um planeta ou nave)
+  return icons[name] || "🛸";
+};
+
 const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, originPlanet, destinationPlanet, mainDisplayState = 'stars' }) => {
   // Guarda a distância inicial para travar a tela
   const [initialDistance, setInitialDistance] = useState(distanceKm);
@@ -46,27 +137,20 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
   // Garante que não ultrapasse 100%
   const clampedProgress = Math.min(visualProgress, 100);
 
-  const planetEmojis = {
-    "Terra": "🌍",
-    "Marte": "🔴",
-    "Lua": "🌕",
-    "Mercurio": "🪐",
-    "Venus": "🌖",
-    "Jupiter": "🪐",
-    "Saturno": "🪐",
-    "Urano": "🪐",
-    "Netuno": "🪐",
-    "Ceres": "🌑",
-  };
-
   return (
     <div className="route-monitor">
       <h4>Rota Atual</h4>
       <div className="route-box">
+
+        {/* PONTO DE ORIGEM */}
         <div className="planet origin">
-          {planetEmojis[originPlanet] || "🌍"}
-          <span>{originPlanet || "Origem"}</span>
+          <div style={{ fontSize: '2em', marginBottom: '5px' }}>
+            {getEntityIcon(originPlanet)}
+          </div>
+          <span>{getDisplayName(originPlanet) || "Origem"}</span>
         </div>
+
+        {/* LINHA DE ROTA E NAVE */}
         <div className="route-line">
           <div
             className="current-position"
@@ -83,10 +167,15 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
             {Math.max(0, displayDistance).toLocaleString()} km
           </div>
         </div>
+
+        {/* PONTO DE DESTINO */}
         <div className="planet destination">
-          {planetEmojis[destinationPlanet] || "🪐"}
-          <span>{destinationPlanet || "Destino"}</span>
+          <div style={{ fontSize: '2em', marginBottom: '5px' }}>
+            {getEntityIcon(destinationPlanet)}
+          </div>
+          <span>{getDisplayName(destinationPlanet) || "Destino"}</span>
         </div>
+
       </div>
     </div>
   );
