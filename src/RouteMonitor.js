@@ -127,28 +127,19 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
   return (
     <div className="route-monitor">
       <h4>Rota Atual</h4>
-      <div className="route-box">
+      {/* Forçamos o padding menor no container para garantir espaço */}
+      <div className="route-box" style={{ padding: '10px 20px', justifyContent: 'space-evenly' }}>
 
         {/* PONTO DE ORIGEM */}
-        <div className="planet origin" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {/* Caixa com altura e largura travadas para não estourar o container */}
-          <div style={{
-            height: '35px',
-            width: '35px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '28px',
-            lineHeight: '1',
-            marginBottom: '5px'
-          }}>
+        <div className="planet origin" style={{ margin: 0 }}>
+          <div style={{ fontSize: '24px', lineHeight: '1', marginBottom: '2px' }}>
             {getEntityIcon(originPlanet)}
           </div>
-          <span>{getDisplayName(originPlanet) || "Origem"}</span>
+          <span style={{ margin: 0 }}>{getDisplayName(originPlanet) || "Origem"}</span>
         </div>
 
-        {/* LINHA DE ROTA E NAVE */}
-        <div className="route-line">
+        {/* LINHA DE ROTA E NAVE - Forçamos margens muito menores para não estourar a caixa */}
+        <div className="route-line" style={{ margin: '20px 0', width: '90%' }}>
           <div
             className="current-position"
             style={{
@@ -158,29 +149,21 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
             }}
           >
             <span>Atual</span>
-            <div className={`pulse-dot ${!isTrackingActive ? 'pulse-fast' : ''}`}></div>
+            {/* Margem do ponto reduzida de 25px para 10px */}
+            <div className={`pulse-dot ${!isTrackingActive ? 'pulse-fast' : ''}`} style={{ marginBottom: '10px' }}></div>
           </div>
-          <div className="distance-readout">
+          {/* Margem da distância reduzida de 25px para 10px */}
+          <div className="distance-readout" style={{ marginTop: '10px' }}>
             {Math.max(0, displayDistance).toLocaleString()} km
           </div>
         </div>
 
         {/* PONTO DE DESTINO */}
-        <div className="planet destination" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          {/* Caixa com altura e largura travadas para não estourar o container */}
-          <div style={{
-            height: '35px',
-            width: '35px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '28px',
-            lineHeight: '1',
-            marginBottom: '5px'
-          }}>
+        <div className="planet destination" style={{ margin: 0 }}>
+          <div style={{ fontSize: '24px', lineHeight: '1', marginBottom: '2px' }}>
             {getEntityIcon(destinationPlanet)}
           </div>
-          <span>{getDisplayName(destinationPlanet) || "Destino"}</span>
+          <span style={{ margin: 0 }}>{getDisplayName(destinationPlanet) || "Destino"}</span>
         </div>
 
       </div>
