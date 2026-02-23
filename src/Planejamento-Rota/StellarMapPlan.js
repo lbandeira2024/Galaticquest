@@ -3,6 +3,28 @@ import './StellarMapPlan.css';
 import transferDistances from './fixed_transfer_distances.json';
 import { useConfig } from '../ConfigContext';
 
+// --- DICIONÁRIO DE NOMES PARA EXIBIÇÃO (VISUAL APENAS) ---
+const displayNames = {
+    "Mercurio": "Mercúrio",
+    "Venus": "Vênus",
+    "Jupiter": "Júpiter",
+    "Plutao": "Plutão",
+    "Tritao": "Tritão",
+    "Titania": "Titânia",
+    "Encelado": "Encélado"
+    // Adicione outros aqui se necessário. 
+    // Nota: Ganímedes e Titã já estavam com acento no seu código original.
+};
+
+const getDisplayName = (name) => {
+    if (!name) return "";
+    if (name.includes("S.O.S próximo a ")) {
+        const host = name.replace("S.O.S próximo a ", "");
+        return `S.O.S próximo a ${displayNames[host] || host}`;
+    }
+    return displayNames[name] || name;
+};
+
 // --- CONSTANTES E DADOS ESTÁTICOS ---
 const MAX_FOOD = 30 * 1200 * 36;
 const MAX_OXYGEN = 242000;
@@ -359,7 +381,10 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                             {plannedRoute.steps.map((step, index) => {
                                 const markerClass = index <= currentIndex ? "origin-marker" : index === currentIndex + 1 ? "next-destination-marker" : "normal-marker";
                                 const isStepLocked = index <= (currentIndex + 1);
-                                const displayName = hasWaterList.has(step.name) ? `${step.name} 💧` : step.name;
+
+                                // NOVA LÓGICA DE NOME PARA A ROTA (COM ACENTOS)
+                                const rawDisplayName = getDisplayName(step.name);
+                                const displayName = hasWaterList.has(step.name) ? `${rawDisplayName} 💧` : rawDisplayName;
 
                                 return (
                                     <div key={index} className="step-ultimate" onMouseEnter={() => !isRouteConfirmed && setHoveredStep(index)} onMouseLeave={() => !isRouteConfirmed && setHoveredStep(null)}>
@@ -398,7 +423,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                     <div className="sun-fire"></div>
                     <div className="sun-core"></div>
                     <div className="sun-corona"></div>
-                    <span className="body-label">{solarSystem.sun.name}</span>
+                    <span className="body-label">{getDisplayName(solarSystem.sun.name)}</span>
                 </div>
 
                 {sosSignal && !isSosAdded && (() => {
@@ -428,7 +453,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                         >
                             <div className="sos-pulse"></div>
                             <div className="label-container">
-                                <span className="body-label sos-label">{sosSignal.name}</span>
+                                <span className="body-label sos-label">{getDisplayName(sosSignal.name)}</span>
                             </div>
                         </div>
                     );
@@ -471,7 +496,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                         <span className={`body-label
                                             ${planet.isExoplanet ? 'exoplanet-label' : ''}
                                             ${planet.isDwarfPlanet ? 'dwarf-planet-label' : ''}`}>
-                                            {planet.name}
+                                            {getDisplayName(planet.name)}
                                         </span>
                                     </div>
 
@@ -495,7 +520,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                                 <div className="label-container moon-label-container" style={{
                                                     transform: `translateY(-50%) rotate(${-currentMoonRotation}deg)`
                                                 }}>
-                                                    <span className="body-label moon-label">{moon.name}</span>
+                                                    <span className="body-label moon-label">{getDisplayName(moon.name)}</span>
                                                 </div>
                                             </div>
                                         );
@@ -509,7 +534,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
             {selectedBody && (
                 <div className="info-panel">
                     <div className="info-panel-header">
-                        <h3>{selectedBody.name}</h3>
+                        <h3>{getDisplayName(selectedBody.name)}</h3>
                         <button className="close-button" onClick={() => setSelectedBody(null)}>×</button>
                     </div>
                     {selectedBody.description && (
