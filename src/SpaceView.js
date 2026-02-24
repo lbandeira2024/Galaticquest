@@ -5,7 +5,7 @@ import { useAudio } from './AudioManager';
 const planetImageMap = {
   marte: '/images/Planets/Marte-Rotacionando.webm',
   lua: '/images/Planets/lua-rotacionando.webm',
-  mercurio: '/images/Planets/Mercurio-Rotacionando.gif',
+  mercurio: '/images/Planets/Mercurio-Rotacionando.webm',
   venus: '/images/Planets/venus-rotacionando.webm',
   jupiter: '/images/Planets/jupiter_rotacionando.webm',
   proximacentaurib: '/images/Planets/proximacentaurib-rotacionando.gif',
