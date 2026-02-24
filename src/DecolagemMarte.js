@@ -798,15 +798,19 @@ const DecolagemMarte = () => {
     setTimeout(async () => {
       const currentIndex = routeIndexRef.current;
       const currentRoute = plannedRouteRef.current;
+      let nextDistance = 300000000;
 
       if (currentRoute && currentRoute[currentIndex] && currentRoute[currentIndex + 1]) {
         setOriginPlanet({ nome: currentRoute[currentIndex].name });
         setSelectedPlanet({ nome: currentRoute[currentIndex + 1].name });
-        const nextDistance = currentRoute[currentIndex + 1].distance || 300000000;
+        nextDistance = currentRoute[currentIndex + 1].distance || 300000000;
         setDistanceKm(nextDistance);
       } else {
-        setDistanceKm(300000000);
+        setDistanceKm(nextDistance);
       }
+
+      // CORREÇÃO CHAVE: Força a ref a enxergar a nova distância imediatamente!
+      distanceKmRef.current = nextDistance;
 
       setProgress(0);
       setArrivedAtMars(false);
@@ -814,10 +818,9 @@ const DecolagemMarte = () => {
       approachSoundPlayed.current = false;
       minervaEventTriggered.current = true;
 
-      // --- CORREÇÃO APLICADA AQUI: Garante o boost de velocidade ---
-      setIsBoostingTo60k(true);
-
+      // Deixamos a Minerva controlar o boost de 60k para sincronizar com o áudio
       triggerMinervaInterplanetarySpeed();
+
       setActiveChallengeData(null);
       setIsDialogueFinished(false);
       setTravelStarted(true);
@@ -854,6 +857,8 @@ const DecolagemMarte = () => {
         setSelectedPlanet({ nome: newDestinationStep.name });
         const newDist = newDestinationStep.distance || 300000000;
         setDistanceKm(newDist);
+        // CORREÇÃO: Atualiza imediatamente
+        distanceKmRef.current = newDist;
       }
       setArrivedAtMars(false);
       setIsFinalApproach(false);
@@ -864,6 +869,9 @@ const DecolagemMarte = () => {
       setShowStoreModal(false);
       setTimeout(async () => {
         setDistanceKm(300000000);
+        // CORREÇÃO: Atualiza imediatamente
+        distanceKmRef.current = 300000000;
+
         await saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
         setProgress(0);
         setArrivedAtMars(false);
@@ -871,10 +879,9 @@ const DecolagemMarte = () => {
         approachSoundPlayed.current = false;
         minervaEventTriggered.current = true;
 
-        // --- CORREÇÃO APLICADA AQUI: Garante o boost ao mudar de rota ---
-        setIsBoostingTo60k(true);
-
+        // Deixamos a Minerva controlar o boost de 60k
         triggerMinervaInterplanetarySpeed();
+
         setActiveChallengeData(null);
         setIsDialogueFinished(false);
         setTravelStarted(true);

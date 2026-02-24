@@ -94,17 +94,17 @@ Quando estas questões nos afligem profundamente, e que nem sempre nosso líder 
             { field: 'interdependence', value: 15 }
         ]
     },
-    // --- DESAFIO BOCTOK ---
+    // --- DESAFIO BOKTOK ---
     {
-        id: 'challenge_boctok',
-        name: 'Estação Boctok',
-        description: `Em uma parada na Estação Boctok, a equipe já pode contar com um time de astronautas-especialistas, que trabalha na reutilização de foguetes e naves menores de acoplamento.
+        id: 'challenge_boktok',
+        name: 'Estação Boktok',
+        description: `Em uma parada na Estação Boktok, a equipe já pode contar com um time de astronautas-especialistas, que trabalha na reutilização de foguetes e naves menores de acoplamento.
 
 O time local quer nos presentar com uma demonstração de um software de regulagem energética extensivo, que contribui para a economia da energia circulante em todos os compartimentos e com mais autonomia.
 
 Nos disseram que a demonstração-teste e a aquisição do software nos dá um aumento das reservas de energia.`,
         price: 30000,
-        image: '/images/imagem-desafio-Boctok.png',
+        image: '/images/imagem-desafio-Boktok.png',
         type: 'desafios',
         risk: 'medium',
         reward: 'energy_boost',
