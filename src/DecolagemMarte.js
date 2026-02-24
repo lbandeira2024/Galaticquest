@@ -1348,7 +1348,8 @@ const DecolagemMarte = () => {
           lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
           const dobraAtiva = isDobraAtivadaRef.current;
           const accelConfig = accelerationRates[chosenShipRef.current] || accelerationRates.default;
-          const WARP_MULTIPLIER = 6.726;
+          //const WARP_MULTIPLIER = 6.726;
+          const WARP_MULTIPLIER = 15.000;
 
           let targetSpeed = 45000;
           if (dobraAtiva) { targetSpeed = 100000000; }
