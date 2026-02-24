@@ -813,6 +813,10 @@ const DecolagemMarte = () => {
       setIsFinalApproach(false);
       approachSoundPlayed.current = false;
       minervaEventTriggered.current = true;
+
+      // --- CORREÇÃO APLICADA AQUI: Garante o boost de velocidade ---
+      setIsBoostingTo60k(true);
+
       triggerMinervaInterplanetarySpeed();
       setActiveChallengeData(null);
       setIsDialogueFinished(false);
@@ -866,6 +870,10 @@ const DecolagemMarte = () => {
         setIsFinalApproach(false);
         approachSoundPlayed.current = false;
         minervaEventTriggered.current = true;
+
+        // --- CORREÇÃO APLICADA AQUI: Garante o boost ao mudar de rota ---
+        setIsBoostingTo60k(true);
+
         triggerMinervaInterplanetarySpeed();
         setActiveChallengeData(null);
         setIsDialogueFinished(false);

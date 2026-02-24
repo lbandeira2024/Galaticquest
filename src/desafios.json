@@ -792,17 +792,62 @@
             "dialogo": [
                 {
                     "personagemId": "cerruti",
-                    "texto": "Convidei você para esta caminhada Aletheia, porque estou aflito com a decisão que preciso tomar. Tenho a premiação para fazer à toda equipe, mas o board me orientou a cancelar por motivos que ainda desconheço. É a minha palavra contra a deles.",
+                    "texto": "Convidei você para esta caminhada Aletheia, porque estou aflito com a decisão que preciso tomar. Tenho a premiação para fazer ",
+                    "duracao": 12000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": "à toda equipe, mas o board me orientou a cancelar por motivos que ainda desconheço. É a minha palavra contra a deles.",
                     "duracao": 12000
                 },
                 {
                     "personagemId": "aletheia",
-                    "texto": "A verdade sempre é algo que deve estar em conformidade com a realidade, com os fatos. Temos a estabelecida com os astronautas - o acordo, e a que Bill Dale tentou lhe convencer, se apegando ao board que certamente deve tê-lo cobrado. Ele não esclareceu o porque da mudança exatamente, e você por sua vez, não se convenceu para mudar sua posição. Sentiu mais seguro na palavra que deu aos astronautas que tem trabalhado arduamente, e atingir as metas. Temos talvez duas verdades, a que vale é a sua à partir do dilema que sente. Neste sentido, ele está dentro de você onde tudo pode – a base são seus valores e a sua consciência como líder que é. Ambas as posições apontam riscos. O impasse continua no seu colo para decidir.",
+                    "texto": "A verdade sempre é algo que deve estar em conformidade com a realidade, com os fatos. Temos a estabelecida com os astronautas",
+                    "duracao": 25000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": " o acordo, e a que Bill Dale tentou lhe convencer, se apegando ao board que certamente deve tê-lo cobrado. Ele não esclareceu",
+                    "duracao": 25000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": "  o porque da mudança exatamente, e você por sua vez, não se convenceu para mudar sua posição. Sentiu mais seguro na palavra",
+                    "duracao": 25000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": "  que deu aos astronautas que tem trabalhado arduamente, e atingir as metas. Temos talvez duas verdades, a que vale é a sua à ",
+                    "duracao": 25000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": "   à partir do dilema que sente. Neste sentido, ele está dentro de você onde tudo pode – a base são seus valores e a sua ",
+                    "duracao": 25000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": "    consciência como líder que é. Ambas as posições apontam riscos. O impasse continua no seu colo para decidir.",
                     "duracao": 25000
                 },
                 {
                     "personagemId": "cerruti",
-                    "texto": "Qualquer caminho que eu faça ou opinião que eu venha a pedir a alguém, a decisão será solitariamente minha. Decidir com base apenas na realidade dele, tornaria as coisas mais fáceis, não?.. Aletheia, agradeço seus comentários e escuta. Pensarei um pouco mais. Tenderei a pagar, porque entre outras coisas importantes uma delas é moral, ética; disponho de orçamento para cumprir o acordo feito com todos eles.",
+                    "texto": "Qualquer caminho que eu faça ou opinião que eu venha a pedir a alguém, a decisão será solitariamente minha. Decidir com base",
+                    "duracao": 18000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": "apenas na realidade dele, tornaria as coisas mais fáceis, não?.. Aletheia, agradeço seus comentários e escuta. Pensarei um ",
+                    "duracao": 18000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": "pouco mais. Tenderei a pagar, porque entre outras coisas importantes uma delas é moral, ética; disponho de orçamento para",
+                    "duracao": 18000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": " cumprir o acordo feito com todos eles.",
                     "duracao": 18000
                 }
             ],
@@ -879,27 +924,62 @@
             "dialogo": [
                 {
                     "personagemId": "kopenawa",
-                    "texto": "Não desejo repetir o jeito de condução de Deméter como da outra vez, porque acho que a situação desta vez é diferente. O tempo é menor e o perigo da poe-ira cósmica pode ser fatal, se colidirmos.",
+                    "texto": "Não desejo repetir o jeito de condução de Deméter como da outra vez, porque acho que a situação desta vez é diferente. O tempo",
+                    "duracao": 10000
+                },
+                {
+                    "personagemId": "kopenawa",
+                    "texto": " é menor e o perigo da poe-ira cósmica pode ser fatal, se colidirmos.",
                     "duracao": 10000
                 },
                 {
                     "personagemId": "cerruti",
-                    "texto": "Kopenawa, astrofísico que você é, deve saber que a solução passa pelo olhar de quem é juramentado no assunto. Temos sete especialistas nas estações para nos ajudar e a equipe de base da Terra. Sei que a Liu Yang e o Capitão Kirk conhecem bem o tema, pois trabalharam com experimentos envolvendo cometas e asteroides. Eles conhecem os riscos e o que fazer.",
+                    "texto": "Kopenawa, astrofísico que você é, deve saber que a solução passa pelo olhar de quem é juramentado no assunto. Temos sete ",
+                    "duracao": 15000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": " Temos sete especialistas nas estações para nos ajudar e a equipe de base da Terra. Sei que a Liu Yang e o Capitão Kirk ",
+                    "duracao": 15000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": "conhecem bem o tema, pois trabalharam com experimentos envolvendo cometas e asteroides. Eles conhecem os riscos e o que fazer.",
                     "duracao": 15000
                 },
                 {
                     "personagemId": "kopenawa",
-                    "texto": "Concordo, acho razoável o que você fala ao somar mais dois colegas aos sete especialistas de origem. Eles nos ajudarão na solução. Feito!",
+                    "texto": "Concordo, acho razoável o que você fala ao somar mais dois colegas aos sete especialistas de origem. Eles nos ajudarão ",
+                    "duracao": 7000
+                },
+                {
+                    "personagemId": "kopenawa",
+                    "texto": "na solução. Feito!",
                     "duracao": 7000
                 },
                 {
                     "personagemId": "demeter",
-                    "texto": "Acho que deveríamos conversar e entender o momento de cada um e aproveitar para reconhecer o que fizeram nos últimos meses. Agora é a hora, e enaltecê-los sobre a importância que todos tem nesta luta pela sobrevivência. Disponho-me a iniciar a roda de conversa com o “sinal verde” de vocês.",
+                    "texto": "Acho que deveríamos conversar e entender o momento de cada um e aproveitar para reconhecer o que fizeram nos últimos meses.",
+                    "duracao": 12000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": " Agora é a hora, e enaltecê-los sobre a importância que todos tem nesta luta pela sobrevivência. Disponho-me a iniciar a roda",
+                    "duracao": 12000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "  de conversa com o “sinal verde” de vocês.",
                     "duracao": 12000
                 },
                 {
                     "personagemId": "aquiles",
-                    "texto": "...Estamos aqui perdendo tempo. Já poderíamos colocá-los na estação próxima da ameaça identificada para que comecem a trabalhar. Depois fazemos esta “perfumaria” da Deméter. Eu não me responsabilizo se fizerem diferente.",
+                    "texto": "...Estamos aqui perdendo tempo. Já poderíamos colocá-los na estação próxima da ameaça identificada para que comecem ",
+                    "duracao": 10000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": " a trabalhar. Depois fazemos esta “perfumaria” da Deméter. Eu não me responsabilizo se fizerem diferente.",
                     "duracao": 10000
                 }
             ],
