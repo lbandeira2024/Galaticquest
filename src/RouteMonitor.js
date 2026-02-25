@@ -41,7 +41,7 @@ const getEntityIcon = (name) => {
     "Pallas": "🪨", "Cinturão": "☄️", "Kuiper": "☄️",
     "Proxima Centauri b": "🌌", "TRAPPIST-1e": "🌌", "Kepler-186f": "🌌",
     "ACEE": "🛰️", "Salyut": "🛰️", "Delfos": "🛰️", "Mol": "🛰️",
-    "Skylab": "🛰️", "Almaz": "🛰️", "Tiangong": "🛰️", "Boktok": "🛰️"
+    "Skylab": "🛰️", "Almaz": "🛰️", "Tiangong": "🛰️", "Boctok": "🛰️"
   };
 
   return icons[name] || "🛸";

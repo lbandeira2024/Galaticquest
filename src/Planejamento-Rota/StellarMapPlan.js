@@ -49,7 +49,7 @@ const realDistances = {
     "Lua": 0.384, "Fobos": 0.009, "Deimos": 0.023, "Io": 0.421, "Europa": 0.670, "Ganímedes": 1.07, "Calisto": 1.88,
     "Titã": 1.221, "Encelado": 0.238, "Mimas": 0.185, "Titania": 0.436, "Oberon": 0.583, "Tritao": 0.354, "Caronte": 0.019,
     "Proxima Centauri b": 40230, "TRAPPIST-1e": 39140, "Kepler-186f": 49200, "ACEE": 0.564, "Salyut": 6206,
-    "Delfos": 2875, "Mol": 4500, "Skylab": 115, "Almaz": 6000, "Tiangong": 1500, "Boktok": 39142
+    "Delfos": 2875, "Mol": 4500, "Skylab": 115, "Almaz": 6000, "Tiangong": 1500, "Boctok": 39142
 };
 
 const solarSystem = {
@@ -81,7 +81,7 @@ const solarSystem = {
         { name: "Kuiper", radius: 0, color: "transparent", orbitRadius: 170, orbitSpeed: 0, rotationSpeed: 0, angle: 0, isKuiperBelt: true, moons: [] },
         { name: "Proxima Centauri b", radius: 10, color: "#e74c3c", orbitRadius: 200, orbitSpeed: 0.0001 / 2, rotationSpeed: 0.0005, angle: 0, isExoplanet: true, moons: [] },
         { name: "TRAPPIST-1e", radius: 9, color: "#3498db", orbitRadius: 210, orbitSpeed: 0.00009 / 2, rotationSpeed: 0.0006, angle: 90, isExoplanet: true, moons: [] },
-        { name: "Boktok", radius: 6, color: "#a020f0", orbitRadius: 210.8, orbitSpeed: 0.00009 / 2, rotationSpeed: 0, angle: 90.5, moons: [], isStation: true },
+        { name: "Boctok", radius: 6, color: "#a020f0", orbitRadius: 210.8, orbitSpeed: 0.00009 / 2, rotationSpeed: 0, angle: 90.5, moons: [], isStation: true },
         { name: "Kepler-186f", radius: 8, color: "#2ecc71", orbitRadius: 220, orbitSpeed: 0.00008 / 2, rotationSpeed: 0.0004, angle: 180, isExoplanet: true, moons: [] }
     ]
 };

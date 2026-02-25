@@ -42,7 +42,7 @@ const planetImageMap = {
   skylab: '/images/stations/SKYLAB-Rotacionando.gif',
   salyut: '/images/stations/SALYUT-Rotacionando.gif',
   delfos: '/images/stations/DELFOS-Rotacionando.gif',
-  boktok: '/images/stations/BOKTOK-Rotacionando.webm'
+  boctok: '/images/stations/BOCTOK-Rotacionando.webm'
 };
 
 const PLANET_MUSIC_CONFIG = {
@@ -84,7 +84,7 @@ const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 80%)`);
 const getPlanetScale = (planetName) => {
   const giants = ['jupiter', 'saturno', 'urano', 'netuno'];
   const dwarfs = ['lua', 'ceres', 'plutao', 'makemake', 'eris', 'haumea', 'vesta', 'io', 'europa', 'calisto', 'encelado', 'ganimedes', 'pallas', 'mimas', 'tita', 'titania', 'oberon', 'tritao', 'caronte', 'fobos', 'deimos', 'kaapa'];
-  const stations = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boktok', 'boctok'];
+  const stations = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boctok'];
 
   if (giants.includes(planetName)) return 1.8;
   if (dwarfs.includes(planetName)) return 0.5;
@@ -198,12 +198,7 @@ const SpaceView = ({
 
     currentVisualDistanceRef.current = distanceRef.current;
 
-    let imagePath;
-    if (planetNameNormalized === 'boctok') {
-      imagePath = planetImageMap['boktok'];
-    } else {
-      imagePath = planetImageMap[planetNameNormalized] || '/images/planets/Marte-Rotacionando.gif';
-    }
+    let imagePath = planetImageMap[planetNameNormalized] || '/images/planets/Marte-Rotacionando.gif';
 
     setPlanetImageLoaded(false);
     setPlanetImage(imagePath);
@@ -386,7 +381,7 @@ const SpaceView = ({
     };
   }, [isPaused, isActive, planetImageLoaded, selectedPlanet]);
 
-  const isStation = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boktok', 'boctok'].includes(planetName);
+  const isStation = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boctok'].includes(planetName);
   const baseSize = forceLarge ? '50vmin' : '40vmin';
 
   return (
