@@ -96,9 +96,9 @@ Quando estas questões nos afligem profundamente, e que nem sempre nosso líder 
     },
     // --- DESAFIO BOKTOK ---
     {
-        id: 'challenge_boktok',
-        name: 'Estação Boktok',
-        description: `Em uma parada na Estação Boktok, a equipe já pode contar com um time de astronautas-especialistas, que trabalha na reutilização de foguetes e naves menores de acoplamento.
+        id: 'challenge_boctok',
+        name: 'Estação Boctok',
+        description: `Em uma parada na Estação Boctok, a equipe já pode contar com um time de astronautas-especialistas, que trabalha na reutilização de foguetes e naves menores de acoplamento.
 
 O time local quer nos presentar com uma demonstração de um software de regulagem energética extensivo, que contribui para a economia da energia circulante em todos os compartimentos e com mais autonomia.
 
