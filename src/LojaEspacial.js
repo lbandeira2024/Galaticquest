@@ -104,7 +104,7 @@ O time local quer nos presentar com uma demonstração de um software de regulag
 
 Nos disseram que a demonstração-teste e a aquisição do software nos dá um aumento das reservas de energia.`,
         price: 30000,
-        image: '/images/imagem-desafio-Boktok.png',
+        image: '/images/imagem-desafio-Boctok.png',
         type: 'desafios',
         risk: 'medium',
         reward: 'energy_boost',
