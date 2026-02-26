@@ -82,14 +82,15 @@ const STAR_HUES = [210, 120, 30, 0, 60];
 const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 80%)`);
 
 const getPlanetScale = (planetName) => {
-  const giants = ['jupiter', 'saturno', 'urano', 'netuno'];
+  // Urano removido da lista abaixo
+  const giants = ['jupiter', 'saturno', 'netuno'];
   const dwarfs = ['lua', 'ceres', 'plutao', 'makemake', 'eris', 'haumea', 'vesta', 'io', 'europa', 'calisto', 'encelado', 'ganimedes', 'pallas', 'mimas', 'tita', 'titania', 'oberon', 'tritao', 'caronte', 'fobos', 'deimos', 'kaapa'];
   const stations = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boctok'];
 
   if (giants.includes(planetName)) return 1.8;
   if (dwarfs.includes(planetName)) return 0.5;
   if (stations.includes(planetName)) return 0.35;
-  return 1.0;
+  return 1.0; // Os planetas rochosos (e agora Urano) usarão esta escala
 };
 
 const SpaceView = ({
@@ -208,7 +209,6 @@ const SpaceView = ({
       img.src = imagePath;
       img.onload = () => {
         setPlanetImageLoaded(true);
-        // Garante que a imagem inicie invisível de forma limpa
         if (planetImageRef.current) planetImageRef.current.style.opacity = 0;
       };
       img.onerror = () => {
@@ -424,10 +424,8 @@ const SpaceView = ({
             playsInline
             onLoadedData={() => {
               setPlanetImageLoaded(true);
-              // Inicia seguro pelo DOM, fora do alcance de renderização do React
               if (planetImageRef.current) planetImageRef.current.style.opacity = 0;
             }}
-            // CORREÇÃO: Removido o 'opacity: 0' do style do React
             style={{
               width: baseSize,
               height: baseSize,
@@ -444,7 +442,6 @@ const SpaceView = ({
             src={planetImage}
             alt={`Planet ${planetName}`}
             className={`planet-image ${planetName}-planet ${isStation ? 'is-station' : ''}`}
-            // CORREÇÃO: Removido o 'opacity: 0' do style do React
             style={{
               width: baseSize,
               height: baseSize,
