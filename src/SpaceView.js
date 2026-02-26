@@ -10,7 +10,7 @@ const planetImageMap = {
   jupiter: '/images/Planets/jupiter_rotacionando.webm',
   proximacentaurib: '/images/Planets/proximacentaurib-rotacionando.gif',
   makemake: '/images/Planets/makemake-rotacionando.gif',
-  ceres: '/images/Planets/ceres-rotacionando.gif',
+  ceres: '/images/Planets/ceres-rotacionando.webm',
   deimos: '/images/Planets/deimos-rotacionando.gif',
   eris: '/images/Planets/eris-rotacionando.gif',
   fobos: '/images/Planets/fobos-rotacionando.gif',
