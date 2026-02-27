@@ -40,7 +40,7 @@ const planetImageMap = {
   mol: '/images/stations/MOL-Rotacionando.gif',
   tiangong: '/images/stations/TIANGONG-Rotacionando.gif',
   skylab: '/images/stations/SKYLAB-Rotacionando.gif',
-  salyut: '/images/stations/SALYUT-Rotacionando.gif',
+  salyut: '/images/stations/SALYUT-Rotacionando.webm',
   delfos: '/images/stations/DELFOS-Rotacionando.gif',
   boctok: '/images/stations/BOCTOK-Rotacionando.webm'
 };
