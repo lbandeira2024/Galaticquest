@@ -76,7 +76,7 @@ const PLANET_MUSIC_CONFIG = {
   tritao: { src: '/sounds/tritao/tritao.mp3', volume: 0.5 },
   urano: { src: '/sounds/urano/Urano.mp3', volume: 0.5 },
   vesta: { src: '/sounds/Vesta/DIMORPHOS_Vesta.mp3', volume: 0.5 },
-  Kepler_186f: { src: '/sounds/Kepler/Kepler.mp3', volume: 0.5 },
+  Kepler186f: { src: '/sounds/Kepler/Kepler.mp3', volume: 0.5 },
   trappist: { src: '/sounds/Trappist-1/Trappist-1.mp3', volume: 0.5 },
   caronte: { src: '/sounds/caronte/caronte.mp3', volume: 0.5 },
   oberon: { src: '/sounds/Titania/titaniaOberon.mp3', volume: 0.5 }

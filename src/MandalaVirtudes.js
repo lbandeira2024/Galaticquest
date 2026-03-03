@@ -24,13 +24,13 @@ const ALL_VIRTUE_IDS = VIRTUES.map(v => v.id);
 // Mapeamento de IDs de desafios para nomes de Quizz
 const QUIZZ_NAMES = {
     'CSD1': 'CSD Marte', 'CSD2': 'CSD Ceres', 'CSD3': 'CSD Netuno',
-    'CSD4': 'CSD Plutão', 'CSD5': 'CSD Jupiter', 'CSD6': 'CSD Fobos',
+    'CSD4': 'CSD Plutão', 'CSD5': 'CSD Júpiter', 'CSD6': 'CSD Fobos',
     'CSD7': 'CSD Vênus', 'CSD8': 'CSD Saturno', 'CSD9': 'CSD Lua',
-    'CSD10': 'CSD Haumea', 'CSD11': 'CSD Kappa', 'CSD12': 'CSD Trappist',
+    'CSD10': 'CSD Haumea', 'CSD11': 'CSD Oberon', 'CSD12': 'CSD TRAPPIST-1e',
     'CSD13': 'CSD Makemake', 'CSD14': 'CSD Éris', 'CSD15': 'CSD Urano',
-    'CSD16': 'CSD Mercúrio', 'CSD17': 'CSD Deimos', 'CSD18': 'CSD Vesta', 'CSD19': 'CSD Próxima Cent. b',
-    'CSD20': 'CSD Pallas', 'CSD21': 'CSD Tritão', 'CSD22': 'CSD Europa', 'CSD23': 'CSD Kepler-186f',
-    'CSD24': 'CSD Encélado', 'CSD25': 'CSD Ganímedes',
+    'CSD16': 'CSD Mercúrio', 'CSD17': 'CSD Deimos', 'CSD18': 'CSD Vesta', 'CSD19': 'CSD Próxima Centauri b',
+    'CSD20': 'CSD Pallas', 'CSD21': 'CSD Tritão', 'CSD22': 'CSD Europa', 'CSD23': 'CSD Kepler186f',
+    'CSD24': 'CSD Titã', 'CSD25': 'CSD Ganímedes',
 };
 
 // --- Regras de negócio centralizadas ---
@@ -186,9 +186,7 @@ const VIRTUE_RULES = {
         red: ['simplicidade', 'humildade', 'paixao-pessoas'],
     },
 
-    'CSD8-D':
-        { green: ALL_VIRTUE_IDS, showImage: true },
-
+    'CSD8-D': { green: ALL_VIRTUE_IDS, showImage: true },
 
     'CSD9-A': {
         special: ['humildade', 'agir-verdade'],
@@ -284,7 +282,6 @@ const VIRTUE_RULES = {
     },
 
     'CSD13-B': {
-
         special: ['conhecer-si'],
         red: ['disciplina', 'agir-verdade', 'generosidade', 'paixao-pessoas', 'simplicidade'],
         green: ['ter-proposito', 'protagonismo', 'coragem', 'respeito-diversidade', 'humildade', 'perseveranca'],
@@ -321,7 +318,6 @@ const VIRTUE_RULES = {
     'CSD14-D': {
         special: ['generosidade', 'paixao-pessoas', 'protagonismo', 'agir-verdade', 'perseveranca', 'ter-proposito', 'humildade', 'conhecer-si'],
         green: ['disciplina', 'coragem', 'simplicidade', 'respeito-diversidade'],
-
     },
 
     'CSD15-A': {
