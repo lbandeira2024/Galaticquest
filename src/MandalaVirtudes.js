@@ -28,9 +28,9 @@ const QUIZZ_NAMES = {
     'CSD7': 'CSD Vênus', 'CSD8': 'CSD Saturno', 'CSD9': 'CSD Lua',
     'CSD10': 'CSD Haumea', 'CSD11': 'CSD Kappa', 'CSD12': 'CSD Trappist',
     'CSD13': 'CSD Makemake', 'CSD14': 'CSD Éris', 'CSD15': 'CSD Urano',
-    'CSD16': 'CSD Mercurio', 'CSD17': 'CSD Deimos', 'CSD18': 'CSD Vesta', 'CSD19': 'CSD Próxima Cent',
-    'CSD20': 'CSD Palla', 'CSD21': 'CSD Tritão', 'CSD22': 'CSD Europa', 'CSD23': 'CSD Kepler',
-    'CSD24': 'CSD Encelado', 'CSD25': 'CSD Gaminedes',
+    'CSD16': 'CSD Mercúrio', 'CSD17': 'CSD Deimos', 'CSD18': 'CSD Vesta', 'CSD19': 'CSD Próxima Cent. b',
+    'CSD20': 'CSD Pallas', 'CSD21': 'CSD Tritão', 'CSD22': 'CSD Europa', 'CSD23': 'CSD Kepler-186f',
+    'CSD24': 'CSD Encélado', 'CSD25': 'CSD Ganímedes',
 };
 
 // --- Regras de negócio centralizadas ---

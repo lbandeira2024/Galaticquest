@@ -31,17 +31,59 @@ const getEntityIcon = (name) => {
   if (name.includes("S.O.S")) return "🆘";
 
   const icons = {
-    "Sol": "☀️", "Mercurio": "🟤", "Venus": "🟡", "Terra": "🌍", "Marte": "🔴",
-    "Jupiter": "🟠", "Saturno": "🪐", "Urano": "🧊", "Netuno": "🔵",
-    "Lua": "🌕", "Fobos": "🪨", "Deimos": "🪨", "Io": "🟡", "Europa": "❄️",
-    "Ganímedes": "🌖", "Calisto": "🌑", "Titã": "🟠", "Encelado": "❄️",
-    "Mimas": "🌑", "Titania": "🌑", "Oberon": "🌑", "Tritao": "🧊",
-    "Proteu": "🪨", "Caronte": "🌑", "Ceres": "🪨", "Plutao": "❄️",
-    "Haumea": "🥚", "Makemake": "🔴", "Eris": "⚪", "Vesta": "🪨",
-    "Pallas": "🪨", "Cinturão": "☄️", "Kuiper": "☄️",
-    "Proxima Centauri b": "🌌", "TRAPPIST-1e": "🌌", "Kepler-186f": "🌌",
-    "ACEE": "🛰️", "Salyut": "🛰️", "Delfos": "🛰️", "Mol": "🛰️",
-    "Skylab": "🛰️", "Almaz": "🛰️", "Tiangong": "🛰️", "Boctok": "🛰️"
+    // Estrela e Planetas Principais (Representação Esférica)
+    "Sol": "☀️",
+    "Mercurio": "🌑",
+    "Venus": "🟡",
+    "Terra": "🌍",
+    "Marte": "🔴",
+    "Jupiter": "🟠",
+    "Saturno": "🪐",
+    "Urano": "🌐",
+    "Netuno": "🔵",
+
+    // Luas (Representadas como esferas ou globos lunares)
+    "Lua": "🌕",
+    "Fobos": "🌑",
+    "Deimos": "🌑",
+    "Io": "🟡",
+    "Europa": "⚪",
+    "Ganímedes": "🌖",
+    "Calisto": "🌑",
+    "Titã": "🟠",
+    "Encelado": "⚪",
+    "Mimas": "🌑",
+    "Titania": "🌑",
+    "Oberon": "🌑",
+    "Tritao": "🔵",
+    "Proteu": "🌑",
+    "Caronte": "🌑",
+
+    // Planetas Anões e Corpos Menores
+    "Ceres": "⚪",
+    "Plutao": "❄️",
+    "Haumea": "🥚",
+    "Makemake": "🔴",
+    "Eris": "⚪",
+    "Vesta": "🌑",
+    "Pallas": "🌑",
+    "Cinturão": "☄️",
+    "Kuiper": "☄️",
+
+    // Exoplanetas
+    "Proxima Centauri b": "🌌",
+    "TRAPPIST-1e": "🌌",
+    "Kepler-186f": "🌌",
+
+    // ESTAÇÕES ESPACIAIS (As exceções mecânicas)
+    "ACEE": "🛰️",
+    "Salyut": "🛰️",
+    "Delfos": "🛰️",
+    "Mol": "🛰️",
+    "Skylab": "🛰️",
+    "Almaz": "🛰️",
+    "Tiangong": "🛰️",
+    "Boctok": "🛰️"
   };
 
   return icons[name] || "🛸";
