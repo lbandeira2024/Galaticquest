@@ -73,7 +73,7 @@ const getEntityIcon = (name) => {
     // Exoplanetas
     "Proxima Centauri b": "🌌",
     "TRAPPIST-1e": "🌌",
-    "Kepler-186f": "🌌",
+    "Kepler186f": "🌌",
 
     // ESTAÇÕES ESPACIAIS (As exceções mecânicas)
     "ACEE": "🛰️",
