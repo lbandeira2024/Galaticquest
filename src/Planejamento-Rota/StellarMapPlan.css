@@ -299,7 +299,6 @@
     top: 0;
     left: 0;
     width: 85px;
-    /* MODIFICADO: Aumentado de 70.71px para 85px para dar mais distância */
     height: 0;
     border-top: 2px dashed #2ecc71;
     transform-origin: 0 0;
@@ -314,9 +313,7 @@
 .celestial-body.moon .body-label.moon-label {
     position: absolute !important;
     top: -60px !important;
-    /* MODIFICADO: Ajustado para o novo comprimento da linha */
     left: -60px !important;
-    /* MODIFICADO: Ajustado para o novo comprimento da linha */
     bottom: auto !important;
     right: auto !important;
     transform: translate(-100%, -100%) !important;
@@ -327,7 +324,6 @@
     text-shadow: 0 0 3px rgba(0, 0, 0, 1) !important;
     border-radius: 0 !important;
 
-    /* MODIFICADOS: Espaçamento e comportamento do quadro de texto */
     padding: 5px 12px !important;
     font-size: 11px !important;
     white-space: nowrap !important;
@@ -703,7 +699,8 @@
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    margin-right: 15px;
+    margin-right: 6px;
+    /* MODIFICADO: Estava 15px, reduzi para aproximar da bolinha */
     flex-shrink: 0;
     position: relative;
     z-index: 2;
@@ -731,7 +728,8 @@
     align-items: center;
     flex-grow: 1;
     min-width: 0;
-    padding: 0 10px;
+    padding: 0;
+    /* MODIFICADO: Estava 0 10px, removi o padding para dar espaço total ao texto */
 }
 
 .step-name {
@@ -747,7 +745,8 @@
 .step-distance {
     font-size: 14px;
     color: #bbdefb;
-    min-width: 120px;
+    min-width: 95px;
+    /* MODIFICADO: Estava 120px, reduzi para evitar esmagar o nome */
     text-align: right;
     flex-shrink: 0;
 }
