@@ -522,7 +522,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                                     transform: `translate(-50%, -50%) rotate(${currentMoonRotation}deg)`
                                                 }} onClick={(e) => { e.stopPropagation(); handleBodyClick(moon); }}>
 
-                                                {/* Eixo de Rotação Estrito na Origem (0,0) */}
+                                                {/* Eixo de Rotação Estrito na Origem (0,0) do centro da lua */}
                                                 <div className="label-container moon-label-container" style={{
                                                     transform: `rotate(${-currentMoonRotation}deg)`
                                                 }}>

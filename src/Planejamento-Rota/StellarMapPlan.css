@@ -275,10 +275,10 @@
 }
 
 /* =========================================
-   REGRAS ESPECÍFICAS PARA TODAS AS LUAS (EFEITO DIAGONAL PONTILHADO)
+   REGRAS ESPECÍFICAS PARA TODAS AS LUAS (EFEITO DIAGONAL PERFEITO)
 ========================================= */
 
-/* O container ancora exatamente no centro da lua */
+/* O container ancora exatamente no centro da lua (0,0) */
 .celestial-body.moon .label-container.moon-label-container {
     top: 50% !important;
     left: 50% !important;
@@ -286,49 +286,40 @@
     bottom: auto !important;
     width: 0;
     height: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
+    /* Tiramos o flex para usar posicionamento absoluto livre */
     overflow: visible;
 }
 
-/* A linha diagonal pontilhada conectando a lua à caixa */
+/* A linha diagonal pontilhada conectando o centro da lua à quina da caixa */
 .celestial-body.moon .label-container.moon-label-container::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
-    width: 50px;
-    /* Comprimento da linha */
+    /* Tamanho exato calculado para bater na quina (-40, -40) da tela usando Pitágoras */
+    width: 56.56px;
     height: 0;
-    /* Zerado pois usaremos a borda */
     border-top: 2px dashed #2ecc71;
-    /* <-- LINHA PONTILHADA / TRACEJADA AQUI */
-    background-color: transparent;
-    /* Remove fundo sólido */
-    transform-origin: left center;
+    transform-origin: 0 0;
     transform: rotate(-135deg);
-    /* Aponta para o topo-esquerdo perfeitamente a 45 graus */
+    /* Aponta diagonalmente para CIMA e ESQUERDA */
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease;
     pointer-events: none;
     z-index: 1;
-    box-shadow: 0 -1px 4px rgba(46, 204, 113, 0.4);
-    /* Sombra ajustada para a borda */
 }
 
 /* A caixa de texto retangular (Label) */
 .celestial-body.moon .body-label.moon-label {
     position: absolute;
-    /* (50px de linha * 0.707 do ângulo) = 35.35px */
-    bottom: 35px;
-    right: 35px;
+    /* Ao colocar bottom e right em 40px, a quina inferior-direita fica exatamente no ponto (-40, -40) */
+    bottom: 40px;
+    right: 40px;
 
     border: 2px solid #2ecc71 !important;
-    /* Borda verde */
     background: rgba(0, 15, 30, 0.8) !important;
-    /* Fundo escuro levemente azulado */
     color: white !important;
     font-weight: bold !important;
     text-shadow: 0 0 3px rgba(0, 0, 0, 1) !important;
@@ -345,7 +336,6 @@
     pointer-events: auto !important;
     z-index: 2;
     transform: none !important;
-    /* Remove qualquer transform anterior para não bugar a caixa */
 }
 
 /* Mostrar a linha pontilhada e a caixa ao passar o mouse */
@@ -369,8 +359,6 @@
 .celestial-body.moon[data-name="Encelado"] .label-container.moon-label-container::before {
     border-top-color: #4fc3f7 !important;
     /* Linha pontilhada azul */
-    background-color: transparent !important;
-    box-shadow: 0 -1px 4px rgba(79, 195, 247, 0.4);
 }
 
 /* ========================================= */
