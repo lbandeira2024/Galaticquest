@@ -275,7 +275,7 @@
 }
 
 /* =========================================
-   REGRAS ESPECÍFICAS PARA TODAS AS LUAS (EFEITO DIAGONAL PERFEITO)
+   REGRAS ESPECÍFICAS PARA TODAS AS LUAS (EFEITO DIAGONAL PERFEITO E TIMER)
 ========================================= */
 
 /* O container ancora exatamente no centro da lua (0,0) */
@@ -355,14 +355,16 @@
     z-index: 2;
 }
 
-/* Mostrar a linha e a caixa ao passar o mouse na lua ou no texto */
+/* Mostrar a linha e a caixa ao passar o mouse ou pela classe ativa do JS (.show-label) */
 .celestial-body.moon:hover .body-label.moon-label,
-.celestial-body.moon:hover .label-container.moon-label-container::before {
+.celestial-body.moon:hover .label-container.moon-label-container::before,
+.celestial-body.moon.show-label .body-label.moon-label,
+.celestial-body.moon.show-label .label-container.moon-label-container::before {
     opacity: 1 !important;
     visibility: visible !important;
 }
 
-/* Efeito de destaque no hover (opcional e interativo) */
+/* Efeito de destaque no hover na caixa (interatividade extra) */
 .celestial-body.moon .body-label.moon-label:hover {
     background: rgba(46, 204, 113, 0.2) !important;
     box-shadow: 0 0 10px rgba(46, 204, 113, 0.5) !important;

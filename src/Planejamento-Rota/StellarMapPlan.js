@@ -338,6 +338,34 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
         return '';
     };
 
+    // --- CONTROLE DE VISIBILIDADE DAS LUAS (NOVO) ---
+    const [visibleMoonLabel, setVisibleMoonLabel] = useState(null);
+    const moonLabelTimeoutRef = useRef(null);
+
+    const handleMoonInteraction = useCallback((moonName) => {
+        // Limpa o timer anterior, se houver
+        if (moonLabelTimeoutRef.current) {
+            clearTimeout(moonLabelTimeoutRef.current);
+        }
+
+        // Define a nova lua como visível
+        setVisibleMoonLabel(moonName);
+
+        // Inicia contagem de 3 segundos para esconder
+        moonLabelTimeoutRef.current = setTimeout(() => {
+            setVisibleMoonLabel(null);
+        }, 3000);
+    }, []);
+
+    // Limpa o timer caso o componente seja fechado para evitar memory leak
+    useEffect(() => {
+        return () => {
+            if (moonLabelTimeoutRef.current) {
+                clearTimeout(moonLabelTimeoutRef.current);
+            }
+        };
+    }, []);
+
     return (
         <div className="stellar-map" ref={containerRef} style={{ cursor: isDragging ? 'grabbing' : 'grab' }}>
             {plannedRoute.steps.length > 0 && (
@@ -511,17 +539,26 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                                 : '';
                                         const currentMoonRotation = rotationAngles[moon.name] || 0;
 
+                                        // Verifica se ESTA lua está ativa na regra dos 3 segundos
+                                        const isLabelVisible = visibleMoonLabel === moon.name;
+
                                         return (
                                             <div
                                                 key={moonIndex}
-                                                className={`celestial-body moon ${moonStatus}`}
+                                                className={`celestial-body moon ${moonStatus} ${isLabelVisible ? 'show-label' : ''}`}
                                                 data-name={moon.name}
                                                 style={{
                                                     width: `${moon.radius}px`, height: `${moon.radius}px`,
                                                     left: `${moonX}%`, top: `${moonY}%`,
                                                     transform: `translate(-50%, -50%) rotate(${currentMoonRotation}deg)`
-                                                }} onClick={(e) => { e.stopPropagation(); handleBodyClick(moon); }}>
-
+                                                }}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleMoonInteraction(moon.name); // Garante que ative ao clicar também
+                                                    handleBodyClick(moon);
+                                                }}
+                                                onMouseEnter={() => handleMoonInteraction(moon.name)}
+                                            >
                                                 {/* Eixo de Rotação Estrito na Origem (0,0) do centro da lua */}
                                                 <div className="label-container moon-label-container" style={{
                                                     transform: `rotate(${-currentMoonRotation}deg)`
