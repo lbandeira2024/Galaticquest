@@ -1467,7 +1467,8 @@ const DecolagemMarte = () => {
                 setActiveChallengeData(desafioEncontrado);
                 setShowDesafioModal(true);
               } else {
-                console.warn("⚠️ Desafio não encontrado para o destino:", targetName);
+                console.warn("⚠️ Desafio não encontrado para o destino:", targetName, "- Abrindo confirmação de viagem.");
+                setShowConfirmacaoModal(true);
               }
             }
 

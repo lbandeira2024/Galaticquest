@@ -2523,23 +2523,58 @@
             "dialogo": [
                 {
                     "personagemId": "petros",
-                    "texto": "(no rádio): Semolek, cuide remotamente do giroscópio da nave de Aletheia e equipe. Precisamos salvá-los, colocando-os na direção e estabilidade. \n\nCuidarei daqui do sistema inercial. Acho que conseguiremos sob meu comando falar a mesma linguagem. Conto com você, e temos guarida pra isso. \n\nMinha orientação é para que todo movimento nos monitores você me sinalize, por favor. Farei o mesmo daqui. Não podemos esquecer o “por que” desta ação. A prioridade é ficarmos à frente do controle sem distrações, seguindo o passo a passo. Vamos nessa, parceiro!",
-                    "duracao": 30000
+                    "texto": "(no rádio): Semolek, cuide remotamente do giroscópio da nave de Aletheia e equipe. Precisamos salvá-los, colocando-os na",
+                    "duracao": 4000
+                },
+                {
+                    "personagemId": "petros",
+                    "texto": "direção e estabilidade. \n\nCuidarei daqui do sistema inercial. Acho que conseguiremos sob meu comando falar a mesma linguagem.",
+                    "duracao": 4000
+                },
+                {
+                    "personagemId": "petros",
+                    "texto": "Conto com você, e temos guarida pra isso. \n\nMinha orientação é para que todo movimento nos monitores você me sinalize,",
+                    "duracao": 4000
+                },
+                {
+                    "personagemId": "petros",
+                    "texto": " por favor. Farei o mesmo daqui. Não podemos esquecer o “por que” desta ação. A prioridade é ficarmos à frente do controle",
+                    "duracao": 4000
+                },
+                {
+                    "personagemId": "petros",
+                    "texto": " sem distrações, seguindo o passo a passo. Vamos nessa, parceiro!",
+                    "duracao": 4000
                 },
                 {
                     "personagemId": "petros",
                     "texto": "(no rádio): ...Ei, concluí o escaneamento do sistema inercial, o problema ocorreu em um software de um dos computadores.",
-                    "duracao": 8000
+                    "duracao": 4000
                 },
                 {
                     "personagemId": "semolek",
-                    "texto": "(no rádio): O giroscópio estava avariado também, por conta, talvez, de uma chuva de meteoritos. Corrigido!... Eles não perceberam. Houve lá uma falha humana no monitoramento... Faltou disciplina (risos).",
-                    "duracao": 15000
+                    "texto": "(no rádio): O giroscópio estava avariado também, por conta, talvez, de uma chuva de meteoritos. Corrigido!... Eles não ",
+                    "duracao": 4000
+                },
+                {
+                    "personagemId": "semolek",
+                    "texto": "perceberam. Houve lá uma falha humana no monitoramento... Faltou disciplina (risos).",
+                    "duracao": 4000
                 },
                 {
                     "personagemId": "cerruti",
-                    "texto": "(no rádio): ... Pessoal, já estou sabendo de vocês. Quero lhes dizer uma coisa para não perder tempo: a ação de ambos pode ter sido eficaz, mas não foi gerencialmente correta. Entenderam bem?... Existe um provérbio africano que diz: “se você quer ser rápido, vá sozinho, se quer ir longe vá em grupo.” Obedeçam a hierarquia... Teremos que aplicar o código de conduta,... Até mais.”",
-                    "duracao": 25000
+                    "texto": "(no rádio): ... Pessoal, já estou sabendo de vocês. Quero lhes dizer uma coisa para não perder tempo: a ação de ambos pode ter",
+                    "duracao": 4000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": " sido eficaz, mas não foi gerencialmente correta. Entenderam bem?... Existe um provérbio africano que diz: “se você quer ser ",
+                    "duracao": 4000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": "rápido, vá sozinho, se quer ir longe vá em grupo.” Obedeçam a hierarquia... Teremos que aplicar o código de conduta,.. Até mais.”",
+                    "duracao": 4000
                 }
             ],
             "opcoes": [
