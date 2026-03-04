@@ -278,7 +278,6 @@
    REGRAS ESPECÍFICAS PARA TODAS AS LUAS (EFEITO DIAGONAL PERFEITO E TIMER)
 ========================================= */
 
-/* O container ancora exatamente no centro da lua (0,0) */
 .celestial-body.moon .label-container.moon-label-container {
     position: absolute !important;
     top: 50% !important;
@@ -294,20 +293,17 @@
     z-index: 100;
 }
 
-/* A linha diagonal pontilhada conectando o centro da lua (0,0) ao ponto (-50, -50) */
 .celestial-body.moon .label-container.moon-label-container::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
-    width: 70.71px;
-    /* Comprimento exato da hipotenusa para um deslocamento de 50x50 */
+    width: 85px;
+    /* MODIFICADO: Aumentado de 70.71px para 85px para dar mais distância */
     height: 0;
     border-top: 2px dashed #2ecc71;
-    /* Linha tracejada */
     transform-origin: 0 0;
     transform: rotate(-135deg);
-    /* Aponta perfeitamente para CIMA e ESQUERDA */
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease;
@@ -315,39 +311,32 @@
     z-index: 1;
 }
 
-/* A caixa de texto retangular (Label) que se adapta ao tamanho do nome */
 .celestial-body.moon .body-label.moon-label {
     position: absolute !important;
-
-    /* Posição inicial EXATA onde a linha termina (-50, -50) */
-    top: -50px !important;
-    left: -50px !important;
+    top: -60px !important;
+    /* MODIFICADO: Ajustado para o novo comprimento da linha */
+    left: -60px !important;
+    /* MODIFICADO: Ajustado para o novo comprimento da linha */
     bottom: auto !important;
     right: auto !important;
-
-    /* O SEGREDO MÁGICO: Puxa a caixa 100% para cima e 100% para a esquerda.
-       Isso faz com que a quina INFERIOR-DIREITA da caixa fique exatamente no ponto (-50, -50),
-       conectando-se perfeitamente com a linha. */
     transform: translate(-100%, -100%) !important;
-
     border: 2px solid #2ecc71 !important;
-    /* Borda verde */
     background: rgba(0, 15, 30, 0.8) !important;
-    /* Fundo escuro */
     color: white !important;
     font-weight: bold !important;
     text-shadow: 0 0 3px rgba(0, 0, 0, 1) !important;
     border-radius: 0 !important;
-    /* Caixa totalmente retangular */
-    padding: 4px 8px !important;
-    font-size: 11px !important;
 
-    /* Garante que a caixa estique horizontalmente apenas o necessário para o nome */
+    /* MODIFICADOS: Espaçamento e comportamento do quadro de texto */
+    padding: 5px 12px !important;
+    font-size: 11px !important;
     white-space: nowrap !important;
     display: inline-block !important;
+    min-width: fit-content !important;
+    width: auto !important;
+    box-sizing: border-box !important;
     margin: 0 !important;
 
-    /* INVISÍVEL POR PADRÃO */
     opacity: 0 !important;
     visibility: hidden !important;
     transition: all 0.2s ease !important;
@@ -355,7 +344,6 @@
     z-index: 2;
 }
 
-/* Mostrar a linha e a caixa ao passar o mouse ou pela classe ativa do JS (.show-label) */
 .celestial-body.moon:hover .body-label.moon-label,
 .celestial-body.moon:hover .label-container.moon-label-container::before,
 .celestial-body.moon.show-label .body-label.moon-label,
@@ -364,13 +352,11 @@
     visibility: visible !important;
 }
 
-/* Efeito de destaque no hover na caixa (interatividade extra) */
 .celestial-body.moon .body-label.moon-label:hover {
     background: rgba(46, 204, 113, 0.2) !important;
     box-shadow: 0 0 10px rgba(46, 204, 113, 0.5) !important;
 }
 
-/* --- ESTILO ESPECÍFICO PARA A LUA ENCÉLADO (Cor azul para gelo) --- */
 .celestial-body.moon[data-name="Encelado"] .body-label.moon-label {
     border-color: #4fc3f7 !important;
 }
@@ -864,7 +850,6 @@
     }
 }
 
-/* --- ESTILOS DO SINAL S.O.S (NOVO) --- */
 .sos-signal {
     width: 8px;
     height: 8px;
