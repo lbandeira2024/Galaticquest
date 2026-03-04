@@ -280,30 +280,34 @@
 
 /* O container ancora exatamente no centro da lua (0,0) */
 .celestial-body.moon .label-container.moon-label-container {
+    position: absolute !important;
     top: 50% !important;
     left: 50% !important;
     right: auto !important;
     bottom: auto !important;
-    width: 0;
-    height: 0;
-    display: block;
-    /* Tiramos o flex para usar posicionamento absoluto livre */
-    overflow: visible;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+    z-index: 100;
 }
 
-/* A linha diagonal pontilhada conectando o centro da lua à quina da caixa */
+/* A linha diagonal pontilhada conectando o centro da lua (0,0) ao ponto (-50, -50) */
 .celestial-body.moon .label-container.moon-label-container::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
-    /* Tamanho exato calculado para bater na quina (-40, -40) da tela usando Pitágoras */
-    width: 56.56px;
+    width: 70.71px;
+    /* Comprimento exato da hipotenusa para um deslocamento de 50x50 */
     height: 0;
     border-top: 2px dashed #2ecc71;
+    /* Linha tracejada */
     transform-origin: 0 0;
     transform: rotate(-135deg);
-    /* Aponta diagonalmente para CIMA e ESQUERDA */
+    /* Aponta perfeitamente para CIMA e ESQUERDA */
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease;
@@ -311,23 +315,37 @@
     z-index: 1;
 }
 
-/* A caixa de texto retangular (Label) */
+/* A caixa de texto retangular (Label) que se adapta ao tamanho do nome */
 .celestial-body.moon .body-label.moon-label {
-    position: absolute;
-    /* Ao colocar bottom e right em 40px, a quina inferior-direita fica exatamente no ponto (-40, -40) */
-    bottom: 40px;
-    right: 40px;
+    position: absolute !important;
+
+    /* Posição inicial EXATA onde a linha termina (-50, -50) */
+    top: -50px !important;
+    left: -50px !important;
+    bottom: auto !important;
+    right: auto !important;
+
+    /* O SEGREDO MÁGICO: Puxa a caixa 100% para cima e 100% para a esquerda.
+       Isso faz com que a quina INFERIOR-DIREITA da caixa fique exatamente no ponto (-50, -50),
+       conectando-se perfeitamente com a linha. */
+    transform: translate(-100%, -100%) !important;
 
     border: 2px solid #2ecc71 !important;
+    /* Borda verde */
     background: rgba(0, 15, 30, 0.8) !important;
+    /* Fundo escuro */
     color: white !important;
     font-weight: bold !important;
     text-shadow: 0 0 3px rgba(0, 0, 0, 1) !important;
     border-radius: 0 !important;
-    /* Retangular como na imagem */
+    /* Caixa totalmente retangular */
     padding: 4px 8px !important;
     font-size: 11px !important;
-    white-space: nowrap;
+
+    /* Garante que a caixa estique horizontalmente apenas o necessário para o nome */
+    white-space: nowrap !important;
+    display: inline-block !important;
+    margin: 0 !important;
 
     /* INVISÍVEL POR PADRÃO */
     opacity: 0 !important;
@@ -335,20 +353,19 @@
     transition: all 0.2s ease !important;
     pointer-events: auto !important;
     z-index: 2;
-    transform: none !important;
 }
 
-/* Mostrar a linha pontilhada e a caixa ao passar o mouse */
+/* Mostrar a linha e a caixa ao passar o mouse na lua ou no texto */
 .celestial-body.moon:hover .body-label.moon-label,
 .celestial-body.moon:hover .label-container.moon-label-container::before {
     opacity: 1 !important;
     visibility: visible !important;
 }
 
-/* Efeito de destaque no hover do mouse em cima da caixa (interatividade) */
+/* Efeito de destaque no hover (opcional e interativo) */
 .celestial-body.moon .body-label.moon-label:hover {
     background: rgba(46, 204, 113, 0.2) !important;
-    box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.5) !important;
 }
 
 /* --- ESTILO ESPECÍFICO PARA A LUA ENCÉLADO (Cor azul para gelo) --- */
@@ -358,7 +375,6 @@
 
 .celestial-body.moon[data-name="Encelado"] .label-container.moon-label-container::before {
     border-top-color: #4fc3f7 !important;
-    /* Linha pontilhada azul */
 }
 
 /* ========================================= */
