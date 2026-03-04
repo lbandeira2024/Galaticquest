@@ -261,6 +261,7 @@
 }
 
 .body-label {
+    position: relative;
     color: white !important;
     font-size: 10px;
     text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
@@ -277,12 +278,32 @@
    REGRAS ESPECÍFICAS PARA TODAS AS LUAS
 ========================================= */
 
-/* Forçar o contentor do texto para a ESQUERDA da lua */
+/* Forçar o contentor do texto para a ESQUERDA da lua e dar espaço para a linha */
 .celestial-body.moon .label-container.moon-label-container {
     top: 50% !important;
     bottom: auto !important;
     left: auto !important;
-    right: calc(100% + 8px) !important;
+    right: calc(100% + 40px) !important;
+    display: flex;
+    align-items: center;
+}
+
+/* A Linha Tracejada */
+.celestial-body.moon .body-label.moon-label::before {
+    content: "";
+    position: absolute;
+    left: 100%;
+    /* Inicia na ponta direita do label */
+    top: 50%;
+    width: 40px;
+    /* Tamanho da linha até a lua */
+    height: 0;
+    border-top: 1px dashed #00ff00;
+    pointer-events: none;
+    transform: translateY(-50%);
+    box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.2s ease;
 }
 
 /* Forçar a invisibilidade padrão e a cor verde em todos os textos das luas */
@@ -301,11 +322,29 @@
     pointer-events: auto !important;
 }
 
-/* Quando o utilizador passa o rato em cima do "corpo" da lua, o texto surge à esquerda */
-.celestial-body.moon:hover .body-label.moon-label {
+/* Quando o utilizador passa o rato em cima do "corpo" da lua, o texto surge à esquerda com a linha */
+.celestial-body.moon:hover .body-label.moon-label,
+.celestial-body.moon:hover .body-label.moon-label::before {
     opacity: 1 !important;
     visibility: visible !important;
+}
+
+/* Ajuste de escala exclusivo para o hover do label (evita bugar a linha) */
+.celestial-body.moon:hover .body-label.moon-label {
     transform: scale(1.1) !important;
+}
+
+/* --- ESTILO ESPECÍFICO PARA A LUA ENCÉLADO --- */
+.celestial-body.moon[data-name="Encelado"] .body-label.moon-label {
+    border-color: #4fc3f7 !important;
+    color: #4fc3f7 !important;
+    text-shadow: 0 0 5px rgba(79, 195, 247, 0.5) !important;
+    background: rgba(0, 40, 80, 0.7) !important;
+}
+
+.celestial-body.moon[data-name="Encelado"] .body-label.moon-label::before {
+    border-top-color: #4fc3f7 !important;
+    box-shadow: 0 0 5px rgba(79, 195, 247, 0.5);
 }
 
 /* ========================================= */

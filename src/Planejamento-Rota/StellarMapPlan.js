@@ -512,11 +512,15 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                         const currentMoonRotation = rotationAngles[moon.name] || 0;
 
                                         return (
-                                            <div key={moonIndex} className={`celestial-body moon ${moonStatus}`} style={{
-                                                width: `${moon.radius}px`, height: `${moon.radius}px`,
-                                                left: `${moonX}%`, top: `${moonY}%`,
-                                                transform: `translate(-50%, -50%) rotate(${currentMoonRotation}deg)`
-                                            }} onClick={(e) => { e.stopPropagation(); handleBodyClick(moon); }}>
+                                            <div
+                                                key={moonIndex}
+                                                className={`celestial-body moon ${moonStatus}`}
+                                                data-name={moon.name} /* <-- ADICIONADO AQUI! */
+                                                style={{
+                                                    width: `${moon.radius}px`, height: `${moon.radius}px`,
+                                                    left: `${moonX}%`, top: `${moonY}%`,
+                                                    transform: `translate(-50%, -50%) rotate(${currentMoonRotation}deg)`
+                                                }} onClick={(e) => { e.stopPropagation(); handleBodyClick(moon); }}>
 
                                                 <div className="label-container moon-label-container" style={{
                                                     transform: `translateY(-50%) rotate(${-currentMoonRotation}deg)`
