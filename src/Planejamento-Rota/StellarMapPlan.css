@@ -261,6 +261,7 @@
 }
 
 .body-label {
+    position: relative;
     color: white !important;
     font-size: 10px;
     text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
@@ -274,38 +275,102 @@
 }
 
 /* =========================================
-   REGRAS ESPECÍFICAS PARA TODAS AS LUAS
+   REGRAS ESPECÍFICAS PARA TODAS AS LUAS (EFEITO DIAGONAL PONTILHADO)
 ========================================= */
 
-/* Forçar o contentor do texto para a ESQUERDA da lua */
+/* O container ancora exatamente no centro da lua */
 .celestial-body.moon .label-container.moon-label-container {
     top: 50% !important;
+    left: 50% !important;
+    right: auto !important;
     bottom: auto !important;
-    left: auto !important;
-    right: calc(100% + 8px) !important;
+    width: 0;
+    height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
 }
 
-/* Forçar a invisibilidade padrão e a cor verde em todos os textos das luas */
-.celestial-body.moon .body-label.moon-label {
-    color: #00ff00 !important;
-    font-weight: bold !important;
-    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5) !important;
-    background: rgba(0, 40, 0, 0.7) !important;
-    border: 1px solid #00ff00 !important;
+/* A linha diagonal pontilhada conectando a lua à caixa */
+.celestial-body.moon .label-container.moon-label-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50px;
+    /* Comprimento da linha */
+    height: 0;
+    /* Zerado pois usaremos a borda */
+    border-top: 2px dashed #2ecc71;
+    /* <-- LINHA PONTILHADA / TRACEJADA AQUI */
+    background-color: transparent;
+    /* Remove fundo sólido */
+    transform-origin: left center;
+    transform: rotate(-135deg);
+    /* Aponta para o topo-esquerdo perfeitamente a 45 graus */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    z-index: 1;
+    box-shadow: 0 -1px 4px rgba(46, 204, 113, 0.4);
+    /* Sombra ajustada para a borda */
+}
 
-    /* INVISÍVEL POR PADRÃO (Sem causar "Ghost hovers") */
+/* A caixa de texto retangular (Label) */
+.celestial-body.moon .body-label.moon-label {
+    position: absolute;
+    /* (50px de linha * 0.707 do ângulo) = 35.35px */
+    bottom: 35px;
+    right: 35px;
+
+    border: 2px solid #2ecc71 !important;
+    /* Borda verde */
+    background: rgba(0, 15, 30, 0.8) !important;
+    /* Fundo escuro levemente azulado */
+    color: white !important;
+    font-weight: bold !important;
+    text-shadow: 0 0 3px rgba(0, 0, 0, 1) !important;
+    border-radius: 0 !important;
+    /* Retangular como na imagem */
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    white-space: nowrap;
+
+    /* INVISÍVEL POR PADRÃO */
     opacity: 0 !important;
     visibility: hidden !important;
     transition: all 0.2s ease !important;
-
     pointer-events: auto !important;
+    z-index: 2;
+    transform: none !important;
+    /* Remove qualquer transform anterior para não bugar a caixa */
 }
 
-/* Quando o utilizador passa o rato em cima do "corpo" da lua, o texto surge à esquerda */
-.celestial-body.moon:hover .body-label.moon-label {
+/* Mostrar a linha pontilhada e a caixa ao passar o mouse */
+.celestial-body.moon:hover .body-label.moon-label,
+.celestial-body.moon:hover .label-container.moon-label-container::before {
     opacity: 1 !important;
     visibility: visible !important;
-    transform: scale(1.1) !important;
+}
+
+/* Efeito de destaque no hover do mouse em cima da caixa (interatividade) */
+.celestial-body.moon .body-label.moon-label:hover {
+    background: rgba(46, 204, 113, 0.2) !important;
+    box-shadow: 0 0 10px rgba(46, 204, 113, 0.5);
+}
+
+/* --- ESTILO ESPECÍFICO PARA A LUA ENCÉLADO (Cor azul para gelo) --- */
+.celestial-body.moon[data-name="Encelado"] .body-label.moon-label {
+    border-color: #4fc3f7 !important;
+}
+
+.celestial-body.moon[data-name="Encelado"] .label-container.moon-label-container::before {
+    border-top-color: #4fc3f7 !important;
+    /* Linha pontilhada azul */
+    background-color: transparent !important;
+    box-shadow: 0 -1px 4px rgba(79, 195, 247, 0.4);
 }
 
 /* ========================================= */
