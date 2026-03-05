@@ -31,7 +31,7 @@ const TEAMS_DATA = [
 
 const getMemberImage = (teamCode, index) => {
   switch (teamCode) {
-    case 'E1': return index === 0 ? 'Sisifo' : index === 1 ? 'neo_steves' : index === 2 ? 'Tamara' : index === 3 ? 'Ares' : 'Mae';
+    case 'E1': return index === 0 ? 'Sisifo' : index === 1 ? 'neo_steves' : index === 2 ? 'tamara' : index === 3 ? 'ares' : 'mae';
     case 'E2': return index === 0 ? 'Aletheia' : index === 1 ? 'Capitao_Kirk' : index === 2 ? 'Dr_Maureen' : index === 3 ? 'Hazza_Ali' : 'Illa_Ramon';
     case 'E3': return index === 0 ? 'Kopenawa' : index === 1 ? 'Marek' : index === 2 ? 'Farna' : index === 3 ? 'Zachary' : index === 4 ? 'Iuri' : 'Zahy';
     case 'E4': return index === 0 ? 'Demeter' : index === 1 ? 'Semolek' : index === 2 ? 'Nora' : index === 3 ? 'Liu' : 'Petros';
@@ -1506,18 +1506,50 @@ const DecolagemMarte = () => {
             }
 
             let newProcessadorO2Value = processadorO2Ref.current;
+            let earnedCoins = 0;
             const planetNameInput = selPlanet?.nome || '';
             const hasWater = Array.from(hasWaterList).some(p => p.toLowerCase() === planetNameInput.toLowerCase().trim());
-            if (hasWater) { const o2Bonus = Math.floor(Math.random() * 5) + 1; newProcessadorO2Value = Math.min(5, processadorO2Ref.current + o2Bonus); }
+
+            if (hasWater) {
+              const o2Bonus = Math.floor(Math.random() * 5) + 1;
+              newProcessadorO2Value = Math.min(5, processadorO2Ref.current + o2Bonus);
+              earnedCoins = o2Bonus * 10000;
+            }
+
             const newRouteIndex = routeIndexRef.current + 1;
 
             (async () => {
               await saveCurrentProgressRef.current(newRouteIndex);
               try {
+                const currentCoins = spaceCoinsRef.current || 0;
+                const newCoinsValue = currentCoins + earnedCoins;
+
+                const bodyData = {
+                  routeIndex: newRouteIndex,
+                  processadorO2: newProcessadorO2Value,
+                  telemetryState: {
+                    oxygen: telemetryRef.current.atmosphere.o2,
+                    nuclearPropulsion: telemetryRef.current.propulsion.powerOutput,
+                    direction: telemetryRef.current.direction,
+                    stability: telemetryRef.current.stability,
+                    productivity: telemetryRef.current.productivity,
+                    interdependence: telemetryRef.current.interdependence,
+                    engagement: telemetryRef.current.engagement
+                  }
+                };
+
+                if (earnedCoins > 0) {
+                  bodyData.spaceCoins = newCoinsValue;
+                }
+
                 await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
                   method: 'POST', headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ routeIndex: newRouteIndex, processadorO2: newProcessadorO2Value, telemetryState: { oxygen: telemetryRef.current.atmosphere.o2, nuclearPropulsion: telemetryRef.current.propulsion.powerOutput, direction: telemetryRef.current.direction, stability: telemetryRef.current.stability, productivity: telemetryRef.current.productivity, interdependence: telemetryRef.current.interdependence, engagement: telemetryRef.current.engagement } }),
+                  body: JSON.stringify(bodyData),
                 });
+
+                if (earnedCoins > 0) {
+                  setSpaceCoins(newCoinsValue);
+                }
               } catch (error) { console.error("ERRO", error); }
               setProcessadorO2(newProcessadorO2Value); setRouteIndex(newRouteIndex); handleChallengeEndRef.current();
             })();
