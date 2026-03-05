@@ -260,26 +260,18 @@
     z-index: 5;
 }
 
-/* =========================================
-   QUADRO PADRÃO DOS PLANETAS NO MAPA 
-========================================= */
 .body-label {
     position: relative;
     color: white !important;
     font-size: 11px;
-    /* Um pouco maior e legível */
     text-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
     font-weight: normal;
     padding: 4px 8px;
-    /* Quadro mais espaçoso */
     background: rgba(0, 0, 0, 0.5);
-    /* Fundo um pouco mais escuro para destaque */
     border-radius: 4px;
     pointer-events: auto;
     cursor: pointer;
     display: inline-block;
-
-    /* GANTE QUE O QUADRO CRESÇA PARA CABER TUDO */
     white-space: nowrap !important;
     width: max-content !important;
     min-width: fit-content !important;
@@ -334,8 +326,6 @@
     font-weight: bold !important;
     text-shadow: 0 0 3px rgba(0, 0, 0, 1) !important;
     border-radius: 0 !important;
-
-    /* GANTE QUE O QUADRO DAS LUAS CRESÇA PARA CABER TUDO */
     padding: 5px 12px !important;
     font-size: 11px !important;
     white-space: nowrap !important;
@@ -344,7 +334,6 @@
     min-width: fit-content !important;
     box-sizing: border-box !important;
     margin: 0 !important;
-
     opacity: 0 !important;
     visibility: hidden !important;
     transition: all 0.2s ease !important;
@@ -373,8 +362,6 @@
     border-top-color: #4fc3f7 !important;
 }
 
-/* ========================================= */
-
 .dwarf-planet-label {
     color: #d7bde2 !important;
     font-style: italic;
@@ -391,10 +378,11 @@
     padding: 15px;
     border-radius: 8px;
 
-    /* MODIFICADO: Estica o painel de info pra caber nomes grandes */
     width: max-content;
     min-width: 300px;
-    max-width: 90vw;
+    /* LIMITE RÍGIDO DE TELA - Nunca vaza */
+    max-width: calc(100% - 40px);
+    box-sizing: border-box;
 
     border: 1px solid #3498db;
     box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
@@ -410,16 +398,16 @@
     font-size: 14px;
     border-bottom: 1px solid #3498db;
     padding-bottom: 5px;
-    white-space: nowrap;
-    /* Título numa linha só */
+    /* QUEBRA DE LINHA SEGURA CASO O NOME SEJA MAIOR QUE A TELA */
+    white-space: normal;
+    word-wrap: break-word;
 }
 
 .info-panel-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     gap: 15px;
-    /* Mais espaço pro botão de fechar */
 }
 
 .info-section {
@@ -545,15 +533,18 @@
    QUADRO/PAINEL DE ROTA LATERAL
 ========================================= */
 .route-display-panel {
-    position: fixed;
+    /* Absolute respeita as margens do .stellar-map principal */
+    position: absolute;
     top: 20px;
     right: 20px;
 
-    /* MODIFICADO: Deixa o quadro lateral crescer dinamicamente baseado no maior nome */
     width: fit-content;
-    min-width: 450px;
-    /* Margem segura excelente para o Proxima */
-    max-width: 95vw;
+    min-width: 420px;
+
+    /* LIMITES RÍGIDOS DA TELA: Nunca ultrapassa a lateral ou o fundo */
+    max-width: calc(100% - 40px);
+    max-height: calc(100% - 40px);
+    box-sizing: border-box;
 
     padding: 20px;
     background: rgba(10, 20, 40, 0.98);
@@ -561,7 +552,11 @@
     box-shadow: 0 0 30px rgba(79, 195, 247, 0.6);
     backdrop-filter: blur(8px);
     border-radius: 8px;
-    overflow: hidden;
+
+    /* Configuração Flex para impedir que os filhos quebrem a estrutura */
+    display: flex;
+    flex-direction: column;
+    z-index: 10;
 }
 
 .actions-ultimate {
@@ -690,8 +685,12 @@
 }
 
 .route-container {
+    flex: 1;
+    /* Ocupa o restante do espaço dinâmico */
     max-height: 300px;
     overflow-y: auto;
+    overflow-x: hidden;
+    /* Corta rolagem horizontal interna */
     padding-right: 5px;
     margin-top: 10px;
 }
@@ -761,18 +760,20 @@
     flex-grow: 1;
     min-width: 0;
     padding: 0;
+    gap: 10px;
+    /* Dá respiro limpo entre o nome e a distância */
 }
 
-/* MODIFICADO: Removidos os text-overflow e overflow: hidden. 
-   O texto não vai mais "cortar" e gerar as reticências ("...") */
 .step-name {
     font-size: 14px;
     color: white;
     flex: 1;
     text-align: left;
-    white-space: nowrap;
-    overflow: visible;
-    text-overflow: clip;
+
+    /* Se o limite absoluto da tela for atingido, quebra a linha graciosamente */
+    white-space: normal;
+    line-height: 1.2;
+    word-wrap: break-word;
 }
 
 .step-distance {
@@ -781,7 +782,6 @@
     min-width: 85px;
     text-align: right;
     flex-shrink: 0;
-    padding-left: 10px;
 }
 
 .remove-step {
@@ -927,14 +927,13 @@
     box-shadow: 0 0 5px #00ff00;
 }
 
-@media (max-width: 460px) {
+@media (max-width: 480px) {
     .route-display-panel {
-        width: auto;
+        width: calc(100% - 20px);
         min-width: unset;
         left: 10px;
         right: 10px;
-        top: 10px;
-        max-height: 95vh;
+        max-width: none;
     }
 
     .resources-ultimate {
@@ -942,8 +941,10 @@
     }
 
     .info-panel {
-        max-width: 90vw;
+        width: calc(100% - 20px);
         min-width: unset;
-        left: 5vw;
+        left: 10px;
+        right: 10px;
+        max-width: none;
     }
 }

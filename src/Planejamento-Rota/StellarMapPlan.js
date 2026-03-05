@@ -35,7 +35,7 @@ const getDisplayName = (name) => {
     return displayNames[name] || name;
 };
 
-// NOVA FUNÇÃO: Garante que a gota apareça em TODOS os lugares (Mapa, Painel e Rota)
+// FUNÇÃO DA GOTA: Agora será usada APENAS no painel de rota
 const getDisplayNameWithDrop = (name) => {
     const rawName = getDisplayName(name);
     return hasWaterList.has(name) ? `${rawName} 💧` : rawName;
@@ -406,7 +406,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                 const markerClass = index <= currentIndex ? "origin-marker" : index === currentIndex + 1 ? "next-destination-marker" : "normal-marker";
                                 const isStepLocked = index <= (currentIndex + 1);
 
-                                // Agora usamos a função que garante a gota centralizada em tudo
+                                // AQUI SIM TEM GOTA: Somente na lista lateral de rotas
                                 const displayName = getDisplayNameWithDrop(step.name);
 
                                 return (
@@ -446,7 +446,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                     <div className="sun-fire"></div>
                     <div className="sun-core"></div>
                     <div className="sun-corona"></div>
-                    <span className="body-label">{getDisplayNameWithDrop(solarSystem.sun.name)}</span>
+                    {/* AQUI NÃO TEM GOTA (MAPA) */}
+                    <span className="body-label">{getDisplayName(solarSystem.sun.name)}</span>
                 </div>
 
                 {sosSignal && !isSosAdded && (() => {
@@ -476,7 +477,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                         >
                             <div className="sos-pulse"></div>
                             <div className="label-container">
-                                <span className="body-label sos-label">{getDisplayNameWithDrop(sosSignal.name)}</span>
+                                {/* AQUI NÃO TEM GOTA (MAPA) */}
+                                <span className="body-label sos-label">{getDisplayName(sosSignal.name)}</span>
                             </div>
                         </div>
                     );
@@ -518,7 +520,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                         <span className={`body-label
                                             ${planet.isExoplanet ? 'exoplanet-label' : ''}
                                             ${planet.isDwarfPlanet ? 'dwarf-planet-label' : ''}`}>
-                                            {getDisplayNameWithDrop(planet.name)}
+                                            {/* AQUI NÃO TEM GOTA (MAPA) */}
+                                            {getDisplayName(planet.name)}
                                         </span>
                                     </div>
 
@@ -552,7 +555,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                                 <div className="label-container moon-label-container" style={{
                                                     transform: `rotate(${-currentMoonRotation}deg)`
                                                 }}>
-                                                    <span className="body-label moon-label">{getDisplayNameWithDrop(moon.name)}</span>
+                                                    {/* AQUI NÃO TEM GOTA (MAPA) */}
+                                                    <span className="body-label moon-label">{getDisplayName(moon.name)}</span>
                                                 </div>
                                             </div>
                                         );
@@ -566,7 +570,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
             {selectedBody && (
                 <div className="info-panel">
                     <div className="info-panel-header">
-                        <h3>{getDisplayNameWithDrop(selectedBody.name)}</h3>
+                        {/* AQUI NÃO TEM GOTA (PAINEL DE INFORMAÇÕES DO PLANETA) */}
+                        <h3>{getDisplayName(selectedBody.name)}</h3>
                         <button className="close-button" onClick={() => setSelectedBody(null)}>×</button>
                     </div>
                     {selectedBody.description && (
