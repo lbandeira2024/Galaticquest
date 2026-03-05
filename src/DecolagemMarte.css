@@ -741,7 +741,7 @@
 
 /* Glossary Button */
 .glossary-button {
-  margin-left: 35px;
+  margin-left: 0;
   position: relative;
   overflow: hidden;
   background: rgba(0, 50, 100, 0.7);
@@ -1519,4 +1519,63 @@
   color: #0f0;
   font-size: 0.8em;
   text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
+}
+
+/* ==========================================================
+   === ESTILOS ADICIONADOS: MODAL E MEMBROS DA TRIPULAÇÃO ===
+   ========================================================== */
+.team-modal-details {
+  max-width: 900px !important;
+  border: 1px solid #ff9800 !important;
+  box-shadow: 0 0 20px rgba(255, 152, 0, 0.4) !important;
+  background: rgba(10, 10, 10, 0.95) !important;
+}
+
+.team-grid_equipe {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.team-member_equipe {
+  padding: 10px;
+  border: 1px solid #333;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  background-color: rgba(30, 30, 30, 0.8);
+}
+
+.team-member-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 15px;
+  border: 1px solid #ff9800;
+}
+
+.team-member-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.team-member-role {
+  color: #ff9800;
+  font-size: 11px;
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.team-member-name-container {
+  display: flex;
+  align-items: center;
+}
+
+.team-member-experience {
+  font-size: 10px;
+  color: #ccc;
+  margin-top: 2px;
+  line-height: 1.2;
 }

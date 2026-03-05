@@ -20,6 +20,26 @@ import { useConfig } from './ConfigContext';
 import LojaEspacial from './LojaEspacial';
 import { useLocation, useNavigate } from 'react-router-dom';
 
+// --- CONSTANTES DE DADOS DA TRIPULAÇÃO ---
+const TEAMS_DATA = [
+  { id: 1, code: "E1", description: "Equipe especializada em exploração", missions: 12, achievements: ["Primeira equipe a mapear o Cinturão de Asteroides X-47", "Desenvolveu sistema de navegação em ambientes de alta gravidade", "Recorde de permanência em ambientes hostis: 487 dias"], members: [{ role: "Coordenador Espacial", name: "Sisifo", experience: "45 anos", details: "Engenheiro Aeroespacial", country: "Espanha" }, { role: "Cientista", name: "Neo", experience: "39 anos", details: "Cientista de Recursos Naturais Raros e Astrobotânica", country: "Americano" }, { role: "Engenheira", name: "Tamara", experience: "32 anos", details: "Física e Engenheira Aero Espacial", country: "Americana" }, { role: "Engenheira", name: "Ares", experience: "39 anos", details: "Engenheira Aeronáutico, PhD em Sist. de Oxigenação sob condições adversas", country: "Espanha" }, { role: "Engenheira", name: "Mae", experience: "37 anos", details: "Engenheira Química, PhD", country: "Americana" }] },
+  { id: 2, code: "E2", description: "Equipe especializada em diplomacia", missions: 18, achievements: ["Mediou conflito intercolonial em Marte (2147)", "Equipe com maior índice de resolução pacífica de incidentes", "Desenvolveu protocolos de comunicação intercultural"], members: [{ role: "Coordenadora Espacial", name: "Aletheia", experience: "40 anos", details: "Engenharia Aeronáutica", country: "Romena" }, { role: "Capitão", name: "Kirk", experience: "30 anos", details: "Ergo. Químico, PhD em Matemática e Pepito Espacial", country: "Americano" }, { role: "Cientista", name: "Maureen", experience: "43 anos", details: "Ergo. Astrofísica, PhD em Geometria Espacial", country: "Canadense" }, { role: "Piloto", name: "Hazza Ali", experience: "37 anos", details: "Piloto Militar", country: "Árabe" }, { role: "Engenheiro", name: "Ilia Ramon", experience: "49 anos", details: "Ergo. Aeronáutico e Piloto de Caça", country: "Israelense" }] },
+  { id: 3, code: "E3", description: "Equipe especializada em combate", missions: 24, achievements: ["Defesa bem-sucedida da Base Lunar Alpha contra ataque de 2149", "Treinou 87% dos pilotos de combate ativos", "Desenvolveu táticas de defesa em gravidade zero"], members: [{ role: "Coordenador Espacial", name: "Kopenawa", experience: "55 anos", details: "Astrofísico e Engenheiro Espacial", country: "Mexicano" }, { role: "Médico", name: "Marek", experience: "47 anos", details: "Psiquiatra Psicanalista, PhD em Doenças Pós-Espaciais", country: "Tcheco" }, { role: "Nutricionista", name: "Farna", experience: "34 anos", details: "Nutricionista Espacial", country: "Polonesa" }, { role: "Biólogo", name: "Zachary", experience: "42 anos", details: "Biólogo e Infectologista, PhD", country: "Americano" }, { role: "Engenheiro", name: "Iuri", experience: "30 anos", details: "Ergo. Aeronáutico e músico", country: "Ítalo-russo" }, { role: "Tripulante convidada", name: "Zahy", experience: "35 anos", details: "Indígena brasileira", country: "Brasileira" }] },
+  { id: 4, code: "E4", description: "Equipe especializada em pesquisa", missions: 15, achievements: ["Descoberta de 3 novos elementos em asteroides", "Desenvolveu sistema de análise de solo planetário em tempo real", "Publicou 47 artigos científicos em revistas de prestígio"], members: [{ role: "Coordenadora Espacial", name: "Deméter", experience: "42 anos", details: "Geóloga espacial, PhD", country: "Canadense" }, { role: "Engenheiro", name: "Semolek", experience: "40 anos", details: "Ergo. Especialista em Sist. de Sensores Espaciais e Aéreos", country: "Russo" }, { role: "Engenheira", name: "Nora", experience: "27 anos", details: "Engenheira Mecânica Especialista em Eventos Espaciais Atípicos", country: "Árabe" }, { role: "Física", name: "Liu", experience: "43 anos", details: "Física Nuclear", country: "Chinesa" }, { role: "Engenheiro", name: "Pétros", experience: "34 anos", details: "Engenheiro de Sistemas", country: "Grego" }] },
+  { id: 5, code: "E5", description: "Equipe especializada em engenharia", missions: 21, achievements: ["Projetou o sistema de propulsão usado em 78% das naves atuais", "Recorde de reparos em órbita: 147 em missão única", "Desenvolveu materiais autoregenerativos para cascos de nave"], members: [{ role: "Coordenador Espacial", name: "Aguiles", experience: "35 anos", details: "Ergo. Mecânico Aero Espacial", country: "Italiano" }, { role: "Engenheiro", name: "Noguchi", experience: "38 anos", details: "Engenheiro Aeronáutico", country: "Japonês" }, { role: "Médica", name: "Chiaki", experience: "46 anos", details: "Médica, PhD em doenças espaciais", country: "Japonesa" }, { role: "Engenheiro", name: "Gorjah", experience: "32 anos", details: "Eng. Elétrico PhD em Logística Espacial", country: "Americano" }, { role: "Astrobiólogo", name: "Atena", experience: "38 anos", details: "Astrobiólogo, PhD", country: "Russa" }] }
+];
+
+const getMemberImage = (teamCode, index) => {
+  switch (teamCode) {
+    case 'E1': return index === 0 ? 'Sisifo' : index === 1 ? 'neo_steves' : index === 2 ? 'tamara' : index === 3 ? 'ares' : 'mae';
+    case 'E2': return index === 0 ? 'Aletheia' : index === 1 ? 'Capitao_Kirk' : index === 2 ? 'Dr_Maureen' : index === 3 ? 'Hazza_Ali' : 'Illa_Ramon';
+    case 'E3': return index === 0 ? 'Kopenawa' : index === 1 ? 'Marek' : index === 2 ? 'Farna' : index === 3 ? 'Zachary' : index === 4 ? 'Iuri' : 'Zahy';
+    case 'E4': return index === 0 ? 'Demeter' : index === 1 ? 'Semolek' : index === 2 ? 'Nora' : index === 3 ? 'Liu' : 'Petros';
+    case 'E5': return index === 0 ? 'Aquiles' : index === 1 ? 'Noguchi' : index === 2 ? 'dra_chiaki' : index === 3 ? 'Gorjah' : 'Atena';
+    default: return index === 0 ? 'default1' : index === 1 ? 'default2' : index === 2 ? 'default3' : index === 3 ? 'default4' : 'default5';
+  }
+};
+
 // --- COMPONENTES OTIMIZADOS (React.memo) ---
 
 // 1. Painel Esquerdo
@@ -103,7 +123,8 @@ const RightMonitorPanel = React.memo(({
   showCriticalWarpFail, showWarpDisabledMessage, isForcedMapEdit, isSosMinervaActive,
   isDeparting, currentCharacterData, currentDialogueStep, highlightKeywords,
   setShowGlossary, handleInventory, teamPhotoUrl, API_BASE_URL,
-  isSOSActive, handleSOS, hasFundsForSOS, isRestoringSOS, togglePause, isPauseButtonDisabled
+  isSOSActive, handleSOS, hasFundsForSOS, isRestoringSOS, togglePause, isPauseButtonDisabled,
+  setShowTeamModal
 }) => {
   return (
     <div className="right-panel-3d" style={{ zIndex: 50 }}>
@@ -167,9 +188,19 @@ const RightMonitorPanel = React.memo(({
         </div>
       </div>
       <div className="glossary-button-container" style={{ marginTop: '20px', position: 'relative', zIndex: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <button className="glossary-button" onClick={() => !isPaused && setShowGlossary(true)} disabled={isPaused}>GLOSSÁRIO</button>
-          <button className="bolsa-button" onClick={handleInventory} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed' }}><img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" /></button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <button
+            className="glossary-button"
+            onClick={() => !isPaused && setShowTeamModal(true)}
+            disabled={isPaused}
+            style={{ width: '130px', backgroundColor: 'rgba(0, 150, 255, 0.2)' }}
+          >
+            TRIPULAÇÃO
+          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <button className="glossary-button" onClick={() => !isPaused && setShowGlossary(true)} disabled={isPaused} style={{ marginLeft: 0 }}>GLOSSÁRIO</button>
+            <button className="bolsa-button" onClick={handleInventory} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed', marginLeft: 0 }}><img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" /></button>
+          </div>
         </div>
       </div>
       {teamPhotoUrl && (
@@ -489,6 +520,7 @@ const DecolagemMarte = () => {
   const [minervaImage, setMinervaImage] = useState('/images/Minerva/Minerva_Active.gif');
   const [isDobraEnabled, setIsDobraEnabled] = useState(false);
   const [showGlossary, setShowGlossary] = useState(false);
+  const [showTeamModal, setShowTeamModal] = useState(false); // NOVO ESTADO AQUI
   const [showInventory, setShowInventory] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [missionTime, setMissionTime] = useState(12 * 60 * 60);
@@ -597,6 +629,12 @@ const DecolagemMarte = () => {
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
   const isPausedRef = useRef(isPaused);
+
+  // --- DADOS DA TRIPULAÇÃO ATUAL ---
+  const teamData = useMemo(() => {
+    const teamCode = user?.teamCode || "E1"; // Fallback para E1
+    return TEAMS_DATA.find(t => t.code === teamCode) || TEAMS_DATA[0];
+  }, [user]);
 
   // Sincronização de Refs
   useEffect(() => { telemetryRef.current = telemetry; }, [telemetry]);
@@ -1628,6 +1666,7 @@ const DecolagemMarte = () => {
           currentDialogueStep={currentDialogueStep}
           highlightKeywords={highlightKeywords}
           setShowGlossary={setShowGlossary}
+          setShowTeamModal={setShowTeamModal}
           handleInventory={handleInventory}
           teamPhotoUrl={teamPhotoUrl}
           API_BASE_URL={API_BASE_URL}
@@ -1711,6 +1750,38 @@ const DecolagemMarte = () => {
             <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '30px' }}>
               <button onClick={() => setShowO2Modal(false)} style={{ padding: '10px 20px', background: '#444', color: 'white', border: '1px solid #777', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold' }}>CANCELAR</button>
               <button onClick={() => { handleTransferO2(); setShowO2Modal(false); }} style={{ padding: '10px 20px', background: 'linear-gradient(145deg, #0055ff, #0033cc)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold', boxShadow: '0 0 10px #0055ff' }}>CONFIRMAR</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL DA TRIPULAÇÃO */}
+      {showTeamModal && teamData && (
+        <div className="modal-overlay" style={{ zIndex: 1002 }}>
+          <div className="modal-content team-modal-details">
+            <button className="close-button" onClick={() => setShowTeamModal(false)}>×</button>
+            <h2 style={{ color: '#ff9800', textAlign: 'center', marginBottom: '5px' }}>EQUIPE {teamData.code}</h2>
+            <p style={{ textAlign: 'center', color: '#aaa', marginBottom: '20px' }}>{teamData.description}</p>
+
+            <div className="team-grid_equipe">
+              {teamData.members.map((member, index) => (
+                <div key={index} className="team-member_equipe">
+                  <img
+                    src={`/images/Astronautas/${teamData.code}/${getMemberImage(teamData.code, index)}.png`}
+                    alt={member.name}
+                    className="team-member-avatar"
+                  />
+                  <div className="team-member-details">
+                    <div className="team-member-role">{member.role}</div>
+                    <div className="team-member-name-container">
+                      <span style={{ color: '#fff', fontSize: '14px', fontWeight: 'bold' }}>{member.name}</span>
+                    </div>
+                    <div className="team-member-experience">
+                      {member.experience} - {member.details}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

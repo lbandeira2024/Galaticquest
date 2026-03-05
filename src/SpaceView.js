@@ -79,7 +79,8 @@ const PLANET_MUSIC_CONFIG = {
   kepler186f: { src: '/sounds/Kepler/kepler.mp3', volume: 0.5 },
   trappist: { src: '/sounds/Trappist-1/Trappist-1.mp3', volume: 0.5 },
   caronte: { src: '/sounds/caronte/caronte.mp3', volume: 0.5 },
-  oberon: { src: '/sounds/Titania/titaniaOberon.mp3', volume: 0.5 }
+  oberon: { src: '/sounds/Titania/titaniaOberon.mp3', volume: 0.5 },
+  pallas: { src: '/sounds/pallas/pallas.mp3', volume: 0.5 }
 };
 
 const STAR_HUES = [210, 120, 30, 0, 60];

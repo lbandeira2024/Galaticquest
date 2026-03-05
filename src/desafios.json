@@ -1054,33 +1054,93 @@
             "dialogo": [
                 {
                     "personagemId": "aletheia",
-                    "texto": "Astronauta, tá sentindo falta da Terra? Que falta que essa Terra te faz? A gente aqui embaixo continua em guerra olhando aí pra lua, implorando por paz. Então me diz, por que que você quer voltar? Você não tá feliz onde você está?... Como é grande a nossa ignorância. E como a nossa vida é mesquinha. E você querendo voltar aqui pro chão? Ah não, meu irmão, qual é a tua? Bicho te mordeu aí na Lua?” (risos)",
-                    "duracao": 15000
-                },
-                {
-                    "personagemId": "sisifo",
-                    "texto": "Ahahah! ...É isso aí. Talvez a real seja agir com a nossa melhor liderança, a que pode mudar toda essa ignorância sem ser messias!",
-                    "duracao": 6000
-                },
-                {
-                    "personagemId": "sisifo",
-                    "texto": "Sabe Aletheia, sinto aqui no espaço que todas estas coisas se conectam, tudo, e volta para a gente mesmo... Quando eu retornar a Terra não serei mais o mesmo. Só existimos em nós para o outro; somos gregário. Acho que preciso fazer mais por mim e pelas pessoas sem vaidade e oportunismo, e de forma generosa. As coisas boas assim voltarão; não quero ter mais grandes expectativas, percebo que a ansiedade me leva ao estresse. Será este o meu desafio pessoal daqui pra frente, com certeza!... E valorizar as coisas simples!",
-                    "duracao": 18000
+                    "texto": "Astronauta, tá sentindo falta da Terra? Que falta que essa Terra te faz? A gente aqui embaixo continua em guerra olhando aí pra",
+                    "duracao": 4000
                 },
                 {
                     "personagemId": "aletheia",
-                    "texto": "Parceiro, acho que você agora deixou de ficar tão ansioso como antes, coisa que vinha atrapalhando a gente, todos nós. Não será fácil, mas acho que você caminha para sua alteridade. Isso é maravilhoso pra sua vida e para os que ainda você vai liderar. Isto é fascinante. Te elogio por este salto de fé que você dá... É a jornada de um líder que caminha de verdade, não?",
-                    "duracao": 14000
-                },
-                {
-                    "personagemId": "sisifo",
-                    "texto": "Acho que sim. Só saberei construindo esta jornada, não podemos perder de vista o “porque” da nossa existência, mas acontece que a perdemos com facilidade. Não podemos permitir que coisas assim aconteçam. A vida é em si efêmera. Estamos hoje na ACEE e muitas outras empresas ainda virão. Nos resta construir algo que nos dê sentido e dignidade.",
-                    "duracao": 14000
+                    "texto": " lua, implorando por paz. Então me diz, por que que você quer voltar? Você não tá feliz onde você está?... Como é grande",
+                    "duracao": 4000
                 },
                 {
                     "personagemId": "aletheia",
-                    "texto": "A jornada é o seu caminho, parceiro. Decida o que achar razoável para você.",
+                    "texto": " a nossa ignorância. E como a nossa vida é mesquinha. E você querendo voltar aqui pro chão? Ah não, meu irmão, qual é a tua?",
+                    "duracao": 3000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": " Bicho te mordeu aí na Lua?” (risos)",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "Ahahah! É isso aí. Talvez a real seja agir com a nossa melhor liderança, a que pode mudar toda essa ignorância sem ser messias!",
+                    "duracao": 3000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "Sabe Aletheia, sinto aqui no espaço que todas estas coisas se conectam, tudo, e volta para a gente mesmo... Quando eu retornar",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": " a Terra não serei mais o mesmo. Só existimos em nós para o outro; somos gregário. Acho que preciso fazer mais por mim e pelas",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": " pessoas sem vaidade e oportunismo, e de forma generosa. As coisas boas assim voltarão; não quero ter mais grandes expectativas",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": " , percebo que a ansiedade me leva ao estresse. Será este o meu desafio pessoal daqui pra frente, com certeza!... E valorizar",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "as coisas simples!",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": "Parceiro, acho que você agora deixou de ficar tão ansioso como antes, coisa que vinha atrapalhando a gente, todos nós. Não será",
+                    "duracao": 3000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": " fácil, mas acho que você caminha para sua alteridade. Isso é maravilhoso pra sua vida e para os que ainda você vai liderar.",
+                    "duracao": 3000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": " Isto é fascinante. Te elogio por este salto de fé que você dá... É a jornada de um líder que caminha de verdade, não?",
+                    "duracao": 3000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "Acho que sim. Só saberei construindo esta jornada, não podemos perder de vista o “porque” da nossa existência, mas acontece",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": " que a perdemos com facilidade. Não podemos permitir que coisas assim aconteçam. A vida é em si efêmera. Estamos hoje na ACEE ",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "  e muitas outras empresas ainda virão. Nos resta construir algo que nos dê sentido e dignidade.",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": "A jornada é o seu caminho, parceiro. Decida o que achar razoável para você. Ou seremos sempre assim?",
                     "duracao": 5000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "... Aletheia, qual é a nossa verdade, afinal? ",
+                    "duracao": 2000
                 }
             ],
             "opcoes": [
