@@ -3,7 +3,7 @@ import './StellarMapPlan.css';
 import transferDistances from './fixed_transfer_distances.json';
 import { useConfig } from '../ConfigContext';
 
-// --- DICIONÁRIO DE NOMES PARA EXIBIÇÃO (VISUAL APENAS) ---
+// --- DICIONÁRIO DE NOMES PARA EXIBIÇÃO ---
 const displayNames = {
     "Mercurio": "Mercúrio",
     "Venus": "Vênus",
@@ -18,6 +18,14 @@ const displayNames = {
     "Kuiper": "Cinturão de Kuiper"
 };
 
+// LISTA DE ÁGUA: Nomes devem ser IDÊNTICOS aos do solarSystem
+const hasWaterList = new Set([
+    "Marte", "Mercurio", "Ceres", "Plutao", "Haumea", "Eris", "Makemake",
+    "Lua", "Europa", "Ganímedes", "Calisto", "Titã", "Encelado", "Tritao",
+    "Caronte", "Titania", "Oberon", "Vesta", "Trappist-1e", "Kepler186f",
+    "Terra", "Proxima Centauri b", "Jupiter"
+]);
+
 const getDisplayName = (name) => {
     if (!name) return "";
     if (name.includes("S.O.S próximo a ")) {
@@ -27,6 +35,12 @@ const getDisplayName = (name) => {
     return displayNames[name] || name;
 };
 
+// NOVA FUNÇÃO: Garante que a gota apareça em TODOS os lugares (Mapa, Painel e Rota)
+const getDisplayNameWithDrop = (name) => {
+    const rawName = getDisplayName(name);
+    return hasWaterList.has(name) ? `${rawName} 💧` : rawName;
+};
+
 // --- CONSTANTES E DADOS ESTÁTICOS ---
 const MAX_FOOD = 30 * 1200 * 36;
 const MAX_OXYGEN = 242000;
@@ -34,14 +48,6 @@ const OXYGEN_PER_PERSON_PER_DAY = 0.84;
 const CREW_SIZE = 10;
 const FOOD_PER_KM = 30;
 const MAX_FUEL = 98000;
-
-// LISTA DE ÁGUA: Nomes devem ser IDÊNTICOS aos do solarSystem (sem acentos se lá não tiver)
-const hasWaterList = new Set([
-    "Marte", "Mercurio", "Ceres", "Plutao", "Haumea", "Eris", "Makemake",
-    "Lua", "Europa", "Ganímedes", "Calisto", "Titã", "Encelado", "Tritao",
-    "Caronte", "Titania", "Oberon", "Vesta", "Trappist-1e", "Kepler186f",
-    "Terra", "Proxima Centauri b", "Jupiter"
-]);
 
 const realDistances = {
     "Sol": 0, "Mercurio": 57.9, "Venus": 108.2, "Terra": 149.6, "Marte": 227.9, "Ceres": 413.7, "Jupiter": 778.3,
@@ -256,10 +262,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
         if (isRouteConfirmed) return;
         if (visitedDestinations.includes(body.name)) return;
 
-        // Ignora completamente o clique no Sol
-        if (body.name === "Sol") {
-            return;
-        }
+        if (body.name === "Sol") return;
 
         if (body.name === "Terra" && plannedRoute.steps.length > 1) {
             setSelectedBody(body);
@@ -338,31 +341,22 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
         return '';
     };
 
-    // --- CONTROLE DE VISIBILIDADE DAS LUAS (NOVO) ---
     const [visibleMoonLabel, setVisibleMoonLabel] = useState(null);
     const moonLabelTimeoutRef = useRef(null);
 
     const handleMoonInteraction = useCallback((moonName) => {
-        // Limpa o timer anterior, se houver
         if (moonLabelTimeoutRef.current) {
             clearTimeout(moonLabelTimeoutRef.current);
         }
-
-        // Define a nova lua como visível
         setVisibleMoonLabel(moonName);
-
-        // Inicia contagem de 3 segundos para esconder
         moonLabelTimeoutRef.current = setTimeout(() => {
             setVisibleMoonLabel(null);
         }, 3000);
     }, []);
 
-    // Limpa o timer caso o componente seja fechado para evitar memory leak
     useEffect(() => {
         return () => {
-            if (moonLabelTimeoutRef.current) {
-                clearTimeout(moonLabelTimeoutRef.current);
-            }
+            if (moonLabelTimeoutRef.current) clearTimeout(moonLabelTimeoutRef.current);
         };
     }, []);
 
@@ -412,9 +406,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                 const markerClass = index <= currentIndex ? "origin-marker" : index === currentIndex + 1 ? "next-destination-marker" : "normal-marker";
                                 const isStepLocked = index <= (currentIndex + 1);
 
-                                // LÓGICA DE NOME PARA A ROTA (COM ACENTOS)
-                                const rawDisplayName = getDisplayName(step.name);
-                                const displayName = hasWaterList.has(step.name) ? `${rawDisplayName} 💧` : rawDisplayName;
+                                // Agora usamos a função que garante a gota centralizada em tudo
+                                const displayName = getDisplayNameWithDrop(step.name);
 
                                 return (
                                     <div key={index} className="step-ultimate" onMouseEnter={() => !isRouteConfirmed && setHoveredStep(index)} onMouseLeave={() => !isRouteConfirmed && setHoveredStep(null)}>
@@ -453,7 +446,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                     <div className="sun-fire"></div>
                     <div className="sun-core"></div>
                     <div className="sun-corona"></div>
-                    <span className="body-label">{getDisplayName(solarSystem.sun.name)}</span>
+                    <span className="body-label">{getDisplayNameWithDrop(solarSystem.sun.name)}</span>
                 </div>
 
                 {sosSignal && !isSosAdded && (() => {
@@ -483,13 +476,12 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                         >
                             <div className="sos-pulse"></div>
                             <div className="label-container">
-                                <span className="body-label sos-label">{getDisplayName(sosSignal.name)}</span>
+                                <span className="body-label sos-label">{getDisplayNameWithDrop(sosSignal.name)}</span>
                             </div>
                         </div>
                     );
                 })()}
 
-                {/* --- RENDERIZAÇÃO UNIVERSAL DOS PLANETAS E LUAS --- */}
                 {solarSystem.planets.map((planet, index) => {
                     const planetX = solarSystem.sun.x + Math.cos(planet.angle) * planet.orbitRadius;
                     const planetY = solarSystem.sun.y + Math.sin(planet.angle) * planet.orbitRadius;
@@ -526,11 +518,10 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                         <span className={`body-label
                                             ${planet.isExoplanet ? 'exoplanet-label' : ''}
                                             ${planet.isDwarfPlanet ? 'dwarf-planet-label' : ''}`}>
-                                            {getDisplayName(planet.name)}
+                                            {getDisplayNameWithDrop(planet.name)}
                                         </span>
                                     </div>
 
-                                    {/* LOOP QUE GERA TODAS AS LUAS DE TODOS OS PLANETAS */}
                                     {planet.moons.map((moon, moonIndex) => {
                                         const moonX = planetX + Math.cos(moon.angle) * moon.orbitRadius;
                                         const moonY = planetY + Math.sin(moon.angle) * moon.orbitRadius;
@@ -539,7 +530,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                                 : '';
                                         const currentMoonRotation = rotationAngles[moon.name] || 0;
 
-                                        // Verifica se ESTA lua está ativa na regra dos 3 segundos
                                         const isLabelVisible = visibleMoonLabel === moon.name;
 
                                         return (
@@ -554,16 +544,15 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                                 }}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleMoonInteraction(moon.name); // Garante que ative ao clicar também
+                                                    handleMoonInteraction(moon.name);
                                                     handleBodyClick(moon);
                                                 }}
                                                 onMouseEnter={() => handleMoonInteraction(moon.name)}
                                             >
-                                                {/* Eixo de Rotação Estrito na Origem (0,0) do centro da lua */}
                                                 <div className="label-container moon-label-container" style={{
                                                     transform: `rotate(${-currentMoonRotation}deg)`
                                                 }}>
-                                                    <span className="body-label moon-label">{getDisplayName(moon.name)}</span>
+                                                    <span className="body-label moon-label">{getDisplayNameWithDrop(moon.name)}</span>
                                                 </div>
                                             </div>
                                         );
@@ -577,7 +566,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
             {selectedBody && (
                 <div className="info-panel">
                     <div className="info-panel-header">
-                        <h3>{getDisplayName(selectedBody.name)}</h3>
+                        <h3>{getDisplayNameWithDrop(selectedBody.name)}</h3>
                         <button className="close-button" onClick={() => setSelectedBody(null)}>×</button>
                     </div>
                     {selectedBody.description && (
