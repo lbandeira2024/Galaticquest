@@ -1411,7 +1411,7 @@
 
 .team-grid_equipe {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 15px;
   margin-top: 20px;
 }
@@ -1428,10 +1428,11 @@
 }
 
 .team-member-avatar {
-  width: 80px;
-  height: 80px;
+  width: 104px;
+  height: 104px;
   border-radius: 50%;
   object-fit: cover;
+  object-position: top center;
   margin-right: 15px;
   border: 2px solid #ff9800;
   flex-shrink: 0;
