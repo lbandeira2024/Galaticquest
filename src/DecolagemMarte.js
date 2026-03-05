@@ -187,20 +187,35 @@ const RightMonitorPanel = React.memo(({
         </div>
       </div>
       <div className="glossary-button-container" style={{ marginTop: '20px', position: 'relative', zIndex: 10 }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {/* BOTÃO DA EQUIPE COM A CLASSE DE BRILHO (já possui a classe glossary-button) */}
+        {/* --- ALTERAÇÃO AQUI: flex-direction: row --- */}
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
           <button
             className="glossary-button shine-effect"
             onClick={() => !isPaused && setShowTeamModal(true)}
             disabled={isPaused}
-            style={{ width: '130px', backgroundColor: 'rgba(0, 150, 255, 0.2)' }}
+            style={{ width: '125px', backgroundColor: 'rgba(0, 150, 255, 0.2)', margin: 0, padding: '8px 5px' }}
           >
             EQUIPE
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <button className="glossary-button shine-effect" onClick={() => !isPaused && setShowGlossary(true)} disabled={isPaused} style={{ marginLeft: 0 }}>GLOSSÁRIO</button>
-            <button className="bolsa-button" onClick={handleInventory} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed', marginLeft: 0 }}><img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" /></button>
-          </div>
+
+          <button
+            className="glossary-button shine-effect"
+            onClick={() => !isPaused && setShowGlossary(true)}
+            disabled={isPaused}
+            style={{ width: '125px', margin: 0, padding: '8px 5px' }}
+          >
+            GLOSSÁRIO
+          </button>
+
+          <button
+            className="bolsa-button"
+            onClick={handleInventory}
+            disabled={true}
+            title="Bolsa Espacial (Indisponível)"
+            style={{ opacity: 0.5, cursor: 'not-allowed', margin: 0 }}
+          >
+            <img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" style={{ width: '70px' }} />
+          </button>
         </div>
       </div>
       {teamPhotoUrl && (
