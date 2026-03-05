@@ -48,14 +48,13 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Garante que o vídeo cubra todo o espaço sem distorcer */
   display: block;
   z-index: 1;
 }
 
 /* ====================================================================== */
 
-/* Efeito de estática com rolagem vertical (versão correta e final) */
+/* Efeito de estática com rolagem vertical */
 @keyframes verticalStaticScroll {
   from {
     background-position: 0 0;
@@ -759,9 +758,7 @@
   z-index: 10;
   pointer-events: auto;
   width: 130px;
-  /* Largura fixa */
   box-sizing: border-box;
-  /* Garante que o padding não estoure a largura */
 }
 
 .glossary-button:hover {
@@ -773,9 +770,7 @@
 /* === FOTO DA EQUIPE NO COCKPIT === */
 .team-photo-frame {
   margin-top: auto;
-  /* Empurra para o fundo do painel direito */
   margin-bottom: 60px;
-  /* Espaço para não cobrir os botões flutuantes */
   width: 100%;
   border: 2px solid #00aaff;
   border-radius: 8px;
@@ -786,7 +781,6 @@
   display: flex;
   flex-direction: column;
   z-index: 15;
-  /* Garante visibilidade acima de elementos com z-index menor */
 }
 
 .team-photo-header {
@@ -805,12 +799,9 @@
 .team-photo-img {
   width: 100%;
   height: 140px;
-  /* Altura fixa para manter layout consistente */
   object-fit: cover;
-  /* Preenche o espaço sem distorcer */
   display: block;
   filter: sepia(20%) contrast(1.1) brightness(0.9);
-  /* Filtro para integrar visualmente ao cockpit */
 }
 
 /* Efeito de linhas de monitor (scanlines) */
@@ -826,10 +817,7 @@
 }
 
 /* Responsive Design */
-/* MODIFICAÇÃO: O media query existente foi alterado para empilhar os painéis */
 @media (max-width: 768px) {
-
-  /* Permite rolagem em telas pequenas */
   .tela-decolagem {
     height: auto;
     min-height: 100vh;
@@ -837,7 +825,6 @@
     overflow-x: hidden;
   }
 
-  /* Transforma o cockpit em um container flexível de coluna */
   .cockpit-container {
     display: flex;
     flex-direction: column;
@@ -847,7 +834,6 @@
     transform: none;
   }
 
-  /* Reseta e centraliza os painéis */
   .left-panel-3d,
   .right-panel-3d,
   .main-display {
@@ -864,31 +850,24 @@
     padding: 10px;
   }
 
-  /* Define a ordem de exibição */
   .main-display {
     order: 1;
-    /* Aparece primeiro */
     height: 60vh;
-    /* Mantém uma boa altura para o display */
   }
 
   .left-panel-3d {
     order: 2;
-    /* Aparece no meio */
   }
 
   .right-panel-3d {
     order: 3;
-    /* Aparece por último */
   }
 
   .mission-timer {
     top: 15px;
     right: 15px;
     bottom: auto;
-    /* Reseta o 'bottom' */
     transform: none;
-    /* Reseta transformação 3D */
     font-size: 0.9em;
   }
 
@@ -902,7 +881,6 @@
 
   .monitor-screen {
     height: 150px;
-    /* Aumenta um pouco a altura no modo empilhado */
   }
 
   .propulsion-panel {
@@ -931,31 +909,22 @@
     height: 50px;
   }
 
-  /* ==================== INÍCIO DA CORREÇÃO ==================== */
-  /* NOVO: Ajusta o container flutuante em telas menores */
   .floating-buttons-container {
     bottom: 10px;
     right: 10px;
     gap: 5px;
-    /* Espaçamento menor para mobile */
   }
 
-  /* Ajusta os botões flutuantes */
   .pause-button {
-    /* bottom: 10px !important;  <-- REMOVIDO */
-    /* right: 10px !important;   <-- REMOVIDO */
     padding: 8px 12px;
     font-size: 0.9rem;
   }
 
   .sos-button {
-    /* bottom: 10px !important;  <-- REMOVIDO */
-    /* right: 80px !important;   <-- REMOVIDO */
     width: 50px;
     font-size: 0.7rem;
   }
 
-  /* Ajuste da foto em mobile */
   .team-photo-frame {
     margin-bottom: 10px;
     height: auto;
@@ -964,10 +933,7 @@
   .team-photo-img {
     height: 180px;
   }
-
-  /* ==================== FIM DA CORREÇÃO ==================== */
 }
-
 
 @media (prefers-reduced-motion: reduce) {
   .tela-decolagem.shaking {
@@ -1056,34 +1022,6 @@
   }
 }
 
-.ativar-de-btn.active {
-  background: linear-gradient(145deg,
-      #ff0000 0%,
-      #ff8000 10%,
-      #ffff00 20%,
-      #00ff00 30%,
-      #00ffff 40%,
-      #0000ff 50%,
-      #8000ff 60%,
-      #ff00ff 70%,
-      #ff0080 80%,
-      #ff0000 90%);
-  animation: rainbow-pulse 2s infinite alternate, pulse-green-fast 1.2s infinite;
-  background-size: 200% 200%;
-  color: white;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
-}
-
-@keyframes rainbow-pulse {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  100% {
-    background-position: 100% 50%;
-  }
-}
-
 .close-button {
   position: absolute;
   top: 15px;
@@ -1158,9 +1096,6 @@
   transform: scale(1.1);
 }
 
-/* --- ESTILOS MODIFICADOS E ADICIONADOS PARA O REC E TRANSMISSÃO --- */
-
-/* Animação de piscar para o REC */
 @keyframes blink-animation {
 
   0%,
@@ -1175,30 +1110,24 @@
   }
 }
 
-/* Classe base para o REC, sempre visível */
 .rec-label {
   font-size: 1.3em;
   font-weight: bold;
   transition: color 0.4s ease, text-shadow 0.4s ease, opacity 0.4s ease;
 }
 
-/* Classe para o estado desativado do REC */
 .rec-label.inactive-rec {
   color: #5a0000;
-  /* Vermelho escuro e apagado */
   text-shadow: none;
   opacity: 0.7;
 }
 
-/* Classe para o estado ativado e piscante do REC */
 .rec-label.blinking-rec {
   color: #f00;
-  /* Vermelho brilhante */
   text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
   animation: blink-animation 1.2s infinite;
 }
 
-/* Classe para a mensagem de transmissão */
 .transmission-message {
   width: 100%;
   height: 100%;
@@ -1215,7 +1144,6 @@
   animation: text-fade-in 2s ease-in-out;
 }
 
-/* Animação para a mensagem aparecer suavemente */
 @keyframes text-fade-in {
   from {
     opacity: 0;
@@ -1283,48 +1211,12 @@
   color: yellow;
   font-weight: bold;
   text-shadow: 0 0 5px rgba(255, 255, 0, 0.7);
-  /* Sombra para melhor legibilidade no fundo escuro */
 }
 
-/* ==========================================================
-   === ESTILOS ADICIONADOS PARA A BARRA DE VELOCIDADE DOBRA ===
-   ========================================================== */
-
-.speed-gauge-fill.is-dobra-active {
-  background: linear-gradient(90deg,
-      #ff0000 0%,
-      #ff8000 10%,
-      #ffff00 20%,
-      #00ff00 30%,
-      #00ffff 40%,
-      #0000ff 50%,
-      #8000ff 60%,
-      #ff00ff 70%,
-      #ff0080 80%,
-      #ff0000 90%);
-  background-size: 200% 200%;
-  animation: rainbow-scroll 2s linear infinite;
-}
-
-@keyframes rainbow-scroll {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  100% {
-    background-position: 200% 50%;
-  }
-}
-
-/* --- ESTILO PARA O NOME DO PERSONAGEM NO DIÁLOGO --- */
 .dialogue-character-name {
   color: yellow;
   font-weight: bold;
 }
-
-/* =============================================================== */
-/* ==================== ESTILOS FLUTUANTES (S.O.S. / PAUSA) ==================== */
-/* =============================================================== */
 
 .floating-buttons-container {
   position: fixed;
@@ -1333,16 +1225,12 @@
   z-index: 999;
   display: flex;
   flex-direction: row-reverse;
-  /* Alinha da direita para a esquerda */
   align-items: center;
-  /* Alinha verticalmente */
   gap: 10px;
-  /* Espaço entre os botões */
 }
 
 .pause-button {
   background-color: rgba(50, 255, 50, 0.2) !important;
-  /* FORÇANDO O VERDE */
   border: 1px solid rgba(79, 195, 247, 0.8);
   color: #fff;
   padding: 10px 20px;
@@ -1358,9 +1246,7 @@
 
 .pause-button.paused {
   background-color: rgba(50, 255, 50, 0.2) !important;
-  /* FORÇANDO O VERDE (mesmo pausado) */
 }
-
 
 .pause-button:disabled {
   opacity: 0.6;
@@ -1374,8 +1260,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-
-  /* Estilos Base (Desativado) */
   background-color: rgba(180, 0, 0, 0.7);
   border: 1px solid rgba(255, 50, 50, 0.5);
   color: #fff;
@@ -1392,7 +1276,6 @@
 }
 
 .sos-button.active {
-  /* Estilos Ativos */
   background-color: rgba(255, 0, 0, 0.9);
   border: 1px solid rgba(255, 100, 100, 0.8);
   cursor: pointer;
@@ -1422,9 +1305,6 @@
   }
 }
 
-/* ============================================================ */
-
-/* --- NOVO: Estilo para o Processador O2 --- */
 .o2-processor-display {
   width: 100%;
   margin-top: 5px;
@@ -1521,9 +1401,7 @@
   text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
 }
 
-/* ==========================================================
-   === ESTILOS ADICIONADOS: MODAL E MEMBROS DA TRIPULAÇÃO ===
-   ========================================================== */
+/* Modal e Membros da Equipa */
 .team-modal-details {
   max-width: 900px !important;
   border: 1px solid #ff9800 !important;
@@ -1533,7 +1411,7 @@
 
 .team-grid_equipe {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 15px;
   margin-top: 20px;
 }
@@ -1548,12 +1426,12 @@
 }
 
 .team-member-avatar {
-  width: 50px;
-  height: 50px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
   margin-right: 15px;
-  border: 1px solid #ff9800;
+  border: 2px solid #ff9800;
 }
 
 .team-member-details {
@@ -1578,4 +1456,51 @@
   color: #ccc;
   margin-top: 2px;
   line-height: 1.2;
+}
+
+/* =============================================================== */
+/* ====== EFEITO DE BRILHO DIAGONAL (EQUIPE, GLOSSÁRIO, MAPA) ==== */
+/* =============================================================== */
+
+/* Aplica o efeito no glossary-button e na nova classe shine-effect */
+.glossary-button::after,
+.shine-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0) 100%);
+  transform: skewX(-25deg);
+  /* Dá a inclinação diagonal */
+  animation: sweep-shine 3s infinite;
+  pointer-events: none;
+  /* Garante que o brilho não atrapalhe o clique do botão */
+  z-index: 1;
+}
+
+@keyframes sweep-shine {
+  0% {
+    left: -150%;
+  }
+
+  20% {
+    left: 200%;
+    /* O brilho atravessa o botão rapidamente (0.6s) */
+  }
+
+  100% {
+    left: 200%;
+    /* Pausa durante o resto do tempo para perfazer 3s */
+  }
+}
+
+/* Garante que qualquer botão com este efeito oculte as margens vazadas */
+.shine-effect {
+  position: relative;
+  overflow: hidden;
 }

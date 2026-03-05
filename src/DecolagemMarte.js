@@ -96,7 +96,6 @@ const LeftControlPanel = React.memo(({
         </div>
       </div>
       <div className="o2-processor-display">
-        {/* CORREÇÃO DO VISUAL DO O2 AQUI */}
         <span className="o2-processor-label">
           PROCESSADOR <span style={{ fontSize: '1.4em', fontWeight: '900', color: '#0bf', textShadow: '0 0 10px #0bf' }}>O</span><sub style={{ fontSize: '0.66em', verticalAlign: 'sub', color: '#0bf', textShadow: '0 0 10px #0bf' }}>2</sub>
         </span>
@@ -189,16 +188,17 @@ const RightMonitorPanel = React.memo(({
       </div>
       <div className="glossary-button-container" style={{ marginTop: '20px', position: 'relative', zIndex: 10 }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {/* BOTÃO DA EQUIPE COM A CLASSE DE BRILHO (já possui a classe glossary-button) */}
           <button
-            className="glossary-button"
+            className="glossary-button shine-effect"
             onClick={() => !isPaused && setShowTeamModal(true)}
             disabled={isPaused}
             style={{ width: '130px', backgroundColor: 'rgba(0, 150, 255, 0.2)' }}
           >
-            TRIPULAÇÃO
+            EQUIPE
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <button className="glossary-button" onClick={() => !isPaused && setShowGlossary(true)} disabled={isPaused} style={{ marginLeft: 0 }}>GLOSSÁRIO</button>
+            <button className="glossary-button shine-effect" onClick={() => !isPaused && setShowGlossary(true)} disabled={isPaused} style={{ marginLeft: 0 }}>GLOSSÁRIO</button>
             <button className="bolsa-button" onClick={handleInventory} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed', marginLeft: 0 }}><img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" /></button>
           </div>
         </div>
@@ -520,7 +520,7 @@ const DecolagemMarte = () => {
   const [minervaImage, setMinervaImage] = useState('/images/Minerva/Minerva_Active.gif');
   const [isDobraEnabled, setIsDobraEnabled] = useState(false);
   const [showGlossary, setShowGlossary] = useState(false);
-  const [showTeamModal, setShowTeamModal] = useState(false); // NOVO ESTADO AQUI
+  const [showTeamModal, setShowTeamModal] = useState(false);
   const [showInventory, setShowInventory] = useState(false);
   const [isShaking, setIsShaking] = useState(false);
   const [missionTime, setMissionTime] = useState(12 * 60 * 60);
@@ -847,7 +847,6 @@ const DecolagemMarte = () => {
         setDistanceKm(nextDistance);
       }
 
-      // CORREÇÃO CHAVE: Força a ref a enxergar a nova distância imediatamente!
       distanceKmRef.current = nextDistance;
 
       setProgress(0);
@@ -856,7 +855,6 @@ const DecolagemMarte = () => {
       approachSoundPlayed.current = false;
       minervaEventTriggered.current = true;
 
-      // Deixamos a Minerva controlar o boost de 60k para sincronizar com o áudio
       triggerMinervaInterplanetarySpeed();
 
       setActiveChallengeData(null);
@@ -895,7 +893,6 @@ const DecolagemMarte = () => {
         setSelectedPlanet({ nome: newDestinationStep.name });
         const newDist = newDestinationStep.distance || 300000000;
         setDistanceKm(newDist);
-        // CORREÇÃO: Atualiza imediatamente
         distanceKmRef.current = newDist;
       }
       setArrivedAtMars(false);
@@ -907,7 +904,6 @@ const DecolagemMarte = () => {
       setShowStoreModal(false);
       setTimeout(async () => {
         setDistanceKm(300000000);
-        // CORREÇÃO: Atualiza imediatamente
         distanceKmRef.current = 300000000;
 
         await saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
@@ -917,7 +913,6 @@ const DecolagemMarte = () => {
         approachSoundPlayed.current = false;
         minervaEventTriggered.current = true;
 
-        // Deixamos a Minerva controlar o boost de 60k
         triggerMinervaInterplanetarySpeed();
 
         setActiveChallengeData(null);
@@ -1739,7 +1734,6 @@ const DecolagemMarte = () => {
           </div>
         </div>
       )}
-      {/* CORREÇÃO DO VISUAL DO O2 NO MODAL AQUI */}
       {showO2Modal && (
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: '500px', textAlign: 'center', fontFamily: "'Courier New', monospace", color: '#fff', border: '2px solid #0bf', boxShadow: '0 0 20px #0bf' }}>
