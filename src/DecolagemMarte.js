@@ -31,7 +31,7 @@ const TEAMS_DATA = [
 
 const getMemberImage = (teamCode, index) => {
   switch (teamCode) {
-    case 'E1': return index === 0 ? 'Sisifo' : index === 1 ? 'neo_steves' : index === 2 ? 'tamara' : index === 3 ? 'ares' : 'mae';
+    case 'E1': return index === 0 ? 'Sisifo' : index === 1 ? 'neo_steves' : index === 2 ? 'Tamara' : index === 3 ? 'Ares' : 'Mae';
     case 'E2': return index === 0 ? 'Aletheia' : index === 1 ? 'Capitao_Kirk' : index === 2 ? 'Dr_Maureen' : index === 3 ? 'Hazza_Ali' : 'Illa_Ramon';
     case 'E3': return index === 0 ? 'Kopenawa' : index === 1 ? 'Marek' : index === 2 ? 'Farna' : index === 3 ? 'Zachary' : index === 4 ? 'Iuri' : 'Zahy';
     case 'E4': return index === 0 ? 'Demeter' : index === 1 ? 'Semolek' : index === 2 ? 'Nora' : index === 3 ? 'Liu' : 'Petros';
