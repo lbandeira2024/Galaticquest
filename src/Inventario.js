@@ -20,10 +20,14 @@ const Inventario = ({ onClose, onUpdateTelemetry }) => {
     const [activeTab, setActiveTab] = useState('storage');
     const [isLoading, setIsLoading] = useState(true);
 
-    const [cooldowns, setCooldowns] = useState(() => {
-        const savedCooldowns = localStorage.getItem('inventoryCooldowns');
-        return savedCooldowns ? JSON.parse(savedCooldowns) : {};
+    // --- NOVO: Cooldown Global para todos os itens pessoais ---
+    const [globalCooldown, setGlobalCooldown] = useState(() => {
+        const saved = localStorage.getItem('globalPersonalCooldown');
+        return saved ? parseInt(saved, 10) : 0;
     });
+
+    // --- Tick para forçar atualização do cronômetro na tela ---
+    const [, setTick] = useState(0);
 
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [isDragging, setIsDragging] = useState(false);
@@ -95,9 +99,18 @@ const Inventario = ({ onClose, onUpdateTelemetry }) => {
         }
     };
 
+    // --- Salvar cooldown global no storage ---
     useEffect(() => {
-        localStorage.setItem('inventoryCooldowns', JSON.stringify(cooldowns));
-    }, [cooldowns]);
+        localStorage.setItem('globalPersonalCooldown', globalCooldown.toString());
+    }, [globalCooldown]);
+
+    // --- Atualizar o cronômetro a cada segundo ---
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setTick(t => t + 1);
+        }, 1000);
+        return () => clearInterval(interval);
+    }, []);
 
     const handleUseItem = async (index) => {
         const itemToUse = inventory[index];
@@ -127,7 +140,6 @@ const Inventario = ({ onClose, onUpdateTelemetry }) => {
             newTelemetryDB.oxygen = 100;
             playSound('/sounds/inventory-use.mp3');
         } else if (itemToUse.image.includes('provision.png') || itemToUse.image.includes('Provisoes.png')) {
-            // Lógica ajustada para +10 conforme solicitado e compatível com LojaEspacial.js
             const newProd = Math.min(100, (currentTelemetry.productivity || 0) + 10);
             const newEng = Math.min(100, (currentTelemetry.engagement || 0) + 10);
 
@@ -157,36 +169,81 @@ const Inventario = ({ onClose, onUpdateTelemetry }) => {
             });
             const data = await response.json();
             if (response.ok && data.user) {
-                // --- CORREÇÃO APLICADA AQUI ---
-                // Ocultamos/removemos a chamada do login para não atualizar o AuthContext inteiro,
-                // o que causava o recarregamento total do componente pai DecolagemMarte.js
-                // login(data.user); 
+                // login(data.user); (Omitido intencionalmente para não recarregar toda a interface)
             }
         } catch (err) {
             console.error("❌ Erro ao atualizar inventário:", err);
         }
     };
 
-    const handleActivateItem = (index) => {
-        playSound('/sounds/inventory-use.mp3');
-        const item = personalItems[index];
-        setCooldowns(prev => ({ ...prev, [item.id]: Date.now() }));
+    // --- NOVA LÓGICA DE ITENS PESSOAIS ---
+    const isGlobalCooldownActive = () => {
+        if (!globalCooldown) return false;
+        const now = Date.now();
+        return (now - globalCooldown) < 600000; // 10 Minutos em Milissegundos
     };
 
-    const isItemOnCooldown = (itemId) => {
-        if (!cooldowns[itemId]) return false;
+    const getGlobalCooldownRemaining = () => {
+        if (!globalCooldown) return "0:00";
         const now = Date.now();
-        return (now - cooldowns[itemId]) < 600000;
-    };
-
-    const getCooldownRemaining = (itemId) => {
-        if (!cooldowns[itemId]) return 0;
-        const now = Date.now();
-        const elapsed = now - cooldowns[itemId];
+        const elapsed = now - globalCooldown;
         const remainingSeconds = Math.max(0, Math.ceil((600000 - elapsed) / 1000));
+
+        if (remainingSeconds === 0) return "0:00";
+
         const minutes = Math.floor(remainingSeconds / 60);
         const seconds = remainingSeconds % 60;
         return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    const handleActivateItem = async (index) => {
+        if (isGlobalCooldownActive()) return;
+
+        playSound('/sounds/inventory-use.mp3');
+        const item = personalItems[index];
+
+        // Ativa o cooldown para TODOS os itens
+        setGlobalCooldown(Date.now());
+
+        // Identifica se o item é um dos especiais de 8%
+        const specialItems = ["acervo de fotos e videos", "natureza e galaxias", "fauna e flora", "dialogos culturais"];
+
+        // Remove acentos e joga tudo para minúsculo para fazer a comparação segura
+        const normalizeStr = (str) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+        const itemNameNormalized = normalizeStr(item.name);
+
+        let bonus = 6; // Padrão 6%
+        if (specialItems.some(special => itemNameNormalized.includes(normalizeStr(special)))) {
+            bonus = 8; // Itens específicos 8%
+        }
+
+        // Aplica o bónus
+        let currentTelemetry = user?.grupo?.telemetryState || {
+            oxygen: 100, nuclearPropulsion: 100, direction: 100,
+            stability: 100, productivity: 100, interdependence: 100, engagement: 100
+        };
+
+        const newProd = Math.min(100, (currentTelemetry.productivity || 0) + bonus);
+        const newTelemetryDB = { ...currentTelemetry, productivity: newProd };
+
+        // Atualiza a tela de voo em tempo real
+        if (onUpdateTelemetry) {
+            onUpdateTelemetry({ productivity: newProd });
+        }
+
+        // Salva na base de dados
+        if (!user?._id || !API_BASE_URL) return;
+        try {
+            await fetch(`${API_BASE_URL}/${user._id}/update-gamedata`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    telemetryState: newTelemetryDB
+                }),
+            });
+        } catch (err) {
+            console.error("❌ Erro ao salvar bônus de produtividade:", err);
+        }
     };
 
     const handleCloseSafe = (e) => {
@@ -194,6 +251,9 @@ const Inventario = ({ onClose, onUpdateTelemetry }) => {
         e.stopPropagation();
         onClose();
     };
+
+    const isCooldownGlobal = isGlobalCooldownActive();
+    const globalCooldownText = getGlobalCooldownRemaining();
 
     const modalContent = (
         <div className="inventory-modal-overlay">
@@ -263,34 +323,33 @@ const Inventario = ({ onClose, onUpdateTelemetry }) => {
                         )}
                     </div>
                 )}
+
                 {!isLoading && activeTab === 'personal' && (
                     <div className="inventory-items-list">
                         {personalItems.length > 0 ? (
-                            personalItems.map((item, index) => {
-                                const isOnCooldown = isItemOnCooldown(item.id);
-                                const cooldownRemaining = getCooldownRemaining(item.id);
-                                return (
-                                    <div key={`personal-${index}`} className="inventory-list-item">
-                                        <img src={item.image} alt={item.name} className="inventory-list-image" onError={(e) => { e.target.onerror = null; e.target.src = '/images/placeholder.png'; }} />
-                                        <div className="inventory-list-details">
-                                            <div className="inventory-list-name">{item.name}</div>
-                                            <div className="inventory-list-description">
-                                                {item.description}
-                                                {isOnCooldown && (
-                                                    <div className="cooldown-text">Recarregando: {cooldownRemaining}</div>
-                                                )}
-                                            </div>
+                            personalItems.map((item, index) => (
+                                <div key={`personal-${index}`} className="inventory-list-item">
+                                    <img src={item.image} alt={item.name} className="inventory-list-image" onError={(e) => { e.target.onerror = null; e.target.src = '/images/placeholder.png'; }} />
+                                    <div className="inventory-list-details">
+                                        <div className="inventory-list-name">{item.name}</div>
+                                        <div className="inventory-list-description">
+                                            {item.description}
+                                            {isCooldownGlobal && (
+                                                <div className="cooldown-text">
+                                                    Todos os itens recarregando em: {globalCooldownText}
+                                                </div>
+                                            )}
                                         </div>
-                                        <button
-                                            className={`activate-button ${isOnCooldown ? 'disabled' : ''}`}
-                                            onClick={() => !isOnCooldown && handleActivateItem(index)}
-                                            disabled={isOnCooldown}
-                                        >
-                                            {isOnCooldown ? `AGUARDE` : `ATIVAR`}
-                                        </button>
                                     </div>
-                                );
-                            })
+                                    <button
+                                        className={`activate-button ${isCooldownGlobal ? 'disabled' : ''}`}
+                                        onClick={() => !isCooldownGlobal && handleActivateItem(index)}
+                                        disabled={isCooldownGlobal}
+                                    >
+                                        {isCooldownGlobal ? `AGUARDE` : `ATIVAR`}
+                                    </button>
+                                </div>
+                            ))
                         ) : (
                             <p className="empty-inventory-message">Nenhum item pessoal adicionado.</p>
                         )}
