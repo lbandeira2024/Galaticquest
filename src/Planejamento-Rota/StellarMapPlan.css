@@ -275,7 +275,7 @@
 }
 
 /* =========================================
-   REGRAS ESPECÍFICAS PARA TODAS AS LUAS (EFEITO DIAGONAL PERFEITO E TIMER)
+   REGRAS ESPECÍFICAS PARA TODAS AS LUAS
 ========================================= */
 
 .celestial-body.moon .label-container.moon-label-container {
@@ -521,7 +521,8 @@
     position: fixed;
     top: 20px;
     right: 20px;
-    width: 380px;
+    width: 430px;
+    /* AUMENTADO: de 380px para 430px */
     padding: 20px;
     background: rgba(10, 20, 40, 0.98);
     border: 1px solid #4fc3f7;
@@ -700,7 +701,6 @@
     height: 16px;
     border-radius: 50%;
     margin-right: 6px;
-    /* MODIFICADO: Estava 15px, reduzi para aproximar da bolinha */
     flex-shrink: 0;
     position: relative;
     z-index: 2;
@@ -729,11 +729,11 @@
     flex-grow: 1;
     min-width: 0;
     padding: 0;
-    /* MODIFICADO: Estava 0 10px, removi o padding para dar espaço total ao texto */
 }
 
 .step-name {
-    font-size: 15px;
+    font-size: 14px;
+    /* REDUZIDO: de 15px para 14px para encaixar perfeitamente */
     color: white;
     flex: 1;
     text-align: left;
@@ -743,10 +743,11 @@
 }
 
 .step-distance {
-    font-size: 14px;
+    font-size: 13px;
+    /* REDUZIDO: de 14px para 13px */
     color: #bbdefb;
-    min-width: 95px;
-    /* MODIFICADO: Estava 120px, reduzi para evitar esmagar o nome */
+    min-width: 85px;
+    /* REDUZIDO: de 95px para 85px para dar mais espaço ao nome */
     text-align: right;
     flex-shrink: 0;
 }
@@ -894,7 +895,8 @@
     box-shadow: 0 0 5px #00ff00;
 }
 
-@media (max-width: 420px) {
+/* AUMENTADO: O breakpoint do media query para englobar telas até 460px */
+@media (max-width: 460px) {
     .route-display-panel {
         width: auto;
         left: 10px;
