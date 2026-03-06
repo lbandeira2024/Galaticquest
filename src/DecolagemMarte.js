@@ -187,7 +187,6 @@ const RightMonitorPanel = React.memo(({
         </div>
       </div>
       <div className="glossary-button-container" style={{ marginTop: '20px', position: 'relative', zIndex: 10 }}>
-        {/* --- ALTERAÇÃO AQUI: flex-direction: row --- */}
         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
           <button
             className="glossary-button shine-effect"
@@ -197,25 +196,10 @@ const RightMonitorPanel = React.memo(({
           >
             EQUIPE
           </button>
-
-          <button
-            className="glossary-button shine-effect"
-            onClick={() => !isPaused && setShowGlossary(true)}
-            disabled={isPaused}
-            style={{ width: '125px', margin: 0, padding: '8px 5px' }}
-          >
-            GLOSSÁRIO
-          </button>
-
-          <button
-            className="bolsa-button"
-            onClick={handleInventory}
-            disabled={true}
-            title="Bolsa Espacial (Indisponível)"
-            style={{ opacity: 0.5, cursor: 'not-allowed', margin: 0 }}
-          >
-            <img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" style={{ width: '70px' }} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+            <button className="glossary-button shine-effect" onClick={() => !isPaused && setShowGlossary(true)} disabled={isPaused} style={{ marginLeft: 0 }}>GLOSSÁRIO</button>
+            <button className="bolsa-button" onClick={handleInventory} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed', marginLeft: 0 }}><img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" /></button>
+          </div>
         </div>
       </div>
       {teamPhotoUrl && (
@@ -1516,6 +1500,8 @@ const DecolagemMarte = () => {
                 setShowDesafioModal(true);
               } else {
                 console.warn("⚠️ Desafio não encontrado para o destino:", targetName, "- Abrindo confirmação de viagem.");
+                // GARANTE QUE SABEMOS QUE NÃO HÁ DESAFIO
+                setActiveChallengeData(null);
                 setShowConfirmacaoModal(true);
               }
             }
@@ -1766,6 +1752,7 @@ const DecolagemMarte = () => {
           onSeguirPlano={handleSeguirPlano}
           onMudarRota={handleMudarRota}
           hasRoute={plannedRoute && (routeIndex + 1) < plannedRoute.length}
+          isArrivalWithoutChallenge={!activeChallengeData}
         />
       )}
       {showSOSModal && (
