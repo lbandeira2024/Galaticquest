@@ -1484,7 +1484,10 @@ const DecolagemMarte = () => {
             setIsWarpCooldown(true);
             setTimeout(() => { setIsWarpCooldown(false); }, 20000);
           } else if (newDistance <= 0 && !arrivedAtMarsRef.current && !isForcedMapEditRef.current && !isSosDestination) {
+
+            // PREVINE DISPAROS MÚLTIPLOS DO TIMEOUT
             setArrivedAtMars(true); setSpeed(45000);
+            arrivedAtMarsRef.current = true;
 
             const normalizeName = (str) => str ? str.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "") : "";
 
@@ -1500,9 +1503,11 @@ const DecolagemMarte = () => {
                 setShowDesafioModal(true);
               } else {
                 console.warn("⚠️ Desafio não encontrado para o destino:", targetName, "- Abrindo confirmação de viagem.");
-                // GARANTE QUE SABEMOS QUE NÃO HÁ DESAFIO
+                // GARANTE QUE SABEMOS QUE NÃO HÁ DESAFIO E ADICIONA ESPERA DE 5 SEGUNDOS
                 setActiveChallengeData(null);
-                setShowConfirmacaoModal(true);
+                setTimeout(() => {
+                  setShowConfirmacaoModal(true);
+                }, 5000);
               }
             }
 

@@ -1,14 +1,24 @@
 import React from 'react';
 import './ModalConfirmacaoViagem.css';
 
-// Removido o default "true" de hasRoute. 
-// Agora, se hasRoute não for passado, o botão "Seguir Plano" não aparece.
-const ModalConfirmacaoViagem = ({ onSeguirPlano, onMudarRota, hasRoute }) => {
+// Agora recebe a propriedade isArrivalWithoutChallenge para saber qual texto mostrar
+const ModalConfirmacaoViagem = ({ onSeguirPlano, onMudarRota, hasRoute, isArrivalWithoutChallenge }) => {
     return (
         <div className="modal-confirmacao-overlay">
-            <div className="modal-confirmacao-container">
-                <h3>Decisão registrada!</h3>
-                <p>Vamos continuar a viagem ou alterar o curso?</p>
+            <div
+                className="modal-confirmacao-container"
+                style={isArrivalWithoutChallenge ? { border: '2px solid #ff3333', boxShadow: '0 0 30px rgba(255, 50, 50, 0.5)' } : {}}
+            >
+                <h3 style={isArrivalWithoutChallenge ? { color: '#ff3333', textShadow: '0 0 15px red' } : {}}>
+                    {isArrivalWithoutChallenge ? "ALERTA DO SISTEMA" : "DECISÃO REGISTRADA!"}
+                </h3>
+
+                <p style={isArrivalWithoutChallenge ? { color: '#ffaaaa', fontWeight: 'bold' } : {}}>
+                    {isArrivalWithoutChallenge
+                        ? "Atenção protocolo ACEE-4576, alterar curso para outro destino imediatamente."
+                        : "Vamos continuar a viagem ou alterar o curso?"}
+                </p>
+
                 <div className="confirmacao-buttons-container">
                     <button className="confirmacao-button mudar-rota" onClick={onMudarRota}>
                         MUDAR ROTA
