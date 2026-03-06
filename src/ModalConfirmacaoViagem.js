@@ -15,7 +15,7 @@ const ModalConfirmacaoViagem = ({ onSeguirPlano, onMudarRota, hasRoute, isArriva
 
                 <p style={isArrivalWithoutChallenge ? { color: '#ffaaaa', fontWeight: 'bold' } : {}}>
                     {isArrivalWithoutChallenge
-                        ? "Atenção protocolo ACEE-4576, alterar curso para outro destino imediatamente."
+                        ? "Atenção, atenção equipe, Protocolo ACEE-4765 de Defesa... Sair agora desta órbita, seguiremos a rota... Seguiremos viagem!"
                         : "Vamos continuar a viagem ou alterar o curso?"}
                 </p>
 
