@@ -1521,8 +1521,8 @@
         {
             "nome": "Modelo Democrático, Autocrático Ou Liberal?",
             "id": "CSD12",
-            "descricao": "O Sindicato Mundial dE Astronautas Espaciais  (smae) comunica no seu boletim oficial que entrou com uma representação nas entidades competentes de justiça dos países membros da ACEE – EUA, Rússia e China, reivindicando o aumento de 40% no vencimento dos astronautas e um bônus vitalício de insalubridade de 35%, com base no salário médio dos últimos 5 anos contra “doenças adversas estranhas (DAE)”, adquiridas no espaço. Este último ganho recai também às famílias de astronautas mortos. \n\nA representação favorece a todos os astronautas que estiveram e estão em missões orbitais. Sabe-se que a ACEE atualmente tem no espaço 26 astronautas, além de uma tripulante convidada - a Zahy. \n\nNo mundo, o número de astronautas orbitais vinculados historicamente a ACEE e às agências dos países somam 592. O orçamento estimado para esta “dívida trabalhista”, que deverá ser permanente e crescente, é de 20 MM (US$) ao ano.\n\nA ACEE e as agências alegam não ter condições de bancar esta expectativa que afetará as contas públicas dos países em crise por conta da pandemia Sars Cov 19 que afetou a economia mundial. Isto coloca em risco todas as missões planejadas. Já se comenta na comunidade de astronautas, cosmonautas e taikonautas que dias difíceis virão para a categoria, com o acirramento das partes.\n\nO Fundo Financeiro Internacional Para Projetos Espaciais (FFIP), que vem dando apoio às missões, não parece nada sensível a qualquer reivindicação da categoria. Os projetos, em andamento, agora correm sério risco de interrupção com a posição de ambos os lados. \n\nO representante sindical dos astronautas no espaço, Iuri Galina, convoca todos para uma live, a fim de discutir o assunto. Sabe-se que boa parte deles é favorável a adesão à greve, e que não há previsão para encerrá-la, caso as\nreinvindicações não sejam atendidas.\n\nNa live, todos os astronautas, exceto Cerruti e Zahy, estão reunidos e trocam ideias se irão avançar ou recuar na estratégia da greve para conseguirem o êxito nas reivindicações.",
-            "planeta": "TRAPPIST-1e",
+            "descricao": "O Sindicato Mundial dE Astronautas Espaciais (SMAE) comunica no seu boletim oficial que entrou com uma representação nas entidades competentes de justiça dos países membros da ACEE – EUA, Rússia e China, reivindicando o aumento de 40% no vencimento dos astronautas e um bônus vitalício de insalubridade de 35%, com base no salário médio dos últimos 5 anos contra “doenças adversas estranhas (DAE)”, adquiridas no espaço. Este último ganho recai também às famílias de astronautas mortos. \n\nA representação favorece a todos os astronautas que estiveram e estão em missões orbitais. Sabe-se que a ACEE atualmente tem no espaço 26 astronautas, além de uma tripulante convidada - a Zahy. \n\nNo mundo, o número de astronautas orbitais vinculados historicamente a ACEE e às agências dos países somam 592. O orçamento estimado para esta “dívida trabalhista”, que deverá ser permanente e crescente, é de 20 MM (US$) ao ano.\n\nA ACEE e as agências alegam não ter condições de bancar esta expectativa que afetará as contas públicas dos países em crise por conta da pandemia Sars Cov 19 que afetou a economia mundial. Isto coloca em risco todas as missões planejadas. Já se comenta na comunidade de astronautas, cosmonautas e taikonautas que dias difíceis virão para a categoria, com o acirramento das partes.\n\nO Fundo Financeiro Internacional Para Projetos Espaciais (FFIP), que vem dando apoio às missões, não parece nada sensível a qualquer reivindicação da categoria. Os projetos, em andamento, agora correm sério risco de interrupção com a posição de ambos os lados. \n\nO representante sindical dos astronautas no espaço, Iuri Galina, convoca todos para uma live, a fim de discutir o assunto. Sabe-se que boa parte deles é favorável a adesão à greve, e que não há previsão para encerrá-la, caso as\nreinvindicações não sejam atendidas.\n\nNa live, todos os astronautas, exceto Cerruti e Zahy, estão reunidos e trocam ideias se irão avançar ou recuar na estratégia da greve para conseguirem o êxito nas reivindicações.",
+            "planeta": "Trappist-1e",
             "personagens": [
                 "iuri_galina",
                 "kopenawa",
@@ -1531,18 +1531,63 @@
             "dialogo": [
                 {
                     "personagemId": "iuri_galina",
-                    "texto": "...Finalmente, nós representamos a “nata” dos astronautas no mundo. Se não fizermos nada por nós agora, não teremos qualquer conforto de nossas famílias no futuro. Precisamos de tranquilidade para trabalharmos, vocês não acham? ... Se não agora, quando será então, parceiros?",
-                    "duracao": 15000
+                    "texto": "...Finalmente, nós representamos a “nata” dos astronautas no mundo. Se não fizermos nada por nós agora, não teremos qualque",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "iuri_galina",
+                    "texto": " conforto de nossas famílias no futuro. Precisamos de tranquilidade para trabalharmos, vocês não acham? ... Se não agora,",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "iuri_galina",
+                    "texto": " quando será então, parceiros?",
+                    "duracao": 2000
                 },
                 {
                     "personagemId": "narrador",
-                    "texto": "Algumas horas depois, entre debates e posições acirradas, o grupo combina, aparentemente, fazer piquetes para não interromper as tarefas nas estações.",
-                    "duracao": 10000
+                    "texto": "Algumas horas depois, entre debates e posições acirradas, o grupo combina, aparentemente, fazer piquetes para não interromper",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "narrador",
+                    "texto": " as tarefas nas estações.",
+                    "duracao": 2000
                 },
                 {
                     "personagemId": "kopenawa",
-                    "texto": "(pede a palavra): ...Parceiros, quero um tempo de fala... Entendo a posição de cada um, mas gostaria de relevar também a importância de nossa missão e os reflexos dela para o mundo. Nós somos a “nata” do exemplo, e podemos pensar adiante uma outra forma de encaminharmos nossas reinvindicações. Vou declinar da minha posição inicial, pois estamos no momento mais crítico de tudo, por isso nossa inteligência coletiva tem que prevalecer. Respeito suas posições, mas tenho agora a expectativa que todos repensem a situação. Não estou aqui representando ninguém, exceto minha consciência. Estou aberto para, adiante, retomarmos o assunto numa outra “vibe”, e, sendo um dos coordenadores, quem sabe, levar a posição de não adesão à nossa chefia – o Cerruti, claro, se vocês concordarem!”",
-                    "duracao": 35000
+                    "texto": "(pede a palavra): ...Parceiros, quero um tempo de fala... Entendo a posição de cada um, mas gostaria de relevar também a",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "kopenawa",
+                    "texto": " importância de nossa missão e os reflexos dela para o mundo. Nós somos a “nata” do exemplo, e podemos pensar adiante ",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "kopenawa",
+                    "texto": "uma outra forma de encaminharmos nossas reinvindicações. Vou declinar da minha posição inicial, pois estamos no momento mais",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "kopenawa",
+                    "texto": "crítico de tudo, por isso nossa inteligência coletiva tem que prevalecer. Respeito suas posições, mas tenho agora a expectativa",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "kopenawa",
+                    "texto": "que todos repensem a situação. Não estou aqui representando ninguém, exceto minha consciência. Estou aberto para, adiante,",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "kopenawa",
+                    "texto": " retomarmos o assunto numa outra “vibe”, e, sendo um dos coordenadores, quem sabe, levar a posição de não adesão à nossa",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "kopenawa",
+                    "texto": " chefia – o Cerruti, claro, se vocês concordarem!”",
+                    "duracao": 2000
                 }
             ],
             "opcoes": [
@@ -2513,7 +2558,7 @@
             "opcoes": [
                 {
                     "id": "A",
-                    "texto": "O vazamento é grave. Idealmente, ambos deveriam conversar direta e assertivamente com Cerruti. Entender as motivações do que disse a Bill Dale e, em seguida, pensarem juntos uma tratativa que agradasse a todos.",
+                    "texto": "o vazamento é grave. Idealmente, Neo e Capitão Kirk deveriam conversar direta e assertivamente com Cerruti. Entender as motivações do que disse a Bill Dale e, em seguida, pensarem juntos uma tratativa que agradasse a todos.",
                     "impactos": {
                         "nuclearPropulsion": 0,
                         "direction": 0,
@@ -2527,7 +2572,7 @@
                 },
                 {
                     "id": "B",
-                    "texto": "Ambos deveriam acionar o Compliance da ACEE na Terra, porque não se pode admitir uma atitude desastrosa de um líder como Cerruti. Depois, observariam humildemente os desdobramentos da ação.",
+                    "texto": " Neo e Capitão Kirk deveriam acionar o Compliance da ACEE na Terra, porque não se pode admitir uma atitude desastrosa de um líder como Cerruti. Depois, observariam humildemente os desdobramentos da ação.",
                     "impactos": {
                         "nuclearPropulsion": 0,
                         "direction": 0,
