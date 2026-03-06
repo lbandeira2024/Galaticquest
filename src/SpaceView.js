@@ -26,7 +26,7 @@ const planetImageMap = {
   calisto: '/images/Planets/calisto-rotacionando.gif',
   encelado: '/images/Planets/encelado-rotacionando.gif',
   ganimedes: '/images/Planets/ganimedes-rotacionando.gif',
-  pallas: '/images/Planets/pallas-rotacionando.gif',
+  pallas: '/images/Planets/pallas-rotacionando.webm',
   kepler186f: '/images/Planets/kepler-rotacionando.webm',
   mimas: '/images/Planets/mimas-rotacionando.gif',
   tita: '/images/Planets/tita-rotacionando.gif',
