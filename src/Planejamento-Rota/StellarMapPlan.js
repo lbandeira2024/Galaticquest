@@ -535,6 +535,9 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
 
                                         const isLabelVisible = visibleMoonLabel === moon.name;
 
+                                        // A Mágica: Se o rótulo da lua estiver visível, ela fica perfeitamente horizontal
+                                        const visualRotation = isLabelVisible ? 0 : currentMoonRotation;
+
                                         return (
                                             <div
                                                 key={moonIndex}
@@ -543,7 +546,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                                 style={{
                                                     width: `${moon.radius}px`, height: `${moon.radius}px`,
                                                     left: `${moonX}%`, top: `${moonY}%`,
-                                                    transform: `translate(-50%, -50%) rotate(${currentMoonRotation}deg)`
+                                                    transform: `translate(-50%, -50%) rotate(${visualRotation}deg)`,
+                                                    transition: 'transform 0.3s ease'
                                                 }}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
@@ -553,7 +557,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                                 onMouseEnter={() => handleMoonInteraction(moon.name)}
                                             >
                                                 <div className="label-container moon-label-container" style={{
-                                                    transform: `rotate(${-currentMoonRotation}deg)`
+                                                    transform: `rotate(${-visualRotation}deg)`
                                                 }}>
                                                     {/* AQUI NÃO TEM GOTA (MAPA) */}
                                                     <span className="body-label moon-label">{getDisplayName(moon.name)}</span>

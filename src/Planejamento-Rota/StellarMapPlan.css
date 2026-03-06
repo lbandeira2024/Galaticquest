@@ -294,6 +294,9 @@
     display: block !important;
     overflow: visible !important;
     z-index: 100;
+    transform: none !important;
+    /* Reset de transformações externas */
+    pointer-events: none;
 }
 
 .celestial-body.moon .label-container.moon-label-container::before {
@@ -329,7 +332,7 @@
     padding: 5px 12px !important;
     font-size: 11px !important;
     white-space: nowrap !important;
-    display: inline-block !important;
+    display: block !important;
     width: max-content !important;
     min-width: fit-content !important;
     box-sizing: border-box !important;
@@ -339,6 +342,8 @@
     transition: all 0.2s ease !important;
     pointer-events: auto !important;
     z-index: 2;
+    rotate: none !important;
+    /* Remove qualquer herança de rotação */
 }
 
 .celestial-body.moon:hover .body-label.moon-label,
@@ -380,7 +385,6 @@
 
     width: max-content;
     min-width: 300px;
-    /* LIMITE RÍGIDO DE TELA - Nunca vaza */
     max-width: calc(100% - 40px);
     box-sizing: border-box;
 
@@ -398,7 +402,6 @@
     font-size: 14px;
     border-bottom: 1px solid #3498db;
     padding-bottom: 5px;
-    /* QUEBRA DE LINHA SEGURA CASO O NOME SEJA MAIOR QUE A TELA */
     white-space: normal;
     word-wrap: break-word;
 }
@@ -533,7 +536,6 @@
    QUADRO/PAINEL DE ROTA LATERAL
 ========================================= */
 .route-display-panel {
-    /* Absolute respeita as margens do .stellar-map principal */
     position: absolute;
     top: 20px;
     right: 20px;
@@ -541,7 +543,6 @@
     width: fit-content;
     min-width: 420px;
 
-    /* LIMITES RÍGIDOS DA TELA: Nunca ultrapassa a lateral ou o fundo */
     max-width: calc(100% - 40px);
     max-height: calc(100% - 40px);
     box-sizing: border-box;
@@ -553,7 +554,6 @@
     backdrop-filter: blur(8px);
     border-radius: 8px;
 
-    /* Configuração Flex para impedir que os filhos quebrem a estrutura */
     display: flex;
     flex-direction: column;
     z-index: 10;
@@ -686,11 +686,9 @@
 
 .route-container {
     flex: 1;
-    /* Ocupa o restante do espaço dinâmico */
     max-height: 300px;
     overflow-y: auto;
     overflow-x: hidden;
-    /* Corta rolagem horizontal interna */
     padding-right: 5px;
     margin-top: 10px;
 }
@@ -761,7 +759,6 @@
     min-width: 0;
     padding: 0;
     gap: 10px;
-    /* Dá respiro limpo entre o nome e a distância */
 }
 
 .step-name {
@@ -769,8 +766,6 @@
     color: white;
     flex: 1;
     text-align: left;
-
-    /* Se o limite absoluto da tela for atingido, quebra a linha graciosamente */
     white-space: normal;
     line-height: 1.2;
     word-wrap: break-word;
