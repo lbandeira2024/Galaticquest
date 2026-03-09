@@ -8,7 +8,7 @@ const planetImageMap = {
   mercurio: '/images/Planets/Mercurio-Rotacionando.webm',
   venus: '/images/Planets/venus-rotacionando.webm',
   jupiter: '/images/Planets/jupiter_rotacionando.webm',
-  proximacentaurib: '/images/Planets/proximacentaurib-rotacionando.gif',
+  proximacentaurib: '/images/Planets/proximacentaurib-rotacionando.webm',
   makemake: '/images/Planets/makemake-rotacionando.gif',
   ceres: '/images/Planets/ceres-rotacionando.webm',
   deimos: '/images/Planets/deimos-rotacionando.gif',
@@ -76,9 +76,7 @@ const PLANET_MUSIC_CONFIG = {
   tritao: { src: '/sounds/tritao/tritao.mp3', volume: 0.5 },
   urano: { src: '/sounds/urano/Urano.mp3', volume: 0.5 },
   vesta: { src: '/sounds/Vesta/DIMORPHOS_Vesta.mp3', volume: 0.5 },
-  kepler186f: { src: '/sounds/Kepler/kepler.mp3', volume: 0.5 },
   trappist: { src: '/sounds/Trappist-1/Trappist-1.mp3', volume: 0.5 },
-  caronte: { src: '/sounds/caronte/caronte.mp3', volume: 0.5 },
   oberon: { src: '/sounds/Titania/titaniaOberon.mp3', volume: 0.5 },
   pallas: { src: '/sounds/pallas/pallas.mp3', volume: 0.5 }
 };
@@ -87,7 +85,6 @@ const STAR_HUES = [210, 120, 30, 0, 60];
 const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 80%)`);
 
 const getPlanetScale = (planetName) => {
-  // Urano removido da lista abaixo
   const giants = ['jupiter', 'saturno', 'netuno'];
   const dwarfs = ['lua', 'ceres', 'plutao', 'makemake', 'eris', 'haumea', 'vesta', 'io', 'europa', 'calisto', 'encelado', 'ganimedes', 'pallas', 'mimas', 'tita', 'titania', 'oberon', 'tritao', 'caronte', 'fobos', 'deimos', 'kaapa'];
   const stations = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boctok'];
@@ -95,7 +92,7 @@ const getPlanetScale = (planetName) => {
   if (giants.includes(planetName)) return 1.8;
   if (dwarfs.includes(planetName)) return 0.5;
   if (stations.includes(planetName)) return 0.35;
-  return 1.0; // Os planetas rochosos (e agora Urano) usarão esta escala
+  return 1.0;
 };
 
 const SpaceView = ({
@@ -204,7 +201,7 @@ const SpaceView = ({
 
     currentVisualDistanceRef.current = distanceRef.current;
 
-    let imagePath = planetImageMap[planetNameNormalized] || '/images/planets/Marte-Rotacionando.gif';
+    let imagePath = planetImageMap[planetNameNormalized] || '/images/Planets/Marte-Rotacionando.gif';
 
     setPlanetImageLoaded(false);
     setPlanetImage(imagePath);
@@ -217,7 +214,7 @@ const SpaceView = ({
         if (planetImageRef.current) planetImageRef.current.style.opacity = 0;
       };
       img.onerror = () => {
-        setPlanetImage('/images/planets/Marte-Rotacionando.gif');
+        setPlanetImage('/images/Planets/Marte-Rotacionando.gif');
         setPlanetImageLoaded(true);
       };
     }
@@ -414,9 +411,31 @@ const SpaceView = ({
         style={{
           display: !isWarpActive && planetImageLoaded ? 'flex' : 'none',
           justifyContent: 'center',
-          alignItems: 'center'
+          alignItems: 'center',
+          position: 'relative' // ADICIONADO PARA PERSPECTIVA DO SOL
         }}
       >
+        {/* NOVO: SOL EM PERSPECTIVA PARA PROXIMA CENTAURI B */}
+        {planetName === 'proximacentaurib' && (
+          <video
+            src="/images/Planets/solProximaB.webm"
+            autoPlay
+            loop
+            muted
+            playsInline
+            style={{
+              position: 'absolute',
+              width: '15vmin',
+              height: '15vmin',
+              top: '-20%',
+              left: '-30%',
+              opacity: 0.8,
+              zIndex: 5
+            }}
+          />
+        )}
+
+        {/* PLANETA PRINCIPAL */}
         {planetImage && planetImage.endsWith('.webm') ? (
           <video
             key={planetName}
