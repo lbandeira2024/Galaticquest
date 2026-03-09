@@ -26,7 +26,7 @@ const QUIZZ_NAMES = {
     'CSD1': 'CSD Marte', 'CSD2': 'CSD Ceres', 'CSD3': 'CSD Netuno',
     'CSD4': 'CSD Plutão', 'CSD5': 'CSD Júpiter', 'CSD6': 'CSD Fobos',
     'CSD7': 'CSD Vênus', 'CSD8': 'CSD Saturno', 'CSD9': 'CSD Lua',
-    'CSD10': 'CSD Haumea', 'CSD11': 'CSD Oberon', 'CSD12': 'CSD TRAPPIST-1e',
+    'CSD10': 'CSD Haumea', 'CSD11': 'CSD Oberon', 'CSD12': 'CSD Trappist-1e',
     'CSD13': 'CSD Makemake', 'CSD14': 'CSD Éris', 'CSD15': 'CSD Urano',
     'CSD16': 'CSD Mercúrio', 'CSD17': 'CSD Deimos', 'CSD18': 'CSD Vesta', 'CSD19': 'CSD Próxima Centauri b',
     'CSD20': 'CSD Pallas', 'CSD21': 'CSD Tritão', 'CSD22': 'CSD Europa', 'CSD23': 'CSD Kepler186f',
