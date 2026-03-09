@@ -89,6 +89,8 @@ const getPlanetScale = (planetName) => {
   const dwarfs = ['lua', 'ceres', 'plutao', 'makemake', 'eris', 'haumea', 'vesta', 'io', 'europa', 'calisto', 'encelado', 'ganimedes', 'pallas', 'mimas', 'tita', 'titania', 'oberon', 'tritao', 'caronte', 'fobos', 'deimos', 'kaapa'];
   const stations = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boctok'];
 
+  // Reduz a escala máxima de Proxima Centauri B para garantir que tanto o planeta quanto o sol caibam na tela
+  if (planetName === 'proximacentaurib') return 0.65;
   if (giants.includes(planetName)) return 1.8;
   if (dwarfs.includes(planetName)) return 0.5;
   if (stations.includes(planetName)) return 0.35;
@@ -109,7 +111,7 @@ const SpaceView = ({
 
   const canvasRef = useRef(null);
   const planetContainerRef = useRef(null);
-  const scaleWrapperRef = useRef(null); // NOVO REF PARA CONTROLAR O ESCALONAMENTO DO GRUPO (PLANETA + ESTRELA)
+  const scaleWrapperRef = useRef(null);
   const planetImageRef = useRef(null);
   const animationFrameRef = useRef(null);
   const lastTimeRef = useRef(0);
@@ -290,7 +292,6 @@ const SpaceView = ({
         currentVisualDistanceRef.current = targetDist;
       }
 
-      // NOVO LÓGICA: Aplica a opacidade e o scale no Wrapper (agrupa planeta e sol)
       if (scaleWrapperRef.current && planetImageLoaded && !isWarping) {
         const visualDist = currentVisualDistanceRef.current;
         const force = forceLargeRef.current;
@@ -323,7 +324,15 @@ const SpaceView = ({
             scale = Math.max(MIN_SCALE, scale);
           }
         }
-        scaleWrapperRef.current.style.transform = `scale(${scale})`;
+
+        // Se for proximacentaurib, aplica um desvio no wrapper para que a composição
+        // Planeta + Sol Superior Esquerdo pareçam no centro da tela.
+        let transformStr = `scale(${scale})`;
+        if (planetNameNormalized === 'proximacentaurib') {
+          transformStr = `translate(15%, 10%) scale(${scale})`;
+        }
+
+        scaleWrapperRef.current.style.transform = transformStr;
       }
 
       ctx.globalAlpha = 1.0;
@@ -413,10 +422,10 @@ const SpaceView = ({
         style={{
           display: !isWarpActive && planetImageLoaded ? 'flex' : 'none',
           justifyContent: 'center',
-          alignItems: 'center'
+          alignItems: 'center',
+          position: 'relative'
         }}
       >
-        {/* WRAPPER DE ESCALA: Agrupa o planeta e o sol, e recebe a animação de Zoom */}
         <div
           ref={scaleWrapperRef}
           style={{
@@ -430,7 +439,7 @@ const SpaceView = ({
             transformStyle: 'preserve-3d'
           }}
         >
-          {/* NOVO: SOL EM PERSPECTIVA PARA PROXIMA CENTAURI B */}
+          {/* APENAS RENDERIZA O SOL SE FOR PROXIMA CENTAURI B */}
           {planetName === 'proximacentaurib' && (
             <video
               src="/images/Planets/solProximaB.webm"
@@ -440,13 +449,13 @@ const SpaceView = ({
               playsInline
               style={{
                 position: 'absolute',
-                width: '65%',       // Tamanho do Sol relativo ao wrapper
-                height: '65%',
-                top: '-25%',        // Puxa para cima
-                left: '-40%',       // Puxa para a esquerda
+                width: '45%',       // Ajustado para manter um tamanho não obstrutivo
+                height: '45%',
+                top: '-25%',
+                left: '-35%',
                 opacity: 0.9,
-                zIndex: 5,          // Permanece atrás do planeta (zIndex: 10)
-                transform: 'translateZ(-50px)', // Ilusão de que está um pouco mais distante
+                zIndex: 5,
+                transform: 'translateZ(-50px)',
                 filter: 'drop-shadow(0 0 40px rgba(255, 200, 100, 0.6))',
                 mixBlendMode: 'screen',
                 pointerEvents: 'none'
@@ -454,7 +463,6 @@ const SpaceView = ({
             />
           )}
 
-          {/* PLANETA PRINCIPAL */}
           {planetImage && planetImage.endsWith('.webm') ? (
             <video
               key={planetName}
