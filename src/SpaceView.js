@@ -109,6 +109,7 @@ const SpaceView = ({
 
   const canvasRef = useRef(null);
   const planetContainerRef = useRef(null);
+  const scaleWrapperRef = useRef(null); // NOVO REF PARA CONTROLAR O ESCALONAMENTO DO GRUPO (PLANETA + ESTRELA)
   const planetImageRef = useRef(null);
   const animationFrameRef = useRef(null);
   const lastTimeRef = useRef(0);
@@ -211,7 +212,7 @@ const SpaceView = ({
       img.src = imagePath;
       img.onload = () => {
         setPlanetImageLoaded(true);
-        if (planetImageRef.current) planetImageRef.current.style.opacity = 0;
+        if (scaleWrapperRef.current) scaleWrapperRef.current.style.opacity = 0;
       };
       img.onerror = () => {
         setPlanetImage('/images/Planets/Marte-Rotacionando.gif');
@@ -289,7 +290,8 @@ const SpaceView = ({
         currentVisualDistanceRef.current = targetDist;
       }
 
-      if (planetImageRef.current && planetImageLoaded && !isWarping) {
+      // NOVO LÓGICA: Aplica a opacidade e o scale no Wrapper (agrupa planeta e sol)
+      if (scaleWrapperRef.current && planetImageLoaded && !isWarping) {
         const visualDist = currentVisualDistanceRef.current;
         const force = forceLargeRef.current;
         const departing = isDepartingRef.current;
@@ -305,7 +307,7 @@ const SpaceView = ({
             opacity = Math.max(0, Math.min(1, 1 - (visualDist / FADE_START_DIST)));
           }
         }
-        planetImageRef.current.style.opacity = opacity;
+        scaleWrapperRef.current.style.opacity = opacity;
 
         let scale = 1.0;
         if (force) {
@@ -321,7 +323,7 @@ const SpaceView = ({
             scale = Math.max(MIN_SCALE, scale);
           }
         }
-        planetImageRef.current.style.transform = `scale(${scale})`;
+        scaleWrapperRef.current.style.transform = `scale(${scale})`;
       }
 
       ctx.globalAlpha = 1.0;
@@ -411,73 +413,86 @@ const SpaceView = ({
         style={{
           display: !isWarpActive && planetImageLoaded ? 'flex' : 'none',
           justifyContent: 'center',
-          alignItems: 'center',
-          position: 'relative' // ADICIONADO PARA POSSIBILITAR POSICIONAMENTO ABSOLUTO DE FILHOS
+          alignItems: 'center'
         }}
       >
-        {/* NOVO: SOL EM PERSPECTIVA PARA PROXIMA CENTAURI B */}
-        {planetName === 'proximacentaurib' && (
-          <video
-            src="/images/Planets/solProximaB.webm"
-            autoPlay
-            loop
-            muted
-            playsInline
-            style={{
-              position: 'absolute',
-              width: '25vmin',
-              height: '25vmin',
-              top: '-25%',
-              left: '-35%',
-              opacity: 0.9,
-              zIndex: 5,
-              transform: 'perspective(600px) translateZ(-150px)',
-              filter: 'drop-shadow(0 0 40px rgba(255, 200, 100, 0.6))',
-              mixBlendMode: 'screen'
-            }}
-          />
-        )}
+        {/* WRAPPER DE ESCALA: Agrupa o planeta e o sol, e recebe a animação de Zoom */}
+        <div
+          ref={scaleWrapperRef}
+          style={{
+            position: 'relative',
+            width: baseSize,
+            height: baseSize,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            willChange: 'transform, opacity',
+            transformStyle: 'preserve-3d'
+          }}
+        >
+          {/* NOVO: SOL EM PERSPECTIVA PARA PROXIMA CENTAURI B */}
+          {planetName === 'proximacentaurib' && (
+            <video
+              src="/images/Planets/solProximaB.webm"
+              autoPlay
+              loop
+              muted
+              playsInline
+              style={{
+                position: 'absolute',
+                width: '65%',       // Tamanho do Sol relativo ao wrapper
+                height: '65%',
+                top: '-25%',        // Puxa para cima
+                left: '-40%',       // Puxa para a esquerda
+                opacity: 0.9,
+                zIndex: 5,          // Permanece atrás do planeta (zIndex: 10)
+                transform: 'translateZ(-50px)', // Ilusão de que está um pouco mais distante
+                filter: 'drop-shadow(0 0 40px rgba(255, 200, 100, 0.6))',
+                mixBlendMode: 'screen',
+                pointerEvents: 'none'
+              }}
+            />
+          )}
 
-        {/* PLANETA PRINCIPAL */}
-        {planetImage && planetImage.endsWith('.webm') ? (
-          <video
-            key={planetName}
-            ref={planetImageRef}
-            src={planetImage}
-            className={`planet-image ${planetName}-planet ${isStation ? 'is-station' : ''}`}
-            autoPlay
-            loop
-            muted
-            playsInline
-            onLoadedData={() => {
-              setPlanetImageLoaded(true);
-              if (planetImageRef.current) planetImageRef.current.style.opacity = 0;
-            }}
-            style={{
-              width: baseSize,
-              height: baseSize,
-              zIndex: forceLarge ? 1000 : 10,
-              objectFit: 'contain',
-              transformOrigin: 'center center',
-              willChange: 'transform, opacity'
-            }}
-          />
-        ) : (
-          <img
-            key={planetName}
-            ref={planetImageRef}
-            src={planetImage}
-            alt={`Planet ${planetName}`}
-            className={`planet-image ${planetName}-planet ${isStation ? 'is-station' : ''}`}
-            style={{
-              width: baseSize,
-              height: baseSize,
-              zIndex: forceLarge ? 1000 : 10,
-              transformOrigin: 'center center',
-              willChange: 'transform, opacity'
-            }}
-          />
-        )}
+          {/* PLANETA PRINCIPAL */}
+          {planetImage && planetImage.endsWith('.webm') ? (
+            <video
+              key={planetName}
+              ref={planetImageRef}
+              src={planetImage}
+              className={`planet-image ${planetName}-planet ${isStation ? 'is-station' : ''}`}
+              autoPlay
+              loop
+              muted
+              playsInline
+              onLoadedData={() => {
+                setPlanetImageLoaded(true);
+                if (scaleWrapperRef.current) scaleWrapperRef.current.style.opacity = 0;
+              }}
+              style={{
+                width: '100%',
+                height: '100%',
+                zIndex: forceLarge ? 1000 : 10,
+                objectFit: 'contain',
+                transformOrigin: 'center center'
+              }}
+            />
+          ) : (
+            <img
+              key={planetName}
+              ref={planetImageRef}
+              src={planetImage}
+              alt={`Planet ${planetName}`}
+              className={`planet-image ${planetName}-planet ${isStation ? 'is-station' : ''}`}
+              style={{
+                width: '100%',
+                height: '100%',
+                zIndex: forceLarge ? 1000 : 10,
+                transformOrigin: 'center center'
+              }}
+            />
+          )}
+        </div>
       </div>
     </div>
   );
