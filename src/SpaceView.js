@@ -412,7 +412,7 @@ const SpaceView = ({
           display: !isWarpActive && planetImageLoaded ? 'flex' : 'none',
           justifyContent: 'center',
           alignItems: 'center',
-          position: 'relative' // ADICIONADO PARA PERSPECTIVA DO SOL
+          position: 'relative' // ADICIONADO PARA POSSIBILITAR POSICIONAMENTO ABSOLUTO DE FILHOS
         }}
       >
         {/* NOVO: SOL EM PERSPECTIVA PARA PROXIMA CENTAURI B */}
@@ -425,12 +425,15 @@ const SpaceView = ({
             playsInline
             style={{
               position: 'absolute',
-              width: '15vmin',
-              height: '15vmin',
-              top: '-20%',
-              left: '-30%',
-              opacity: 0.8,
-              zIndex: 5
+              width: '25vmin',
+              height: '25vmin',
+              top: '-25%',
+              left: '-35%',
+              opacity: 0.9,
+              zIndex: 5,
+              transform: 'perspective(600px) translateZ(-150px)',
+              filter: 'drop-shadow(0 0 40px rgba(255, 200, 100, 0.6))',
+              mixBlendMode: 'screen'
             }}
           />
         )}
