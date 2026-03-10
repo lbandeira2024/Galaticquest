@@ -226,9 +226,18 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
     useEffect(() => {
         if (initialRoute && initialRoute.length > 0) {
             dispatchRouteAction({ type: 'SET_SAVED_ROUTE', payload: { steps: initialRoute } });
-            setIsRouteConfirmed(true);
+            // MODIFICADO: Já começa o estado de EDIÇÃO e obriga o usuário a modificar para prosseguir.
+            setIsRouteConfirmed(false);
         }
     }, [initialRoute, currentIndex]);
+
+    // LÓGICA DE VALIDAÇÃO: Verifica se a rota mudou de fato em relação à inicial
+    const isRouteModified = useMemo(() => {
+        if (!initialRoute || initialRoute.length === 0) return plannedRoute.steps.length > 1;
+        if (plannedRoute.steps.length !== initialRoute.length) return true;
+
+        return plannedRoute.steps.some((step, idx) => step.name !== initialRoute[idx].name);
+    }, [plannedRoute.steps, initialRoute]);
 
     useEffect(() => {
         const updateAngles = () => {
@@ -285,7 +294,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
     }, [currentIndex]);
 
     const handleConfirmRoute = useCallback(() => {
-        if (plannedRoute.steps.length === 0) return;
+        if (plannedRoute.steps.length <= 1) return;
         new Audio('/sounds/03.system-selection.mp3').play();
         setWaveAnimation(true);
         setIsRouteConfirmed(true);
@@ -365,9 +374,10 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
             {plannedRoute.steps.length > 0 && (
                 <div className="route-display-panel ultimate">
                     <div className="actions-ultimate">
+                        {/* BOTÃO ATUALIZADO: Só libera a confirmação se houver mudança de fato na rota ou se tivermos corpos adicionados */}
                         <button className={`action-ultimate ${isRouteConfirmed ? 'edit' : 'confirm'}`}
                             onClick={isRouteConfirmed ? handleEditRoute : handleConfirmRoute}
-                            disabled={plannedRoute.steps.length <= 1}>
+                            disabled={isRouteConfirmed ? false : (!isRouteModified || plannedRoute.steps.length <= 1)}>
                             <span className="button-icon">{isRouteConfirmed ? '✎' : '✓'}</span>
                             {isRouteConfirmed ? 'EDITAR' : 'CONFIRMAR'}
                         </button>
@@ -405,8 +415,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                             {plannedRoute.steps.map((step, index) => {
                                 const markerClass = index <= currentIndex ? "origin-marker" : index === currentIndex + 1 ? "next-destination-marker" : "normal-marker";
                                 const isStepLocked = index <= (currentIndex + 1);
-
-                                // AQUI SIM TEM GOTA: Somente na lista lateral de rotas
                                 const displayName = getDisplayNameWithDrop(step.name);
 
                                 return (
@@ -446,7 +454,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                     <div className="sun-fire"></div>
                     <div className="sun-core"></div>
                     <div className="sun-corona"></div>
-                    {/* AQUI NÃO TEM GOTA (MAPA) */}
                     <span className="body-label">{getDisplayName(solarSystem.sun.name)}</span>
                 </div>
 
@@ -477,7 +484,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                         >
                             <div className="sos-pulse"></div>
                             <div className="label-container">
-                                {/* AQUI NÃO TEM GOTA (MAPA) */}
                                 <span className="body-label sos-label">{getDisplayName(sosSignal.name)}</span>
                             </div>
                         </div>
@@ -520,7 +526,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                         <span className={`body-label
                                             ${planet.isExoplanet ? 'exoplanet-label' : ''}
                                             ${planet.isDwarfPlanet ? 'dwarf-planet-label' : ''}`}>
-                                            {/* AQUI NÃO TEM GOTA (MAPA) */}
                                             {getDisplayName(planet.name)}
                                         </span>
                                     </div>
@@ -534,8 +539,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                         const currentMoonRotation = rotationAngles[moon.name] || 0;
 
                                         const isLabelVisible = visibleMoonLabel === moon.name;
-
-                                        // A Mágica: Se o rótulo da lua estiver visível, ela fica perfeitamente horizontal
                                         const visualRotation = isLabelVisible ? 0 : currentMoonRotation;
 
                                         return (
@@ -559,7 +562,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                                 <div className="label-container moon-label-container" style={{
                                                     transform: `rotate(${-visualRotation}deg)`
                                                 }}>
-                                                    {/* AQUI NÃO TEM GOTA (MAPA) */}
                                                     <span className="body-label moon-label">{getDisplayName(moon.name)}</span>
                                                 </div>
                                             </div>
@@ -574,7 +576,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
             {selectedBody && (
                 <div className="info-panel">
                     <div className="info-panel-header">
-                        {/* AQUI NÃO TEM GOTA (PAINEL DE INFORMAÇÕES DO PLANETA) */}
                         <h3>{getDisplayName(selectedBody.name)}</h3>
                         <button className="close-button" onClick={() => setSelectedBody(null)}>×</button>
                     </div>
