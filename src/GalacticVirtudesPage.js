@@ -205,6 +205,28 @@ const GalacticVirtudesPage = ({ onClose }) => {
                         </div>
                     </div>
 
+                    <section className="acee-section">
+                        <h3>ACEE (Agência Central de Exploração Espacial)</h3>
+
+                        <div className="acee-content">
+                            <h4>Missão:</h4>
+                            <p>Empreender voos espaciais com foco na visitação, exploração de corpos celestes e na criação de novas colônias, para assegurar a preservação da espécie humana e o seu bem-estar, abrangendo toda comunidade do planeta Terra.</p>
+
+                            <h4>Visão:</h4>
+                            <p>Ser uma referência respeitada pelos terráqueos e empreendedores do segmento de tecnologia espacial, traduzida pela inteligência e fidelização das agências à ACEE, gerando a satisfação de stakeholders: governo, órgãos internacionais, investidores, comunidade científica, mídia internacional e cidadãos de todo o mundo.</p>
+
+                            <h4>Valores:</h4>
+                            <ul>
+                                <li>Ética, respeito à ciência e aos protocolos recomendados que sirvam de orientação geral, e à diversidade.</li>
+                                <li>Cuidados ilimitados com o meio ambiente espacial.</li>
+                                <li>Sincronicidade entre as estações espaciais e agências estrangeiras, com espírito de equipe.</li>
+                                <li>Tudo pela vida, paixão pelo ser humano.</li>
+                                <li>Responsabilidade social, pensando o futuro que é agora.</li>
+                                <li>Transparência: A informação é chave para tudo, assim como sua comunicação direta.</li>
+                            </ul>
+                        </div>
+                    </section>
+
                     <div className="glossary-section">
                         <h3>GLOSSÁRIO GERAL</h3>
                         <p>MONITORES DE CONTROLE: Saber observá-los e correlacioná-los durante a jornada espacial, atentos também à Missão, aos Valores e as Virtudes, é fundamental para o sucesso da equipe de jogadores no game Galactic Quest – O Líder Caminhante. São eles:</p>
@@ -221,7 +243,7 @@ const GalacticVirtudesPage = ({ onClose }) => {
 
                         <div className="glossary-item">
                             <h4>ESTABILIDADE:</h4>
-                            <p>Refere-se à capacidade da espaçonave de manter a sua orientação e trajetória no espaço, sem ser afetada por forças externas ou movimentos aleatórios. Ela é crucial para que a espaçonave possa realizar as suas tarefas com precisão e segurança, como manter uma órbita, realizar manobras, ou até mesmo realizar experiências científicas.</p>
+                            <p>Refere-se à capacidade da espaçonave de manter a sua orientation e trajetória no espaço, sem ser afetada por forças externas ou movimentos aleatórios. Ela é crucial para que a espaçonave possa realizar as suas tarefas com precisão e segurança, como manter uma órbita, realizar manobras, ou até mesmo realizar experiências científicas.</p>
                         </div>
 
                         <div className="glossary-item">
@@ -274,6 +296,36 @@ const GalacticVirtudesPage = ({ onClose }) => {
                         <div className="glossary-item">
                             <h4>DESAFIOS-EVENTOS:</h4>
                             <p>São ocorrências típicas e culturais, que aparecem aos astronautas durante a jornada exploratória e que ao vivenciá-las implica, entre outras coisas, fazer investimentos.</p>
+                        </div>
+
+                        <div className="glossary-item">
+                            <h4>DOBRA ESPACIAL:</h4>
+                            <p>É o meio operacional utilizado durante a viagem espacial para aumentar a velocidade de deslocamento da espaçonave, permitindo a ela navegar com velocidade superior à da luz, sem violar as leis da relatividade de Einstein. Em vez de impulsionar a nave através do espaço, o motor de dobra manipula o espaço-tempo ao redor dela, contraindo-o à frente e expandindo-o atrás, em intervalos autoprogramados.</p>
+                        </div>
+
+                        <div className="glossary-item">
+                            <h4>INVENTÁRIO:</h4>
+                            <p>Refere-se a todas as coisas “materiais” e tangíveis, que podem ser levadas pelos astronautas da equipe para a missão espacial, a fim de cumprirem um papel importante para a saúde mental e a ligação de todos eles com suas raízes culturais.</p>
+                        </div>
+
+                        <div className="glossary-item">
+                            <h4>S.O.S:</h4>
+                            <p>Indica o risco iminente para a missão e espaçonave em termos de sua sobrevivência, impactando os indicadores cruciais - como os níveis de oxigênio e de propulsão nuclear (energia vital). Ele somente poderá ser ativado se houver spacecoins em caixa.</p>
+                        </div>
+
+                        <div className="glossary-item">
+                            <h4>PROCESSADOR 02:</h4>
+                            <p>Quando acessado pelo grupo, o mecanismo da espaçonave permite o processamento e beneficiamento do material encontrado (água/gelo) em oxigênio no corpo celeste, para fins de sobrevivência da equipe e da missão no espaço.</p>
+                        </div>
+
+                        <div className="glossary-item">
+                            <h4>CORPOS CELESTES COM PRESENÇA DE ÁGUA:</h4>
+                            <p>Calisto, Caronte, Ceres, Encélado, Éris, Europa, Ganímedes, Haumea, Júpiter, Lua, Marte, Makemake, Mercúrio, Oberon, Plutão, Próximo Centauri b, Terra, Titã, Titânia, Trappist-1e, Tritão e Vesta.</p>
+                        </div>
+
+                        <div className="glossary-item">
+                            <h4>CORPOS CELESTES COM AUSÊNCIA DE ÁGUA:</h4>
+                            <p>Deimos, Fobos, Io, Kepler-186f, Mimas, Netuno, Pallas, Proteu, Saturno, Vênus e Urano.</p>
                         </div>
                     </div>
                 </div>

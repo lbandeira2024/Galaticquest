@@ -134,16 +134,18 @@ const BoasVindas = () => {
                         <p>Informamos que esta missão simulada foi projetada para desenvolver a sua liderança, em termos de análise e tomada de decisão no trabalho em equipe.</p>
                         <p>O ambiente se dá através de desafios interestelares em uma jornada onde vocês terão de enfrentar situações críticas que exigirão perspicácia, intuição e a observância de virtudes essenciais, que faz parte de um líder que cumpre a sua jornada com qualidade.</p>
                         <p>Aproveitamos para declarar nossa Missão, Visão e Valores a todos vocês:</p>
-                        <p><strong>Missão:</strong>Empreender voos espaciais, com foco na visitação e exploração de corpos celestiais, visando a construção de novas colônias para preservação da espécie humana e do seu bem-estar, abrangendo toda comunidade do planeta Terra. </p>
-                        <p><strong>Visão:</strong> Ser uma referência respeitada pelos terráqueos e empreendedores do segmento de tecnologia espacial, traduzida pela inteligência e fidelização das agências espaciais à ACEE, gerando a satisfação de stakeholders: governos, órgãos internacionais, investidores, comunidade científica e cidadãos de todo mundo</p>
+                        <p><strong>Missão:</strong>Empreender voos espaciais com foco na visitação, exploração de corpos celestes e na criação de novas colônias, para assegurar a preservação da espécie humana e o seu bem-estar,
+                            abrangendo toda comunidade do planeta Terra.</p>
+                        <p><strong>Visão:</strong> Ser uma referência respeitada pelos terráqueos e empreendedores do segmento de tecnologia espacial, traduzida pela inteligência e fidelização das agências à ACEE, gerando a
+                            satisfação de stakeholders: governo, órgãos internacionais, investidores, comunidade científica,  mídia internacional e cidadãos de todo o mundo.</p>
                         <p><strong>Valores:</strong></p>
                         <ul>
-                            <li>Ética, respeito à ciência e à diversidade</li>
-                            <li>Cuidados ilimitados com o meio ambiente espacial</li>
-                            <li>Sincronicidade entre as estações espaciais e agências estrangeiras, com espírito de equipe</li>
-                            <li>Tudo pela vida, paixão pelo ser humano</li>
-                            <li>Responsabilidade social, pensando o futuro que é agora</li>
-                            <li>Transparência: a informação é chave para tudo, assim como sua comunicação direta</li>
+                            <li>Ética, respeito à ciência e aos protocolos recomendados que sirvam de orientação geral, e à diversidade.</li>
+                            <li>Cuidados ilimitados com o meio ambiente espacial. </li>
+                            <li>Sincronicidade entre as estações espaciais e agências estrangeiras, com espírito de equipe.</li>
+                            <li>Tudo pela vida, paixão pelo ser humano.</li>
+                            <li>Responsabilidade social, pensando o futuro que é agora.</li>
+                            <li>Transparência: A informação é chave para tudo, assim como sua comunicação direta.</li>
                         </ul>
                         <p>À equipe de jogadores do Galactic Quest, desejamos boa sorte e que vocês voltem em segurança! </p>
                     </div>
