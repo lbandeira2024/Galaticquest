@@ -2154,7 +2154,48 @@
             "dialogo": [
                 {
                     "personagemId": "narrador",
-                    "texto": "Com os vários desdobramentos que ocorreram até aqui nesta ousada missão da ACEE no espaço, para colonização e preservação da espécie humana, este grupo convidado para jogar o game Galactic Quest já deve ter assimilado os perfis e projetado algumas outras prováveis reações de certos astronautas em seu imaginário. \n\nAlguns participantes do grupo se afeiçoaram a alguns deles, outros não, por diferentes critérios subjetivos, considerando o modo como concebem liderança à partir de suas próprias práticas de competências, de filosofia e daquilo que já observaram na convivência com terceiros fora da sala.\n\nConsiderando a complexidade de viagens que implicam basear-se na Estação de Delfos, como ponto de partida a planetas desconhecidos e a necessidade de habilidades técnicas e de comportamentos, perguntamos: \n\nQue equipe a seguir, o grupo escolheria para cumprir o tamanho desafio?\n\nDiscutam e decidam a melhor composição, lembrando que você e seu grupo podem esperar e observar novos desdobramentos da missão para decidir."
+                    "texto": "Com os vários desdobramentos que ocorreram até aqui nesta ousada missão da ACEE no espaço, para colonização e preservação",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "narrador",
+                    "texto": "da espécie humana, este grupo convidado para jogar o game Galactic Quest já deve ter assimilado os perfis e projetado algumas",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "narrador",
+                    "texto": "outras prováveis reações de certos astronautas em seu imaginário. \n\nAlguns participantes do grupo se afeiçoaram a alguns",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "narrador",
+                    "texto": "deles, outros não, por diferentes critérios subjetivos, considerando o modo como concebem liderança à partir de suas próprias",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "narrador",
+                    "texto": " práticas de competências, de filosofia e daquilo que já observaram na convivência com terceiros fora da sala.\n\nConsiderando",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "narrador",
+                    "texto": " a complexidade de viagens que implicam basear-se na Estação de Delfos, como ponto de partida a planetas desconhecidos e a",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "narrador",
+                    "texto": "necessidade de habilidades técnicas e de comportamentos, perguntamos: \n\nQue equipe a seguir, o grupo escolheria para cumprir",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "narrador",
+                    "texto": "o tamanho desafio?\n\nDiscutam e decidam a melhor composição, lembrando que você e seu grupo podem esperar e observar novos",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "narrador",
+                    "texto": " desdobramentos da missão para decidir.",
+                    "duracao": 5000
                 }
             ],
             "opcoes": [
