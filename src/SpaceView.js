@@ -325,11 +325,15 @@ const SpaceView = ({
           }
         }
 
-        // Se for proximacentaurib, aplica um desvio no wrapper para que a composição
-        // Planeta + Sol Superior Esquerdo pareçam no centro da tela.
+        // Se for proximacentaurib, aplica um desvio proporcional à distância para enquadrar a estrela
         let transformStr = `scale(${scale})`;
         if (planetNameNormalized === 'proximacentaurib') {
-          transformStr = `translate(15%, 10%) scale(${scale})`;
+          // Calcula o fator de deslocamento (começa a deslocar quando visualDist < 1000000)
+          const offsetFactor = Math.max(0, 1 - (visualDist / 1000000));
+          const translateX = 15 * offsetFactor;
+          const translateY = 10 * offsetFactor;
+
+          transformStr = `translate(${translateX}%, ${translateY}%) scale(${scale})`;
         }
 
         scaleWrapperRef.current.style.transform = transformStr;
@@ -449,14 +453,14 @@ const SpaceView = ({
               playsInline
               style={{
                 position: 'absolute',
-                width: '45%',       // Ajustado para manter um tamanho não obstrutivo
-                height: '45%',
-                top: '-25%',
-                left: '-35%',
-                opacity: 0.9,
+                width: '60%',
+                height: '60%',
+                top: '-35%',
+                left: '-45%',
+                opacity: 1,
                 zIndex: 5,
-                transform: 'translateZ(-50px)',
-                filter: 'drop-shadow(0 0 40px rgba(255, 200, 100, 0.6))',
+                transform: 'translateZ(-100px)',
+                filter: 'drop-shadow(0 0 60px rgba(255, 160, 50, 0.8))',
                 mixBlendMode: 'screen',
                 pointerEvents: 'none'
               }}
