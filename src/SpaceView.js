@@ -89,7 +89,6 @@ const getPlanetScale = (planetName) => {
   const dwarfs = ['lua', 'ceres', 'plutao', 'makemake', 'eris', 'haumea', 'vesta', 'io', 'europa', 'calisto', 'encelado', 'ganimedes', 'pallas', 'mimas', 'tita', 'titania', 'oberon', 'tritao', 'caronte', 'fobos', 'deimos', 'kaapa'];
   const stations = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boctok'];
 
-  // Reduz a escala máxima de Proxima Centauri B para garantir que tanto o planeta quanto o sol caibam na tela
   if (planetName === 'proximacentaurib') return 0.65;
   if (giants.includes(planetName)) return 1.8;
   if (dwarfs.includes(planetName)) return 0.5;
@@ -325,13 +324,15 @@ const SpaceView = ({
           }
         }
 
-        // Se for proximacentaurib, aplica um desvio proporcional à distância para enquadrar a estrela
+        // Se for proximacentaurib, aplica um desvio maior para enquadrar a ESTRELA GIGANTE
         let transformStr = `scale(${scale})`;
         if (planetNameNormalized === 'proximacentaurib') {
-          // Calcula o fator de deslocamento (começa a deslocar quando visualDist < 1000000)
+          // Calcula o fator de deslocamento
           const offsetFactor = Math.max(0, 1 - (visualDist / 1000000));
-          const translateX = 15 * offsetFactor;
-          const translateY = 10 * offsetFactor;
+          // Deslocamos ainda mais para a direita (25%) e baixo (20%) 
+          // para dar espaço para a estrela que agora está muito maior
+          const translateX = 25 * offsetFactor;
+          const translateY = 20 * offsetFactor;
 
           transformStr = `translate(${translateX}%, ${translateY}%) scale(${scale})`;
         }
@@ -453,14 +454,14 @@ const SpaceView = ({
               playsInline
               style={{
                 position: 'absolute',
-                width: '60%',
-                height: '60%',
-                top: '-35%',
-                left: '-45%',
+                width: '180%',        /* Aumentado de 60% para 180% - Estrela Gigante! */
+                height: '180%',
+                top: '-60%',          /* Movido mais para cima para compensar o tamanho */
+                left: '-70%',         /* Movido mais para a esquerda */
                 opacity: 1,
                 zIndex: 5,
-                transform: 'translateZ(-100px)',
-                filter: 'drop-shadow(0 0 60px rgba(255, 160, 50, 0.8))',
+                transform: 'translateZ(-20px)', /* Reduzido de -100px para -20px para não encolher com a perspectiva 3D */
+                filter: 'drop-shadow(0 0 80px rgba(255, 160, 50, 0.9))',
                 mixBlendMode: 'screen',
                 pointerEvents: 'none'
               }}
