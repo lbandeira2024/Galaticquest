@@ -61,7 +61,7 @@ const getEntityIcon = (name) => {
 
     // Planetas Anões e Corpos Menores
     "Ceres": "⚪",
-    "Plutao": "❄️",
+    "Plutao": "🔵",
     "Haumea": "🥚",
     "Makemake": "🔴",
     "Eris": "⚪",
@@ -70,10 +70,10 @@ const getEntityIcon = (name) => {
     "Cinturão": "☄️",
     "Kuiper": "☄️",
 
-    // Exoplanetas
-    "Proxima Centauri b": "🌌",
-    "Trappist1e": "🌌",
-    "Kepler186f": "🌌",
+    // Exoplanetas (Representação esférica com cores diferenciadas)
+    "Proxima Centauri b": "🟣",
+    "Trappist1e": "🟢",
+    "Kepler186f": "🟤",
 
     // ESTAÇÕES ESPACIAIS (As exceções mecânicas)
     "ACEE": "🛰️",
