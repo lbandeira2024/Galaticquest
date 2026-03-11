@@ -5,7 +5,7 @@ import './Inventario.css';
 import { useAuth } from './AuthContext';
 import { useConfig } from './ConfigContext';
 
-const Inventario = ({ onClose, onUpdateTelemetry }) => {
+const Inventario = ({ onClose, onUpdateTelemetry, currentTelemetry }) => {
     const { playSound } = useAudio();
     const { user, login } = useAuth();
     const { apiBaseUrl } = useConfig();
@@ -125,11 +125,13 @@ const Inventario = ({ onClose, onUpdateTelemetry }) => {
         setInventory(updatedInventory);
 
         let updatesForParent = {};
-        let currentTelemetry = user?.grupo?.telemetryState || {
+
+        // CORREÇÃO AQUI: Usando os dados ao vivo da nave
+        const liveTelemetry = currentTelemetry || user?.grupo?.telemetryState || {
             oxygen: 100, nuclearPropulsion: 100, direction: 100,
             stability: 100, productivity: 100, interdependence: 100, engagement: 100
         };
-        let newTelemetryDB = { ...currentTelemetry };
+        let newTelemetryDB = { ...liveTelemetry };
 
         if (itemToUse.image.includes('tanque.png')) {
             updatesForParent.nuclearPropulsion = 100;
@@ -140,8 +142,8 @@ const Inventario = ({ onClose, onUpdateTelemetry }) => {
             newTelemetryDB.oxygen = 100;
             playSound('/sounds/inventory-use.mp3');
         } else if (itemToUse.image.includes('provision.png') || itemToUse.image.includes('Provisoes.png')) {
-            const newProd = Math.min(100, (currentTelemetry.productivity || 0) + 10);
-            const newEng = Math.min(100, (currentTelemetry.engagement || 0) + 10);
+            const newProd = Math.min(100, (liveTelemetry.productivity || 0) + 10);
+            const newEng = Math.min(100, (liveTelemetry.engagement || 0) + 10);
 
             updatesForParent.productivity = newProd;
             updatesForParent.engagement = newEng;
@@ -217,14 +219,14 @@ const Inventario = ({ onClose, onUpdateTelemetry }) => {
             bonus = 8; // Itens específicos 8%
         }
 
-        // Aplica o bónus
-        let currentTelemetry = user?.grupo?.telemetryState || {
+        // CORREÇÃO AQUI: Usando os dados ao vivo da nave para aplicar o bónus
+        const liveTelemetry = currentTelemetry || user?.grupo?.telemetryState || {
             oxygen: 100, nuclearPropulsion: 100, direction: 100,
             stability: 100, productivity: 100, interdependence: 100, engagement: 100
         };
 
-        const newProd = Math.min(100, (currentTelemetry.productivity || 0) + bonus);
-        const newTelemetryDB = { ...currentTelemetry, productivity: newProd };
+        const newProd = Math.min(100, (liveTelemetry.productivity || 0) + bonus);
+        const newTelemetryDB = { ...liveTelemetry, productivity: newProd };
 
         // Atualiza a tela de voo em tempo real
         if (onUpdateTelemetry) {
