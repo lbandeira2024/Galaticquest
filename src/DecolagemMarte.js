@@ -739,14 +739,24 @@ const DecolagemMarte = () => {
   };
 
   const handleInventoryTelemetryUpdate = useCallback((updates) => {
-    if (updates.nuclearPropulsion !== undefined) telemetryRef.current.propulsion.powerOutput = updates.nuclearPropulsion;
-    if (updates.oxygen !== undefined) telemetryRef.current.atmosphere.o2 = updates.oxygen;
-    if (updates.productivity !== undefined) telemetryRef.current.productivity = updates.productivity;
-    if (updates.engagement !== undefined) telemetryRef.current.engagement = updates.engagement;
-    if (updates.interdependence !== undefined) telemetryRef.current.interdependence = updates.interdependence;
-    if (updates.stability !== undefined) telemetryRef.current.stability = updates.stability;
-    if (updates.direction !== undefined) telemetryRef.current.direction = updates.direction;
-    setTelemetry({ ...telemetryRef.current });
+    setTelemetry(prev => {
+      const newPropulsion = updates.nuclearPropulsion !== undefined ? updates.nuclearPropulsion : prev.propulsion.powerOutput;
+      const newO2 = updates.oxygen !== undefined ? updates.oxygen : prev.atmosphere.o2;
+
+      const newState = {
+        ...prev,
+        propulsion: { ...prev.propulsion, powerOutput: newPropulsion },
+        atmosphere: { ...prev.atmosphere, o2: newO2 },
+        productivity: updates.productivity !== undefined ? updates.productivity : prev.productivity,
+        engagement: updates.engagement !== undefined ? updates.engagement : prev.engagement,
+        interdependence: updates.interdependence !== undefined ? updates.interdependence : prev.interdependence,
+        stability: updates.stability !== undefined ? updates.stability : prev.stability,
+        direction: updates.direction !== undefined ? updates.direction : prev.direction
+      };
+
+      telemetryRef.current = newState;
+      return newState;
+    });
     setLastImpactTimestamp(Date.now());
   }, []);
 
@@ -806,15 +816,33 @@ const DecolagemMarte = () => {
     if (item.effects || item.value) {
       const impactos = item.effects ? item.effects.reduce((acc, effect) => ({ ...acc, [effect.field]: effect.value }), {}) : { [item.telemetryField]: item.value };
       const applyImpact = (currentVal, change) => Math.max(0, Math.min(100, currentVal + (change || 0)));
-      if (impactos.nuclearPropulsion !== undefined) telemetryRef.current.propulsion.powerOutput = applyImpact(telemetryRef.current.propulsion.powerOutput, impactos.nuclearPropulsion);
-      if (impactos.oxygen !== undefined) telemetryRef.current.atmosphere.o2 = applyImpact(telemetryRef.current.atmosphere.o2, impactos.oxygen);
-      if (impactos.direction !== undefined) telemetryRef.current.direction = applyImpact(telemetryRef.current.direction, impactos.direction);
-      if (impactos.stability !== undefined) telemetryRef.current.stability = applyImpact(telemetryRef.current.stability, impactos.stability);
-      if (impactos.productivity !== undefined) telemetryRef.current.productivity = applyImpact(telemetryRef.current.productivity, impactos.productivity);
-      if (impactos.engagement !== undefined) telemetryRef.current.engagement = applyImpact(telemetryRef.current.engagement, impactos.engagement);
-      if (impactos.interdependence !== undefined) telemetryRef.current.interdependence = applyImpact(telemetryRef.current.interdependence, impactos.interdependence);
-      setTelemetry({ ...telemetryRef.current });
-      setLastImpactTimestamp(Date.now()); saveTelemetryData();
+
+      setTelemetry(prev => {
+        const newPropulsion = impactos.nuclearPropulsion !== undefined ? applyImpact(prev.propulsion.powerOutput, impactos.nuclearPropulsion) : prev.propulsion.powerOutput;
+        const newO2 = impactos.oxygen !== undefined ? applyImpact(prev.atmosphere.o2, impactos.oxygen) : prev.atmosphere.o2;
+        const newDirection = impactos.direction !== undefined ? applyImpact(prev.direction, impactos.direction) : prev.direction;
+        const newStability = impactos.stability !== undefined ? applyImpact(prev.stability, impactos.stability) : prev.stability;
+        const newProductivity = impactos.productivity !== undefined ? applyImpact(prev.productivity, impactos.productivity) : prev.productivity;
+        const newEngagement = impactos.engagement !== undefined ? applyImpact(prev.engagement, impactos.engagement) : prev.engagement;
+        const newInterdependence = impactos.interdependence !== undefined ? applyImpact(prev.interdependence, impactos.interdependence) : prev.interdependence;
+
+        const newState = {
+          ...prev,
+          propulsion: { ...prev.propulsion, powerOutput: newPropulsion },
+          atmosphere: { ...prev.atmosphere, o2: newO2 },
+          direction: newDirection,
+          stability: newStability,
+          productivity: newProductivity,
+          engagement: newEngagement,
+          interdependence: newInterdependence
+        };
+
+        telemetryRef.current = newState;
+        return newState;
+      });
+
+      setLastImpactTimestamp(Date.now());
+      saveTelemetryData();
     }
   }, [playSound, saveTelemetryData]);
 
@@ -917,6 +945,12 @@ const DecolagemMarte = () => {
       setArrivedAtMars(false);
       setIsFinalApproach(false);
       triggerMinervaInterplanetarySpeed();
+
+      // DESTRAVA A NAVE APÓS MUDANÇA DE ROTA NO MEIO DO VOO
+      setTimeout(() => {
+        routeChangeLockRef.current = false;
+      }, 500);
+
     } else {
       playSFX('/sounds/empuxo.wav');
       setIsDeparting(true);
@@ -951,21 +985,36 @@ const DecolagemMarte = () => {
     const currentCoins = Number(spaceCoins) || 0;
     const newBalance = currentCoins + coinsReward;
     if (coinsReward !== 0) setSpaceCoins(newBalance);
+
     if (impactos) {
       const applyImpact = (currentVal, change) => Math.max(0, Math.min(100, currentVal + (change || 0)));
-      if (impactos.nuclearPropulsion !== undefined) telemetryRef.current.propulsion.powerOutput = applyImpact(telemetryRef.current.propulsion.powerOutput, impactos.nuclearPropulsion);
-      if (impactos.oxygen !== undefined) telemetryRef.current.atmosphere.o2 = applyImpact(telemetryRef.current.atmosphere.o2, impactos.oxygen);
-      if (impactos.direction !== undefined) telemetryRef.current.direction = applyImpact(telemetryRef.current.direction, impactos.direction);
-      if (impactos.stability !== undefined) telemetryRef.current.stability = applyImpact(telemetryRef.current.stability, impactos.stability);
-      if (impactos.productivity !== undefined) telemetryRef.current.productivity = applyImpact(telemetryRef.current.productivity, impactos.productivity);
-      if (impactos.engagement !== undefined) telemetryRef.current.engagement = applyImpact(telemetryRef.current.engagement, impactos.engagement);
-      if (impactos.interdependence !== undefined) telemetryRef.current.interdependence = applyImpact(telemetryRef.current.interdependence, impactos.interdependence);
-      setTelemetry(prev => ({
-        ...prev, propulsion: { ...prev.propulsion, powerOutput: telemetryRef.current.propulsion.powerOutput },
-        atmosphere: { ...prev.atmosphere, o2: telemetryRef.current.atmosphere.o2 },
-        direction: telemetryRef.current.direction, stability: telemetryRef.current.stability, productivity: telemetryRef.current.productivity, engagement: telemetryRef.current.engagement, interdependence: telemetryRef.current.interdependence
-      }));
-      setLastImpactTimestamp(Date.now()); saveTelemetryData();
+
+      setTelemetry(prev => {
+        const newPropulsion = impactos.nuclearPropulsion !== undefined ? applyImpact(prev.propulsion.powerOutput, impactos.nuclearPropulsion) : prev.propulsion.powerOutput;
+        const newO2 = impactos.oxygen !== undefined ? applyImpact(prev.atmosphere.o2, impactos.oxygen) : prev.atmosphere.o2;
+        const newDirection = impactos.direction !== undefined ? applyImpact(prev.direction, impactos.direction) : prev.direction;
+        const newStability = impactos.stability !== undefined ? applyImpact(prev.stability, impactos.stability) : prev.stability;
+        const newProductivity = impactos.productivity !== undefined ? applyImpact(prev.productivity, impactos.productivity) : prev.productivity;
+        const newEngagement = impactos.engagement !== undefined ? applyImpact(prev.engagement, impactos.engagement) : prev.engagement;
+        const newInterdependence = impactos.interdependence !== undefined ? applyImpact(prev.interdependence, impactos.interdependence) : prev.interdependence;
+
+        const newState = {
+          ...prev,
+          propulsion: { ...prev.propulsion, powerOutput: newPropulsion },
+          atmosphere: { ...prev.atmosphere, o2: newO2 },
+          direction: newDirection,
+          stability: newStability,
+          productivity: newProductivity,
+          engagement: newEngagement,
+          interdependence: newInterdependence
+        };
+
+        telemetryRef.current = newState;
+        return newState;
+      });
+
+      setLastImpactTimestamp(Date.now());
+      saveTelemetryData();
     }
     if (!userId || !desafioId || !API_BASE_URL) return;
     try {
@@ -1038,10 +1087,15 @@ const DecolagemMarte = () => {
   const handleTransferO2 = async () => {
     if (isPaused || processadorO2 === 0 || !userId || !API_BASE_URL) return;
     const amountToAdd = processadorO2;
-    const currentO2 = telemetryRef.current.atmosphere.o2;
-    const newO2 = Math.min(100, currentO2 + amountToAdd);
-    telemetryRef.current.atmosphere.o2 = newO2;
-    setTelemetry(prev => ({ ...prev, atmosphere: { ...prev.atmosphere, o2: newO2 } }));
+
+    setTelemetry(prev => {
+      const currentO2 = prev.atmosphere.o2;
+      const newO2 = Math.min(100, currentO2 + amountToAdd);
+      const newState = { ...prev, atmosphere: { ...prev.atmosphere, o2: newO2 } };
+      telemetryRef.current = newState;
+      return newState;
+    });
+
     setLastImpactTimestamp(Date.now());
     playSound('/sounds/data-updates-telemetry.mp3');
     try {
@@ -1052,7 +1106,7 @@ const DecolagemMarte = () => {
           processadorO2: 0,
           telemetryState: {
             ...telemetryRef.current,
-            oxygen: newO2,
+            oxygen: telemetryRef.current.atmosphere.o2,
             nuclearPropulsion: telemetryRef.current.propulsion.powerOutput,
             direction: telemetryRef.current.direction,
             stability: telemetryRef.current.stability,
@@ -1187,7 +1241,12 @@ const DecolagemMarte = () => {
             setPlannedRoute(routeFromDB);
             setOriginPlanet({ nome: originStep.name });
             setSelectedPlanet({ nome: nextStep.name });
-            setDistanceKm(nextStep.distance || 0);
+
+            // SINCRONIZA A REF DA DISTÂNCIA AQUI
+            const distFromDB = nextStep.distance || 0;
+            setDistanceKm(distFromDB);
+            distanceKmRef.current = distFromDB;
+
           } else {
             setSelectedPlanet({ nome: "Erro de Rota" });
           }
