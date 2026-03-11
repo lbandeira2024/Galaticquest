@@ -128,6 +128,7 @@ const RightMonitorPanel = React.memo(({
   return (
     <div className="right-panel-3d" style={{ zIndex: 50 }}>
       <MissionTimer isPaused={isPaused} />
+
       {/* MONITOR SUPERIOR */}
       <div className="right-monitor-container" style={{ marginTop: '80px' }}>
         <div className="monitor-controls">
@@ -170,6 +171,7 @@ const RightMonitorPanel = React.memo(({
           )}
         </div>
       </div>
+
       {/* MONITOR INFERIOR */}
       <div className="right-monitor-container" style={{ marginTop: '10px' }}>
         <div className="monitor-screen" onClick={isTransmissionStarting ? handleNextDialogue : undefined} style={{ cursor: isTransmissionStarting ? 'pointer' : 'default' }}>
@@ -186,22 +188,33 @@ const RightMonitorPanel = React.memo(({
           )}
         </div>
       </div>
-      <div className="glossary-button-container" style={{ marginTop: '20px', position: 'relative', zIndex: 10 }}>
-        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+
+      {/* BOTOES EQUIPE E GLOSSARIO LADO A LADO */}
+      <div className="glossary-button-container" style={{ marginTop: '15px', position: 'relative', zIndex: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%' }}>
           <button
             className="glossary-button shine-effect"
             onClick={() => !isPaused && setShowTeamModal(true)}
             disabled={isPaused}
-            style={{ width: '125px', backgroundColor: 'rgba(0, 150, 255, 0.2)', margin: 0, padding: '8px 5px' }}
+            style={{ flex: 1, backgroundColor: 'rgba(0, 150, 255, 0.2)', margin: 0, padding: '8px 0', textAlign: 'center' }}
           >
             EQUIPE
           </button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <button className="glossary-button shine-effect" onClick={() => !isPaused && setShowGlossary(true)} disabled={isPaused} style={{ marginLeft: 0 }}>GLOSSÁRIO</button>
-            <button className="bolsa-button" onClick={handleInventory} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed', marginLeft: 0 }}><img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" /></button>
-          </div>
+          <button
+            className="glossary-button shine-effect"
+            onClick={() => !isPaused && setShowGlossary(true)}
+            disabled={isPaused}
+            style={{ flex: 1, margin: 0, padding: '8px 0', textAlign: 'center' }}
+          >
+            GLOSSÁRIO
+          </button>
+          <button className="bolsa-button" onClick={handleInventory} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed', margin: 0, flexShrink: 0 }}>
+            <img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" style={{ width: '60px', height: 'auto' }} />
+          </button>
         </div>
       </div>
+
+      {/* IMAGEM DA TRIPULACAO ABAIXO DOS BOTÕES */}
       {teamPhotoUrl && (
         <div className="team-photo-frame">
           <div className="team-photo-header">TRIPULAÇÃO</div>
@@ -209,9 +222,16 @@ const RightMonitorPanel = React.memo(({
           <div className="team-photo-overlay"></div>
         </div>
       )}
+
+      {/* BOTÕES FLUTUANTES (Pausa e S.O.S) COM HVS-21 AO LADO */}
       <div className="floating-buttons-container">
-        <button className={`sos-button ${isSOSActive ? 'active' : ''}`} onClick={handleSOS} disabled={!isSOSActive} title={isSOSActive ? "Ativar S.O.S." : !hasFundsForSOS ? "Sem SpaceCoins para S.O.S." : "S.O.S. indisponível"}>S.O.S.</button>
-        <button onClick={togglePause} disabled={isPauseButtonDisabled || isRestoringSOS} className={`pause-button ${isPaused ? 'paused' : ''}`} title={isRestoringSOS ? "Não é possível pausar durante a restauração S.O.S." : ""}>{isPaused ? 'Continuar Jogo' : 'Pausar Jogo'}</button>
+        <button onClick={togglePause} disabled={isPauseButtonDisabled || isRestoringSOS} className={`pause-button ${isPaused ? 'paused' : ''}`} title={isRestoringSOS ? "Não é possível pausar durante a restauração S.O.S." : ""}>
+          {isPaused ? 'Continuar Jogo' : 'Pausar Jogo'}
+        </button>
+        <button className={`sos-button ${isSOSActive ? 'active' : ''}`} onClick={handleSOS} disabled={!isSOSActive} title={isSOSActive ? "Ativar S.O.S." : !hasFundsForSOS ? "Sem SpaceCoins para S.O.S." : "S.O.S. indisponível"}>
+          S.O.S.
+        </button>
+        <img src="/images/HVS-21.png" alt="HVS-21" className="hvs-logo" onError={(e) => { e.target.style.display = 'none'; }} />
       </div>
     </div>
   );

@@ -769,8 +769,8 @@
 
 /* === FOTO DA EQUIPE NO COCKPIT === */
 .team-photo-frame {
-  margin-top: auto;
-  margin-bottom: 60px;
+  margin-top: 15px;
+  margin-bottom: auto;
   width: 100%;
   border: 2px solid #00aaff;
   border-radius: 8px;
@@ -1085,7 +1085,7 @@
 }
 
 .bolsa-button img {
-  width: 90px;
+  width: 60px;
   height: auto;
   filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.6));
   animation: brilhoBolsa 6s infinite;
@@ -1227,6 +1227,13 @@
   flex-direction: row-reverse;
   align-items: center;
   gap: 10px;
+}
+
+.hvs-logo {
+  height: 45px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 6px rgba(0, 180, 255, 0.8));
 }
 
 .pause-button {
@@ -1414,7 +1421,6 @@
 
 .team-grid_equipe {
   display: grid;
-  /* Aumentado o espaço mínimo de cada cartão para não amassar o texto */
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
   gap: 15px;
   margin-top: 20px;
@@ -1432,7 +1438,6 @@
 }
 
 .team-member-avatar {
-  /* Tamanhos forçados com !important para prevenir conflitos do navegador */
   width: 110px !important;
   height: 110px !important;
   min-width: 110px !important;
@@ -1440,12 +1445,10 @@
   border-radius: 50% !important;
   object-fit: cover !important;
   object-position: center 15% !important;
-  /* Foca nos rostos */
   margin-right: 15px !important;
   border: 3px solid #ff9800 !important;
   flex-shrink: 0 !important;
   background-color: #111 !important;
-  /* Previne fundo branco se houver png transparente */
 }
 
 .team-member-details {
@@ -1453,7 +1456,6 @@
   flex-direction: column !important;
   flex: 1 !important;
   min-width: 0 !important;
-  /* Obriga o texto a quebrar a linha e não empurrar a foto */
   justify-content: center !important;
 }
 
@@ -1482,7 +1484,6 @@
 /* ====== EFEITO DE BRILHO DIAGONAL (EQUIPE, GLOSSÁRIO, MAPA) ==== */
 /* =============================================================== */
 
-/* Aplica o efeito no glossary-button e na nova classe shine-effect */
 .glossary-button::after,
 .shine-effect::after {
   content: '';
@@ -1496,10 +1497,8 @@
       rgba(255, 255, 255, 0.4) 50%,
       rgba(255, 255, 255, 0) 100%);
   transform: skewX(-25deg);
-  /* Dá a inclinação diagonal */
   animation: sweep-shine 3s infinite;
   pointer-events: none;
-  /* Garante que o brilho não atrapalhe o clique do botão */
   z-index: 1;
 }
 
@@ -1510,16 +1509,13 @@
 
   20% {
     left: 200%;
-    /* O brilho atravessa o botão rapidamente (0.6s) */
   }
 
   100% {
     left: 200%;
-    /* Pausa durante o resto do tempo para perfazer 3s */
   }
 }
 
-/* Garante que qualquer botão com este efeito oculte as margens vazadas */
 .shine-effect {
   position: relative;
   overflow: hidden;
