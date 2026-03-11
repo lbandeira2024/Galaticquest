@@ -111,7 +111,7 @@ const TelemetryDisplay = ({
 
   const [onlineShips, setOnlineShips] = useState([]);
 
-  // --- LÓGICA DE DETECÇÃO DE MUDANÇA (HIGHLIGHT VERDE) ---
+  // --- LÓGICA DE DETECÇÃO DE MUDANÇA (HIGHLIGHT VERDE + DELTA PERCENTUAL) ---
   const [highlightedMetrics, setHighlightedMetrics] = useState({});
   const prevData = usePrevious(data);
 
@@ -140,7 +140,8 @@ const TelemetryDisplay = ({
       const prevVal = Math.round(getNestedValue(prevData, key));
 
       if (currentVal !== prevVal) {
-        newHighlights[key] = true;
+        // Salva a diferença (delta) ao invés de apenas true
+        newHighlights[key] = currentVal - prevVal;
         hasChanges = true;
       }
     });
@@ -155,12 +156,23 @@ const TelemetryDisplay = ({
             delete updated[key];
             return updated;
           });
-        }, 25000);
+        }, 15000); // 15 segundos para sumir a cor e o numero
       });
     }
   }, [lastImpactTimestamp]);
 
-  const isHighlighted = (key) => !!highlightedMetrics[key];
+  // Função auxiliar para renderizar o número percentual (+ ou -)
+  const renderDelta = (key) => {
+    const delta = highlightedMetrics[key];
+    if (delta === undefined) return null;
+
+    const sign = delta > 0 ? '+' : '';
+    return (
+      <span className="delta-value">
+        {sign}{delta}%
+      </span>
+    );
+  };
 
   useEffect(() => {
     const executeHeartbeatCycle = async () => {
@@ -326,39 +338,46 @@ const TelemetryDisplay = ({
     <div className="telemetry-display">
       <div className="telemetry-nuclear-panel">
 
-        <div className={`nuclear-item ${isHighlighted('propulsion.powerOutput') ? 'highlight-changed' : ''}`}>
+        <div className={`nuclear-item ${highlightedMetrics['propulsion.powerOutput'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">PROPULSÃO NUCLEAR</span>
           <ProgressBar value={Math.round(parseFloat(data.propulsion?.powerOutput) || 0)} />
+          {renderDelta('propulsion.powerOutput')}
         </div>
 
-        <div className={`nuclear-item ${isHighlighted('direction') ? 'highlight-changed' : ''}`}>
+        <div className={`nuclear-item ${highlightedMetrics['direction'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">DIREÇÃO</span>
           <ProgressBar value={Math.round(data.direction ?? 0)} />
+          {renderDelta('direction')}
         </div>
 
-        <div className={`nuclear-item ${isHighlighted('stability') ? 'highlight-changed' : ''}`}>
+        <div className={`nuclear-item ${highlightedMetrics['stability'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">ESTABILIDADE</span>
           <ProgressBar value={Math.round(data.stability ?? 0)} />
+          {renderDelta('stability')}
         </div>
 
-        <div className={`nuclear-item ${isHighlighted('productivity') ? 'highlight-changed' : ''}`}>
+        <div className={`nuclear-item ${highlightedMetrics['productivity'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">PRODUTIVIDADE</span>
           <ProgressBar value={Math.round(data.productivity ?? 0)} />
+          {renderDelta('productivity')}
         </div>
 
-        <div className={`nuclear-item ${isHighlighted('interdependence') ? 'highlight-changed' : ''}`}>
+        <div className={`nuclear-item ${highlightedMetrics['interdependence'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">INTERDEPENDÊNCIA</span>
           <ProgressBar value={Math.round(data.interdependence ?? 0)} />
+          {renderDelta('interdependence')}
         </div>
 
-        <div className={`nuclear-item ${isHighlighted('engagement') ? 'highlight-changed' : ''}`}>
+        <div className={`nuclear-item ${highlightedMetrics['engagement'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">ENGAJAMENTO</span>
           <ProgressBar value={Math.round(data.engagement ?? 0)} />
+          {renderDelta('engagement')}
         </div>
 
-        <div className={`nuclear-item ${isOxygenRefilled ? 'oxygen-refill-active' : ''} ${isHighlighted('atmosphere.o2') ? 'highlight-changed' : ''}`}>
+        <div className={`nuclear-item ${isOxygenRefilled ? 'oxygen-refill-active' : ''} ${highlightedMetrics['atmosphere.o2'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">OXIGÊNIO</span>
           <ProgressBar value={Math.round(data.atmosphere?.o2 ?? 0)} />
+          {renderDelta('atmosphere.o2')}
         </div>
 
         <div className="nuclear-item">

@@ -38,6 +38,8 @@
   border: 1px solid rgba(0, 150, 255, 0.2);
   box-shadow: inset 0 0 5px rgba(0, 100, 200, 0.3);
   transition: all 0.3s ease;
+  position: relative;
+  /* ADICIONADO PARA POSICIONAR O DELTA */
 }
 
 .nuclear-label {
@@ -59,7 +61,6 @@
   margin: 5px 0;
 }
 
-/* --- MUDANÇA PRINCIPAL AQUI --- */
 .progress-bar {
   height: 100%;
   border-radius: 10px;
@@ -90,17 +91,45 @@
   box-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
 }
 
-/* --- AJUSTE NO TEXTO --- */
 .progress-value {
-  /* Removemos o position absolute antigo */
   font-size: 0.7em;
   color: #fff;
   font-weight: bold;
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
   white-space: nowrap;
-  /* Impede que o texto quebre linha */
   z-index: 2;
 }
+
+/* ====================================================
+   ========= ESTILOS DA PORCENTAGEM DE IMPACTO ========
+   ==================================================== */
+.delta-value {
+  position: absolute;
+  bottom: 1px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75em;
+  color: #39ff14;
+  font-weight: bold;
+  text-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: deltaPulse 1s infinite alternate;
+}
+
+@keyframes deltaPulse {
+  0% {
+    opacity: 0.8;
+    text-shadow: 0 0 4px #39ff14;
+  }
+
+  100% {
+    opacity: 1;
+    text-shadow: 0 0 10px #39ff14, 0 0 15px #39ff14;
+  }
+}
+
+/* ==================================================== */
 
 .space-coins-panel {
   display: flex;
@@ -294,7 +323,6 @@
   box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
 }
 
-/* === ESTILO DO ALERTA DE EDIÇÃO OBRIGATÓRIA === */
 .forced-alert {
   display: flex;
   align-items: center;
@@ -340,7 +368,6 @@
   text-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
 }
 
-/* --- CORREÇÃO DA POSIÇÃO DA MODAL DE TRANSFERÊNCIA --- */
 .transfer-modal {
   position: fixed;
   top: auto;
