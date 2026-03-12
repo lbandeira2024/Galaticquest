@@ -39,7 +39,7 @@ const getEntityIcon = (name) => {
     "Marte": "🔴",
     "Jupiter": "🟠",
     "Saturno": "🪐",
-    "Urano": "🌐",
+    "Urano": "🔵", // Retornado para a forma redonda
     "Netuno": "🔵",
 
     // Luas (Representadas como esferas ou globos lunares)
@@ -61,7 +61,7 @@ const getEntityIcon = (name) => {
 
     // Planetas Anões e Corpos Menores
     "Ceres": "⚪",
-    "Plutao": "🔵",
+    "Plutao": "🟤", // Cor real bege/marrom
     "Haumea": "🥚",
     "Makemake": "🔴",
     "Eris": "⚪",
@@ -73,7 +73,7 @@ const getEntityIcon = (name) => {
     // Exoplanetas (Representação esférica com cores diferenciadas)
     "Proxima Centauri b": "🟣",
     "Trappist1e": "🟢",
-    "Kepler186f": "🟤",
+    "Kepler186f": "🟢", // Alinhado com a cor #2ecc71 do mapa
 
     // ESTAÇÕES ESPACIAIS (As exceções mecânicas)
     "ACEE": "🛰️",
