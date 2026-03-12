@@ -52,7 +52,7 @@ const PLANET_MUSIC_CONFIG = {
   venus: { src: '/sounds/Venus/venus.mp3', volume: 0.5 },
   lua: { src: '/sounds/lua/lua.mp3', volume: 0.5 },
   acee: { src: '/sounds/ACEE/EstacaoACEE.mp3', volume: 0.5 },
-  caronte: { src: '/sounds/carote/caronte.mp3', volume: 0.5 },
+  caronte: { src: '/sounds/caronte/caronte.mp3', volume: 0.5 },
   ceres: { src: '/sounds/ceres/ceres.mp3', volume: 0.5 },
   eris: { src: '/sounds/Eris/Eris.mp3', volume: 0.5 },
   haumea: { src: '/sounds/haumea/Haumea.mp3', volume: 0.5 },
