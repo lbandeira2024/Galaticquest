@@ -103,7 +103,13 @@
     border: 1px solid rgba(65, 131, 215, 0.2);
     border-radius: 50%;
     transform: translate(-50%, -50%);
-    transition: transform 10s linear;
+    /* Removido o transition: transform 10s linear; pois causava conflito com o React atualizando a posição */
+}
+
+.moon-orbit {
+    border: 1px dotted rgba(46, 204, 113, 0.2);
+    z-index: 2;
+    pointer-events: none;
 }
 
 .asteroid-belt {
@@ -123,9 +129,9 @@
 .celestial-body {
     position: absolute;
     border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: filter 0.3s ease, box-shadow 0.3s ease;
-    will-change: transform;
+    /* Adicionada transição suave para left e top para simular órbita fluida */
+    transition: left 0.1s linear, top 0.1s linear, filter 0.3s ease, box-shadow 0.3s ease;
+    will-change: left, top, transform;
     transform-style: preserve-3d;
     z-index: 3;
 }
@@ -277,10 +283,7 @@
     min-width: fit-content !important;
 }
 
-/* =========================================
-   REGRAS ESPECÍFICAS PARA TODAS AS LUAS
-========================================= */
-
+/* REGRAS ESPECÍFICAS PARA TODAS AS LUAS */
 .celestial-body.moon .label-container.moon-label-container {
     position: absolute !important;
     top: 50% !important;
@@ -295,7 +298,6 @@
     overflow: visible !important;
     z-index: 100;
     transform: none !important;
-    /* Reset de transformações externas */
     pointer-events: none;
 }
 
@@ -343,7 +345,6 @@
     pointer-events: auto !important;
     z-index: 2;
     rotate: none !important;
-    /* Remove qualquer herança de rotação */
 }
 
 .celestial-body.moon:hover .body-label.moon-label,
@@ -372,9 +373,7 @@
     font-style: italic;
 }
 
-/* =========================================
-   QUADRO DE INFORMAÇÕES (RODAPÉ)
-========================================= */
+/* QUADRO DE INFORMAÇÕES (RODAPÉ) */
 .info-panel {
     position: absolute;
     bottom: 20px;
@@ -382,12 +381,10 @@
     background: rgba(0, 0, 0, 0.7);
     padding: 15px;
     border-radius: 8px;
-
     width: max-content;
     min-width: 300px;
     max-width: calc(100% - 40px);
     box-sizing: border-box;
-
     border: 1px solid #3498db;
     box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
     backdrop-filter: blur(5px);
@@ -532,28 +529,22 @@
     }
 }
 
-/* =========================================
-   QUADRO/PAINEL DE ROTA LATERAL
-========================================= */
+/* QUADRO/PAINEL DE ROTA LATERAL */
 .route-display-panel {
     position: absolute;
     top: 20px;
     right: 20px;
-
     width: fit-content;
     min-width: 420px;
-
     max-width: calc(100% - 40px);
     max-height: calc(100% - 40px);
     box-sizing: border-box;
-
     padding: 20px;
     background: rgba(10, 20, 40, 0.98);
     border: 1px solid #4fc3f7;
     box-shadow: 0 0 30px rgba(79, 195, 247, 0.6);
     backdrop-filter: blur(8px);
     border-radius: 8px;
-
     display: flex;
     flex-direction: column;
     z-index: 10;
