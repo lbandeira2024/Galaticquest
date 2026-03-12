@@ -42,7 +42,8 @@ const planetImageMap = {
   skylab: '/images/stations/SKYLAB-Rotacionando.gif',
   salyut: '/images/stations/SALYUT-Rotacionando.webm',
   delfos: '/images/stations/DELFOS-Rotacionando.gif',
-  boctok: '/images/stations/BOCTOK-Rotacionando.webm'
+  boctok: '/images/stations/BOCTOK-Rotacionando.webm',
+  proteu: '/images/Planets/proteu-rotacionando.webm'
 };
 
 const PLANET_MUSIC_CONFIG = {
@@ -78,7 +79,8 @@ const PLANET_MUSIC_CONFIG = {
   vesta: { src: '/sounds/Vesta/DIMORPHOS_Vesta.mp3', volume: 0.5 },
   trappist: { src: '/sounds/Trappist-1/Trappist-1.mp3', volume: 0.5 },
   oberon: { src: '/sounds/Titania/titaniaOberon.mp3', volume: 0.5 },
-  pallas: { src: '/sounds/pallas/pallas.mp3', volume: 0.5 }
+  pallas: { src: '/sounds/pallas/pallas.mp3', volume: 0.5 },
+  proteu: { src: '/sounds/proteu/tritao.mp3', volume: 0.5 }
 };
 
 const STAR_HUES = [210, 120, 30, 0, 60];
