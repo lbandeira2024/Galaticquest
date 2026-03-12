@@ -34,7 +34,7 @@ const planetImageMap = {
   oberon: '/images/Planets/oberon-rotacionando.gif',
   tritao: '/images/Planets/tritao-rotacionando.gif',
   caronte: '/images/Planets/caronte-rotacionando.gif',
-  trappist1e: '/images/Planets/trappist-rotacionando.gif',
+  trappist1e: '/images/Planets/trappist-rotacionando.webm',
   acee: '/images/stations/ACEE-Rotacionando.gif',
   almaz: '/images/stations/ALMAZ-Rotacionando.gif',
   mol: '/images/stations/MOL-Rotacionando.gif',
