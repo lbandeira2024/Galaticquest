@@ -60,34 +60,34 @@ const realDistances = {
 const solarSystem = {
     sun: { name: "Sol", radius: 50, color: "#ff6d00", x: 50, y: 50, rotationSpeed: 0 },
     planets: [
-        { name: "Mercurio", radius: 8, color: "#DE820D", orbitRadius: 20, orbitSpeed: 1.5, rotationSpeed: 0.0006, angle: 0, moons: [] },
-        { name: "Venus", radius: 12, color: "#e6c229", orbitRadius: 30, orbitSpeed: 1.2, rotationSpeed: 0.0002, angle: 45, moons: [] },
-        { name: "Terra", radius: 13, color: "#3498db", orbitRadius: 40, orbitSpeed: 1.0, rotationSpeed: 0.006, angle: 90, moons: [{ name: "Lua", radius: 4, orbitRadius: 4, orbitSpeed: 5, rotationSpeed: 0.0002, angle: 0 }] },
-        { name: "ACEE", radius: 6, color: "#a020f0", orbitRadius: 42, orbitSpeed: 1.1, rotationSpeed: 0, angle: 116, moons: [], isStation: true },
-        { name: "Salyut", radius: 6, color: "#a020f0", orbitRadius: 140, orbitSpeed: 0.3, rotationSpeed: 0, angle: 0, moons: [], isStation: true },
-        { name: "Delfos", radius: 6, color: "#a020f0", orbitRadius: 118, orbitSpeed: 0.4, rotationSpeed: 0, angle: 200, moons: [], isStation: true },
-        { name: "Mol", radius: 6, color: "#a020f0", orbitRadius: 140, orbitSpeed: 0.3, rotationSpeed: 0, angle: 315, moons: [], isStation: true },
-        { name: "Skylab", radius: 6, color: "#a020f0", orbitRadius: 33, orbitSpeed: 1.3, rotationSpeed: 0, angle: 46, moons: [], isStation: true },
-        { name: "Almaz", radius: 6, color: "#a020f0", orbitRadius: 157, orbitSpeed: 0.2, rotationSpeed: 0, angle: 60, moons: [], isStation: true },
-        { name: "Tiangong", radius: 6, color: "#a020f0", orbitRadius: 110, orbitSpeed: 0.45, rotationSpeed: 0, angle: 180, moons: [], isStation: true },
-        { name: "Marte", radius: 10, color: "#e74c3c", orbitRadius: 50, orbitSpeed: 0.8, rotationSpeed: 0.006, angle: 135, moons: [{ name: "Fobos", radius: 2.5, orbitRadius: 3, orbitSpeed: 8, rotationSpeed: 0.03, angle: 0 }, { name: "Deimos", radius: 2, orbitRadius: 5, orbitSpeed: 6, rotationSpeed: 0.01, angle: 180 }] },
-        { name: "Ceres", radius: 5, color: "#aaa", orbitRadius: 60, orbitSpeed: 0.7, rotationSpeed: 0.001, angle: 0, isDwarfPlanet: true, moons: [] },
-        { name: "Vesta", radius: 4.5, color: "#bbb", orbitRadius: 62, orbitSpeed: 0.65, rotationSpeed: 0.001, angle: 120, moons: [] },
-        { name: "Pallas", radius: 4.5, color: "#ccc", orbitRadius: 64, orbitSpeed: 0.6, rotationSpeed: 0.001, angle: 240, moons: [] },
+        { name: "Mercurio", radius: 8, color: "#DE820D", orbitRadius: 20, orbitSpeed: 0.08, rotationSpeed: 0.0006, angle: 0, moons: [] },
+        { name: "Venus", radius: 12, color: "#e6c229", orbitRadius: 30, orbitSpeed: 0.06, rotationSpeed: 0.0002, angle: 45, moons: [] },
+        { name: "Terra", radius: 13, color: "#3498db", orbitRadius: 40, orbitSpeed: 0.05, rotationSpeed: 0.006, angle: 90, moons: [{ name: "Lua", radius: 4, orbitRadius: 4, orbitSpeed: 0.25, rotationSpeed: 0.0002, angle: 0 }] },
+        { name: "ACEE", radius: 6, color: "#a020f0", orbitRadius: 42, orbitSpeed: 0.055, rotationSpeed: 0, angle: 116, moons: [], isStation: true },
+        { name: "Salyut", radius: 6, color: "#a020f0", orbitRadius: 140, orbitSpeed: 0.015, rotationSpeed: 0, angle: 0, moons: [], isStation: true },
+        { name: "Delfos", radius: 6, color: "#a020f0", orbitRadius: 118, orbitSpeed: 0.02, rotationSpeed: 0, angle: 200, moons: [], isStation: true },
+        { name: "Mol", radius: 6, color: "#a020f0", orbitRadius: 140, orbitSpeed: 0.015, rotationSpeed: 0, angle: 315, moons: [], isStation: true },
+        { name: "Skylab", radius: 6, color: "#a020f0", orbitRadius: 33, orbitSpeed: 0.065, rotationSpeed: 0, angle: 46, moons: [], isStation: true },
+        { name: "Almaz", radius: 6, color: "#a020f0", orbitRadius: 157, orbitSpeed: 0.01, rotationSpeed: 0, angle: 60, moons: [], isStation: true },
+        { name: "Tiangong", radius: 6, color: "#a020f0", orbitRadius: 110, orbitSpeed: 0.022, rotationSpeed: 0, angle: 180, moons: [], isStation: true },
+        { name: "Marte", radius: 10, color: "#e74c3c", orbitRadius: 50, orbitSpeed: 0.04, rotationSpeed: 0.006, angle: 135, moons: [{ name: "Fobos", radius: 2.5, orbitRadius: 3, orbitSpeed: 0.4, rotationSpeed: 0.03, angle: 0 }, { name: "Deimos", radius: 2, orbitRadius: 5, orbitSpeed: 0.3, rotationSpeed: 0.01, angle: 180 }] },
+        { name: "Ceres", radius: 5, color: "#aaa", orbitRadius: 60, orbitSpeed: 0.035, rotationSpeed: 0.001, angle: 0, isDwarfPlanet: true, moons: [] },
+        { name: "Vesta", radius: 4.5, color: "#bbb", orbitRadius: 62, orbitSpeed: 0.032, rotationSpeed: 0.001, angle: 120, moons: [] },
+        { name: "Pallas", radius: 4.5, color: "#ccc", orbitRadius: 64, orbitSpeed: 0.03, rotationSpeed: 0.001, angle: 240, moons: [] },
         { name: "Cinturão", radius: 0, color: "transparent", orbitRadius: 65, orbitSpeed: 0, rotationSpeed: 0, angle: 0, isAsteroidBelt: true, moons: [] },
-        { name: "Jupiter", radius: 28, color: "#f1c40f", orbitRadius: 80, orbitSpeed: 0.4, rotationSpeed: 0.025, angle: 180, moons: [{ name: "Io", radius: 4, orbitRadius: 5, orbitSpeed: 4.5, rotationSpeed: 0.0008, angle: 0 }, { name: "Europa", radius: 3.5, orbitRadius: 6.5, orbitSpeed: 4.0, rotationSpeed: 0.0007, angle: 90 }, { name: "Ganímedes", radius: 5, orbitRadius: 8, orbitSpeed: 3.5, rotationSpeed: 0.0004, angle: 180 }, { name: "Calisto", radius: 4.5, orbitRadius: 9.5, orbitSpeed: 3.0, rotationSpeed: 0.0003, angle: 270 }] },
-        { name: "Saturno", radius: 24, color: "#f39c12", orbitRadius: 100, orbitSpeed: 0.3, rotationSpeed: 0.022, angle: 225, moons: [{ name: "Titã", radius: 5, orbitRadius: 8, orbitSpeed: 3, rotationSpeed: 0.0003, angle: 0 }, { name: "Encelado", radius: 3, orbitRadius: 5, orbitSpeed: 3.8, rotationSpeed: 0.0005, angle: 120 }, { name: "Mimas", radius: 2.5, orbitRadius: 4, orbitSpeed: 4.2, rotationSpeed: 0.0007, angle: 240 }], hasRings: true },
-        { name: "Urano", radius: 18, color: "#1abc9c", orbitRadius: 120, orbitSpeed: 0.2, rotationSpeed: 0.015, angle: 270, moons: [{ name: "Titania", radius: 4, orbitRadius: 6, orbitSpeed: 2.5, rotationSpeed: 0.0002, angle: 0 }, { name: "Oberon", radius: 3.8, orbitRadius: 7, orbitSpeed: 2.2, rotationSpeed: 0.00018, angle: 180 }] },
-        { name: "Netuno", radius: 18, color: "#3498db", orbitRadius: 140, orbitSpeed: 0.15, rotationSpeed: 0.016, angle: 315, moons: [{ name: "Tritao", radius: 4.2, orbitRadius: 5.5, orbitSpeed: 2.8, rotationSpeed: 0.00015, angle: 0 }, { name: "Proteu", radius: 2.5, orbitRadius: 4, orbitSpeed: 3.2, rotationSpeed: 0.00025, angle: 90 }] },
-        { name: "Plutao", radius: 5, color: "#d7bde2", orbitRadius: 150, orbitSpeed: 0.1, rotationSpeed: 0.0008, angle: 0, isDwarfPlanet: true, moons: [{ name: "Caronte", radius: 2.5, orbitRadius: 3, orbitSpeed: 4, rotationSpeed: 0.0004, angle: 0 }] },
-        { name: "Haumea", radius: 4, color: "#aed6f1", orbitRadius: 155, orbitSpeed: 0.09, rotationSpeed: 0.001, angle: 60, isDwarfPlanet: true, moons: [] },
-        { name: "Makemake", radius: 4, color: "#f9e79f", orbitRadius: 158, orbitSpeed: 0.085, rotationSpeed: 0.0008, angle: 120, isDwarfPlanet: true, moons: [] },
-        { name: "Eris", radius: 5.5, color: "#d5dbdb", orbitRadius: 165, orbitSpeed: 0.08, rotationSpeed: 0.0006, angle: 180, isDwarfPlanet: true, moons: [] },
+        { name: "Jupiter", radius: 28, color: "#f1c40f", orbitRadius: 80, orbitSpeed: 0.02, rotationSpeed: 0.025, angle: 180, moons: [{ name: "Io", radius: 4, orbitRadius: 5, orbitSpeed: 0.22, rotationSpeed: 0.0008, angle: 0 }, { name: "Europa", radius: 3.5, orbitRadius: 6.5, orbitSpeed: 0.2, rotationSpeed: 0.0007, angle: 90 }, { name: "Ganímedes", radius: 5, orbitRadius: 8, orbitSpeed: 0.17, rotationSpeed: 0.0004, angle: 180 }, { name: "Calisto", radius: 4.5, orbitRadius: 9.5, orbitSpeed: 0.15, rotationSpeed: 0.0003, angle: 270 }] },
+        { name: "Saturno", radius: 24, color: "#f39c12", orbitRadius: 100, orbitSpeed: 0.015, rotationSpeed: 0.022, angle: 225, moons: [{ name: "Titã", radius: 5, orbitRadius: 8, orbitSpeed: 0.15, rotationSpeed: 0.0003, angle: 0 }, { name: "Encelado", radius: 3, orbitRadius: 5, orbitSpeed: 0.19, rotationSpeed: 0.0005, angle: 120 }, { name: "Mimas", radius: 2.5, orbitRadius: 4, orbitSpeed: 0.21, rotationSpeed: 0.0007, angle: 240 }], hasRings: true },
+        { name: "Urano", radius: 18, color: "#1abc9c", orbitRadius: 120, orbitSpeed: 0.01, rotationSpeed: 0.015, angle: 270, moons: [{ name: "Titania", radius: 4, orbitRadius: 6, orbitSpeed: 0.12, rotationSpeed: 0.0002, angle: 0 }, { name: "Oberon", radius: 3.8, orbitRadius: 7, orbitSpeed: 0.11, rotationSpeed: 0.00018, angle: 180 }] },
+        { name: "Netuno", radius: 18, color: "#3498db", orbitRadius: 140, orbitSpeed: 0.008, rotationSpeed: 0.016, angle: 315, moons: [{ name: "Tritao", radius: 4.2, orbitRadius: 5.5, orbitSpeed: 0.14, rotationSpeed: 0.00015, angle: 0 }, { name: "Proteu", radius: 2.5, orbitRadius: 4, orbitSpeed: 0.16, rotationSpeed: 0.00025, angle: 90 }] },
+        { name: "Plutao", radius: 5, color: "#d7bde2", orbitRadius: 150, orbitSpeed: 0.005, rotationSpeed: 0.0008, angle: 0, isDwarfPlanet: true, moons: [{ name: "Caronte", radius: 2.5, orbitRadius: 3, orbitSpeed: 0.2, rotationSpeed: 0.0004, angle: 0 }] },
+        { name: "Haumea", radius: 4, color: "#aed6f1", orbitRadius: 155, orbitSpeed: 0.0045, rotationSpeed: 0.001, angle: 60, isDwarfPlanet: true, moons: [] },
+        { name: "Makemake", radius: 4, color: "#f9e79f", orbitRadius: 158, orbitSpeed: 0.004, rotationSpeed: 0.0008, angle: 120, isDwarfPlanet: true, moons: [] },
+        { name: "Eris", radius: 5.5, color: "#d5dbdb", orbitRadius: 165, orbitSpeed: 0.004, rotationSpeed: 0.0006, angle: 180, isDwarfPlanet: true, moons: [] },
         { name: "Kuiper", radius: 0, color: "transparent", orbitRadius: 170, orbitSpeed: 0, rotationSpeed: 0, angle: 0, isKuiperBelt: true, moons: [] },
-        { name: "Proxima Centauri b", radius: 10, color: "#e74c3c", orbitRadius: 200, orbitSpeed: 0.04, rotationSpeed: 0.0005, angle: 0, isExoplanet: true, moons: [] },
-        { name: "Trappist1e", radius: 9, color: "#3498db", orbitRadius: 210, orbitSpeed: 0.035, rotationSpeed: 0.0006, angle: 90, isExoplanet: true, moons: [] },
-        { name: "Boctok", radius: 6, color: "#a020f0", orbitRadius: 210.8, orbitSpeed: 0.035, rotationSpeed: 0, angle: 90.5, moons: [], isStation: true },
-        { name: "Kepler186f", radius: 8, color: "#2ecc71", orbitRadius: 220, orbitSpeed: 0.03, rotationSpeed: 0.0004, angle: 180, isExoplanet: true, moons: [] }
+        { name: "Proxima Centauri b", radius: 10, color: "#e74c3c", orbitRadius: 200, orbitSpeed: 0.002, rotationSpeed: 0.0005, angle: 0, isExoplanet: true, moons: [] },
+        { name: "Trappist1e", radius: 9, color: "#3498db", orbitRadius: 210, orbitSpeed: 0.0018, rotationSpeed: 0.0006, angle: 90, isExoplanet: true, moons: [] },
+        { name: "Boctok", radius: 6, color: "#a020f0", orbitRadius: 210.8, orbitSpeed: 0.0018, rotationSpeed: 0, angle: 90.5, moons: [], isStation: true },
+        { name: "Kepler186f", radius: 8, color: "#2ecc71", orbitRadius: 220, orbitSpeed: 0.0015, rotationSpeed: 0.0004, angle: 180, isExoplanet: true, moons: [] }
     ]
 };
 
@@ -482,7 +482,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                 })()}
 
                 {solarSystem.planets.map((planet, index) => {
-                    // Converter o ângulo para radianos para o cálculo preciso do posicionamento absoluto
                     const planetAngleRad = planet.angle * (Math.PI / 180);
                     const planetX = solarSystem.sun.x + Math.cos(planetAngleRad) * planet.orbitRadius;
                     const planetY = solarSystem.sun.y + Math.sin(planetAngleRad) * planet.orbitRadius;
@@ -492,13 +491,11 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                             : '';
                     return (
                         <React.Fragment key={index}>
-                            {/* Órbita do Planeta */}
                             <div className={`orbit ${planet.isAsteroidBelt ? 'asteroid-belt' : ''} ${planet.isKuiperBelt ? 'kuiper-belt' : ''}`} style={{
                                 width: `${planet.orbitRadius * 2}%`, height: `${planet.orbitRadius * 2}%`,
                                 left: `${solarSystem.sun.x}%`, top: `${solarSystem.sun.y}%`
                             }}></div>
 
-                            {/* Planeta */}
                             {(planet.radius > 0 || planet.isStation) && (
                                 <div className={`celestial-body ${planet.isStation ? 'station' : 'planet'}
                                     ${planet.isExoplanet ? 'isExoplanet' : ''}
@@ -530,7 +527,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                 </div>
                             )}
 
-                            {/* Luas renderizadas FORA da div do planeta para não herdarem sua rotação local, mas calculadas baseadas nele */}
                             {planet.moons && planet.moons.map((moon, moonIndex) => {
                                 const moonAngleRad = moon.angle * (Math.PI / 180);
                                 const moonX = planetX + Math.cos(moonAngleRad) * moon.orbitRadius;
@@ -546,7 +542,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
 
                                 return (
                                     <React.Fragment key={`moon-${index}-${moonIndex}`}>
-                                        {/* Trilha da Órbita da Lua */}
                                         <div className="orbit moon-orbit" style={{
                                             width: `${moon.orbitRadius * 2}%`,
                                             height: `${moon.orbitRadius * 2}%`,
@@ -554,7 +549,6 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                             top: `${planetY}%`
                                         }}></div>
 
-                                        {/* Corpo da Lua */}
                                         <div
                                             className={`celestial-body moon ${moonStatus} ${isLabelVisible ? 'show-label' : ''}`}
                                             data-name={moon.name}
