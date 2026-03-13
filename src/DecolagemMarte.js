@@ -919,6 +919,7 @@ const DecolagemMarte = () => {
       if (!isForcedMapEdit) { setShowStellarMap(false); }
       return;
     }
+
     setIsForcedMapEdit(false);
     setShowStellarMap(false);
     setShowSosSurprise(false);
@@ -928,10 +929,12 @@ const DecolagemMarte = () => {
     const isInFlight = !arrivedAtMars && travelStarted;
 
     if (isInFlight) {
+      // --- CASO 1: MUDANÇA EM VOO ---
       routeChangeLockRef.current = true;
       saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
       setPlannedRoute(newPlannedRoute);
       setRouteIndex(newRouteIndex);
+
       const newOriginStep = newPlannedRoute[newRouteIndex];
       const newDestinationStep = newPlannedRoute[newRouteIndex + 1];
 
@@ -944,7 +947,8 @@ const DecolagemMarte = () => {
       }
       setArrivedAtMars(false);
       setIsFinalApproach(false);
-      triggerMinervaInterplanetarySpeed();
+
+      // triggerMinervaInterplanetarySpeed(); // Removido para não disparar áudio/Minerva ao mudar rota em voo
 
       // DESTRAVA A NAVE APÓS MUDANÇA DE ROTA NO MEIO DO VOO
       setTimeout(() => {
@@ -952,9 +956,11 @@ const DecolagemMarte = () => {
       }, 500);
 
     } else {
+      // --- CASO 2: PARTIDA ---
       playSFX('/sounds/empuxo.wav');
       setIsDeparting(true);
       setShowStoreModal(false);
+
       setTimeout(async () => {
         setDistanceKm(300000000);
         distanceKmRef.current = 300000000;
