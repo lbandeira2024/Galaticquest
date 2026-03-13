@@ -66,15 +66,16 @@ const LeftControlPanel = React.memo(({
       <div className="dobra-buttons-container">
         <div className="dobra-btn-wrapper">
           <button
+            type="button"
             className={`ativar-de-btn ${isDobraAtivada ? 'active' : ''} ${!isDobraEnabled || isPaused || distanceKm <= 0 ? 'disabled' : ''}`}
-            onClick={handleDobraEspacial}
+            onClick={(e) => { e.preventDefault(); handleDobraEspacial(); }}
             disabled={!isDobraEnabled || isPaused || distanceKm <= 0}
           >
             {isDobraAtivada ? <>Dobra<br />Ativa</> : <>Dobra<br />Espacial</>}
           </button>
         </div>
         <div className="dobra-btn-wrapper">
-          <button className="inventory-btn" onClick={handleInventory} disabled={isPaused}>Inventário</button>
+          <button type="button" className="inventory-btn" onClick={(e) => { e.preventDefault(); handleInventory(); }} disabled={isPaused}>Inventário</button>
         </div>
       </div>
       <SpeedGauge
@@ -103,8 +104,9 @@ const LeftControlPanel = React.memo(({
           {[1, 2, 3, 4, 5].map(unit => (<div key={unit} className={`o2-unit ${processadorO2 >= unit ? 'filled' : ''}`}></div>))}
         </div>
         <button
+          type="button"
           className={`o2-transfer-button ${isO2TransferDisabled ? 'disabled' : ''}`}
-          onClick={handleOpenO2Modal}
+          onClick={(e) => { e.preventDefault(); handleOpenO2Modal(); }}
           disabled={isO2TransferDisabled}
           style={{ zIndex: 100 }}
         >
@@ -134,8 +136,9 @@ const RightMonitorPanel = React.memo(({
         <div className="monitor-controls">
           <span className={`rec-label ${isTransmissionStarting ? 'blinking-rec' : 'inactive-rec'}`}>REC</span>
           <button
+            type="button"
             className={`play-button ${isDialogueFinished ? 'pulsing-play' : ''}`}
-            onClick={handleReplayDialogue}
+            onClick={(e) => { e.preventDefault(); handleReplayDialogue(); }}
             disabled={!isDialogueFinished || isPaused}
           >
             Play
@@ -193,22 +196,24 @@ const RightMonitorPanel = React.memo(({
       <div className="glossary-button-container" style={{ marginTop: '15px', position: 'relative', zIndex: 10 }}>
         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%' }}>
           <button
+            type="button"
             className="glossary-button shine-effect"
-            onClick={() => !isPaused && setShowTeamModal(true)}
+            onClick={(e) => { e.preventDefault(); if (!isPaused) setShowTeamModal(true); }}
             disabled={isPaused}
             style={{ flex: 1, backgroundColor: 'rgba(0, 150, 255, 0.2)', margin: 0, padding: '8px 0', textAlign: 'center' }}
           >
             EQUIPE
           </button>
           <button
+            type="button"
             className="glossary-button shine-effect"
-            onClick={() => !isPaused && setShowGlossary(true)}
+            onClick={(e) => { e.preventDefault(); if (!isPaused) setShowGlossary(true); }}
             disabled={isPaused}
             style={{ flex: 1, margin: 0, padding: '8px 0', textAlign: 'center' }}
           >
             GLOSSÁRIO
           </button>
-          <button className="bolsa-button" onClick={handleInventory} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed', margin: 0, flexShrink: 0 }}>
+          <button type="button" className="bolsa-button" onClick={(e) => { e.preventDefault(); handleInventory(); }} disabled={true} title="Bolsa Espacial (Indisponível)" style={{ opacity: 0.5, cursor: 'not-allowed', margin: 0, flexShrink: 0 }}>
             <img src="/images/BolsaEspacial.png" alt="Bolsa Espacial" style={{ width: '60px', height: 'auto' }} />
           </button>
         </div>
@@ -225,10 +230,22 @@ const RightMonitorPanel = React.memo(({
 
       {/* BOTÕES FLUTUANTES (Pausa e S.O.S) COM HVS-21 AO LADO */}
       <div className="floating-buttons-container">
-        <button onClick={togglePause} disabled={isPauseButtonDisabled || isRestoringSOS} className={`pause-button ${isPaused ? 'paused' : ''}`} title={isRestoringSOS ? "Não é possível pausar durante a restauração S.O.S." : ""}>
+        <button
+          type="button"
+          onClick={(e) => { e.preventDefault(); togglePause(); }}
+          disabled={isPauseButtonDisabled || isRestoringSOS}
+          className={`pause-button ${isPaused ? 'paused' : ''}`}
+          title={isRestoringSOS ? "Não é possível pausar durante a restauração S.O.S." : ""}
+        >
           {isPaused ? 'Continuar Jogo' : 'Pausar Jogo'}
         </button>
-        <button className={`sos-button ${isSOSActive ? 'active' : ''}`} onClick={handleSOS} disabled={!isSOSActive} title={isSOSActive ? "Ativar S.O.S." : !hasFundsForSOS ? "Sem SpaceCoins para S.O.S." : "S.O.S. indisponível"}>
+        <button
+          type="button"
+          className={`sos-button ${isSOSActive ? 'active' : ''}`}
+          onClick={(e) => { e.preventDefault(); handleSOS(); }}
+          disabled={!isSOSActive}
+          title={isSOSActive ? "Ativar S.O.S." : !hasFundsForSOS ? "Sem SpaceCoins para S.O.S." : "S.O.S. indisponível"}
+        >
           S.O.S.
         </button>
         <img src="/images/HVS-21.png" alt="HVS-21" className="hvs-logo" onError={(e) => { e.target.style.display = 'none'; }} />
@@ -425,8 +442,8 @@ const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano }) => {
           </div>
         </div>
         <div className="store-action-buttons" style={{ position: 'relative', justifyContent: 'center', marginTop: '20px', bottom: 'auto', right: 'auto' }}>
-          <button className="buy-button action-button-mudar" onClick={onMudarRota} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>MUDAR ROTA</button>
-          <button className="buy-button action-button-seguir" onClick={onSeguirPlano} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>SEGUIR PLANO</button>
+          <button type="button" className="buy-button action-button-mudar" onClick={(e) => { e.preventDefault(); onMudarRota(); }} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>MUDAR ROTA</button>
+          <button type="button" className="buy-button action-button-seguir" onClick={(e) => { e.preventDefault(); onSeguirPlano(); }} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>SEGUIR PLANO</button>
         </div>
       </div>
     </div>
@@ -1852,8 +1869,8 @@ const DecolagemMarte = () => {
             <p style={{ color: '#fff', fontSize: '1.1em', lineHeight: '1.5' }}>Para recuperar a integridade de <strong style={{ color: '#00ff00' }}> TODOS OS SISTEMAS </strong> da nave, custará o valor de <strong style={{ color: 'yellow', fontSize: '1.1em' }}> {sosCost.toLocaleString('pt-BR')} SpaceCoins</strong>.</p>
             <p style={{ color: '#fff', fontSize: '1.1em', lineHeight: '1.5' }}>Você aceita?</p>
             <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '30px' }}>
-              <button onClick={handleCancelSOS} style={{ padding: '10px 20px', background: 'linear-gradient(145deg, #ff8c00, #e67300)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold', fontSize: '1em' }}>Cancelar</button>
-              <button onClick={handleConfirmSOS} style={{ padding: '10px 20px', background: 'linear-gradient(145deg, #00a800, #008500)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold', fontSize: '1em' }}>OK</button>
+              <button type="button" onClick={handleCancelSOS} style={{ padding: '10px 20px', background: 'linear-gradient(145deg, #ff8c00, #e67300)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold', fontSize: '1em' }}>Cancelar</button>
+              <button type="button" onClick={handleConfirmSOS} style={{ padding: '10px 20px', background: 'linear-gradient(145deg, #00a800, #008500)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold', fontSize: '1em' }}>OK</button>
             </div>
           </div>
         </div>
@@ -1866,8 +1883,8 @@ const DecolagemMarte = () => {
               Deseja transferir <strong style={{ color: '#0bf' }}>{processadorO2} unidades</strong> do Processador de <strong style={{ fontSize: '1.3em', color: '#0bf', textShadow: '0 0 8px #0bf' }}>O</strong><sub style={{ fontSize: '0.77em', verticalAlign: 'sub', color: '#0bf', textShadow: '0 0 8px #0bf' }}>2</sub> para o suporte de vida da nave?
             </p>
             <div style={{ display: 'flex', justifyContent: 'space-around', marginTop: '30px' }}>
-              <button onClick={() => setShowO2Modal(false)} style={{ padding: '10px 20px', background: '#444', color: 'white', border: '1px solid #777', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold' }}>CANCELAR</button>
-              <button onClick={() => { handleTransferO2(); setShowO2Modal(false); }} style={{ padding: '10px 20px', background: 'linear-gradient(145deg, #0055ff, #0033cc)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold', boxShadow: '0 0 10px #0055ff' }}>CONFIRMAR</button>
+              <button type="button" onClick={() => setShowO2Modal(false)} style={{ padding: '10px 20px', background: '#444', color: 'white', border: '1px solid #777', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold' }}>CANCELAR</button>
+              <button type="button" onClick={() => { handleTransferO2(); setShowO2Modal(false); }} style={{ padding: '10px 20px', background: 'linear-gradient(145deg, #0055ff, #0033cc)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontFamily: "'Courier New', monospace", fontWeight: 'bold', boxShadow: '0 0 10px #0055ff' }}>CONFIRMAR</button>
             </div>
           </div>
         </div>
@@ -1877,7 +1894,7 @@ const DecolagemMarte = () => {
       {showTeamModal && teamData && (
         <div className="modal-overlay" style={{ zIndex: 1002 }}>
           <div className="modal-content team-modal-details">
-            <button className="close-button" onClick={() => setShowTeamModal(false)}>×</button>
+            <button type="button" className="close-button" onClick={() => setShowTeamModal(false)}>×</button>
             <h2 style={{ color: '#ff9800', textAlign: 'center', marginBottom: '5px' }}>EQUIPE {teamData.code}</h2>
             <p style={{ textAlign: 'center', color: '#aaa', marginBottom: '20px' }}>{teamData.description}</p>
 
