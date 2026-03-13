@@ -86,6 +86,23 @@ function AppContent() {
 
   const prevPathRef = useRef(location.pathname);
 
+  // --- NOVO: BLOQUEIO GLOBAL DO BOTÃO DIREITO ---
+  useEffect(() => {
+    const handleContextMenu = (e) => {
+      // Bloqueia o menu de contexto apenas se não for administrador
+      if (!user?.administrador) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener("contextmenu", handleContextMenu);
+
+    return () => {
+      document.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, [user]);
+  // ----------------------------------------------
+
   const enterFullScreen = () => {
     const element = document.documentElement;
     if (element.requestFullscreen) {
