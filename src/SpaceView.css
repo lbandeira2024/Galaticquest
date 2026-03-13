@@ -6,7 +6,8 @@
   left: 0;
   overflow: hidden;
   z-index: 1;
-  background: radial-gradient(ellipse at center, #020010 0%, #000000 100%);
+  /* NOVO: Fundo universo mais realista usando um gradiente linear em ângulo para simular a luz de galáxias distantes */
+  background: linear-gradient(135deg, #05070a 0%, #000000 40%, #010208 100%);
   will-change: transform;
 }
 
@@ -19,10 +20,12 @@
   left: -50%;
   z-index: 0;
   pointer-events: none;
+  /* NOVO: Adicionado um toque violeta/esverdeado muito sutil (última linha) para simular poeira cósmica profunda */
   background:
     radial-gradient(ellipse at 50% 50%, rgba(15, 20, 45, 0.3) 0%, transparent 45%),
     radial-gradient(ellipse at 40% 60%, rgba(10, 15, 30, 0.2) 0%, transparent 40%),
-    radial-gradient(ellipse at 60% 40%, rgba(20, 10, 30, 0.2) 0%, transparent 40%);
+    radial-gradient(ellipse at 60% 40%, rgba(20, 10, 30, 0.2) 0%, transparent 40%),
+    radial-gradient(ellipse at 30% 30%, rgba(20, 5, 30, 0.05) 0%, transparent 50%);
   filter: blur(40px);
   transform: rotate(-15deg);
   opacity: 0.6;
@@ -84,7 +87,8 @@
 }
 
 .space-view-container.warp-active {
-  background: radial-gradient(ellipse at center, #000010 0%, #000000 100%);
+  /* NOVO: Deixando o warp ligeiramente mais imersivo sem clarear demais o preto */
+  background: radial-gradient(ellipse at center, #020215 0%, #000000 100%);
 }
 
 .space-view-container.warp-active .galactic-nebula {

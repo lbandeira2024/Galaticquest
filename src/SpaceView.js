@@ -98,20 +98,25 @@ const getPlanetScale = (planetName) => {
   return 1.0;
 };
 
+// NOVO: Geração de estrelas com variável de profundidade (isDeepSpace) para contraste
 const generateStar = (width, height, isWarping) => {
   const x = (Math.random() - 0.5) * width;
   const yBias = Math.random() - 0.5;
   const y = (yBias * yBias * yBias) * height * 1.0;
 
+  // 70% das estrelas ficam no fundo (mais fracas e menores) para evitar tela "cinza"
+  const isDeepSpace = Math.random() > 0.3;
+
   return {
     x,
     y,
     z: Math.random() * width,
-    size: Math.random() * 2 + 0.8,
+    size: (Math.random() * 2 + 0.8) * (isDeepSpace ? 0.6 : 1), // Estrelas do fundo são menores
     baseSpeed: 1,
     hueIndex: Math.floor(Math.random() * 5),
     twinkleSpeed: Math.random() * 0.05 + 0.01,
-    twinklePhase: Math.random() * Math.PI * 2
+    twinklePhase: Math.random() * Math.PI * 2,
+    baseAlpha: isDeepSpace ? (Math.random() * 0.3 + 0.1) : (Math.random() * 0.6 + 0.4) // Alfa base baseado na profundidade
   };
 };
 
@@ -164,7 +169,6 @@ const SpaceView = ({
 
   useEffect(() => {
     if (starsRef.current.length === 0) {
-      // Ajustado para 800 estrelas para equilibrar com o fundo realista
       starsRef.current = Array.from({ length: 800 }, () => generateStar(window.innerWidth, window.innerHeight, false));
     }
   }, []);
@@ -362,7 +366,9 @@ const SpaceView = ({
         star.z -= moveDistance;
 
         star.twinklePhase += star.twinkleSpeed;
-        const twinkleAlpha = 0.4 + Math.abs(Math.sin(star.twinklePhase)) * 0.6;
+
+        // NOVO: Aplica o baseAlpha para garantir o efeito de profundidade visual (menos opacidade nas estrelas distantes)
+        const twinkleAlpha = star.baseAlpha * (0.4 + Math.abs(Math.sin(star.twinklePhase)) * 0.6);
 
         if (star.z <= 0) {
           Object.assign(star, generateStar(width, height, isWarping));
