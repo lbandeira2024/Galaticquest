@@ -98,6 +98,26 @@ const getPlanetScale = (planetName) => {
   return 1.0;
 };
 
+// Função auxiliar para gerar estrelas com agrupamento (Milky Way effect)
+const generateStar = (width, height, isWarping) => {
+  const x = (Math.random() - 0.5) * width;
+
+  // Viés cúbico: concentra as estrelas mais próximas de Y=0 (centro da tela)
+  const yBias = Math.random() - 0.5;
+  const y = (yBias * yBias * yBias) * height * 2.5; // Espalha um pouco, mas adensa no meio
+
+  return {
+    x,
+    y,
+    z: Math.random() * width,
+    size: Math.random() * 2 + 0.5,
+    baseSpeed: 1,
+    hueIndex: Math.floor(Math.random() * 5),
+    twinkleSpeed: Math.random() * 0.05 + 0.01,
+    twinklePhase: Math.random() * Math.PI * 2
+  };
+};
+
 const SpaceView = ({
   distance = 225000000,
   forceLarge = false,
@@ -147,14 +167,8 @@ const SpaceView = ({
 
   useEffect(() => {
     if (starsRef.current.length === 0) {
-      starsRef.current = Array.from({ length: 250 }, () => ({
-        x: (Math.random() - 0.5) * window.innerWidth,
-        y: (Math.random() - 0.5) * window.innerHeight,
-        z: Math.random() * window.innerWidth,
-        size: Math.random() * 2 + 1,
-        baseSpeed: 1,
-        hueIndex: Math.floor(Math.random() * 5)
-      }));
+      // Aumentamos o número de estrelas para dar volume à galáxia
+      starsRef.current = Array.from({ length: 400 }, () => generateStar(window.innerWidth, window.innerHeight, false));
     }
   }, []);
 
@@ -326,25 +340,19 @@ const SpaceView = ({
           }
         }
 
-        // Se for proximacentaurib, aplica um desvio maior para enquadrar a ESTRELA GIGANTE
         let transformStr = `scale(${scale})`;
         if (planetNameNormalized === 'proximacentaurib') {
-          // Calcula o fator de deslocamento
           const offsetFactor = Math.max(0, 1 - (visualDist / 1000000));
-          // Deslocamos ainda mais para a direita (25%) e baixo (20%) 
-          // para dar espaço para a estrela que agora está muito maior
           const translateX = 25 * offsetFactor;
           const translateY = 20 * offsetFactor;
-
           transformStr = `translate(${translateX}%, ${translateY}%) scale(${scale})`;
         }
 
         scaleWrapperRef.current.style.transform = transformStr;
       }
 
-      ctx.globalAlpha = 1.0;
-      ctx.fillStyle = '#000014';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Limpa o canvas (agora transparente para mostrar a nebulosa do CSS)
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const width = canvas.width;
       const height = canvas.height;
@@ -357,20 +365,29 @@ const SpaceView = ({
         const moveDistance = (speedFactor + (star.baseSpeed || 0)) * dt;
         star.z -= moveDistance;
 
+        // Animação de cintilação (twinkle)
+        star.twinklePhase += star.twinkleSpeed;
+        const twinkleAlpha = 0.4 + Math.abs(Math.sin(star.twinklePhase)) * 0.6; // Varia de 0.4 a 1.0
+
         if (star.z <= 0) {
+          Object.assign(star, generateStar(width, height, isWarping));
           star.z = width;
-          star.x = (Math.random() - 0.5) * width;
-          star.y = (Math.random() - 0.5) * height;
-          if (isWarping) star.hueIndex = Math.floor(Math.random() * 5);
         }
 
         const scale = 400 / (star.z + 1);
         let drawX = star.x;
         let drawY = star.y;
 
+        // Inclinação do braço galáctico acompanhando o movimento
         if (!isWarping) {
           drawX += velX;
           drawY += velY;
+          // Adiciona uma leve rotação global para as estrelas casarem com a nebulosa do CSS
+          const angle = -15 * (Math.PI / 180);
+          const rotatedX = drawX * Math.cos(angle) - drawY * Math.sin(angle);
+          const rotatedY = drawX * Math.sin(angle) + drawY * Math.cos(angle);
+          drawX = rotatedX;
+          drawY = rotatedY;
         }
 
         const x = centerX + drawX * scale;
@@ -379,7 +396,9 @@ const SpaceView = ({
         if (x < 0 || x > width || y < 0 || y > height) continue;
 
         const size = scale * star.size * 0.3;
-        ctx.globalAlpha = Math.min(1.0, scale * 1.5);
+
+        // Aplica o twinkle no alpha geral da estrela
+        ctx.globalAlpha = Math.min(1.0, scale * 1.5) * (isWarping ? 1 : twinkleAlpha);
 
         if (starSpeedHigh) {
           ctx.fillStyle = STAR_COLORS_HSL[star.hueIndex];
@@ -406,6 +425,9 @@ const SpaceView = ({
 
   return (
     <div className={`space-view-container ${isWarpActive ? 'warp-active' : ''} ${isPaused ? 'paused' : ''}`}>
+      {/* CAMADA DA NEBULOSA */}
+      <div className="galactic-nebula"></div>
+
       <div className={`warp-overlay-container ${isWarpActive && !isPaused ? 'active' : ''}`}>
         <div className="tunnel-effect"></div>
         <div className="warp-horizon-constant"></div>
@@ -446,7 +468,6 @@ const SpaceView = ({
             transformStyle: 'preserve-3d'
           }}
         >
-          {/* APENAS RENDERIZA O SOL SE FOR PROXIMA CENTAURI B */}
           {planetName === 'proximacentaurib' && (
             <video
               src="/images/Planets/solProximaB.webm"
@@ -456,13 +477,13 @@ const SpaceView = ({
               playsInline
               style={{
                 position: 'absolute',
-                width: '180%',        /* Aumentado de 60% para 180% - Estrela Gigante! */
+                width: '180%',
                 height: '180%',
-                top: '-60%',          /* Movido mais para cima para compensar o tamanho */
-                left: '-70%',         /* Movido mais para a esquerda */
+                top: '-60%',
+                left: '-70%',
                 opacity: 1,
                 zIndex: 5,
-                transform: 'translateZ(-20px)', /* Reduzido de -100px para -20px para não encolher com a perspectiva 3D */
+                transform: 'translateZ(-20px)',
                 filter: 'drop-shadow(0 0 80px rgba(255, 160, 50, 0.9))',
                 mixBlendMode: 'screen',
                 pointerEvents: 'none'
