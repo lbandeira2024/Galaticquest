@@ -965,8 +965,6 @@ const DecolagemMarte = () => {
       setArrivedAtMars(false);
       setIsFinalApproach(false);
 
-      // triggerMinervaInterplanetarySpeed(); // Removido para não disparar áudio/Minerva ao mudar rota em voo
-
       // DESTRAVA A NAVE APÓS MUDANÇA DE ROTA NO MEIO DO VOO
       setTimeout(() => {
         routeChangeLockRef.current = false;
@@ -1152,27 +1150,51 @@ const DecolagemMarte = () => {
   }, [isPaused, processadorO2, playSound]);
 
   const isO2TransferDisabled = isPaused || processadorO2 === 0;
-  const hasStartedAudioRef = useRef(false);
+
+  // --- CONTROLE BLINDADO DA SEQUÊNCIA DE DECOLAGEM ---
+  const sequenceStarted = useRef(false);
+  const isMounted = useRef(true);
+
+  // Garante que não vamos tentar mudar a tela se o usuário sair do jogo no meio do voo
+  useEffect(() => {
+    isMounted.current = true;
+    return () => { isMounted.current = false; };
+  }, []);
 
   useEffect(() => {
     if (isLoadingRoute) return;
+
+    // Se já não estiver na Terra, vai direto pro espaço (Pula a decolagem)
     if (routeIndex > 0) {
-      setMainDisplayState('stars');
-      setMonitorState('on');
-      setTravelStarted(true);
-      hasStartedAudioRef.current = true;
+      if (!sequenceStarted.current) {
+        sequenceStarted.current = true;
+        setMainDisplayState('stars');
+        setMonitorState('on');
+        setTravelStarted(true);
+      }
       return;
     }
-    unlockAudio();
-    if (!hasStartedAudioRef.current) {
-      hasStartedAudioRef.current = true;
+
+    // Sequência de Decolagem Inicial (Rodará estritamente UMA vez)
+    if (!sequenceStarted.current) {
+      sequenceStarted.current = true; // Trava a sequência
+
+      unlockAudio();
       const audioUrl = `/sounds/decolagem.mp3?t=${Date.now()}`;
       playTrack(audioUrl, { loop: false, isPrimary: true });
+
+      setTimeout(() => {
+        if (isMounted.current) { setMainDisplayState('clouds'); setTravelStarted(true); }
+      }, 13000);
+
+      setTimeout(() => {
+        if (isMounted.current) { setMainDisplayState('static'); setMonitorState('static'); }
+      }, 23000);
+
+      setTimeout(() => {
+        if (isMounted.current) { stopAllAudio(); setMainDisplayState('stars'); setMonitorState('on'); }
+      }, 45000);
     }
-    const monitorTimer1 = setTimeout(() => { if (!isPausedRef.current) { setMainDisplayState('clouds'); setTravelStarted(true); } }, 13000);
-    const monitorTimer2 = setTimeout(() => { if (!isPausedRef.current) { setMainDisplayState('static'); setMonitorState('static'); } }, 23000);
-    const monitorTimer3 = setTimeout(() => { if (!isPausedRef.current) { stopAllAudio(); setMainDisplayState('stars'); setMonitorState('on'); } }, 45000);
-    return () => { clearTimeout(monitorTimer1); clearTimeout(monitorTimer2); clearTimeout(monitorTimer3); };
   }, [isLoadingRoute, routeIndex, unlockAudio, playTrack, stopAllAudio]);
 
   useEffect(() => {
