@@ -6,12 +6,11 @@
   left: 0;
   overflow: hidden;
   z-index: 1;
-  /* Fundo mais profundo para contrastar com a Via Láctea */
   background: radial-gradient(ellipse at center, #020010 0%, #000000 100%);
   will-change: transform;
 }
 
-/* === EFEITO VIA LÁCTEA (NEBULOSA) === */
+/* === EFEITO VIA LÁCTEA (NEBULOSA) MODO SUPER VISÍVEL === */
 .galactic-nebula {
   position: absolute;
   width: 200%;
@@ -20,15 +19,13 @@
   left: -50%;
   z-index: 0;
   pointer-events: none;
-  /* Gradientes que simulam o gás e a poeira espacial do núcleo galáctico */
   background:
-    radial-gradient(ellipse at 50% 50%, rgba(20, 30, 80, 0.15) 0%, transparent 40%),
-    radial-gradient(ellipse at 40% 60%, rgba(80, 30, 60, 0.1) 0%, transparent 35%),
-    radial-gradient(ellipse at 60% 40%, rgba(20, 60, 80, 0.1) 0%, transparent 35%);
-  filter: blur(40px);
+    radial-gradient(ellipse at 50% 50%, rgba(90, 40, 200, 0.6) 0%, transparent 45%),
+    radial-gradient(ellipse at 40% 60%, rgba(30, 120, 255, 0.5) 0%, transparent 40%),
+    radial-gradient(ellipse at 60% 40%, rgba(200, 30, 90, 0.4) 0%, transparent 40%);
+  filter: blur(30px);
   transform: rotate(-15deg);
-  /* Inclinação clássica do braço da Via Láctea */
-  opacity: 0.8;
+  opacity: 1 !important;
   mix-blend-mode: screen;
 }
 
@@ -91,8 +88,7 @@
 }
 
 .space-view-container.warp-active .galactic-nebula {
-  opacity: 0.2;
-  /* Esconde um pouco a nebulosa durante a dobra */
+  opacity: 0.2 !important;
   transition: opacity 1s ease;
 }
 
