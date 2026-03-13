@@ -280,7 +280,7 @@
         {
             "nome": "Como “Descascar Este Abacaxi” Agora, Kopenawa?",
             "id": "CSD2",
-            "descricao": "Um desacordo sobre a gestão de um problema surge entre Aquiles e Kopenawa, afetando a motivação da equipe em meio a uma missão crítica de colonização.",
+            "descricao": "O espaço sideral tem sido repleto de novidades científicas aos vinte e seis astronautas que viajam entre as Estações Espaciais, especialmente para a equipe do líder Kopenawa. Mas nem tudo são flores para uma equipe como a dele, que tem se mostrado harmoniosa em meio aos desafios de ter que cumprir uma série de protocolos técnicos, experimentos e novas implantações que visam a finalização da montagem da Estação orbital. \n\nOutro dia, a astronauta convidada Zahy, indígena, procurou Kopenawa para reclamar do assédio moral e sexual que vem sofrendo há alguns meses de um outro astronauta especialista - o Gorjah Walker. Ele atua na equipe liderada por Aquiles, que está momentaneamente vivendo numa outra grande Estação Espacial e que vem passando por reparos. \n\nConta Zahy a Kopenawa que numa de suas investidas, ao fechar a porta da sala de controle, o astronauta Gorja tentou lhe tirar a roupa acuando-a num canto da nave quando não havia ninguém por perto. Zahy confessa que se sentiu constrangida, mas acabou conseguindo escapar no final. Diz ela, que o fato já aconteceu outras vezes, mas diferentemente desta em que ele foi bem mais ousado e sem qualquer consentimento de sua parte. \n\nZahy pediu a Kopenawa que o fato não gerasse nenhuma punição grave a Gorjah que tem afinal um papel importante para toda rede de estações. \n\nKopenawa responde à Zahy que precisa pensar para que não tome nenhuma decisão precipitada que afete o ambiente. Quer preservar os envolvidos, sem por em risco suas contribuições como especialistas na missão, especialmente Gorjah.\n\nKopenawa como líder, pede discrição a Zahy sobre o assunto.\n\nApós alguns dias, Kopenawa, que tem o hábito de caminhar para pensar melhor as coisas, encontrava-se bem introspectivo. Decide então, conversar primeiro com Aquiles, e depois com Gorjah. \n\nNo dia seguinte, Kopenawa toma conhecimento no cafezinho por Marek que Zahy comentou o episódio com Farna, que decidiu assumir as dores da colega divulgando o ocorrido a todas as astronautas das estações. Na atitude que tomou, ela queria “punir” Gorjah para que as astronautas o ignorassem nos eventos sociais virtuais que acontece entre as estações. Já pesado o ambiente, Kopenawa percebeu que a desconfiança em relação aos homens tomou conta das astronautas. \n\nSem se esquecer da tradição xamã, Kopenawa decidiu fazer seu ritual de infância e depois caminhar no espaço para refletir sobre tudo. Procurou Aquiles, o líder de Gorjah, que o escutou atentamente. Nesta conversa: \n\nUm desacordo sobre a gestão de um problema surge entre Aquiles e Kopenawa, afetando a motivação da equipe em meio a uma missão crítica de colonização.",
             "planeta": "Ceres",
             "personagens": [
                 "aquiles",
@@ -419,7 +419,7 @@
                 },
                 {
                     "personagemId": "aquiles",
-                    "texto": "A vida é assim, Atena. Aqui é uma organização – a ACEE, se esqueceu? .. Você mais parece uma divindade de sabedoria e ",
+                    "texto": "Avida é assim, Atena. Aqui é uma organização – a ACEE, se esqueceu? .. Você mais parece uma divindade de sabedoria e ",
                     "duracao": 7000
                 },
                 {
@@ -2286,7 +2286,7 @@
             "dialogo": [
                 {
                     "personagemId": "aquiles",
-                    "texto": "...Vejo que vocês querem consertar o mundo. Não temos habilidade para um assunto como este. Cadê o Marek que não dá as caras?... Gente, não somos os guardiões de nada, não dá para estar em todos os lugares e ver o que está acontecendo. É difícil segurar uma tropa tão heterogênea. O ramadã vai passar e tudo voltará ao normal. Quanto a produtividade, sim, precisamos repensar o que fazer até Hazza Alli voltar à rotina. Agora, não me crucifiquem por eu ser uma pessoa franca.",
+                    "texto": "...Vejo que vocês querem consertar o mundo. Não temos habilidade para um assunto como este. Cadê o Marek que não dá as caras?... Gente, não somos os guardiões de nada, não dá para estar em todos os lugares e ver o que está acontecendo. É difícil segurar uma tropa tão heterogênea. O ramadã vai passar e tudo voltará normal. Quanto a produtividade, sim, precisamos repensar o que fazer até Hazza Alli voltar à rotina. Agora, não me crucifiquem por eu ser uma pessoa franca.",
                     "duracao": 25000
                 },
                 {
