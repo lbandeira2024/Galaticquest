@@ -98,19 +98,16 @@ const getPlanetScale = (planetName) => {
   return 1.0;
 };
 
-// Função auxiliar para gerar estrelas com agrupamento (Milky Way effect)
 const generateStar = (width, height, isWarping) => {
   const x = (Math.random() - 0.5) * width;
-
-  // Viés cúbico: concentra as estrelas mais próximas de Y=0 (centro da tela)
   const yBias = Math.random() - 0.5;
-  const y = (yBias * yBias * yBias) * height * 2.5; // Espalha um pouco, mas adensa no meio
+  const y = (yBias * yBias * yBias) * height * 1.0;
 
   return {
     x,
     y,
     z: Math.random() * width,
-    size: Math.random() * 2 + 0.5,
+    size: Math.random() * 2 + 0.8,
     baseSpeed: 1,
     hueIndex: Math.floor(Math.random() * 5),
     twinkleSpeed: Math.random() * 0.05 + 0.01,
@@ -167,8 +164,8 @@ const SpaceView = ({
 
   useEffect(() => {
     if (starsRef.current.length === 0) {
-      // Aumentamos o número de estrelas para dar volume à galáxia
-      starsRef.current = Array.from({ length: 400 }, () => generateStar(window.innerWidth, window.innerHeight, false));
+      // Ajustado para 800 estrelas para equilibrar com o fundo realista
+      starsRef.current = Array.from({ length: 800 }, () => generateStar(window.innerWidth, window.innerHeight, false));
     }
   }, []);
 
@@ -351,7 +348,6 @@ const SpaceView = ({
         scaleWrapperRef.current.style.transform = transformStr;
       }
 
-      // Limpa o canvas (agora transparente para mostrar a nebulosa do CSS)
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const width = canvas.width;
@@ -365,9 +361,8 @@ const SpaceView = ({
         const moveDistance = (speedFactor + (star.baseSpeed || 0)) * dt;
         star.z -= moveDistance;
 
-        // Animação de cintilação (twinkle)
         star.twinklePhase += star.twinkleSpeed;
-        const twinkleAlpha = 0.4 + Math.abs(Math.sin(star.twinklePhase)) * 0.6; // Varia de 0.4 a 1.0
+        const twinkleAlpha = 0.4 + Math.abs(Math.sin(star.twinklePhase)) * 0.6;
 
         if (star.z <= 0) {
           Object.assign(star, generateStar(width, height, isWarping));
@@ -378,11 +373,9 @@ const SpaceView = ({
         let drawX = star.x;
         let drawY = star.y;
 
-        // Inclinação do braço galáctico acompanhando o movimento
         if (!isWarping) {
           drawX += velX;
           drawY += velY;
-          // Adiciona uma leve rotação global para as estrelas casarem com a nebulosa do CSS
           const angle = -15 * (Math.PI / 180);
           const rotatedX = drawX * Math.cos(angle) - drawY * Math.sin(angle);
           const rotatedY = drawX * Math.sin(angle) + drawY * Math.cos(angle);
@@ -397,7 +390,6 @@ const SpaceView = ({
 
         const size = scale * star.size * 0.3;
 
-        // Aplica o twinkle no alpha geral da estrela
         ctx.globalAlpha = Math.min(1.0, scale * 1.5) * (isWarping ? 1 : twinkleAlpha);
 
         if (starSpeedHigh) {
@@ -425,7 +417,6 @@ const SpaceView = ({
 
   return (
     <div className={`space-view-container ${isWarpActive ? 'warp-active' : ''} ${isPaused ? 'paused' : ''}`}>
-      {/* CAMADA DA NEBULOSA */}
       <div className="galactic-nebula"></div>
 
       <div className={`warp-overlay-container ${isWarpActive && !isPaused ? 'active' : ''}`}>

@@ -10,7 +10,7 @@
   will-change: transform;
 }
 
-/* === EFEITO VIA LÁCTEA (NEBULOSA) MODO SUPER VISÍVEL === */
+/* === EFEITO VIA LÁCTEA (NEBULOSA) MODO REALISTA SUTIL === */
 .galactic-nebula {
   position: absolute;
   width: 200%;
@@ -20,12 +20,12 @@
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse at 50% 50%, rgba(90, 40, 200, 0.6) 0%, transparent 45%),
-    radial-gradient(ellipse at 40% 60%, rgba(30, 120, 255, 0.5) 0%, transparent 40%),
-    radial-gradient(ellipse at 60% 40%, rgba(200, 30, 90, 0.4) 0%, transparent 40%);
-  filter: blur(30px);
+    radial-gradient(ellipse at 50% 50%, rgba(15, 20, 45, 0.3) 0%, transparent 45%),
+    radial-gradient(ellipse at 40% 60%, rgba(10, 15, 30, 0.2) 0%, transparent 40%),
+    radial-gradient(ellipse at 60% 40%, rgba(20, 10, 30, 0.2) 0%, transparent 40%);
+  filter: blur(40px);
   transform: rotate(-15deg);
-  opacity: 1 !important;
+  opacity: 0.6;
   mix-blend-mode: screen;
 }
 
