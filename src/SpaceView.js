@@ -18,7 +18,7 @@ const planetImageMap = {
   kaapa: '/images/Planets/kaapa-rotacionando.gif',
   saturno: '/images/Planets/saturno-rotacionando.webm',
   urano: '/images/Planets/urano-rotacionando.webm',
-  netuno: '/images/Planets/Netuno-rotacionando.gif',
+  netuno: '/images/Planets/Netuno-rotacionando.webm',
   plutao: '/images/Planets/plutao-rotacionando.webm',
   vesta: '/images/Planets/vesta-rotacionando.webm',
   io: '/images/Planets/io-rotacionando.gif',

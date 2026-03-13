@@ -253,7 +253,7 @@ const GalacticVirtudesPage = ({ onClose }) => {
 
                         <div className="glossary-item">
                             <h4>ENGAJAMENTO:</h4>
-                            <p>Corresponde à qualidade e o grau dos comportamentos e posturas assumidas nas decisões tomadas pela equipe de astronautas, observando os contextos-situações. Resume uma energia humana altamente positiva, cooperativa e inclusiva.</p>
+                            <p>Corresponde à qualidade e o grau dos comportamentos e posturas assumidas nas decisões tomadas pela equipe de astronautas, observando os contextos-situações. Resume uma energia humana altamente positiva, cooperativa e inclusiva que reforça a conexão humana.</p>
                         </div>
 
                         <div className="glossary-item">
@@ -263,7 +263,7 @@ const GalacticVirtudesPage = ({ onClose }) => {
 
                         <div className="glossary-item">
                             <h4>INTERDEPENDÊNCIA:</h4>
-                            <p>Refere-se ao grau de relacionamento e a intensidade de ajuda entre as equipes que jogam o game.</p>
+                            <p>Refere-se ao grau de relacionamento e a intensidade de ajuda entre as equipes de astronautas durante a missão espacial.</p>
                         </div>
 
                         <h4>OUTROS ELEMENTOS IMPORTANTES PARA A JOGABILIDADE:</h4>
