@@ -84,6 +84,7 @@ const PLANET_MUSIC_CONFIG = {
 };
 
 const STAR_HUES = [210, 120, 30, 0, 60];
+const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 80%)`);
 
 const getPlanetScale = (planetName) => {
   const giants = ['jupiter', 'saturno', 'netuno'];
@@ -97,24 +98,27 @@ const getPlanetScale = (planetName) => {
   return 1.0;
 };
 
-const generateStar = (width, height, isWarping) => {
-  const x = (Math.random() - 0.5) * width;
+// OTIMIZAÇÃO: Recicla a estrela mutando as suas propriedades para não usar o Garbage Collector
+const resetStar = (star, width, height, isWarping) => {
+  star.x = (Math.random() - 0.5) * width;
   const yBias = Math.random() - 0.5;
-  const y = (yBias * yBias * yBias) * height * 1.0;
+  star.y = (yBias * yBias * yBias) * height * 1.0;
+  star.z = width;
 
   const isDeepSpace = Math.random() > 0.3;
+  star.size = (Math.random() * 2 + 0.8) * (isDeepSpace ? 0.6 : 1);
+  star.hueIndex = Math.floor(Math.random() * 5);
+  star.twinkleSpeed = Math.random() * 0.05 + 0.01;
+  star.twinklePhase = Math.random() * Math.PI * 2;
+  star.baseAlpha = isDeepSpace ? (Math.random() * 0.3 + 0.1) : (Math.random() * 0.6 + 0.4);
+};
 
-  return {
-    x,
-    y,
-    z: Math.random() * width,
-    size: (Math.random() * 2 + 0.8) * (isDeepSpace ? 0.6 : 1),
-    baseSpeed: 1,
-    hueIndex: Math.floor(Math.random() * 5),
-    twinkleSpeed: Math.random() * 0.05 + 0.01,
-    twinklePhase: Math.random() * Math.PI * 2,
-    baseAlpha: isDeepSpace ? (Math.random() * 0.3 + 0.1) : (Math.random() * 0.6 + 0.4)
-  };
+const generateStar = (width, height, isWarping) => {
+  const star = { baseSpeed: 1 };
+  resetStar(star, width, height, isWarping);
+  // O z inicial deve ser aleatório para preencher o ecrã
+  star.z = Math.random() * width;
+  return star;
 };
 
 const SpaceView = ({
@@ -248,6 +252,8 @@ const SpaceView = ({
 
     const canvas = canvasRef.current;
     if (!canvas) return;
+
+    // Desativar canal alpha do contexto otimiza renderizações pesadas do navegador
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
@@ -261,20 +267,20 @@ const SpaceView = ({
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
-
     lastTimeRef.current = performance.now();
     const typeScale = getPlanetScale(planetName);
+
+    // OTIMIZAÇÃO: Pré-cálculo da matemática de rotação fora do loop (só muda 1 vez, nunca varia)
+    const angleRotation = -15 * (Math.PI / 180);
+    const cosAngle = Math.cos(angleRotation);
+    const sinAngle = Math.sin(angleRotation);
 
     const animate = (timestamp) => {
       const now = timestamp || performance.now();
 
-      // OTIMIZAÇÃO 1: Limitamos o dt para o equivalente a 50 FPS (0.02s)
-      // Isso impede as estrelas de darem "saltos" visíveis se o React travar a tela
       let dt = (now - lastTimeRef.current) / 1000;
       lastTimeRef.current = now;
-      dt = Math.min(dt, 0.02);
+      dt = Math.min(dt, 0.02); // Limita saltos gigantes (max 50fps gap)
 
       const diff = targetStarSpeedRef.current - currentStarSpeedRef.current;
       if (Math.abs(diff) < 0.1) currentStarSpeedRef.current = targetStarSpeedRef.current;
@@ -351,25 +357,31 @@ const SpaceView = ({
         scaleWrapperRef.current.style.transform = transformStr;
       }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+      // Preparação das variáveis pesadas para o loop
       const width = canvas.width;
       const height = canvas.height;
+      const centerX = width / 2;
+      const centerY = height / 2;
       const starArray = starsRef.current;
       const velX = velocity.current.x * 0.1;
       const velY = velocity.current.y * 0.1;
 
+      // Limpeza eficiente
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, width, height);
+
+      // OTIMIZAÇÃO: Loop redesenhado para evitar GC e concatenação de strings
       for (let i = 0; i < starArray.length; i++) {
         const star = starArray[i];
-        const moveDistance = (speedFactor + (star.baseSpeed || 0)) * dt;
-        star.z -= moveDistance;
 
+        star.z -= (speedFactor + star.baseSpeed) * dt;
         star.twinklePhase += star.twinkleSpeed;
+
         const twinkleAlpha = star.baseAlpha * (0.4 + Math.abs(Math.sin(star.twinklePhase)) * 0.6);
 
         if (star.z <= 0) {
-          Object.assign(star, generateStar(width, height, isWarping));
-          star.z = width;
+          // Utiliza a função resetStar para evitar despejo de objetos na memória (Garbage Collector)
+          resetStar(star, width, height, isWarping);
         }
 
         const scale = 400 / (star.z + 1);
@@ -379,9 +391,9 @@ const SpaceView = ({
         if (!isWarping) {
           drawX += velX;
           drawY += velY;
-          const angle = -15 * (Math.PI / 180);
-          const rotatedX = drawX * Math.cos(angle) - drawY * Math.sin(angle);
-          const rotatedY = drawX * Math.sin(angle) + drawY * Math.cos(angle);
+          // Usa trigonometria pré-calculada para evitar 800 Math.cos por frame
+          const rotatedX = drawX * cosAngle - drawY * sinAngle;
+          const rotatedY = drawX * sinAngle + drawY * cosAngle;
           drawX = rotatedX;
           drawY = rotatedY;
         }
@@ -393,18 +405,20 @@ const SpaceView = ({
 
         const size = scale * star.size * 0.3;
 
-        // OTIMIZAÇÃO 2: Em vez de trocar o estado globalAlpha do Canvas a cada laço, 
-        // injetamos na própria cor. Isso alivia a placa de vídeo consideravelmente.
-        const finalAlpha = Math.min(1.0, scale * 1.5) * (isWarping ? 1 : twinkleAlpha);
+        // Define transparência global (MUITO mais rápido que parsear string rgba/hsla)
+        ctx.globalAlpha = Math.min(1.0, scale * 1.5) * (isWarping ? 1 : twinkleAlpha);
 
         if (starSpeedHigh) {
-          ctx.fillStyle = `hsla(${STAR_HUES[star.hueIndex]}, 100%, 80%, ${finalAlpha})`;
+          ctx.fillStyle = STAR_COLORS_HSL[star.hueIndex];
           ctx.fillRect(x, y, size * 1.5, size * 1.5);
         } else {
-          ctx.fillStyle = `rgba(255, 255, 255, ${finalAlpha})`;
+          ctx.fillStyle = '#ffffff';
           ctx.fillRect(x, y, size, size);
         }
       }
+
+      // Restaura o alpha ao fim do ciclo
+      ctx.globalAlpha = 1.0;
 
       animationFrameRef.current = requestAnimationFrame(animate);
     };
