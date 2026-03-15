@@ -489,17 +489,42 @@ export const AudioProvider = ({ children }) => {
     }
   }, [isAudioUnlocked, isPaused, queuedPrimary, queuedMusic, queuedSFX, playPrimaryNow, playMusicNow, playSfxNow]);
 
+  // CORREÇÃO APLICADA NESTE USEEFFECT
   useEffect(() => {
-    if (!isPaused) return;
-
     const bg = musicAudioRef.current;
     const primary = primaryAudioRef.current;
 
-    if (bg && !bg.paused) bg.pause();
-    if (primary && !primary.paused) primary.pause();
+    if (isPaused) {
+      // Pausa todos os áudios quando o estado muda para pausado
+      if (bg && !bg.paused) bg.pause();
+      if (primary && !primary.paused) primary.pause();
 
-    fadingAudiosRef.current.forEach((s) => s.pause());
-    soundsRef.current.forEach((s) => s.pause());
+      fadingAudiosRef.current.forEach((s) => s.pause());
+      soundsRef.current.forEach((s) => s.pause());
+    } else {
+      // Retoma os áudios exatamente do ponto onde pararam ao sair da pausa
+      if (bg && bg.paused && bg.src) {
+        const p = bg.play();
+        if (p !== undefined) p.catch(() => { });
+      }
+      if (primary && primary.paused && primary.src) {
+        const p = primary.play();
+        if (p !== undefined) p.catch(() => { });
+      }
+
+      fadingAudiosRef.current.forEach((s) => {
+        if (s.paused && s.src) {
+          const p = s.play();
+          if (p !== undefined) p.catch(() => { });
+        }
+      });
+      soundsRef.current.forEach((s) => {
+        if (s.paused && s.src) {
+          const p = s.play();
+          if (p !== undefined) p.catch(() => { });
+        }
+      });
+    }
   }, [isPaused]);
 
   const value = {
