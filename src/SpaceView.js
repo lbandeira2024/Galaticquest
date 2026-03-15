@@ -193,10 +193,11 @@ const SpaceView = ({
 
   const isNearPlanet = distance <= 1000;
 
+  // LÓGICA CENTRAL DE ÁUDIO CINEMÁTICO (Fade Automático)
   useEffect(() => {
     if (!isActive) return;
 
-    let targetAudioSrc = '/sounds/02.Navigating-Flying.mp3';
+    let targetAudioSrc = '/sounds/trilha_galatica_v1.mp3'; // Música Padrão de Voo
     let targetVolume = 1.0;
 
     if (isWarpActive) {
@@ -212,7 +213,7 @@ const SpaceView = ({
         loop: true,
         isPrimary: true,
         volume: targetVolume,
-        fade: true
+        fade: true // Permite o crossfade suave entre as diferentes faixas
       });
       currentTrackRef.current = targetAudioSrc;
     }

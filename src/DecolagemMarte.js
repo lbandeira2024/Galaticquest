@@ -20,9 +20,6 @@ import { useConfig } from './ConfigContext';
 import LojaEspacial from './LojaEspacial';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-// --- CONSTANTE PARA A MÚSICA DE FUNDO PADRÃO ---
-const BGM_TRACK = '/sounds/trilha_galatica_v1.mp3';
-
 // --- CONSTANTES DE DADOS DA TRIPULAÇÃO ---
 const TEAMS_DATA = [
   { id: 1, code: "E1", description: "Equipe especializada em exploração", missions: 12, achievements: ["Primeira equipe a mapear o Cinturão de Asteroides X-47", "Desenvolveu sistema de navegação em ambientes de alta gravidade", "Recorde de permanência em ambientes hostis: 487 dias"], members: [{ role: "Coordenador Espacial", name: "Sisifo", experience: "45 anos", details: "Engenheiro Aeroespacial", country: "Espanha" }, { role: "Cientista", name: "Neo", experience: "39 anos", details: "Cientista de Recursos Naturais Raros e Astrobotânica", country: "Americano" }, { role: "Engenheira", name: "Tamara", experience: "32 anos", details: "Física e Engenheira Aero Espacial", country: "Americana" }, { role: "Engenheira", name: "Ares", experience: "39 anos", details: "Engenheira Aeronáutico, PhD em Sist. de Oxigenação sob condições adversas", country: "Espanha" }, { role: "Engenheira", name: "Mae", experience: "37 anos", details: "Engenheira Química, PhD", country: "Americana" }] },
@@ -382,12 +379,12 @@ const MainDisplayWindow = React.memo(({
         <SpaceView
           distance={distanceKm}
           forceLarge={arrivedAtMars}
-          isWarpActive={false}
+          isWarpActive={isDobraAtivada}
           isPaused={isPaused}
           selectedPlanet={selectedPlanet}
           onChallengeEnd={handleChallengeEnd}
           isDeparting={isDeparting}
-          isActive={mainDisplayState === 'stars' && !isDobraAtivada}
+          isActive={mainDisplayState === 'stars'}
         />
       </div>
 
@@ -524,20 +521,6 @@ const DecolagemMarte = () => {
       console.log(e);
     }
   }, []);
-
-  const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
-  const { isPaused, togglePause } = usePause();
-  const isPausedRef = useRef(isPaused);
-
-  // REFERÊNCIAS SEGURAS PARA O ÁUDIO FUNCIONAR DENTRO DOS USEEFFECTS
-  const stopAllAudioRef = useRef(stopAllAudio);
-  useEffect(() => { stopAllAudioRef.current = stopAllAudio; }, [stopAllAudio]);
-
-  const playTrackRef = useRef(playTrack);
-  useEffect(() => { playTrackRef.current = playTrack; }, [playTrack]);
-
-  const playSFXRef = useRef(playSFX);
-  useEffect(() => { playSFXRef.current = playSFX; }, [playSFX]);
 
   // --- REFS E STATES PRINCIPAIS ---
   const [telemetry, setTelemetry] = useState({
@@ -678,6 +661,10 @@ const DecolagemMarte = () => {
 
   // --- TRAVA DE DISTÂNCIA MESTRA ---
   const canDecreaseDistanceRef = useRef(false);
+
+  const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
+  const { isPaused, togglePause } = usePause();
+  const isPausedRef = useRef(isPaused);
 
   // --- DADOS DA TRIPULAÇÃO ATUAL ---
   const teamData = useMemo(() => {
@@ -1069,13 +1056,10 @@ const DecolagemMarte = () => {
       return;
     }
 
-    try { stopAllAudio(); } catch (e) { console.error(e); }
-
     setIsDobraAtivada(true);
     setIsDobraEnabled(false);
     setMinervaImage('/images/Minerva/Minerva-Vluz.gif');
     playSFX('/sounds/05.Dobra-Active.mp3');
-    playTrack('/sounds/04.Dobra_Espacial_Becoming_one_with_Neytiri.mp3', { loop: true, isPrimary: true });
 
     const COOLDOWN_IN_MS = 3 * 60 * 1000;
     setDobraCooldownEnd(Date.now() + COOLDOWN_IN_MS);
@@ -1084,13 +1068,7 @@ const DecolagemMarte = () => {
     if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
     dobraTimerRef.current = setTimeout(() => {
 
-      try { stopAllAudio(); } catch (e) { console.error(e); }
-
-      // Som de desligamento da dobra e volta da música BGM
       playSFX('/sounds/power-down-Warp.mp3');
-      setTimeout(() => {
-        playTrack(BGM_TRACK, { loop: true, fade: true });
-      }, 1000);
 
       setTimeout(() => {
         isDobraAtivadaRef.current = false;
@@ -1119,7 +1097,7 @@ const DecolagemMarte = () => {
 
     if (minervaTimeoutRef.current) clearTimeout(minervaTimeoutRef.current);
     minervaTimeoutRef.current = setTimeout(() => { setMinervaImage('/images/Minerva/Minerva_Active.gif'); }, DOBRA_DURATION_IN_MS + 3000);
-  }, [isDobraEnabled, isDobraAtivada, isPaused, playSound, stopAllAudio, playTrack, saveTelemetryData, playSFX]);
+  }, [isDobraEnabled, isDobraAtivada, isPaused, playSound, saveTelemetryData, playSFX]);
 
   const handleInventory = useCallback(() => { if (!isPaused) { setShowInventory(true); playSound('/sounds/inventory-open.mp3'); } }, [isPaused, playSound]);
 
@@ -1210,13 +1188,7 @@ const DecolagemMarte = () => {
       }, 23000);
 
       setTimeout(() => {
-        if (isMounted.current) {
-          stopAllAudio();
-          setMainDisplayState('stars');
-          setMonitorState('on');
-          // Após a decolagem, iniciamos a trilha principal de voo
-          playTrack(BGM_TRACK, { loop: true, fade: true });
-        }
+        if (isMounted.current) { stopAllAudio(); setMainDisplayState('stars'); setMonitorState('on'); }
       }, 45000);
     }
   }, [isLoadingRoute, routeIndex, unlockAudio, playTrack, stopAllAudio]);
@@ -1376,15 +1348,7 @@ const DecolagemMarte = () => {
         if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
         isDobraAtivadaRef.current = false;
         setIsDobraAtivada(false);
-
-        try { stopAllAudioRef.current(); } catch (e) { console.error(e); }
-
-        // Falha da dobra também retorna BGM
-        playSFXRef.current('/sounds/power-down-Warp.mp3');
-        setTimeout(() => {
-          playTrackRef.current(BGM_TRACK, { loop: true, fade: true });
-        }, 1000);
-
+        // Deixamos de forçar o stopAllAudio aqui para que o SpaceView resolva a música naturalmente!
         setShowCriticalWarpFail(true);
         setTimeout(() => setShowCriticalWarpFail(false), 7000);
       }
@@ -1458,12 +1422,12 @@ const DecolagemMarte = () => {
     }
 
     if (!isMoon && distanceKm <= approachDistanceThreshold && distanceKm > 0 && !approachSoundPlayed.current) {
-      playSFXRef.current('/sounds/empuxo.wav');
+      playSFX('/sounds/empuxo.wav');
       approachSoundPlayed.current = true;
       setIsFinalApproach(true);
       setIsBoostingTo60k(false);
     }
-  }, [distanceKm, isDobraAtivada, selectedPlanet, isPaused, isLoadingRoute, travelTime]);
+  }, [distanceKm, isDobraAtivada, selectedPlanet, isPaused, isLoadingRoute, playSFX, travelTime]);
 
   const isSystemCritical = telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20;
   const hasFundsForSOS = (spaceCoins || 0) > 0;
@@ -1476,13 +1440,13 @@ const DecolagemMarte = () => {
     const finalCost = Math.min(calculatedCost, spaceCoins || 0);
     setSosCost(finalCost);
     setShowSOSModal(true);
-    playSFXRef.current('/sounds/ui-click.mp3');
-  }, [isSOSActive, travelTime, spaceCoins]);
+    playSound('/sounds/ui-click.mp3');
+  }, [isSOSActive, travelTime, spaceCoins, playSound]);
 
   const handleConfirmSOS = () => {
     setSpaceCoins(prev => (prev || 0) - sosCost);
     setIsRestoringSOS(true);
-    playSFXRef.current('/sounds/ui-click.mp3');
+    playSound('/sounds/ui-click.mp3');
     setShowSOSModal(false);
   };
   const handleCancelSOS = () => setShowSOSModal(false);
@@ -1512,14 +1476,14 @@ const DecolagemMarte = () => {
         telemetryRef.current.interdependence = restoreValue(telemetryRef.current.interdependence);
         telemetryRef.current.engagement = restoreValue(telemetryRef.current.engagement);
         if (anyChanged) setTelemetry(prev => ({ ...prev, ...telemetryRef.current }));
-        if (allFull) { clearInterval(restoreIntervalRef.current); setIsRestoringSOS(false); saveTelemetryDataRef.current(); }
+        if (allFull) { clearInterval(restoreIntervalRef.current); setIsRestoringSOS(false); saveTelemetryData(); }
       }, 50);
     } else if (isPaused && restoreIntervalRef.current) { clearInterval(restoreIntervalRef.current); }
     return () => { if (restoreIntervalRef.current) clearInterval(restoreIntervalRef.current); };
-  }, [isRestoringSOS, isPaused]);
+  }, [isRestoringSOS, isPaused, saveTelemetryData]);
 
 
-  // --- GAME LOOP OTIMIZADO COM SUAVIZADOR DE DISTÂNCIAS CURTAS E REFS SEGURAS ---
+  // --- GAME LOOP OTIMIZADO COM SUAVIZADOR DE DISTÂNCIAS CURTAS E INTEGRAÇÃO MUSICAL INTELIGENTE ---
   useEffect(() => {
     const gameLoop = (timestamp) => {
       if (isPausedRef.current) {
@@ -1536,6 +1500,7 @@ const DecolagemMarte = () => {
           lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
           const dobraAtiva = isDobraAtivadaRef.current;
           const accelConfig = accelerationRates[chosenShipRef.current] || accelerationRates.default;
+          //const WARP_MULTIPLIER = 6.726;
           const WARP_MULTIPLIER = 21.000;
 
           let targetSpeed = 45000;
@@ -1623,14 +1588,6 @@ const DecolagemMarte = () => {
           if (newDistance <= 150000 && isDobraAtivadaRef.current) {
             if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
 
-            // Uso seguro das refs de áudio!
-            try { stopAllAudioRef.current(); } catch (e) { console.error(e); }
-
-            playSFXRef.current('/sounds/power-down-Warp.mp3');
-            setTimeout(() => {
-              playTrackRef.current(BGM_TRACK, { loop: true, fade: true });
-            }, 1000);
-
             isDobraAtivadaRef.current = false;
             setIsDobraAtivada(false);
             setIsFinalApproach(true);
@@ -1639,7 +1596,10 @@ const DecolagemMarte = () => {
             saveTelemetryDataRef.current();
             setShowWarpDisabledMessage(true);
             setMinervaImage('/images/Minerva/Minerva_Active.gif');
-            setTimeout(() => playSFXRef.current('/sounds/empuxo.wav'), 2000);
+
+            playSFX('/sounds/power-down-Warp.mp3');
+            setTimeout(() => playSFX('/sounds/empuxo.wav'), 800);
+
             setTimeout(() => setShowWarpDisabledMessage(false), 10000);
             setIsWarpCooldown(true);
             setTimeout(() => { setIsWarpCooldown(false); }, 20000);
@@ -1736,7 +1696,7 @@ const DecolagemMarte = () => {
 
     animationFrameId.current = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animationFrameId.current);
-  }, [API_BASE_URL, userId]);
+  }, [API_BASE_URL, userId, playSFX]);
 
   // Static Screen Effect
   useEffect(() => {
@@ -1780,14 +1740,14 @@ const DecolagemMarte = () => {
     if (!activeChallengeData || !activeChallengeData.dialogo) return;
     if (dialogueIndex < activeChallengeData.dialogo.length - 1) {
       setDialogueIndex(prev => prev + 1);
-      playSFXRef.current('/sounds/ui-click.mp3');
+      playSound('/sounds/ui-click.mp3');
     } else {
       setIsTransmissionStarting(false);
       setIsDialogueFinished(true);
       setShowEscolhaModal(true);
       setDialogueIndex(0);
     }
-  }, [activeChallengeData, dialogueIndex]);
+  }, [activeChallengeData, dialogueIndex, playSound]);
 
   useEffect(() => {
     if (!isTransmissionStarting || !activeChallengeData || !activeChallengeData.dialogo) return;
@@ -1810,10 +1770,10 @@ const DecolagemMarte = () => {
 
   const handleToggleMap = useCallback((show) => {
     if (show) {
-      if (distanceKm <= 0 && !isForcedMapEdit) { playSFXRef.current('/sounds/error.mp3'); return; }
+      if (distanceKm <= 0 && !isForcedMapEdit) { playSound('/sounds/error.mp3'); return; }
     }
     setShowStellarMap(show);
-  }, [distanceKm, isForcedMapEdit]);
+  }, [distanceKm, isForcedMapEdit, playSound]);
 
   if (isLoadingRoute) return <div className="tela-decolagem" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5em', color: '#00aaff', textShadow: '0 0 10px #00aaff' }}>Buscando dados da missão...</div>;
 
