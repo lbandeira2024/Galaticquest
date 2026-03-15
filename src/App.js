@@ -65,18 +65,19 @@ function AppInitializer() {
     fetchUserGameData();
   }, [user, apiBaseUrl]);
 
-  // CORREÇÃO: AudioProvider agora envolve o PauseProvider. 
-  // O sistema de som está blindado contra as atualizações de estado do menu de pausa!
+  // CORREÇÃO FINAL: PauseProvider por fora, AudioProvider por dentro!
+  // Assim o AudioManager consegue aceder ao usePause sem gerar o erro fatal,
+  // e graças às proteções criadas anteriormente, a música não irá reiniciar!
   return (
-    <AudioProvider>
-      <PauseProvider
-        gameNumber={currentUserGameNumber}
-        apiBaseUrl={apiBaseUrl}
-        initialPauseState={initialPauseState}
-      >
+    <PauseProvider
+      gameNumber={currentUserGameNumber}
+      apiBaseUrl={apiBaseUrl}
+      initialPauseState={initialPauseState}
+    >
+      <AudioProvider>
         <AppContent />
-      </PauseProvider>
-    </AudioProvider>
+      </AudioProvider>
+    </PauseProvider>
   );
 }
 
@@ -152,7 +153,7 @@ function AppContent() {
       stopMusic();
     }
 
-    // Ao SAIR da decolagem: limpa tudo para não vazar sons entre telas
+    // Ao SAIR da decolagem: limpa tudo para não vazar sons entre ecrãs
     if (prev === "/decolagem-marte" && curr !== "/decolagem-marte") {
       stopAllAudio();
     }
@@ -179,7 +180,7 @@ function AppContent() {
         <Route path="/SelecaoEquipe" element={<SelecaoEquipe />} />
         <Route path="/SelecaoNave" element={<SelecaoNave />} />
 
-        {/* Rota temporariamente desativada pois o arquivo não foi encontrado */}
+        {/* Rota temporariamente desativada pois o ficheiro não foi encontrado */}
         {/* <Route path="/stellar-map" element={<StellarMap />} /> */}
 
         <Route path="/" element={<CadastroForm />} />
@@ -193,7 +194,7 @@ function AppContent() {
         <div className="fullscreen-warning-overlay">
           <div className="fullscreen-warning-box">
             <h2>Modo Janela Ativado</h2>
-            <p>Para garantir a melhor imersão no jogo, recomendamos permanecer em tela cheia.</p>
+            <p>Para garantir a melhor imersão no jogo, recomendamos permanecer em ecrã inteiro.</p>
             <div className="fullscreen-warning-buttons">
               <button onClick={handleExit} className="button-exit">
                 Sair
