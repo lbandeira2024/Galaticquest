@@ -4,8 +4,10 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 85%;
-    max-width: 700px;
+    width: 90%;
+    /* Aumentado de 85% para 90% */
+    max-width: 900px;
+    /* Aumentado de 700px para 900px */
     max-height: 80vh;
     background: white;
     border-radius: 10px;
@@ -92,11 +94,19 @@
     line-height: 1.6;
     margin-bottom: 20px;
     padding: 0 10px;
-    text-align: justify;
-    text-justify: inter-word;
-    hyphens: auto;
-    overflow-wrap: break-word;
-    /* Limitar a 12 linhas com ellipsis */
+
+    /* MODIFICAÇÕES PARA EVITAR QUEBRA DE PALAVRAS */
+    text-align: left;
+    /* Trocado de justify para left para evitar buracos no texto */
+    hyphens: none;
+    /* Força a não hifenização */
+    word-break: normal;
+    /* Garante que as palavras fiquem inteiras */
+    overflow-wrap: normal;
+    /* Previne quebras forçadas em palavras longas */
+    white-space: normal;
+
+    /* Limitar a 12 linhas com ellipsis (mantido para a lógica do JS funcionar) */
     display: -webkit-box;
     -webkit-line-clamp: 12;
     -webkit-box-orient: vertical;
