@@ -84,7 +84,6 @@ const PLANET_MUSIC_CONFIG = {
 };
 
 const STAR_HUES = [210, 120, 30, 0, 60];
-const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 80%)`);
 
 const getPlanetScale = (planetName) => {
   const giants = ['jupiter', 'saturno', 'netuno'];
@@ -103,15 +102,18 @@ const generateStar = (width, height, isWarping) => {
   const yBias = Math.random() - 0.5;
   const y = (yBias * yBias * yBias) * height * 1.0;
 
+  const isDeepSpace = Math.random() > 0.3;
+
   return {
     x,
     y,
     z: Math.random() * width,
-    size: Math.random() * 2 + 0.8,
+    size: (Math.random() * 2 + 0.8) * (isDeepSpace ? 0.6 : 1),
     baseSpeed: 1,
     hueIndex: Math.floor(Math.random() * 5),
     twinkleSpeed: Math.random() * 0.05 + 0.01,
-    twinklePhase: Math.random() * Math.PI * 2
+    twinklePhase: Math.random() * Math.PI * 2,
+    baseAlpha: isDeepSpace ? (Math.random() * 0.3 + 0.1) : (Math.random() * 0.6 + 0.4)
   };
 };
 
@@ -152,8 +154,6 @@ const SpaceView = ({
   const starsRef = useRef([]);
 
   const { playTrack } = useAudio();
-
-  // NOVO: Referência para memorizar a música atual e não reiniciar atoa
   const currentTrackRef = useRef(null);
 
   useEffect(() => { distanceRef.current = distance; }, [distance]);
@@ -167,7 +167,6 @@ const SpaceView = ({
 
   useEffect(() => {
     if (starsRef.current.length === 0) {
-      // Ajustado para 800 estrelas para equilibrar com o fundo realista
       starsRef.current = Array.from({ length: 800 }, () => generateStar(window.innerWidth, window.innerHeight, false));
     }
   }, []);
@@ -204,8 +203,6 @@ const SpaceView = ({
       targetVolume = PLANET_MUSIC_CONFIG[planetName].volume;
     }
 
-    // NOVO: A mágica acontece aqui. Se a música que ele quer tocar 
-    // já é a que está tocando agora, ele simplesmente ignora e não faz nada!
     if (currentTrackRef.current !== targetAudioSrc) {
       playTrack(targetAudioSrc, {
         loop: true,
@@ -213,7 +210,7 @@ const SpaceView = ({
         volume: targetVolume,
         fade: true
       });
-      currentTrackRef.current = targetAudioSrc; // Atualiza a memória com a nova música
+      currentTrackRef.current = targetAudioSrc;
     }
   }, [isWarpActive, isNearPlanet, planetName, playTrack, isActive]);
 
@@ -255,31 +252,29 @@ const SpaceView = ({
     if (!ctx) return;
 
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
     };
+
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+    const centerX = window.innerWidth / 2;
+    const centerY = window.innerHeight / 2;
 
     lastTimeRef.current = performance.now();
-
-    const planetNameNormalized = (selectedPlanet?.nome || 'marte')
-      .toString()
-      .toLowerCase()
-      .trim()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/\s+/g, "");
-    const typeScale = getPlanetScale(planetNameNormalized);
+    const typeScale = getPlanetScale(planetName);
 
     const animate = (timestamp) => {
       const now = timestamp || performance.now();
+
+      // OTIMIZAÇÃO 1: Limitamos o dt para o equivalente a 50 FPS (0.02s)
+      // Isso impede as estrelas de darem "saltos" visíveis se o React travar a tela
       let dt = (now - lastTimeRef.current) / 1000;
       lastTimeRef.current = now;
-      if (dt > 0.1) dt = 0.016;
+      dt = Math.min(dt, 0.02);
 
       const diff = targetStarSpeedRef.current - currentStarSpeedRef.current;
       if (Math.abs(diff) < 0.1) currentStarSpeedRef.current = targetStarSpeedRef.current;
@@ -346,7 +341,7 @@ const SpaceView = ({
         }
 
         let transformStr = `scale(${scale})`;
-        if (planetNameNormalized === 'proximacentaurib') {
+        if (planetName === 'proximacentaurib') {
           const offsetFactor = Math.max(0, 1 - (visualDist / 1000000));
           const translateX = 25 * offsetFactor;
           const translateY = 20 * offsetFactor;
@@ -370,7 +365,7 @@ const SpaceView = ({
         star.z -= moveDistance;
 
         star.twinklePhase += star.twinkleSpeed;
-        const twinkleAlpha = 0.4 + Math.abs(Math.sin(star.twinklePhase)) * 0.6;
+        const twinkleAlpha = star.baseAlpha * (0.4 + Math.abs(Math.sin(star.twinklePhase)) * 0.6);
 
         if (star.z <= 0) {
           Object.assign(star, generateStar(width, height, isWarping));
@@ -398,13 +393,15 @@ const SpaceView = ({
 
         const size = scale * star.size * 0.3;
 
-        ctx.globalAlpha = Math.min(1.0, scale * 1.5) * (isWarping ? 1 : twinkleAlpha);
+        // OTIMIZAÇÃO 2: Em vez de trocar o estado globalAlpha do Canvas a cada laço, 
+        // injetamos na própria cor. Isso alivia a placa de vídeo consideravelmente.
+        const finalAlpha = Math.min(1.0, scale * 1.5) * (isWarping ? 1 : twinkleAlpha);
 
         if (starSpeedHigh) {
-          ctx.fillStyle = STAR_COLORS_HSL[star.hueIndex];
+          ctx.fillStyle = `hsla(${STAR_HUES[star.hueIndex]}, 100%, 80%, ${finalAlpha})`;
           ctx.fillRect(x, y, size * 1.5, size * 1.5);
         } else {
-          ctx.fillStyle = '#ffffff';
+          ctx.fillStyle = `rgba(255, 255, 255, ${finalAlpha})`;
           ctx.fillRect(x, y, size, size);
         }
       }
@@ -418,7 +415,7 @@ const SpaceView = ({
       cancelAnimationFrame(animationFrameRef.current);
       window.removeEventListener('resize', resizeCanvas);
     };
-  }, [isPaused, isActive, planetImageLoaded, selectedPlanet]);
+  }, [isPaused, isActive, planetImageLoaded, planetName]);
 
   const isStation = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boctok'].includes(planetName);
   const baseSize = forceLarge ? '50vmin' : '40vmin';
