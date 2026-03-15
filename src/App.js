@@ -31,7 +31,7 @@ import { SpaceCoinsProvider } from "./SpaceCoinsContext";
 import { ConfigProvider, useConfig } from "./ConfigContext";
 
 /**
- * Novo componente Wrapper (Inicializador).
+ * Componente Wrapper (Inicializador).
  */
 function AppInitializer() {
   const { user } = useAuth();
@@ -65,16 +65,18 @@ function AppInitializer() {
     fetchUserGameData();
   }, [user, apiBaseUrl]);
 
+  // CORREÇÃO: AudioProvider agora envolve o PauseProvider. 
+  // O sistema de som está blindado contra as atualizações de estado do menu de pausa!
   return (
-    <PauseProvider
-      gameNumber={currentUserGameNumber}
-      apiBaseUrl={apiBaseUrl}
-      initialPauseState={initialPauseState}
-    >
-      <AudioProvider>
+    <AudioProvider>
+      <PauseProvider
+        gameNumber={currentUserGameNumber}
+        apiBaseUrl={apiBaseUrl}
+        initialPauseState={initialPauseState}
+      >
         <AppContent />
-      </AudioProvider>
-    </PauseProvider>
+      </PauseProvider>
+    </AudioProvider>
   );
 }
 
@@ -86,7 +88,7 @@ function AppContent() {
 
   const prevPathRef = useRef(location.pathname);
 
-  // --- NOVO: BLOQUEIO GLOBAL DO BOTÃO DIREITO ---
+  // --- BLOQUEIO GLOBAL DO BOTÃO DIREITO ---
   useEffect(() => {
     const handleContextMenu = (e) => {
       // Bloqueia o menu de contexto apenas se não for administrador
