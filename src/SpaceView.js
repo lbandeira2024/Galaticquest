@@ -197,7 +197,7 @@ const SpaceView = ({
   useEffect(() => {
     if (!isActive) return;
 
-    let targetAudioSrc = '/sounds/trilha_galatica_v1.mp3'; // Música Padrão de Voo
+    let targetAudioSrc = '/sounds/02.Navigating-Flying.mp3'; // Música Padrão de Voo Atualizada
     let targetVolume = 1.0;
 
     if (isWarpActive) {
