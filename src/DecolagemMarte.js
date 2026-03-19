@@ -977,10 +977,23 @@ const DecolagemMarte = () => {
       setShowStoreModal(false);
 
       setTimeout(async () => {
-        setDistanceKm(300000000);
-        distanceKmRef.current = 300000000;
+        // CORREÇÃO AQUI
+        let nextDistance = 300000000;
+        if (newPlannedRoute && newPlannedRoute[newRouteIndex] && newPlannedRoute[newRouteIndex + 1]) {
+          setOriginPlanet({ nome: newPlannedRoute[newRouteIndex].name });
+          setSelectedPlanet({ nome: newPlannedRoute[newRouteIndex + 1].name });
+          nextDistance = newPlannedRoute[newRouteIndex + 1].distance || 300000000;
+        }
+
+        setDistanceKm(nextDistance);
+        distanceKmRef.current = nextDistance;
+
+        // Atualiza o state local antes de destravar o motor
+        setPlannedRoute(newPlannedRoute);
+        setRouteIndex(newRouteIndex);
 
         await saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
+
         setProgress(0);
         setArrivedAtMars(false);
         setIsFinalApproach(false);
@@ -994,6 +1007,7 @@ const DecolagemMarte = () => {
         setTravelStarted(true);
         setDobraCooldownEnd(0);
         setProcessadorO2(0);
+
         setRefetchTrigger(prev => prev + 1);
         setIsDeparting(false);
       }, 4000);
