@@ -1637,11 +1637,11 @@ const DecolagemMarte = () => {
                 setShowDesafioModal(true);
               } else {
                 console.warn("⚠️ Desafio não encontrado para o destino:", targetName, "- Abrindo confirmação de viagem.");
-                // GARANTE QUE SABEMOS QUE NÃO HÁ DESAFIO E ADICIONA ESPERA DE 5 SEGUNDOS
+                // GARANTE QUE SABEMOS QUE NÃO HÁ DESAFIO E ADICIONA ESPERA DE 10 SEGUNDOS
                 setActiveChallengeData(null);
                 setTimeout(() => {
                   setShowConfirmacaoModal(true);
-                }, 5000);
+                }, 10000);
               }
             }
 
