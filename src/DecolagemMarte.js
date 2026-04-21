@@ -88,12 +88,16 @@ const LeftControlPanel = React.memo(({
         <div
           className={`minerva-title ${isMinervaHighlighted ? 'highlighted' : ''}`}
           onClick={handleMinervaClick}
-          style={{ cursor: isPaused ? 'not-allowed' : 'pointer', zIndex: 10, position: 'relative' }}
+          style={{ cursor: 'pointer', zIndex: 10, position: 'relative' }}
         >
           MINERVA I.A.
         </div>
-        <div className="minerva-container">
-          <img src={minervaImage} alt="Minerva Status" className="minerva-image" />
+        <div className="minerva-container" onClick={handleMinervaClick} style={{ cursor: 'pointer' }}>
+          <img
+            src={minervaImage}
+            alt="Minerva Status"
+            className={`minerva-image ${isMinervaHighlighted ? 'minerva-rainbow-glow' : ''}`}
+          />
         </div>
       </div>
       <div className="o2-processor-display">
@@ -512,7 +516,6 @@ const DecolagemMarte = () => {
   const { spaceCoins, setSpaceCoins, syncSpaceCoins } = useSpaceCoins();
   const alarmAudio = useMemo(() => new Audio('/sounds/evacuation-alarm.mp3'), []);
 
-  // FUNÇÃO MESTRE PARA FORÇAR O ÁUDIO A TOCAR
   const playSFX = useCallback((url) => {
     try {
       const audio = new Audio(url);
@@ -522,7 +525,6 @@ const DecolagemMarte = () => {
     }
   }, []);
 
-  // --- REFS E STATES PRINCIPAIS ---
   const [telemetry, setTelemetry] = useState({
     velocity: { kmh: 0, ms: 0, rel: '0.0c' },
     altitude: 0,
@@ -622,7 +624,10 @@ const DecolagemMarte = () => {
   const [refetchTrigger, setRefetchTrigger] = useState(0);
   const [showMinervaOnMonitor, setShowMinervaOnMonitor] = useState(false);
   const [groupId, setGroupId] = useState(null);
+
+  // ESTADO DA MINERVA (Começa em false e só muda no momento da escolha)
   const [isMinervaHighlighted, setIsMinervaHighlighted] = useState(false);
+
   const [isCooldownOver, setIsCooldownOver] = useState(true);
 
   const [isForcedMapEdit, setIsForcedMapEdit] = useState(false);
@@ -659,20 +664,17 @@ const DecolagemMarte = () => {
   const restoreIntervalRef = useRef(null);
   const cockpitRef = useRef(null);
 
-  // --- TRAVA DE DISTÂNCIA MESTRA ---
   const canDecreaseDistanceRef = useRef(false);
 
   const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
   const isPausedRef = useRef(isPaused);
 
-  // --- DADOS DA TRIPULAÇÃO ATUAL ---
   const teamData = useMemo(() => {
-    const teamCode = user?.teamCode || "E1"; // Fallback para E1
+    const teamCode = user?.teamCode || "E1";
     return TEAMS_DATA.find(t => t.code === teamCode) || TEAMS_DATA[0];
   }, [user]);
 
-  // Sincronização de Refs
   useEffect(() => { telemetryRef.current = telemetry; }, [telemetry]);
   useEffect(() => { spaceCoinsRef.current = spaceCoins; }, [spaceCoins]);
   useEffect(() => { travelStartedRef.current = travelStarted; }, [travelStarted]);
@@ -693,7 +695,6 @@ const DecolagemMarte = () => {
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
   useEffect(() => { mainDisplayStateRef.current = mainDisplayState; }, [mainDisplayState]);
 
-  // Novas Refs para controle de bloqueio de UI (Map Disabled)
   const showStoreModalRef = useRef(showStoreModal);
   useEffect(() => { showStoreModalRef.current = showStoreModal; }, [showStoreModal]);
   const showDesafioModalRef = useRef(showDesafioModal);
@@ -716,18 +717,13 @@ const DecolagemMarte = () => {
     });
   }, []);
 
-  // --- LÓGICA DO TEMPORIZADOR DE SAÍDA E DISTÂNCIA ---
   useEffect(() => {
     let timer;
     if (mainDisplayState === 'stars') {
       if (routeIndex > 0) {
-        timer = setTimeout(() => {
-          canDecreaseDistanceRef.current = true;
-        }, 4500);
+        timer = setTimeout(() => { canDecreaseDistanceRef.current = true; }, 4500);
       } else {
-        timer = setTimeout(() => {
-          canDecreaseDistanceRef.current = true;
-        }, 20000);
+        timer = setTimeout(() => { canDecreaseDistanceRef.current = true; }, 20000);
       }
     } else {
       canDecreaseDistanceRef.current = false;
@@ -737,11 +733,7 @@ const DecolagemMarte = () => {
 
   const triggerMinervaInterplanetarySpeed = useCallback(() => {
     minervaEventTriggered.current = true;
-
-    if (distanceKmRef.current < 300000) {
-      return;
-    }
-
+    if (distanceKmRef.current < 300000) return;
     setShowMinervaOnMonitor(true);
     playSFX('/sounds/Mineva-VelInterplanetaria.mp3');
     setTimeout(() => { setShowMinervaOnMonitor(false); }, 5000);
@@ -759,7 +751,6 @@ const DecolagemMarte = () => {
     setTelemetry(prev => {
       const newPropulsion = updates.nuclearPropulsion !== undefined ? updates.nuclearPropulsion : prev.propulsion.powerOutput;
       const newO2 = updates.oxygen !== undefined ? updates.oxygen : prev.atmosphere.o2;
-
       const newState = {
         ...prev,
         propulsion: { ...prev.propulsion, powerOutput: newPropulsion },
@@ -770,7 +761,6 @@ const DecolagemMarte = () => {
         stability: updates.stability !== undefined ? updates.stability : prev.stability,
         direction: updates.direction !== undefined ? updates.direction : prev.direction
       };
-
       telemetryRef.current = newState;
       return newState;
     });
@@ -792,9 +782,7 @@ const DecolagemMarte = () => {
     };
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSave),
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSave),
       });
     } catch (error) { console.error("ERRO: Falha ao salvar dados de telemetria:", error); }
   }, [userId, API_BASE_URL]);
@@ -806,11 +794,9 @@ const DecolagemMarte = () => {
     if (!userId || !API_BASE_URL) return;
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ routeIndex: currentIndex }),
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ routeIndex: currentIndex }),
       });
-    } catch (error) { console.error("ERRO: Falha ao salvar progresso da rota:", error); }
+    } catch (error) { console.error("ERRO: Falha ao salvar progresso:", error); }
   }, [userId, API_BASE_URL]);
 
   const saveCurrentProgressRef = useRef(saveCurrentProgress);
@@ -821,9 +807,7 @@ const DecolagemMarte = () => {
     const dataToSave = { routeIndex: currentIndex, rotaPlanejada: newRouteArray };
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(dataToSave),
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSave),
       });
     } catch (error) { console.error("ERRO: Falha ao salvar nova rota:", error); }
   }, [userId, API_BASE_URL]);
@@ -853,11 +837,9 @@ const DecolagemMarte = () => {
           engagement: newEngagement,
           interdependence: newInterdependence
         };
-
         telemetryRef.current = newState;
         return newState;
       });
-
       setLastImpactTimestamp(Date.now());
       saveTelemetryData();
     }
@@ -912,7 +894,6 @@ const DecolagemMarte = () => {
       }
 
       distanceKmRef.current = nextDistance;
-
       setProgress(0);
       setArrivedAtMars(false);
       setIsFinalApproach(false);
@@ -920,13 +901,11 @@ const DecolagemMarte = () => {
       minervaEventTriggered.current = true;
 
       triggerMinervaInterplanetarySpeed();
-
       setActiveChallengeData(null);
       setIsDialogueFinished(false);
       setTravelStarted(true);
       setDobraCooldownEnd(0);
       setProcessadorO2(0);
-
       setIsDeparting(false);
     }, 4000);
   }, [playSFX, triggerMinervaInterplanetarySpeed]);
@@ -936,7 +915,6 @@ const DecolagemMarte = () => {
       if (!isForcedMapEdit) { setShowStellarMap(false); }
       return;
     }
-
     setIsForcedMapEdit(false);
     setShowStellarMap(false);
     setShowSosSurprise(false);
@@ -946,7 +924,6 @@ const DecolagemMarte = () => {
     const isInFlight = !arrivedAtMars && travelStarted;
 
     if (isInFlight) {
-      // --- CASO 1: MUDANÇA EM VOO ---
       routeChangeLockRef.current = true;
       saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
       setPlannedRoute(newPlannedRoute);
@@ -965,30 +942,21 @@ const DecolagemMarte = () => {
       setArrivedAtMars(false);
       setIsFinalApproach(false);
 
-      // DESTRAVA A NAVE APÓS MUDANÇA DE ROTA NO MEIO DO VOO
-      setTimeout(() => {
-        routeChangeLockRef.current = false;
-      }, 500);
-
+      setTimeout(() => { routeChangeLockRef.current = false; }, 500);
     } else {
-      // --- CASO 2: PARTIDA ---
       playSFX('/sounds/empuxo.wav');
       setIsDeparting(true);
       setShowStoreModal(false);
 
       setTimeout(async () => {
-        // CORREÇÃO AQUI
         let nextDistance = 300000000;
         if (newPlannedRoute && newPlannedRoute[newRouteIndex] && newPlannedRoute[newRouteIndex + 1]) {
           setOriginPlanet({ nome: newPlannedRoute[newRouteIndex].name });
           setSelectedPlanet({ nome: newPlannedRoute[newRouteIndex + 1].name });
           nextDistance = newPlannedRoute[newRouteIndex + 1].distance || 300000000;
         }
-
         setDistanceKm(nextDistance);
         distanceKmRef.current = nextDistance;
-
-        // Atualiza o state local antes de destravar o motor
         setPlannedRoute(newPlannedRoute);
         setRouteIndex(newRouteIndex);
 
@@ -1001,19 +969,18 @@ const DecolagemMarte = () => {
         minervaEventTriggered.current = true;
 
         triggerMinervaInterplanetarySpeed();
-
         setActiveChallengeData(null);
         setIsDialogueFinished(false);
         setTravelStarted(true);
         setDobraCooldownEnd(0);
         setProcessadorO2(0);
-
         setRefetchTrigger(prev => prev + 1);
         setIsDeparting(false);
       }, 4000);
     }
   }, [saveNewRouteAndProgress, playSFX, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit, triggerMinervaInterplanetarySpeed]);
 
+  // AQUI: Este é o gatilho que acende o brilho da Minerva ao fazer a escolha
   const handleEscolha = async (opcao, desafioId, impactos) => {
     setIsTransmissionStarting(false); setIsDialogueFinished(false);
     const coinsReward = Number(opcao.spaceCoins || 0);
@@ -1023,7 +990,6 @@ const DecolagemMarte = () => {
 
     if (impactos) {
       const applyImpact = (currentVal, change) => Math.max(0, Math.min(100, currentVal + (change || 0)));
-
       setTelemetry(prev => {
         const newPropulsion = impactos.nuclearPropulsion !== undefined ? applyImpact(prev.propulsion.powerOutput, impactos.nuclearPropulsion) : prev.propulsion.powerOutput;
         const newO2 = impactos.oxygen !== undefined ? applyImpact(prev.atmosphere.o2, impactos.oxygen) : prev.atmosphere.o2;
@@ -1043,20 +1009,23 @@ const DecolagemMarte = () => {
           engagement: newEngagement,
           interdependence: newInterdependence
         };
-
         telemetryRef.current = newState;
         return newState;
       });
-
       setLastImpactTimestamp(Date.now());
       saveTelemetryData();
     }
+
     if (!userId || !desafioId || !API_BASE_URL) return;
     try {
       await fetch(`${API_BASE_URL}/record-choice`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, desafioId, escolha: opcao, impactos: impactos, newBalance: newBalance }),
       });
     } catch (error) { console.error("ERRO: Falha ao registrar escolha:", error); }
+
+    // GATILHO QUE ACENDE A MINERVA AO FAZER A ESCOLHA NO MODAL
+    setIsMinervaHighlighted(true);
+
     setShowEscolhaModal(false); setShowConfirmacaoModal(true);
   };
 
@@ -1151,7 +1120,15 @@ const DecolagemMarte = () => {
     } catch (error) { console.error("ERRO: Falha ao transferir O2 e salvar dados:", error); }
   };
 
-  const handleMinervaClick = useCallback(() => { if (!isPaused) { setShowMandala(true); if (isMinervaHighlighted) setIsMinervaHighlighted(false); } }, [isPaused, isMinervaHighlighted]);
+  // AQUI: Garante que o brilho para imediatamente, mesmo se pausado
+  const handleMinervaClick = useCallback((e) => {
+    if (e) e.preventDefault();
+    setIsMinervaHighlighted(false); // FORÇA A PARAR O PISCA-PISCA
+
+    if (!isPaused) {
+      setShowMandala(true);
+    }
+  }, [isPaused]);
 
   const handleOpenO2Modal = useCallback(() => {
     if (isPaused || processadorO2 === 0) return;
@@ -1161,11 +1138,9 @@ const DecolagemMarte = () => {
 
   const isO2TransferDisabled = isPaused || processadorO2 === 0;
 
-  // --- CONTROLE BLINDADO DA SEQUÊNCIA DE DECOLAGEM ---
   const sequenceStarted = useRef(false);
   const isMounted = useRef(true);
 
-  // Garante que não vamos tentar mudar a tela se o usuário sair do jogo no meio do voo
   useEffect(() => {
     isMounted.current = true;
     return () => { isMounted.current = false; };
@@ -1174,7 +1149,6 @@ const DecolagemMarte = () => {
   useEffect(() => {
     if (isLoadingRoute) return;
 
-    // Se já não estiver na Terra, vai direto pro espaço (Pula a decolagem)
     if (routeIndex > 0) {
       if (!sequenceStarted.current) {
         sequenceStarted.current = true;
@@ -1185,10 +1159,8 @@ const DecolagemMarte = () => {
       return;
     }
 
-    // Sequência de Decolagem Inicial (Rodará estritamente UMA vez)
     if (!sequenceStarted.current) {
-      sequenceStarted.current = true; // Trava a sequência
-
+      sequenceStarted.current = true;
       unlockAudio();
       const audioUrl = `/sounds/decolagem.mp3?t=${Date.now()}`;
       playTrack(audioUrl, { loop: false, isPrimary: true });
@@ -1297,7 +1269,6 @@ const DecolagemMarte = () => {
             setOriginPlanet({ nome: originStep.name });
             setSelectedPlanet({ nome: nextStep.name });
 
-            // SINCRONIZA A REF DA DISTÂNCIA AQUI
             const distFromDB = nextStep.distance || 0;
             setDistanceKm(distFromDB);
             distanceKmRef.current = distFromDB;
@@ -1321,6 +1292,8 @@ const DecolagemMarte = () => {
     };
     fetchGameData();
   }, [userId, API_BASE_URL, refetchTrigger]);
+
+  // AQUI FOI REMOVIDO O BLOCO useEffect DE "checkMinervaHighlight" (que fazia ela piscar sozinha)
 
   useEffect(() => {
     if (isPaused || !chosenShip || isDobraAtivada) return;
@@ -1362,7 +1335,6 @@ const DecolagemMarte = () => {
         if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
         isDobraAtivadaRef.current = false;
         setIsDobraAtivada(false);
-        // Deixamos de forçar o stopAllAudio aqui para que o SpaceView resolva a música naturalmente!
         setShowCriticalWarpFail(true);
         setTimeout(() => setShowCriticalWarpFail(false), 7000);
       }
@@ -1397,21 +1369,6 @@ const DecolagemMarte = () => {
   }, [chosenShip, originPlanet.nome]);
 
   useEffect(() => {
-    if (!groupId || isPaused || isMinervaHighlighted || !API_BASE_URL) return;
-    const checkMinervaHighlight = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/group/${groupId}/check-recent-cds`);
-        if (!response.ok) throw new Error(`Server responded with ${response.status}`);
-        const data = await response.json();
-        if (data.success && data.hasRecentEntry) setIsMinervaHighlighted(true);
-      } catch (error) { console.error("ERRO: Falha ao verificar destaque da Minerva:", error); }
-    };
-    checkMinervaHighlight();
-    const interval = setInterval(checkMinervaHighlight, 60000);
-    return () => clearInterval(interval);
-  }, [groupId, isPaused, isMinervaHighlighted, API_BASE_URL]);
-
-  useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => { if (travelStarted) setTravelTime(prev => prev + 1); }, 1000);
     return () => clearInterval(interval);
@@ -1426,7 +1383,6 @@ const DecolagemMarte = () => {
 
   useEffect(() => {
     if (isPaused || isDobraAtivada || isLoadingRoute || travelTime === 0) return;
-
     const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
     const approachDistanceThreshold = 800000;
 
@@ -1497,7 +1453,6 @@ const DecolagemMarte = () => {
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
 
 
-  // --- GAME LOOP OTIMIZADO COM SUAVIZADOR DE DISTÂNCIAS CURTAS E INTEGRAÇÃO MUSICAL INTELIGENTE ---
   useEffect(() => {
     const gameLoop = (timestamp) => {
       if (isPausedRef.current) {
@@ -1514,7 +1469,6 @@ const DecolagemMarte = () => {
           lastUpdateTime.current = timestamp - (deltaTime % telemetryInterval);
           const dobraAtiva = isDobraAtivadaRef.current;
           const accelConfig = accelerationRates[chosenShipRef.current] || accelerationRates.default;
-          //const WARP_MULTIPLIER = 6.726;
           const WARP_MULTIPLIER = 21.000;
 
           let targetSpeed = 45000;
@@ -1619,7 +1573,6 @@ const DecolagemMarte = () => {
             setTimeout(() => { setIsWarpCooldown(false); }, 20000);
           } else if (newDistance <= 0 && !arrivedAtMarsRef.current && !isForcedMapEditRef.current && !isSosDestination) {
 
-            // PREVINE DISPAROS MÚLTIPLOS DO TIMEOUT
             setArrivedAtMars(true); setSpeed(45000);
             arrivedAtMarsRef.current = true;
 
@@ -1637,11 +1590,11 @@ const DecolagemMarte = () => {
                 setShowDesafioModal(true);
               } else {
                 console.warn("⚠️ Desafio não encontrado para o destino:", targetName, "- Abrindo confirmação de viagem.");
-                // GARANTE QUE SABEMOS QUE NÃO HÁ DESAFIO E ADICIONA ESPERA DE 10 SEGUNDOS
+                // GARANTE QUE SABEMOS QUE NÃO HÁ DESAFIO E ADICIONA ESPERA DE 5 SEGUNDOS
                 setActiveChallengeData(null);
                 setTimeout(() => {
                   setShowConfirmacaoModal(true);
-                }, 10000);
+                }, 5000);
               }
             }
 
@@ -1687,9 +1640,7 @@ const DecolagemMarte = () => {
                   body: JSON.stringify(bodyData),
                 });
 
-                if (earnedCoins > 0) {
-                  setSpaceCoins(newCoinsValue);
-                }
+                if (earnedCoins > 0) { setSpaceCoins(newCoinsValue); }
               } catch (error) { console.error("ERRO", error); }
               setProcessadorO2(newProcessadorO2Value); setRouteIndex(newRouteIndex); handleChallengeEndRef.current();
             })();
@@ -1712,14 +1663,12 @@ const DecolagemMarte = () => {
     return () => cancelAnimationFrame(animationFrameId.current);
   }, [API_BASE_URL, userId, playSFX]);
 
-  // Static Screen Effect
   useEffect(() => {
     if ((monitorState !== 'static' && mainDisplayState !== 'static') || isPaused) return;
     const interval = setInterval(() => { setStaticScreenSeed(Math.random()); }, 100);
     return () => clearInterval(interval);
   }, [monitorState, mainDisplayState, isPaused]);
 
-  // Max Speed Calculation
   const currentMaxSpeed = useMemo(() => {
     if (isDobraAtivada) return 100000000;
     if (isBoostingTo60k) return 60000;
@@ -1779,7 +1728,7 @@ const DecolagemMarte = () => {
     const duration = currentStep.duracao || (currentStep.texto.length * 50 + 2000);
     const timer = setTimeout(() => { handleNextDialogue(); }, duration);
 
-    return () => clearTimeout(timer);
+    return () => setTimeout(() => { handleNextDialogue(); }, duration);
   }, [dialogueIndex, isTransmissionStarting, activeChallengeData, handleNextDialogue]);
 
   const handleToggleMap = useCallback((show) => {
@@ -1956,6 +1905,5 @@ const DecolagemMarte = () => {
     </div>
   );
 };
-
 
 export default DecolagemMarte;
