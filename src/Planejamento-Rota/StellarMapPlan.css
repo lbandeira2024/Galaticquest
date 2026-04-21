@@ -162,13 +162,13 @@
 }
 
 .moon {
-    background: linear-gradient(45deg, #ddd, #aaa);
-    box-shadow: 0 0 5px white;
+    background: linear-gradient(45deg, #ff66cc, #9b59b6);
+    box-shadow: 0 0 6px #ff66cc;
     transform-style: preserve-3d;
 }
 
 .moon:hover {
-    box-shadow: 0 0 15px white;
+    box-shadow: 0 0 15px #ff99dd;
     z-index: 100;
 }
 
