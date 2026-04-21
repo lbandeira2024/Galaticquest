@@ -1520,3 +1520,96 @@
   position: relative;
   overflow: hidden;
 }
+
+/* =============================================================== */
+/* ====== EFEITO DE BRILHO DA MINERVA I.A. (MODO DOBRA) ========== */
+/* =============================================================== */
+
+.minerva-image.minerva-rainbow-glow {
+  animation: minervaRainbowPulse 1.5s infinite linear;
+  border-radius: 50%;
+  /* Mantém o brilho circular caso a imagem seja redonda */
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes minervaRainbowPulse {
+  0% {
+    filter: drop-shadow(0 0 15px #ff0000) brightness(1.2);
+  }
+
+  15% {
+    filter: drop-shadow(0 0 15px #ff8000) brightness(1.2);
+  }
+
+  30% {
+    filter: drop-shadow(0 0 15px #ffff00) brightness(1.2);
+  }
+
+  45% {
+    filter: drop-shadow(0 0 15px #00ff00) brightness(1.2);
+  }
+
+  60% {
+    filter: drop-shadow(0 0 15px #00ffff) brightness(1.2);
+  }
+
+  75% {
+    filter: drop-shadow(0 0 15px #0000ff) brightness(1.2);
+  }
+
+  90% {
+    filter: drop-shadow(0 0 15px #ff00ff) brightness(1.2);
+  }
+
+  100% {
+    filter: drop-shadow(0 0 15px #ff0000) brightness(1.2);
+  }
+}
+
+/* Opcional: Garante que o título também mude de cor para acompanhar o brilho */
+.minerva-title.highlighted {
+  animation: minervaTitleRainbow 3s infinite linear;
+}
+
+@keyframes minervaTitleRainbow {
+  0% {
+    color: #ff0000;
+    text-shadow: 0 0 10px #ff0000;
+  }
+
+  15% {
+    color: #ff8000;
+    text-shadow: 0 0 10px #ff8000;
+  }
+
+  30% {
+    color: #ffff00;
+    text-shadow: 0 0 10px #ffff00;
+  }
+
+  45% {
+    color: #00ff00;
+    text-shadow: 0 0 10px #00ff00;
+  }
+
+  60% {
+    color: #00ffff;
+    text-shadow: 0 0 10px #00ffff;
+  }
+
+  75% {
+    color: #0000ff;
+    text-shadow: 0 0 10px #0000ff;
+  }
+
+  90% {
+    color: #ff00ff;
+    text-shadow: 0 0 10px #ff00ff;
+  }
+
+  100% {
+    color: #ff0000;
+    text-shadow: 0 0 10px #ff0000;
+  }
+}

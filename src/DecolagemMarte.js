@@ -92,8 +92,12 @@ const LeftControlPanel = React.memo(({
         >
           MINERVA I.A.
         </div>
-        <div className="minerva-container">
-          <img src={minervaImage} alt="Minerva Status" className="minerva-image" />
+        <div className="minerva-container" onClick={handleMinervaClick} style={{ cursor: isPaused ? 'not-allowed' : 'pointer' }}>
+          <img
+            src={minervaImage}
+            alt="Minerva Status"
+            className={`minerva-image ${isMinervaHighlighted ? 'minerva-rainbow-glow' : ''}`}
+          />
         </div>
       </div>
       <div className="o2-processor-display">
@@ -1057,6 +1061,9 @@ const DecolagemMarte = () => {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, desafioId, escolha: opcao, impactos: impactos, newBalance: newBalance }),
       });
     } catch (error) { console.error("ERRO: Falha ao registrar escolha:", error); }
+
+    setIsMinervaHighlighted(true);
+
     setShowEscolhaModal(false); setShowConfirmacaoModal(true);
   };
 
@@ -1779,7 +1786,7 @@ const DecolagemMarte = () => {
     const duration = currentStep.duracao || (currentStep.texto.length * 50 + 2000);
     const timer = setTimeout(() => { handleNextDialogue(); }, duration);
 
-    return () => clearTimeout(timer);
+    return () => setTimeout(() => { handleNextDialogue(); }, duration);
   }, [dialogueIndex, isTransmissionStarting, activeChallengeData, handleNextDialogue]);
 
   const handleToggleMap = useCallback((show) => {
