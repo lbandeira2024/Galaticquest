@@ -161,15 +161,17 @@
     }
 }
 
-.moon {
-    background: linear-gradient(45deg, #ff66cc, #9b59b6);
-    box-shadow: 0 0 6px #ff66cc;
+/* FORÇANDO A COR DAS LUAS */
+.celestial-body.moon {
+    background: #ff66cc !important;
+    background: linear-gradient(45deg, #ff66cc, #9b59b6) !important;
+    box-shadow: 0 0 8px #ff66cc !important;
     transform-style: preserve-3d;
 }
 
-.moon:hover {
-    box-shadow: 0 0 15px #ff99dd;
-    z-index: 100;
+.celestial-body.moon:hover {
+    box-shadow: 0 0 20px #ff99dd !important;
+    z-index: 100 !important;
 }
 
 .sun {
