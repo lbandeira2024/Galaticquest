@@ -1404,21 +1404,6 @@ const DecolagemMarte = () => {
   }, [chosenShip, originPlanet.nome]);
 
   useEffect(() => {
-    if (!groupId || isPaused || isMinervaHighlighted || !API_BASE_URL) return;
-    const checkMinervaHighlight = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/group/${groupId}/check-recent-cds`);
-        if (!response.ok) throw new Error(`Server responded with ${response.status}`);
-        const data = await response.json();
-        if (data.success && data.hasRecentEntry) setIsMinervaHighlighted(true);
-      } catch (error) { console.error("ERRO: Falha ao verificar destaque da Minerva:", error); }
-    };
-    checkMinervaHighlight();
-    const interval = setInterval(checkMinervaHighlight, 60000);
-    return () => clearInterval(interval);
-  }, [groupId, isPaused, isMinervaHighlighted, API_BASE_URL]);
-
-  useEffect(() => {
     if (isPaused) return;
     const interval = setInterval(() => { if (travelStarted) setTravelTime(prev => prev + 1); }, 1000);
     return () => clearInterval(interval);

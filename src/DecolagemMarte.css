@@ -1567,7 +1567,7 @@
   }
 }
 
-/* Opcional: Garante que o título também mude de cor para acompanhar o brilho */
+/* Garante que o título também mude de cor para acompanhar o brilho */
 .minerva-title.highlighted {
   animation: minervaTitleRainbow 3s infinite linear;
 }
