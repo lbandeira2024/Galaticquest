@@ -1962,11 +1962,12 @@
                 "noguchi",
                 "dra_chiaki",
                 "gorjah",
-                "atena"
+                "atena",
+                "narrador"
             ],
             "dialogo": [
                 {
-                    "personagemId": "Narrador",
+                    "personagemId": "narrador",
                     "texto": "(Na primeira Nave...)",
                     "duracao": 1000
                 },
