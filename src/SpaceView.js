@@ -103,7 +103,9 @@ const resetStar = (star, width, height, isWarping) => {
   star.x = (Math.random() - 0.5) * width;
   const yBias = Math.random() - 0.5;
   star.y = (yBias * yBias * yBias) * height * 1.0;
-  star.z = width;
+
+  // CORREÇÃO 1: Em vez de nascerem todas examente em 'width', elas nascem espalhadas mais ao fundo
+  star.z = width + (Math.random() * (width * 0.5));
 
   const isDeepSpace = Math.random() > 0.3;
   star.size = (Math.random() * 2 + 0.8) * (isDeepSpace ? 0.6 : 1);
@@ -111,12 +113,15 @@ const resetStar = (star, width, height, isWarping) => {
   star.twinkleSpeed = Math.random() * 0.05 + 0.01;
   star.twinklePhase = Math.random() * Math.PI * 2;
   star.baseAlpha = isDeepSpace ? (Math.random() * 0.3 + 0.1) : (Math.random() * 0.6 + 0.4);
+
+  // CORREÇÃO 2: Dá a cada estrela uma velocidade individual ligeiramente diferente (de 1 a 15)
+  star.baseSpeed = Math.random() * 15 + 1;
 };
 
 const generateStar = (width, height, isWarping) => {
-  const star = { baseSpeed: 1 };
+  const star = {}; // Removemos a velocidade engessada daqui
   resetStar(star, width, height, isWarping);
-  // O z inicial deve ser aleatório para preencher o ecrã
+  // O z inicial deve ser aleatório para preencher o ecrã na primeira carga
   star.z = Math.random() * width;
   return star;
 };

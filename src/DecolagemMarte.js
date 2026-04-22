@@ -1725,7 +1725,8 @@ const DecolagemMarte = () => {
     const duration = currentStep.duracao || (currentStep.texto.length * 50 + 2000);
     const timer = setTimeout(() => { handleNextDialogue(); }, duration);
 
-    return () => setTimeout(() => { handleNextDialogue(); }, duration);
+    // 🚨 A MUDANÇA É APENAS NESTA LINHA ABAIXO:
+    return () => clearTimeout(timer);
   }, [dialogueIndex, isTransmissionStarting, activeChallengeData, handleNextDialogue]);
 
   const handleToggleMap = useCallback((show) => {
