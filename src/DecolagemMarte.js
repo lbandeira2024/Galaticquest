@@ -1728,8 +1728,7 @@ const DecolagemMarte = () => {
     const duration = currentStep.duracao || (currentStep.texto.length * 50 + 2000);
     const timer = setTimeout(() => { handleNextDialogue(); }, duration);
 
-    // CORREÇÃO CRÍTICA: Limpar o timer invés de recriar um novo, evitando race conditions
-    return () => clearTimeout(timer);
+    return () => setTimeout(() => { handleNextDialogue(); }, duration);
   }, [dialogueIndex, isTransmissionStarting, activeChallengeData, handleNextDialogue]);
 
   const handleToggleMap = useCallback((show) => {
@@ -1906,5 +1905,6 @@ const DecolagemMarte = () => {
     </div>
   );
 };
+
 
 export default DecolagemMarte;
