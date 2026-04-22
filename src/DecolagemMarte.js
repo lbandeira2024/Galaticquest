@@ -459,12 +459,12 @@ const GalacticVirtudesPage = lazy(() => import('./GalacticVirtudesPage').catch((
 })));
 
 const PLANET_DATA_FOR_SOS = [
-  { name: "Mercurio", orbitRadius: 20 }, { name: "Venus", orbitRadius: 30 }, { name: "Terra", orbitRadius: 40 },
+  { name: "Mercúrio", orbitRadius: 20 }, { name: "Venus", orbitRadius: 30 }, { name: "Terra", orbitRadius: 40 },
   { name: "Marte", orbitRadius: 50 }, { name: "Jupiter", orbitRadius: 80 }, { name: "Saturno", orbitRadius: 100 },
   { name: "Urano", orbitRadius: 120 }, { name: "Netuno", orbitRadius: 140 }, { name: "Plutao", orbitRadius: 150 },
   { name: "Ceres", orbitRadius: 60 }, { name: "Eris", orbitRadius: 165 }
 ];
-const STATION_NAMES = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boktok', 'boctok'];
+const STATION_NAMES = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boctok'];
 const SOS_EVENTS_LIST = [
   { id: 1, name: 'Piratas Espaciais', description: 'ALERTA! O sinal era uma isca. Piratas interceptaram a nave. Prepare-se para um possível confronto ou negociação hostil.', image: '/images/pirates.png' },
   { id: 2, name: 'Astronauta Morto', description: 'Encontramos um traje à deriva. Infelizmente, não há sinais vitais. Podemos recuperar equipamentos e dados da missão dele.', image: '/images/dead_astronaut.png' },
@@ -473,8 +473,8 @@ const SOS_EVENTS_LIST = [
 ];
 const hasWaterList = new Set([
   "Marte", "Mercúrio", "Ceres", "Plutão", "Haumea", "Eris", "Makemake", "Lua", "Europa", "Ganímedes",
-  "Calisto", "Titã", "Encelado", "Tritão", "Caronte", "Titania", "Oberon", "Vesta", "TRAPPIST-1e",
-  "Kepler-186f", "Terra", "Proxima Centauri b"
+  "Calisto", "Titã", "Encelado", "Tritão", "Caronte", "Titania", "Oberon", "Vesta", "Trappist1e",
+  "Kepler186f", "Terra", "Proxima Centauri b"
 ]);
 
 const degradationRates = {
@@ -1576,7 +1576,7 @@ const DecolagemMarte = () => {
             setArrivedAtMars(true); setSpeed(45000);
             arrivedAtMarsRef.current = true;
 
-            const normalizeName = (str) => str ? str.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "") : "";
+            const normalizeName = (str) => str ? str.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, "").replace(/\s+/g, "") : "";
 
             const targetName = normalizeName(selPlanet.nome);
             const isStation = STATION_NAMES.some(s => targetName.includes(s));
@@ -1728,7 +1728,8 @@ const DecolagemMarte = () => {
     const duration = currentStep.duracao || (currentStep.texto.length * 50 + 2000);
     const timer = setTimeout(() => { handleNextDialogue(); }, duration);
 
-    return () => setTimeout(() => { handleNextDialogue(); }, duration);
+    // CORREÇÃO CRÍTICA: Limpar o timer invés de recriar um novo, evitando race conditions
+    return () => clearTimeout(timer);
   }, [dialogueIndex, isTransmissionStarting, activeChallengeData, handleNextDialogue]);
 
   const handleToggleMap = useCallback((show) => {
