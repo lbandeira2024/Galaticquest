@@ -498,6 +498,8 @@ const takeoffDegradation = {
   OBERONX: { propulsion: 1, direction: 0, stability: 1 },
 };
 
+const normalizeName = (str) => str ? str.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, "").replace(/\s+/g, "") : "";
+
 const highlightKeywords = (text, keywords) => {
   if (!keywords || keywords.length === 0 || !text) return text;
   const regex = new RegExp(`(${keywords.join('|')})`, 'gi');
@@ -980,7 +982,6 @@ const DecolagemMarte = () => {
     }
   }, [saveNewRouteAndProgress, playSFX, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit, triggerMinervaInterplanetarySpeed]);
 
-  // AQUI: Este é o gatilho que acende o brilho da Minerva ao fazer a escolha
   const handleEscolha = async (opcao, desafioId, impactos) => {
     setIsTransmissionStarting(false); setIsDialogueFinished(false);
     const coinsReward = Number(opcao.spaceCoins || 0);
@@ -1120,10 +1121,9 @@ const DecolagemMarte = () => {
     } catch (error) { console.error("ERRO: Falha ao transferir O2 e salvar dados:", error); }
   };
 
-  // AQUI: Garante que o brilho para imediatamente, mesmo se pausado
   const handleMinervaClick = useCallback((e) => {
     if (e) e.preventDefault();
-    setIsMinervaHighlighted(false); // FORÇA A PARAR O PISCA-PISCA
+    setIsMinervaHighlighted(false);
 
     if (!isPaused) {
       setShowMandala(true);
@@ -1293,7 +1293,6 @@ const DecolagemMarte = () => {
     fetchGameData();
   }, [userId, API_BASE_URL, refetchTrigger]);
 
-  // AQUI FOI REMOVIDO O BLOCO useEffect DE "checkMinervaHighlight" (que fazia ela piscar sozinha)
 
   useEffect(() => {
     if (isPaused || !chosenShip || isDobraAtivada) return;
@@ -1576,21 +1575,24 @@ const DecolagemMarte = () => {
             setArrivedAtMars(true); setSpeed(45000);
             arrivedAtMarsRef.current = true;
 
-            const normalizeName = (str) => str ? str.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, "").replace(/\s+/g, "") : "";
-
             const targetName = normalizeName(selPlanet.nome);
             const isStation = STATION_NAMES.some(s => targetName.includes(s));
 
             if (isStation) {
               setTimeout(() => { setShowStoreModal(true); }, 2500);
             } else {
-              const desafioEncontrado = desafiosData.desafios?.find(d => normalizeName(d.planeta) === targetName || d.id === selPlanet.desafioId);
+              // MELHORIA DE BUSCA ROBUSTA
+              const desafioEncontrado = desafiosData.desafios?.find(d =>
+                normalizeName(d.planeta) === targetName ||
+                (selPlanet.desafioId && d.id === selPlanet.desafioId)
+              );
+
               if (desafioEncontrado) {
                 setActiveChallengeData(desafioEncontrado);
+                setDialogueIndex(0);
                 setShowDesafioModal(true);
               } else {
-                console.warn("⚠️ Desafio não encontrado para o destino:", targetName, "- Abrindo confirmação de viagem.");
-                // GARANTE QUE SABEMOS QUE NÃO HÁ DESAFIO E ADICIONA ESPERA DE 5 SEGUNDOS
+                console.warn("⚠️ Desafio não encontrado para o destino:", targetName);
                 setActiveChallengeData(null);
                 setTimeout(() => {
                   setShowConfirmacaoModal(true);
@@ -1653,7 +1655,7 @@ const DecolagemMarte = () => {
           setProgress(progressPercentage);
         }
       } catch (fatalError) {
-        console.error("Game Loop Anti-Crash ativado. Um erro foi suprimido:", fatalError);
+        console.error("Game Loop Anti-Crash ativado.", fatalError);
       }
 
       animationFrameId.current = requestAnimationFrame(gameLoop);
@@ -1728,7 +1730,8 @@ const DecolagemMarte = () => {
     const duration = currentStep.duracao || (currentStep.texto.length * 50 + 2000);
     const timer = setTimeout(() => { handleNextDialogue(); }, duration);
 
-    return () => setTimeout(() => { handleNextDialogue(); }, duration);
+    // CORREÇÃO CRÍTICA DO TEMPORIZADOR
+    return () => clearTimeout(timer);
   }, [dialogueIndex, isTransmissionStarting, activeChallengeData, handleNextDialogue]);
 
   const handleToggleMap = useCallback((show) => {
@@ -1905,6 +1908,5 @@ const DecolagemMarte = () => {
     </div>
   );
 };
-
 
 export default DecolagemMarte;
