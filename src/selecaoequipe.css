@@ -550,16 +550,14 @@
 /* Continue Arrow */
 .continue-arrow-container_equipe {
   position: absolute;
-  top: 155px;
-  /* Posiciona o botão exatamente ACIMA da foto (que está em top: 210px) */
+  top: 115px;
+  /* Subimos um pouco mais para alinhar com o título Equipe */
   right: 20px;
-  /* Mantém alinhado com a lateral direita da foto */
 }
 
 .continue-arrow_equipe {
   display: flex;
   height: auto;
-  /* ERRO CORRIGIDO: Estava 1200px, o que criava uma área de clique bugada */
   padding: 10px 0;
   align-items: center;
   justify-content: flex-end;
