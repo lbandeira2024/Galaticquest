@@ -1409,7 +1409,7 @@
 }
 
 /* ==========================================================
-   ====== MODAL E MEMBROS DA EQUIPA (FORÇADO COM !IMPORTANT) ==
+   ====== MODAL E MEMBROS DA EQUIPA (ISOLADO PARA NÃO AFETAR OUTRAS TELAS) ==
    ========================================================== */
 
 .team-modal-details {
@@ -1419,14 +1419,14 @@
   background: rgba(10, 10, 10, 0.95) !important;
 }
 
-.team-grid_equipe {
+.team-modal-details .team-grid_equipe {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)) !important;
   gap: 15px;
   margin-top: 20px;
 }
 
-.team-member_equipe {
+.team-modal-details .team-member_equipe {
   padding: 12px !important;
   border: 1px solid #444 !important;
   border-radius: 8px !important;
@@ -1437,7 +1437,7 @@
   box-sizing: border-box !important;
 }
 
-.team-member-avatar {
+.team-modal-details .team-member-avatar {
   width: 110px !important;
   height: 110px !important;
   min-width: 110px !important;
@@ -1451,7 +1451,7 @@
   background-color: #111 !important;
 }
 
-.team-member-details {
+.team-modal-details .team-member-details {
   display: flex !important;
   flex-direction: column !important;
   flex: 1 !important;
@@ -1459,7 +1459,7 @@
   justify-content: center !important;
 }
 
-.team-member-role {
+.team-modal-details .team-member-role {
   color: #ff9800 !important;
   font-size: 11px !important;
   font-weight: bold !important;
@@ -1467,13 +1467,13 @@
   text-transform: uppercase !important;
 }
 
-.team-member-name-container {
+.team-modal-details .team-member-name-container {
   display: flex !important;
   align-items: center !important;
   margin-bottom: 4px !important;
 }
 
-.team-member-experience {
+.team-modal-details .team-member-experience {
   font-size: 10px !important;
   color: #ddd !important;
   line-height: 1.4 !important;
