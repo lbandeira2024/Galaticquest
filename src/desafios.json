@@ -558,7 +558,12 @@
                 },
                 {
                     "personagemId": "demeter",
-                    "texto": "... Saber quem ela é, o que representa de verdade e para onde ela está indo... Capito? A força do todo é maior do que as partes. Para mim, tudo isso é como um ato de fé.",
+                    "texto": "... Saber quem ela é, o que representa de verdade e para onde ela está indo... Capito? A força do todo é maior do que as partes.",
+                    "duracao": 2000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "Para mim, tudo isso é como um ato de fé.",
                     "duracao": 2000
                 },
                 {
@@ -1296,22 +1301,57 @@
             "dialogo": [
                 {
                     "personagemId": "cerruti",
-                    "texto": "Esta reunião é estritamente confidencial e todos estão desautorizados a comentar qualquer coisa, seja com quem for. Pretendo gerenciar pessoalmente as informações processadas aqui nas redes. Convoquei apenas vocês: Dra. Maureen que projetou o tão aguardado “Willy”; Aquiles; Neo (que já foi um co-líder) e Sísifo... Antes que me perguntem, não convoquei Aletheia, Kopenawa e Deméter, coordenadores-líderes, porque sinto que eles são tendenciosos e querem participar por demais aos outros o processo de tomada de decisão, isto me deixa irritado. Tudo demora com eles.",
+                    "texto": "Esta reunião é estritamente confidencial e todos estão desautorizados a comentar qualquer coisa, seja com quem for.",
+                    "duracao": 20000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": "Pretendo gerenciar pessoalmente as informações processadas aqui nas redes. Convoquei apenas vocês: Dra. Maureen que projetou o ",
+                    "duracao": 20000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": "tão aguardado “Willy”; Aquiles; Neo (que já foi um co-líder) e Sísifo... Antes que me perguntem, não convoquei Aletheia,",
+                    "duracao": 20000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": "Kopenawa e Deméter, coordenadores-líderes, porque sinto que eles são tendenciosos e querem participar por demais aos outros ",
+                    "duracao": 20000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": "o processo de tomada de decisão, isto me deixa irritado. Tudo demora com eles.",
                     "duracao": 20000
                 },
                 {
                     "personagemId": "dra_maureen",
-                    "texto": "... Nem todas as situações estão previstas para “Willy” responder e atuar, principalmente no campo das emoções. Ele não tem e não terá jamais inteligência emocional senhores, embora os testes com ele sejam promissores.",
+                    "texto": "... Nem todas as situações estão previstas para “Willy” responder e atuar, principalmente no campo das emoções.",
+                    "duracao": 10000
+                },
+                {
+                    "personagemId": "dra_maureen",
+                    "texto": "Ele não tem e não terá jamais inteligência emocional senhores, embora os testes com ele sejam promissores.",
                     "duracao": 10000
                 },
                 {
                     "personagemId": "aquiles",
-                    "texto": "Tenho problemas na gestão; apoio a produção em série de “Willy”, pois isto nos ajudará a substituir astronautas lentos. É..., com os outros tudo demora.",
+                    "texto": "Tenho problemas na gestão; apoio a produção em série de “Willy”, pois isto nos ajudará a substituir astronautas lentos.",
+                    "duracao": 10000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "É..., com os outros tudo demora.",
                     "duracao": 10000
                 },
                 {
                     "personagemId": "sisifo",
-                    "texto": "Não tenho uma ideia formada sobre esta mudança na gestão, mas o projeto de testes com “Willy” deve continuar. Penso que o melhor caminho é a cautela técnica.",
+                    "texto": "Não tenho uma ideia formada sobre esta mudança na gestão, mas o projeto de testes com “Willy” deve continuar. ",
+                    "duracao": 10000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "Penso que o melhor caminho é a cautela técnica.",
                     "duracao": 10000
                 },
                 {
@@ -1321,7 +1361,12 @@
                 },
                 {
                     "personagemId": "cerruti",
-                    "texto": "Vamos perseguir a produção em série de “Willy”, que dará certo. Vamos para o risco, pois preciso fazer mudanças para o board que melhoremos nossa productivity e o controle dos custos.",
+                    "texto": "Vamos perseguir a produção em série de “Willy”, que dará certo. Vamos para o risco, pois preciso fazer mudanças ",
+                    "duracao": 12000
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": "para o board que melhoremos nossa productivity e o controle dos custos.",
                     "duracao": 12000
                 }
             ],
@@ -1435,7 +1480,12 @@
                 },
                 {
                     "personagemId": "sisifo",
-                    "texto": "Entendemos. Perdemos a missão a Saturno. Ares, Mae, Tamara e Neo, vamos desligar tudo para poupar o que pudermos pra viagem à Estação Delfos.",
+                    "texto": "Entendemos. Perdemos a missão a Saturno. Ares, Mae, Tamara e Neo, vamos desligar tudo para poupar ",
+                    "duracao": 12000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "o que pudermos pra viagem à Estação Delfos.",
                     "duracao": 12000
                 },
                 {
@@ -1445,7 +1495,22 @@
                 },
                 {
                     "personagemId": "sisifo",
-                    "texto": "Perdemos contato. Nada de improvisar, vamos seguir a trajetória livre e trabalhar uma propulsão que nos ajude. Se o motor estiver avariado pode explodir tudo e morreremos. Usaremos o módulo de serviço, redistribuindo funções, cooperação ao máximo. Na trajetória livre, quando contornarmos Saturno ligaremos então o motor, propulsionaremos e corrigiremos a rota. Vamos começar o rastreamento de energia para armazená-la agora.",
+                    "texto": "Perdemos contato. Nada de improvisar, vamos seguir a trajetória livre e trabalhar uma propulsão que nos ajude. ",
+                    "duracao": 25000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "Se o motor estiver avariado pode explodir tudo e morreremos. Usaremos o módulo de serviço, redistribuindo funções,",
+                    "duracao": 25000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "cooperação ao máximo. Na trajetória livre, quando contornarmos Saturno ligaremos então o motor, propulsionaremos e corrigiremos",
+                    "duracao": 25000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": " a rota. Vamos começar o rastreamento de energia para armazená-la agora.",
                     "duracao": 25000
                 },
                 {
@@ -1455,12 +1520,27 @@
                 },
                 {
                     "personagemId": "sisifo",
-                    "texto": "Insisto, vocês são muito capazes. Mae, confie em nós, aqui confiamos em você. Se não juntarmos nossos talentos agora, quem o fará por nós? Quero todos testando soluções, esta missão é a mais árdua de nossas vidas. O fracasso não vai acontecer sob meu comando. Temos que perseverar!",
+                    "texto": "Insisto, vocês são muito capazes. Mae, confie em nós, aqui confiamos em você. Se não juntarmos nossos talentos agora,",
+                    "duracao": 18000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "quem o fará por nós? Quero todos testando soluções, esta missão é a mais árdua de nossas vidas. ",
+                    "duracao": 18000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "O fracasso não vai acontecer sob meu comando. Temos que perseverar!",
                     "duracao": 18000
                 },
                 {
                     "personagemId": "mae",
-                    "texto": "Nossa Sísifo, vendo você falar assim o seu entusiasmo é o nosso também. Aceito o desafio Sísifo, vamos perseguir o plano pra sair dessa.",
+                    "texto": "Nossa Sísifo, vendo você falar assim o seu entusiasmo é o nosso também. Aceito o desafio Sísifo,",
+                    "duracao": 10000
+                },
+                {
+                    "personagemId": "mae",
+                    "texto": "vamos perseguir o plano pra sair dessa.",
                     "duracao": 10000
                 }
             ],
@@ -1670,12 +1750,27 @@
             "dialogo": [
                 {
                     "personagemId": "kopenawa",
-                    "texto": "Solicitei esta chamada por vídeo a vocês, porque pela primeira vez estou perdido e não sei como fazer para resolver a situação de Zachary, afastado pela Dra. Chiaki. Ele vem ‘jorrando” informes sobre doenças que podem ser contraídas aqui, e percebo que já há uma compulsão de seu comportamento... O que faço, pessoal?",
+                    "texto": "Solicitei esta chamada por vídeo a vocês, porque pela primeira vez estou perdido e não sei como fazer para resolver a situação",
+                    "duracao": 15000
+                },
+                {
+                    "personagemId": "kopenawa",
+                    "texto": "de Zachary, afastado pela Dra. Chiaki. Ele vem ‘jorrando” informes sobre doenças que podem ser contraídas aqui, ",
+                    "duracao": 15000
+                },
+                {
+                    "personagemId": "kopenawa",
+                    "texto": "e percebo que já há uma compulsão de seu comportamento... O que faço, pessoal?",
                     "duracao": 15000
                 },
                 {
                     "personagemId": "aquiles",
-                    "texto": "Temos que valorizar a meritocracia escolhendo outro astronauta para assumir suas funções. Ele está “piradinho”, e tenho dúvidas se ele volta ao trabalho... Pense, Kopenawa, se já não é hora dele retornar à Terra.",
+                    "texto": "Temos que valorizar a meritocracia escolhendo outro astronauta para assumir suas funções. Ele está “piradinho”, e tenho dúvidas",
+                    "duracao": 12000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": " se ele volta ao trabalho... Pense, Kopenawa, se já não é hora dele retornar à Terra.",
                     "duracao": 12000
                 },
                 {
@@ -1685,7 +1780,12 @@
                 },
                 {
                     "personagemId": "sisifo",
-                    "texto": "O caso é delicado, tenho um nome para substituí-lo, se for o caso. Esta pessoa tem todo o conhecimento necessário, menos a experiência.",
+                    "texto": "O caso é delicado, tenho um nome para substituí-lo, se for o caso. Esta pessoa tem todo o conhecimento necessário,",
+                    "duracao": 8000
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "menos a experiência.",
                     "duracao": 8000
                 },
                 {
@@ -1695,7 +1795,32 @@
                 },
                 {
                     "personagemId": "aletheia",
-                    "texto": "Corajoso você, Kopenawa, que nos presenteia com este case de liderança... Zachary merece um feedback de toda situação. Devemos exercer empatia com ele, que tem sido dedicado. Devemos escutá-lo e a linha de especialistas, quem poderia substituí-lo por um tempo. O novo colega deve ser ratificado aqui. Sobre Zachary ainda, ele está moderadamente estressado segundo a doutora, Cerruti. Ela atesta que as fobias foram desencadeadas pelo esgotamento. Ele necessitará de acompanhamento médico-psiquiátrico. Já o novo colega na função deve ter um coach da base, com canal direto e constante. Cerruti, pesquisei - Zachary continua a ter mesma confiança de todo time. Nos resta orientá-los para que os ajudem em sua recuperação.”",
+                    "texto": "Corajoso você, Kopenawa, que nos presenteia com este case de liderança... Zachary merece um feedback de toda situação.",
+                    "duracao": 30000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": "Devemos exercer empatia com ele, que tem sido dedicado. Devemos escutá-lo e a linha de especialistas, quem poderia substituí-lo",
+                    "duracao": 30000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": "por um tempo. O novo colega deve ser ratificado aqui. Sobre Zachary ainda, ele está moderadamente estressado segundo a doutora,",
+                    "duracao": 30000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": "Cerruti. Ela atesta que as fobias foram desencadeadas pelo esgotamento. Ele necessitará de acompanhamento médico-psiquiátrico. ",
+                    "duracao": 30000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": " Já o novo colega na função deve ter um coach da base, com canal direto e constante. Cerruti, pesquisei ",
+                    "duracao": 30000
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": " - Zachary continua a ter mesma confiança de todo time. Nos resta orientá-los para que os ajudem em sua recuperação.”",
                     "duracao": 30000
                 }
             ],
@@ -1772,22 +1897,72 @@
             "dialogo": [
                 {
                     "personagemId": "hazza_alli",
-                    "texto": "Tenho uma ideia razoável. Acho que poderíamos pedir uma reunião com Sísifo e falar sobre Neo, e alertá-lo para que o oriente mais. Ao mesmo tempo, dizer a Sisifo as consequências de seu comportamento para toda tripulação que já está criando uma aversão natural contra ele... Mas vocês sabem, nem sempre as pessoas mudam e têm paciência com alguém assim.",
+                    "texto": "Tenho uma ideia razoável. Acho que poderíamos pedir uma reunião com Sísifo e falar sobre Neo, e alertá-lo para que o ",
+                    "duracao": 15000
+                },
+                {
+                    "personagemId": "hazza_alli",
+                    "texto": "oriente mais. Ao mesmo tempo, dizer a Sisifo as consequências de seu comportamento para toda tripulação que já está criando ",
+                    "duracao": 15000
+                },
+                {
+                    "personagemId": "hazza_alli",
+                    "texto": "uma aversão natural contra ele... Mas vocês sabem, nem sempre as pessoas mudam e têm paciência com alguém assim.",
                     "duracao": 15000
                 },
                 {
                     "personagemId": "illa_ramon",
-                    "texto": "Hazza, você confunde as coisas. Sísifo se sentirá ofendido. Poderíamos nos vingar de Neo ignorando suas orientações no trabalho e ver se ele se toca, o que acham?... Ou vocês acreditam que há outro jeito melhor para se lidar com um “demônio” desses, tão soberbo com todo mundo? Ele vive de aparências e status, e age com utilitarismo das pessoas. É como o vejo, sabe!",
+                    "texto": "Hazza, você confunde as coisas. Sísifo se sentirá ofendido. Poderíamos nos vingar de Neo ignorando suas orientações no trabalho",
+                    "duracao": 20000
+                },
+                {
+                    "personagemId": "illa_ramon",
+                    "texto": " e ver se ele se toca, o que acham?... Ou vocês acreditam que há outro jeito melhor para se lidar com um “demônio” desses, ",
+                    "duracao": 20000
+                },
+                {
+                    "personagemId": "illa_ramon",
+                    "texto": "tão soberbo com todo mundo? Ele vive de aparências e status, e age com utilitarismo das pessoas. É como o vejo, sabe!",
                     "duracao": 20000
                 },
                 {
                     "personagemId": "semolek",
-                    "texto": "...Acho que Neo se conhece pouco pelas reações que conhecemos dele. Isto me preocupa quando dependemos dele. E se perguntássemos a ele numa conversa: “que nota você se daria em termos de autoconhecimento?”...",
+                    "texto": "...Acho que Neo se conhece pouco pelas reações que conhecemos dele. Isto me preocupa quando dependemos dele. ",
+                    "duracao": 12000
+                },
+                {
+                    "personagemId": "semolek",
+                    "texto": "E se perguntássemos a ele numa conversa: “que nota você se daria em termos de autoconhecimento?”...",
                     "duracao": 12000
                 },
                 {
                     "personagemId": "petros",
-                    "texto": "Semolek, você quer “apanhar” e ouvir poucas e boas dele (risos)? Não tente fazer isso que você se dará mal... Acho que precisamos pensar um jeito de sensibilizá-lo mais para os impactos que ele desencadeia nas pessoas. Isto é muito sério se não fizermos nada, o seu comportamento afetará nossa  produtividade. Precisamos abrir a cabeça dele pelo coração para inspirá-lo a entrar no espirito da equipe. Se não for assim, o que será de todos nós?... Vamos falar com Sísifo e sugerir a ele que compartilhe o problema com os outros coordenadores-líderes de sua confiança. Quem se habilita a falar com ele?... Eu me proponho.”",
+                    "texto": "Semolek, você quer “apanhar” e ouvir poucas e boas dele (risos)? Não tente fazer isso que você se dará mal... ",
+                    "duracao": 30000
+                },
+                {
+                    "personagemId": "petros",
+                    "texto": "Acho que precisamos pensar um jeito de sensibilizá-lo mais para os impactos que ele desencadeia nas pessoas. ",
+                    "duracao": 30000
+                },
+                {
+                    "personagemId": "petros",
+                    "texto": "Isto é muito sério se não fizermos nada, o seu comportamento afetará nossa  produtividade. ",
+                    "duracao": 30000
+                },
+                {
+                    "personagemId": "petros",
+                    "texto": "Precisamos abrir a cabeça dele pelo coração para inspirá-lo a entrar no espirito da equipe. ",
+                    "duracao": 30000
+                },
+                {
+                    "personagemId": "petros",
+                    "texto": "Se não for assim, o que será de todos nós?... Vamos falar com Sísifo e sugerir a ele que compartilhe o problema com os outros ",
+                    "duracao": 30000
+                },
+                {
+                    "personagemId": "petros",
+                    "texto": "coordenadores-líderes de sua confiança. Quem se habilita a falar com ele?... Eu me proponho.”",
                     "duracao": 30000
                 }
             ],
@@ -1868,12 +2043,32 @@
                 },
                 {
                     "personagemId": "semolek",
-                    "texto": "Não há o que fazer. O código de segurança espacial (CSE) é claro e recomenda em casos assim, que a adoção de distanciamento do doente seja total. Não há o que fazer. Lamento, gente!",
+                    "texto": "Não há o que fazer. O código de segurança espacial (CSE) é claro e recomenda em casos assim, que a adoção de distanciamento ",
+                    "duracao": 10000
+                },
+                {
+                    "personagemId": "semolek",
+                    "texto": "do doente seja total. Não há o que fazer. Lamento, gente!",
                     "duracao": 10000
                 },
                 {
                     "personagemId": "demeter",
-                    "texto": "...Vou entrar, estou com EPI, um de vocês entre comigo também equipado ...Ela está piorando. Vamos medicá-la conforme protocolo e acompanhar sua reação a despeito da regra de segurança.... A competência dela não pode faltar aqui. Coloquem a Dra. Chiaki em viva voz. Só vou dormir quando ela melhorar... Permanecerei aqui para estancar o seu sangramento que aconteceu quando ela bateu a cabeça no chão.",
+                    "texto": "...Vou entrar, estou com EPI, um de vocês entre comigo também equipado ...Ela está piorando.",
+                    "duracao": 20000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "Vamos medicá-la conforme protocolo e acompanhar sua reação a despeito da regra de segurança.... ",
+                    "duracao": 20000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "A competência dela não pode faltar aqui. Coloquem a Dra. Chiaki em viva voz. Só vou dormir quando ela melhorar... ",
+                    "duracao": 20000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "Permanecerei aqui para estancar o seu sangramento que aconteceu quando ela bateu a cabeça no chão.",
                     "duracao": 20000
                 },
                 {
@@ -1888,7 +2083,22 @@
                 },
                 {
                     "personagemId": "demeter",
-                    "texto": "... Seu eu não estivesse aqui para fazer a diferença, para mim de nada valeria tudo isso. Entenderam?... Fui treinada para isso... O que eu disser aqui é uma ordem... Temos que acreditar que haverá um pico da febre e que depois ela vai baixar... Os sinais de Nora estão oscilando muito... Nos diga Nora, quem são estas pessoas que você está falando?... Você vai melhorar, estamos aqui para lhe ajudar. Acredite!... ( A doença de Nora segue em estado grave).",
+                    "texto": "... Seu eu não estivesse aqui para fazer a diferença, para mim de nada valeria tudo isso. Entenderam?... ",
+                    "duracao": 25000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "Fui treinada para isso... O que eu disser aqui é uma ordem... Temos que acreditar que haverá um pico da febre e que depois ",
+                    "duracao": 25000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "ela vai baixar... Os sinais de Nora estão oscilando muito... Nos diga Nora, quem são estas pessoas que você está falando?...",
+                    "duracao": 25000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": " Você vai melhorar, estamos aqui para lhe ajudar. Acredite!... ( A doença de Nora segue em estado grave).",
                     "duracao": 25000
                 }
             ],
@@ -2008,7 +2218,47 @@
                 },
                 {
                     "personagemId": "aquiles",
-                    "texto": " Atena fará como combinamos a função de Noguchi na engenharia geral aeroespacial (projetos e reparos) com meu coaching e o dele quando precisar. Atena ainda se encontra em fase de treinamento. Certo, Atena?...  Por fim, a Dra. Chiaki continua cumprindo seu papel como médica espacial, mas assume paralelamente a função de astrobióloga de Atena, de quem receberá o coaching. O objetivo é conseguir a adaptação de todos com celeridade. \n\nObservei que todos experimentaram os novos papéis. Vi que Dra. Chiaki precisa ser ainda dirigida neste momento. Treinada e apoiada também, até conseguir o desempenho aguardado. Isto é natural, Dra. Chiaki. Já Atena está pronta para algumas delegações, podendo agir com flexibilidade. Para algumas tarefas especificas Atena, creio que você ainda precise de nosso apoio. Adiante, em conformidade com a maturidade e nível de resposta de cada um, poderemos avançar à segunda rodada no giro das funções. Seguimos para o nosso desafio maior parceiros, rumo ao “planetinha misterioso”. Oremos!... Sísifo que me ouve em áudio, acabamos aqui; vamos para a ação. Boa sorte, parceiro!”",
+                    "texto": " quando precisar. Atena ainda se encontra em fase de treinamento. Certo, Atena?...  Por fim, a Dra. Chiaki continua cumprindo ",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "seu papel como médica espacial, mas assume paralelamente a função de astrobióloga de Atena, de quem receberá o coaching. ",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "O objetivo é conseguir a adaptação de todos com celeridade. \n\nObservei que todos experimentaram os novos papéis. ",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "Vi que Dra. Chiaki precisa ser ainda dirigida neste momento. Treinada e apoiada também, até conseguir o desempenho aguardado. ",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "Isto é natural, Dra. Chiaki. Já Atena está pronta para algumas delegações, podendo agir com flexibilidade. ",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "Para algumas tarefas especificas Atena, creio que você ainda precise de nosso apoio. Adiante, em conformidade com a maturidade",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "e nível de resposta de cada um, poderemos avançar à segunda rodada no giro das funções. Seguimos para o nosso desafio maior ",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "parceiros, rumo ao “planetinha misterioso”. Oremos!... Sísifo que me ouve em áudio, acabamos aqui; vamos para a ação. ",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "Boa sorte, parceiro!”",
                     "duracao": 5000
                 }
             ],
