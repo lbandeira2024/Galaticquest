@@ -3,15 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import './GeneralReport.css';
 
 const GeneralReport = () => {
-    // Pega o número do game da URL configurada no React Router
     const { gameNumber } = useParams();
     const navigate = useNavigate();
     const canvasRef = useRef(null);
 
-    // Controle de abas: 'pontuacao' (tabela da imagem) ou 'regras' (formulários)
     const [activeTab, setActiveTab] = useState('pontuacao');
 
-    // Efeito do Fundo Estrelado Animado
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -58,7 +55,6 @@ const GeneralReport = () => {
         };
     }, []);
 
-    // Função auxiliar para alternar o estado visual das tags
     const handleTagClick = (e) => {
         e.target.classList.toggle('active');
     };
@@ -71,7 +67,7 @@ const GeneralReport = () => {
                 <header className="cyber-header">
                     <div className="header-left">
                         <div className="logo-placeholder">ACEE</div>
-                        <div class="header-titles">
+                        <div className="header-titles">
                             <h1>Painel Administrativo</h1>
                             <p>Configuração de Regras de Jogo</p>
                         </div>
@@ -89,7 +85,6 @@ const GeneralReport = () => {
 
                     <div className="rules-layout-grid">
 
-                        {/* Coluna 1: Ações Esquerda */}
                         <aside className="action-sidebar">
                             <button
                                 className={`action-tab-btn ${activeTab === 'pontuacao' ? 'active-neon' : ''}`}
@@ -105,11 +100,9 @@ const GeneralReport = () => {
                             </button>
                         </aside>
 
-                        {/* Coluna 2: Conteúdo Central dinâmico baseado na aba */}
                         <section className="config-quadrants">
 
                             {activeTab === 'pontuacao' ? (
-                                /* TABELA DA IMAGEM: VISUALIZAR PONTUAÇÃO */
                                 <div className="table-wrapper">
                                     <table className="score-table">
                                         <thead>
@@ -123,7 +116,6 @@ const GeneralReport = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {/* Bloco Verde */}
                                             <tr className="row-green">
                                                 <td rowSpan="4" className="row-header">
                                                     <strong>I- Número de Corpos<br />Celestes<br />Conquistados</strong>
@@ -136,7 +128,6 @@ const GeneralReport = () => {
                                             <tr className="row-green"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
                                             <tr className="row-green bold-row"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
 
-                                            {/* Bloco Laranja */}
                                             <tr className="row-orange">
                                                 <td rowSpan="4" className="row-header">
                                                     <strong>II- Fluxo de Caixa<br /><small>(MM Spacecoin)</small></strong>
@@ -147,7 +138,6 @@ const GeneralReport = () => {
                                             <tr className="row-orange"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
                                             <tr className="row-orange bold-row"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
 
-                                            {/* Bloco Amarelo */}
                                             <tr className="row-yellow">
                                                 <td rowSpan="4" className="row-header">
                                                     <strong>III- Virtus – Índice de<br />Virtudes Humanas<br />Aplicado à Liderança<br /></strong>
@@ -162,7 +152,6 @@ const GeneralReport = () => {
                                     </table>
                                 </div>
                             ) : (
-                                /* GRID DOS FORMULÁRIOS: ALTERAR REGRAS */
                                 <>
                                     <div className="cyber-card">
                                         <h3 className="card-title">BÁSICO</h3>
@@ -236,7 +225,6 @@ const GeneralReport = () => {
                             )}
                         </section>
 
-                        {/* Coluna 3: Menu Lateral Direita */}
                         <nav className="side-nav-menu">
                             <button className="nav-menu-item">VISÃO GERAL</button>
                             <button className="nav-menu-item">BÁSICO</button>

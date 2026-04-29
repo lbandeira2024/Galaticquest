@@ -213,7 +213,6 @@ const GameConfig = () => {
     const [scheduledGames, setScheduledGames] = useState([]);
     const [isAddingNewPlayer, setIsAddingNewPlayer] = useState(false);
 
-    // Estado do formulário de novo jogador (incluindo numeroLiderados)
     const [newPlayerForm, setNewPlayerForm] = useState({
         nome: '',
         email: '',
@@ -245,18 +244,15 @@ const GameConfig = () => {
         }
     };
 
-    // --- FUNÇÃO ATUALIZADA: Filtra estritamente pelo gameNumber ---
     const fetchPlayers = useCallback(async (clientName) => {
         if (!clientName || !apiBaseUrl) {
             setPlayersList([]);
             return;
         }
         try {
-            // Busca todos os usuários da empresa
             const response = await axios.get(`${apiBaseUrl}/users/by-company?company=${encodeURIComponent(clientName)}`);
 
             if (response.data.success) {
-                // FILTRO CRUCIAL: Mantém apenas usuários cujo gameNumber corresponde ao Game atual
                 const currentGameNumber = Number(gameNumber);
                 const playersOfThisGame = response.data.users.filter(player =>
                     Number(player.gameNumber) === currentGameNumber
@@ -274,7 +270,7 @@ const GameConfig = () => {
             console.error("Erro ao buscar lista de jogadores:", error);
             setPlayersList([]);
         }
-    }, [apiBaseUrl, gameNumber]); // gameNumber adicionado às dependências
+    }, [apiBaseUrl, gameNumber]);
 
     const fetchClients = useCallback(async () => {
         if (!apiBaseUrl) return;
@@ -470,7 +466,7 @@ const GameConfig = () => {
             setClientMessage({ type: 'success', text: response.data.message });
             const regionals = response.data.regionals;
             const fullList = [{ _id: '', nome: "Insira nova regional" }, ...regionals];
-            setRegionalList(fullList);
+            setRegionalList(fullRegionalList);
             setSelectedRegional(response.data.newRegionalId);
             setCurrentRegionalName(newRegionalName.trim());
             setIsAddingNewRegional(false);
@@ -856,13 +852,16 @@ const GameConfig = () => {
                                     >
                                         INICIAR
                                     </button>
+
+                                    {/* CORREÇÃO DO BOTÃO AQUI */}
                                     <button
                                         type="button"
-                                        onClick={() => window.location.href = `/GeneralReport.js?gameNumber=${gameNumber}`}
+                                        onClick={() => navigate(`/general-report/${gameNumber}`)}
                                         className="game-action-button report-button"
                                     >
                                         REPORTS
                                     </button>
+
                                 </div>
                             )}
                         </div>

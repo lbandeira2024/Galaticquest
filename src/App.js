@@ -22,6 +22,7 @@ import LobbyGrupos from "./LobbyGrupos";
 import ContadorRegressivo from "./ContadorRegressivo";
 import AdminPage from "./AdminPage";
 import GameConfig from "./GameConfig";
+import GeneralReport from "./GeneralReport"; // <--- NOVO: Import do Relatório Geral
 
 // Context Providers
 import { AudioProvider, useAudio } from "./AudioManager";
@@ -65,9 +66,6 @@ function AppInitializer() {
     fetchUserGameData();
   }, [user, apiBaseUrl]);
 
-  // CORREÇÃO FINAL: PauseProvider por fora, AudioProvider por dentro!
-  // Assim o AudioManager consegue aceder ao usePause sem gerar o erro fatal,
-  // e graças às proteções criadas anteriormente, a música não irá reiniciar!
   return (
     <PauseProvider
       gameNumber={currentUserGameNumber}
@@ -148,12 +146,10 @@ function AppContent() {
     const prev = prevPathRef.current;
     const curr = location.pathname;
 
-    // Ao ENTRAR na decolagem: pare apenas a trilha (não mata o primário)
     if (curr === "/decolagem-marte" && prev !== "/decolagem-marte") {
       stopMusic();
     }
 
-    // Ao SAIR da decolagem: limpa tudo para não vazar sons entre ecrãs
     if (prev === "/decolagem-marte" && curr !== "/decolagem-marte") {
       stopAllAudio();
     }
@@ -167,6 +163,9 @@ function AppContent() {
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/admin/game/:gameNumber" element={<GameConfig />} />
 
+        {/* NOVO: Rota do Relatório Geral recebendo o gameNumber na URL */}
+        <Route path="/general-report/:gameNumber" element={<GeneralReport />} />
+
         <Route path="/ContadorRegressivo" element={<ContadorRegressivo />} />
         <Route path="/BoasVindas" element={<BoasVindas />} />
         <Route path="/LobbyGrupos" element={<LobbyGrupos />} />
@@ -179,9 +178,6 @@ function AppContent() {
         <Route path="/SelecaoRota" element={<SelecaoRota />} />
         <Route path="/SelecaoEquipe" element={<SelecaoEquipe />} />
         <Route path="/SelecaoNave" element={<SelecaoNave />} />
-
-        {/* Rota temporariamente desativada pois o ficheiro não foi encontrado */}
-        {/* <Route path="/stellar-map" element={<StellarMap />} /> */}
 
         <Route path="/" element={<CadastroForm />} />
         <Route path="/login" element={<Login />} />
