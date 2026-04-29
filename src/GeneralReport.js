@@ -64,19 +64,24 @@ const GeneralReport = () => {
             <canvas ref={canvasRef} className="cosmic-bg"></canvas>
 
             <div className="cyber-container">
-                <header className="cyber-header">
-                    <div className="header-left">
-                        <div className="logo-placeholder">ACEE</div>
-                        <div className="header-titles">
+
+                {/* --- CABEÇALHO ATUALIZADO IGUAL AO GAMECONFIG --- */}
+                <header className="admin-header">
+                    <div className="header-content">
+                        <img src="/images/ACEE.png" alt="ACEE Logo" className="admin-logo" />
+                        <div>
                             <h1>Painel Administrativo</h1>
-                            <p>Configuração de Regras de Jogo</p>
+                            <p className="welcome-message">
+                                <span className="user-name">Relatórios do Jogo</span>
+                            </p>
                         </div>
                     </div>
-                    <div className="header-right">
-                        <button className="neon-btn outline-btn" onClick={() => navigate(-1)}>Voltar</button>
-                        <button className="neon-btn outline-btn" onClick={() => navigate('/')}>Sair</button>
+                    <div className="header-actions">
+                        <button onClick={() => navigate(-1)} className="logout-button">Voltar</button>
+                        <button onClick={() => navigate('/')} className="logout-button">Sair</button>
                     </div>
                 </header>
+                {/* ------------------------------------------------ */}
 
                 <main className="neon-panel-wrapper">
                     <h2 className="panel-main-title">
