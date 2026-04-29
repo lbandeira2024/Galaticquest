@@ -2440,7 +2440,7 @@
                 },
                 {
                     "personagemId": "narrador",
-                    "texto": " práticas de competências, de filosofia e daquilo que já observaram na convivência com terceiros fora da sala.\n\nConsiderando",
+                    "texto": " práticas de competências, de filosofia e daquilo que já observaram na convivência com terceiros fora da sala.Considerando",
                     "duracao": 10000
                 },
                 {
@@ -2450,12 +2450,12 @@
                 },
                 {
                     "personagemId": "narrador",
-                    "texto": "necessidade de habilidades técnicas e de comportamentos, perguntamos: \n\nQue equipe a seguir, o grupo escolheria para cumprir",
+                    "texto": "necessidade de habilidades técnicas e de comportamentos, perguntamos: Que equipe a seguir, o grupo escolheria para cumprir",
                     "duracao": 10000
                 },
                 {
                     "personagemId": "narrador",
-                    "texto": "o tamanho desafio?\n\nDiscutam e decidam a melhor composição, lembrando que você e seu grupo podem esperar e observar novos",
+                    "texto": "o tamanho desafio? Discutam e decidam a melhor composição, lembrando que você e seu grupo podem esperar e observar novos",
                     "duracao": 9800
                 },
                 {
@@ -2848,7 +2848,12 @@
                 },
                 {
                     "personagemId": "demeter",
-                    "texto": "O que vocês ganham com isso?... Me deem um tempo para ajudá-los, o problema é de todos. Tenho a confiança de vocês para falar com Cerruti?",
+                    "texto": "O que vocês ganham com isso?... Me deem um tempo para ajudá-los, o problema é de todos. ",
+                    "duracao": 10800
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "Tenho a confiança de vocês para falar com Cerruti?",
                     "duracao": 10800
                 },
                 {
@@ -2858,13 +2863,28 @@
                 },
                 {
                     "personagemId": "narrador",
-                    "texto": "Deméter convida Cerruti para outra caminhada virtual e decide lhe “abrir o jogo” sobre o que acontece, sem mencionar as fontes de informação.",
+                    "texto": "Deméter convida Cerruti para outra caminhada virtual e decide lhe “abrir o jogo” sobre o que acontece, ",
+                    "duracao": 11000
+                },
+                {
+                    "personagemId": "narrador",
+                    "texto": "sem mencionar as fontes de informação.",
                     "duracao": 11000
                 },
                 {
                     "personagemId": "demeter",
-                    "texto": "Cerruti, você não goza de boa reputação. Sua mentalidade tem levado todos ao estresse por conta de seu estilo que não dá confiança nem gera cooperação; você não é inclusivo nem empático e criou vitimizados com seu poder, isto prejudica o trabalho do time e o relacionamento entre os astronautas mais sensíveis.”",
-                    "duracao": 22300
+                    "texto": "Cerruti, você não goza de boa reputação. Sua mentalidade tem levado todos ao estresse por conta de seu estilo que não ",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "dá confiança nem gera cooperação; você não é inclusivo nem empático e criou vitimizados com seu poder, isto prejudica ",
+                    "duracao": 5000
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "o trabalho do time e o relacionamento entre os astronautas mais sensíveis.”",
+                    "duracao": 4000
                 }
             ],
             "opcoes": [
@@ -3068,22 +3088,67 @@
             "dialogo": [
                 {
                     "personagemId": "sisifo",
-                    "texto": "Aqui neste espaço imenso, em meio a tantas caminhadas, repetimos o mesmo que se faz no Caminho de Abraão, no Caminho de Santiago de Compostela e no Caminho da Fé. Descobri aqui muitas coisas que “perdi” quando tomei decisões difíceis e equivocadas. Acho que não devo mais procrastinar este trabalho comigo.... Se não for assim, como vamos caminhar de um jeito que nos guie de verdade? Podem me responder, por favor?",
+                    "texto": "Aqui neste espaço imenso, em meio a tantas caminhadas, repetimos o mesmo que se faz no Caminho de Abraão, ",
+                    "duracao": 29300
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "no Caminho de Santiago de Compostela e no Caminho da Fé. Descobri aqui muitas coisas que “perdi” quando tomei decisões difíceis",
+                    "duracao": 29300
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "e equivocadas. Acho que não devo mais procrastinar este trabalho comigo.... Se não for assim, como vamos caminhar de um jeito ",
+                    "duracao": 29300
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "que nos guie de verdade? Podem me responder, por favor?",
                     "duracao": 29300
                 },
                 {
                     "personagemId": "farna",
-                    "texto": "Foi a “natureza espacial” que definiu regras de convivência para cada um de nós no trabalho aqui, que começaram com caminhadas despretensiosas no início. Lembram-se? ... Minhas crises existenciais começaram, mas continuam na missão, eu acho. Estou aprendendo com os melhores líderes, porém, quero me reservar sobre isso!",
+                    "texto": "Foi a “natureza espacial” que definiu regras de convivência para cada um de nós no trabalho aqui, que começaram com caminhadas ",
+                    "duracao": 23000
+                },
+                {
+                    "personagemId": "farna",
+                    "texto": "despretensiosas no início. Lembram-se? ... Minhas crises existenciais começaram, mas continuam na missão, eu acho. ",
+                    "duracao": 23000
+                },
+                {
+                    "personagemId": "farna",
+                    "texto": "Estou aprendendo com os melhores líderes, porém, quero me reservar sobre isso!",
                     "duracao": 23000
                 },
                 {
                     "personagemId": "tamara",
-                    "texto": "Não dá para fazer uma liderança séria na ACEE agindo como o “asno de Buridan”, certo? Precisamos avançar para uma liderança virtuosa, pois a que vemos é inaceitável. Vejo muitas, muitas decisões procrastinadas na missão e outras corretas também. Mas precisamos melhorar, e muito. Certamente, sou uma delas.",
+                    "texto": "Não dá para fazer uma liderança séria na ACEE agindo como o “asno de Buridan”, certo? Precisamos avançar para uma liderança ",
+                    "duracao": 22000
+                },
+                {
+                    "personagemId": "tamara",
+                    "texto": "virtuosa, pois a que vemos é inaceitável. Vejo muitas, muitas decisões procrastinadas na missão e outras corretas também. ",
+                    "duracao": 22000
+                },
+                {
+                    "personagemId": "tamara",
+                    "texto": "Mas precisamos melhorar, e muito. Certamente, sou uma delas.",
                     "duracao": 22000
                 },
                 {
                     "personagemId": "aquiles",
-                    "texto": "Vocês estão “voando” demais... A carência aqui é fazer, entregar. Há astronautas que procrastinam, líderes que são complacentes... Gente, minha jornada vai recomeçar. Vou voltar ao centro de controle de navegação... Até a próxima chamada... Let's go ahead, all towards the mission! (risos).",
+                    "texto": "Vocês estão “voando” demais... A carência aqui é fazer, entregar. Há astronautas que procrastinam, líderes que são complacentes",
+                    "duracao": 21000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "... Gente, minha jornada vai recomeçar. Vou voltar ao centro de controle de navegação... Até a próxima chamada... ",
+                    "duracao": 21000
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "Let's go ahead, all towards the mission! (risos).",
                     "duracao": 21000
                 }
             ],

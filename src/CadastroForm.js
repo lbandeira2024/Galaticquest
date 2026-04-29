@@ -152,7 +152,7 @@ const CadastroForm = () => {
 
   useEffect(() => {
     const currentMusic = "/sounds/trilha_galatica_v1.mp3";
-    playTrack(currentMusic, { loop: true, isPrimary: false });
+    playTrack(currentMusic, { loop: true, isPrimary: false, volume: 0.5 });
   }, [playTrack]);
 
   useEffect(() => {
