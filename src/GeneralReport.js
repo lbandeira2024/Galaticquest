@@ -15,13 +15,19 @@ const GeneralReport = () => {
     const { musicAudioRef } = useAudio();
     const [isMuted, setIsMuted] = useState(musicAudioRef.current ? musicAudioRef.current.muted : false);
     const [isPaused, setIsPaused] = useState(false);
-    const [activeTab, setActiveTab] = useState('geral'); // Controla a aba Visão Geral / Ranking
+    const [activeTab, setActiveTab] = useState('geral');
     const pauseChannel = useRef(new BroadcastChannel('pause_channel'));
 
-    // ESTADO: Armazena as equipes do jogo atual
-    const [teams, setTeams] = useState([]);
+    // ESTADO: Armazena os objetos completos das equipes
+    const [groups, setGroups] = useState([]);
 
-    // --- FUNÇÕES DOS BOTÕES DO CABEÇALHO ---
+    // Estilo solicitado: Negrito e fonte 30% maior
+    const highlightedStyle = {
+        fontWeight: 'bold',
+        fontSize: '1.3em'
+    };
+
+    // --- FUNÇÕES DE CONTROLE ---
     const handleMuteToggle = () => {
         if (musicAudioRef.current) {
             const newMutedState = !musicAudioRef.current.muted;
@@ -91,44 +97,46 @@ const GeneralReport = () => {
         fetchInitialPauseState();
     }, [apiBaseUrl, gameNumber]);
 
+    // --- BUSCA DINÂMICA: Dados dos Grupos (Nomes e Saldo) ---
     useEffect(() => {
-        const fetchTeams = async () => {
+        const fetchGroupsData = async () => {
             if (!apiBaseUrl || !gameNumber) return;
             try {
-                const response = await axios.get(`${apiBaseUrl}/games/${gameNumber}/groups-details`);
+                const response = await axios.get(`${apiBaseUrl}/games/${gameNumber}/groups-details`); //
                 if (response.data && response.data.success) {
-                    const teamNames = response.data.groups.map(g => g.teamName);
-                    setTeams(teamNames);
+                    setGroups(response.data.groups);
                 }
             } catch (error) {
-                console.error("Erro ao buscar equipes:", error);
+                console.error("Erro ao buscar dados dos grupos:", error);
             }
         };
-        fetchTeams();
+        fetchGroupsData();
     }, [apiBaseUrl, gameNumber]);
 
-    const getTeamName = (index) => {
-        return teams[index] || `Equipe ${index + 1}`;
+    // Helpers para exibição segura de dados
+    const getTeamName = (index) => groups[index]?.teamName || `Equipe ${index + 1}`;
+
+    const getTeamCoins = (index) => {
+        const coins = groups[index]?.spaceCoins || 0; //
+        // Formata para milhões (MM) se necessário ou exibe o valor bruto
+        return `${(coins / 1000000).toFixed(1)} MM`;
     };
 
+    // --- ANIMAÇÃO DE FUNDO ---
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-
         const ctx = canvas.getContext('2d');
         let animationFrameId;
-
         let stars = Array.from({ length: 200 }, () => ({
             x: Math.random() * window.innerWidth,
             y: Math.random() * window.innerHeight,
             radius: Math.random() * 1.5,
             speed: Math.random() * 0.3 + 0.1
         }));
-
         const animateStars = () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-
             stars.forEach(star => {
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
@@ -141,16 +149,13 @@ const GeneralReport = () => {
             });
             animationFrameId = requestAnimationFrame(animateStars);
         };
-
         const handleResize = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         };
-
         window.addEventListener('resize', handleResize);
         handleResize();
         animateStars();
-
         return () => {
             window.removeEventListener('resize', handleResize);
             cancelAnimationFrame(animationFrameId);
@@ -160,9 +165,7 @@ const GeneralReport = () => {
     return (
         <div className="report-body">
             <canvas ref={canvasRef} className="cosmic-bg"></canvas>
-
             <div className="cyber-container">
-
                 <header className="admin-header">
                     <div className="header-content">
                         <img src="/images/ACEE.png" alt="ACEE Logo" className="admin-logo" />
@@ -173,7 +176,6 @@ const GeneralReport = () => {
                             </p>
                         </div>
                     </div>
-
                     <div className="header-actions">
                         <button
                             onClick={handleMuteToggle}
@@ -182,7 +184,6 @@ const GeneralReport = () => {
                         >
                             {isMuted ? '🔇' : '🔊'}
                         </button>
-
                         <button
                             onClick={handlePauseToggle}
                             className={`audio-toggle-button pause-toggle-button ${isPaused ? 'paused' : 'active'}`}
@@ -190,7 +191,6 @@ const GeneralReport = () => {
                         >
                             {isPaused ? '▶️' : '⏸️'}
                         </button>
-
                         <button onClick={() => navigate(-1)} className="logout-button">Voltar</button>
                         <button onClick={() => navigate('/')} className="logout-button">Sair</button>
                     </div>
@@ -202,7 +202,6 @@ const GeneralReport = () => {
                     </h2>
 
                     <div className="rules-layout-grid">
-
                         <aside className="action-sidebar">
                             <button
                                 className={`action-tab-btn ${activeTab === 'geral' ? 'active-neon' : ''}`}
@@ -233,27 +232,33 @@ const GeneralReport = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {/* Bloco I alterado para ter apenas 1 linha conforme solicitado */}
+                                            {/* Bloco I: Apenas 1 linha */}
                                             <tr className="row-green">
                                                 <td className="row-header">
                                                     <strong>I- Número de Corpos<br />Celestes<br />Conquistados</strong>
                                                     <div className="red-dot"></div>
                                                     <small>Cases comuns<br />aos subgrupos</small>
                                                 </td>
-                                                <td>00</td><td>00</td><td>00</td><td>00</td><td>00</td>
+                                                <td style={highlightedStyle}>00</td>
+                                                <td style={highlightedStyle}>00</td>
+                                                <td style={highlightedStyle}>00</td>
+                                                <td style={highlightedStyle}>00</td>
+                                                <td style={highlightedStyle}>00</td>
                                             </tr>
 
-                                            {/* Os demais blocos permanecem inalterados */}
+                                            {/* Bloco II: Fluxo de Caixa - Agora com 1 linha e valores dinâmicos */}
                                             <tr className="row-orange">
-                                                <td rowSpan="4" className="row-header">
+                                                <td className="row-header">
                                                     <strong>II- Fluxo de Caixa<br /><small>(MM Spacecoin)</small></strong>
                                                 </td>
-                                                <td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td>
+                                                <td style={highlightedStyle}>{getTeamCoins(0)}</td>
+                                                <td style={highlightedStyle}>{getTeamCoins(1)}</td>
+                                                <td style={highlightedStyle}>{getTeamCoins(2)}</td>
+                                                <td style={highlightedStyle}>{getTeamCoins(3)}</td>
+                                                <td style={highlightedStyle}>{getTeamCoins(4)}</td>
                                             </tr>
-                                            <tr className="row-orange"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
-                                            <tr className="row-orange"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
-                                            <tr className="row-orange bold-row"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
 
+                                            {/* Bloco III: Virtus */}
                                             <tr className="row-yellow">
                                                 <td rowSpan="4" className="row-header">
                                                     <strong>III- Virtus – Índice de<br />Virtudes Humanas<br />Aplicado à Liderança<br /></strong>
