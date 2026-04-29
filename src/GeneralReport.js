@@ -122,6 +122,26 @@ const GeneralReport = () => {
         return `${(coins / 1000000).toFixed(1)} MM`;
     };
 
+    // --- NOVA FUNÇÃO: Calcula corpos celestes em comum ---
+    const getCommonCelestialBodies = () => {
+        if (!groups || groups.length === 0) return "00";
+
+        // Extrair listas de corpos visitados de cada grupo (filtrando estações)
+        const allGroupsVisited = groups.map(g =>
+            (g.visitedPlanets || []).filter(p => p.type !== 'station')
+        );
+
+        if (allGroupsVisited.length === 0) return "00";
+
+        // Achar a intersecção: IDs que aparecem em TODOS os grupos
+        const commonOnes = allGroupsVisited.reduce((acc, currentList) => {
+            return acc.filter(id => currentList.includes(id));
+        });
+
+        // Retorna o valor formatado com 2 dígitos (ex: "02")
+        return commonOnes.length.toString().padStart(2, '0');
+    };
+
     // --- ANIMAÇÃO DE FUNDO ---
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -232,21 +252,21 @@ const GeneralReport = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {/* Bloco I: Apenas 1 linha */}
+                                            {/* Bloco I: Número de Corpos Celestes Conquistados usando a lógica dinâmica */}
                                             <tr className="row-green">
                                                 <td className="row-header">
                                                     <strong>I- Número de Corpos<br />Celestes<br />Conquistados</strong>
                                                     <div className="red-dot"></div>
                                                     <small>Cases comuns<br />aos subgrupos</small>
                                                 </td>
-                                                <td style={highlightedStyle}>00</td>
-                                                <td style={highlightedStyle}>00</td>
-                                                <td style={highlightedStyle}>00</td>
-                                                <td style={highlightedStyle}>00</td>
-                                                <td style={highlightedStyle}>00</td>
+                                                <td style={highlightedStyle}>{getCommonCelestialBodies()}</td>
+                                                <td style={highlightedStyle}>{getCommonCelestialBodies()}</td>
+                                                <td style={highlightedStyle}>{getCommonCelestialBodies()}</td>
+                                                <td style={highlightedStyle}>{getCommonCelestialBodies()}</td>
+                                                <td style={highlightedStyle}>{getCommonCelestialBodies()}</td>
                                             </tr>
 
-                                            {/* Bloco II: Fluxo de Caixa - Agora com 1 linha e valores dinâmicos */}
+                                            {/* Bloco II: Fluxo de Caixa */}
                                             <tr className="row-orange">
                                                 <td className="row-header">
                                                     <strong>II- Fluxo de Caixa<br /><small>(MM Spacecoin)</small></strong>

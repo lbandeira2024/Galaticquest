@@ -466,7 +466,7 @@ const GameConfig = () => {
             setClientMessage({ type: 'success', text: response.data.message });
             const regionals = response.data.regionals;
             const fullList = [{ _id: '', nome: "Insira nova regional" }, ...regionals];
-            setRegionalList(fullRegionalList);
+            setRegionalList(fullList);
             setSelectedRegional(response.data.newRegionalId);
             setCurrentRegionalName(newRegionalName.trim());
             setIsAddingNewRegional(false);
