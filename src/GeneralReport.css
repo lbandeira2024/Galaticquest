@@ -1,7 +1,9 @@
-/* Variáveis de Identidade Visual (Estilo GameConfig) */
+/* =========================================
+   VARIÁVEIS DE TEMA (MODO CYBER/NEON)
+========================================= */
 :root {
     --bg-dark: #000000;
-    --panel-bg: rgba(0, 0, 0, 0.8);
+    --panel-bg: rgba(0, 0, 0, 0.85);
     --card-bg: rgba(0, 0, 0, 0.5);
     --border-color: rgba(255, 152, 0, 0.4);
     --neon-orange: #ff9800;
@@ -12,6 +14,9 @@
     --font-cyber: 'Courier New', monospace;
 }
 
+/* =========================================
+   ESTILOS GERAIS
+========================================= */
 body {
     margin: 0;
     padding: 0;
@@ -22,7 +27,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Background Estrelado Animado */
 .cosmic-bg {
     position: fixed;
     top: 0;
@@ -41,12 +45,12 @@ body {
     padding: 20px;
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 
-/* Header Base */
+/* =========================================
+   HEADER
+========================================= */
 .cyber-header {
-    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -62,7 +66,7 @@ body {
 }
 
 .logo-placeholder {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: bold;
     color: var(--neon-cyan);
     text-shadow: 0 0 10px rgba(0, 188, 212, 0.7);
@@ -87,7 +91,9 @@ body {
     gap: 15px;
 }
 
-/* Painel Principal de Configurações */
+/* =========================================
+   PAINEL PRINCIPAL & LAYOUT GRID
+========================================= */
 .neon-panel-wrapper {
     background: var(--panel-bg);
     border: 2px solid var(--neon-orange);
@@ -95,32 +101,32 @@ body {
     box-shadow: 0 0 30px var(--neon-orange-glow);
     padding: 30px;
     width: 100%;
-    max-width: 1200px;
     box-sizing: border-box;
 }
 
 .panel-main-title {
     color: var(--neon-yellow);
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     margin: 0 0 30px 0;
     text-shadow: 0 0 10px rgba(255, 196, 0, 0.8);
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 15px;
 }
 
-/* Layout Grid 3 Colunas (Ações Rápidas | Cards Centrais | Menu Lateral) */
 .rules-layout-grid {
     display: flex;
     gap: 30px;
     align-items: flex-start;
 }
 
-/* Coluna 1: Ações Rápidas (Esquerda) */
+/* =========================================
+   COLUNA 1: MENU ESQUERDO
+========================================= */
 .action-sidebar {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    width: 200px;
+    width: 220px;
     flex-shrink: 0;
 }
 
@@ -135,7 +141,6 @@ body {
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.2s;
-    text-align: center;
 }
 
 .action-tab-btn:hover {
@@ -148,11 +153,13 @@ body {
     box-shadow: 0 0 15px var(--neon-orange-glow);
 }
 
-/* Coluna 2: Configurações em Grid (Centro) */
+/* =========================================
+   COLUNA 2: CARDS CENTRAIS DE CONFIGURAÇÃO
+========================================= */
 .config-quadrants {
     flex-grow: 1;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 20px;
 }
 
@@ -161,7 +168,7 @@ body {
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 20px;
-    transition: box-shadow 0.3s, border-color 0.3s;
+    transition: box-shadow 0.3s;
 }
 
 .cyber-card:hover {
@@ -173,10 +180,9 @@ body {
     color: var(--neon-cyan);
     font-size: 1.2rem;
     margin-top: 0;
-    margin-bottom: 15px;
-    text-shadow: 0 0 8px rgba(0, 188, 212, 0.5);
+    margin-bottom: 20px;
     border-bottom: 1px dashed var(--border-color);
-    padding-bottom: 5px;
+    padding-bottom: 8px;
 }
 
 .form-row {
@@ -187,35 +193,34 @@ body {
 }
 
 .form-row label {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     color: var(--text-main);
 }
 
-/* Inputs, Selects e Números */
+/* Inputs e Selects */
 .terminal-dropdown,
 .terminal-input-num {
     background: rgba(0, 0, 0, 0.7);
     border: 1px solid var(--neon-orange);
     color: white;
     font-family: var(--font-cyber);
-    padding: 6px 10px;
+    padding: 8px;
     border-radius: 4px;
     font-size: 0.85rem;
-    width: 130px;
-    transition: 0.2s;
+    width: 140px;
+    outline: none;
 }
 
 .terminal-dropdown:focus,
 .terminal-input-num:focus {
-    outline: none;
     border-color: var(--neon-yellow);
-    box-shadow: 0 0 5px rgba(255, 196, 0, 0.5);
+    box-shadow: 0 0 8px rgba(255, 196, 0, 0.6);
 }
 
-/* Range Sliders customizados */
+/* Range Slider */
 .cyber-range {
     -webkit-appearance: none;
-    width: 130px;
+    width: 140px;
     background: transparent;
 }
 
@@ -228,27 +233,21 @@ body {
 
 .cyber-range::-webkit-slider-thumb {
     -webkit-appearance: none;
-    height: 16px;
-    width: 16px;
+    height: 18px;
+    width: 18px;
     border-radius: 50%;
     background: var(--neon-orange);
     cursor: pointer;
-    margin-top: -6px;
+    margin-top: -7px;
     box-shadow: 0 0 10px var(--neon-orange-glow);
-    transition: 0.2s;
 }
 
-.cyber-range::-webkit-slider-thumb:hover {
-    background: var(--neon-yellow);
-    box-shadow: 0 0 15px rgba(255, 196, 0, 0.8);
-}
-
-/* Toggle Switch (Interruptores) */
+/* Toggle Switch (Interruptor) */
 .cyber-switch {
     position: relative;
     display: inline-block;
-    width: 44px;
-    height: 22px;
+    width: 46px;
+    height: 24px;
 }
 
 .cyber-switch input {
@@ -265,21 +264,21 @@ body {
     right: 0;
     bottom: 0;
     background-color: rgba(255, 255, 255, 0.1);
-    transition: .4s;
-    border-radius: 22px;
     border: 1px solid var(--border-color);
+    border-radius: 24px;
+    transition: 0.4s;
 }
 
 .switch-slider:before {
     position: absolute;
     content: "";
-    height: 14px;
-    width: 14px;
+    height: 16px;
+    width: 16px;
     left: 3px;
     bottom: 3px;
     background-color: var(--text-main);
-    transition: .4s;
     border-radius: 50%;
+    transition: 0.4s;
 }
 
 input:checked+.switch-slider {
@@ -304,27 +303,29 @@ input:checked+.switch-slider:before {
 
 .cyber-tag {
     font-size: 0.75rem;
-    padding: 3px 8px;
+    padding: 4px 8px;
     border: 1px solid var(--neon-cyan);
     border-radius: 4px;
     color: var(--neon-cyan);
     background: rgba(0, 188, 212, 0.1);
     cursor: pointer;
-    transition: 0.2s;
 }
 
 .cyber-tag.active {
     background: var(--neon-cyan);
     color: var(--bg-dark);
     box-shadow: 0 0 8px rgba(0, 188, 212, 0.6);
+    font-weight: bold;
 }
 
-/* Coluna 3: Navegação Global (Direita) */
+/* =========================================
+   COLUNA 3: MENU DIREITO
+========================================= */
 .side-nav-menu {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    width: 140px;
+    width: 160px;
     flex-shrink: 0;
     border-left: 1px solid var(--border-color);
     padding-left: 20px;
@@ -336,8 +337,8 @@ input:checked+.switch-slider:before {
     color: #888;
     text-align: left;
     font-family: var(--font-cyber);
-    font-size: 0.85rem;
-    padding: 10px;
+    font-size: 0.9rem;
+    padding: 12px 10px;
     cursor: pointer;
     transition: 0.3s;
     border-left: 3px solid transparent;
@@ -356,14 +357,16 @@ input:checked+.switch-slider:before {
     text-shadow: 0 0 5px var(--neon-orange-glow);
 }
 
-/* Botões Genéricos e Rodapé */
+/* =========================================
+   BOTÕES E RODAPÉ
+========================================= */
 .neon-btn {
-    padding: 8px 16px;
+    padding: 10px 20px;
     font-family: var(--font-cyber);
     font-weight: bold;
     border-radius: 5px;
     cursor: pointer;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     transition: all 0.3s;
 }
 
@@ -379,7 +382,7 @@ input:checked+.switch-slider:before {
 }
 
 .footer-actions {
-    margin-top: 30px;
+    margin-top: 40px;
     display: flex;
     justify-content: flex-end;
     border-top: 1px solid var(--border-color);
@@ -390,12 +393,12 @@ input:checked+.switch-slider:before {
     background-color: var(--neon-orange);
     color: var(--bg-dark);
     border: none;
-    padding: 12px 25px;
+    padding: 15px 30px;
     font-size: 1rem;
-    box-shadow: 0 0 15px var(--neon-orange-glow);
+    box-shadow: 0 0 20px var(--neon-orange-glow);
 }
 
 .primary-neon:hover {
-    background-color: #e68900;
-    box-shadow: 0 0 20px rgba(255, 152, 0, 0.8);
+    background-color: var(--neon-yellow);
+    box-shadow: 0 0 25px rgba(255, 196, 0, 0.8);
 }
