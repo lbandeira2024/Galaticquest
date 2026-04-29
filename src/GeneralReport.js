@@ -15,6 +15,7 @@ const GeneralReport = () => {
     const { musicAudioRef } = useAudio();
     const [isMuted, setIsMuted] = useState(musicAudioRef.current ? musicAudioRef.current.muted : false);
     const [isPaused, setIsPaused] = useState(false);
+    const [activeTab, setActiveTab] = useState('geral'); // Controla a aba Visão Geral / Ranking
     const pauseChannel = useRef(new BroadcastChannel('pause_channel'));
 
     // ESTADO: Armazena as equipes do jogo atual
@@ -50,7 +51,6 @@ const GeneralReport = () => {
             setIsPaused(newPauseState);
             alert(response.data.message || `Jogo ${newPauseState ? 'pausado' : 'retomado'} com sucesso.`);
 
-            // Notifica as outras abas/jogadores
             pauseChannel.current.postMessage({
                 gameNumber: Number(gameNumber),
                 isPaused: newPauseState,
@@ -63,7 +63,6 @@ const GeneralReport = () => {
         }
     };
 
-    // Escuta mudanças de Pause de outras abas (ex: do GameConfig)
     useEffect(() => {
         const channel = pauseChannel.current;
         const handleChannelMessage = (event) => {
@@ -77,7 +76,6 @@ const GeneralReport = () => {
         return () => channel.removeEventListener('message', handleChannelMessage);
     }, [gameNumber]);
 
-    // Busca o estado inicial de pause ao carregar a página
     useEffect(() => {
         const fetchInitialPauseState = async () => {
             if (!apiBaseUrl) return;
@@ -93,14 +91,12 @@ const GeneralReport = () => {
         fetchInitialPauseState();
     }, [apiBaseUrl, gameNumber]);
 
-    // --- BUSCA: Nomes das Equipes do Jogo Atual ---
     useEffect(() => {
         const fetchTeams = async () => {
             if (!apiBaseUrl || !gameNumber) return;
             try {
                 const response = await axios.get(`${apiBaseUrl}/games/${gameNumber}/groups-details`);
                 if (response.data && response.data.success) {
-                    // Mapeia apenas os nomes das equipes recebidas da API
                     const teamNames = response.data.groups.map(g => g.teamName);
                     setTeams(teamNames);
                 }
@@ -111,13 +107,10 @@ const GeneralReport = () => {
         fetchTeams();
     }, [apiBaseUrl, gameNumber]);
 
-    // Função auxiliar para exibir o nome da equipe ou um fallback seguro
     const getTeamName = (index) => {
         return teams[index] || `Equipe ${index + 1}`;
     };
-    // ---------------------------------------------------
 
-    // --- ANIMAÇÃO DE ESTRELAS ---
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -205,67 +198,82 @@ const GeneralReport = () => {
 
                 <main className="neon-panel-wrapper">
                     <h2 className="panel-main-title">
-                        DESEMPENHO DAS EQUIPES - GAME {gameNumber || ''}
+                        {activeTab === 'geral' ? 'DESEMPENHO DAS EQUIPES' : 'RANKING DO JOGO'} - GAME {gameNumber || ''}
                     </h2>
 
                     <div className="rules-layout-grid">
 
                         <aside className="action-sidebar">
-                            <button className="action-tab-btn active-neon">
-                                VISUALIZAR PONTUAÇÃO
+                            <button
+                                className={`action-tab-btn ${activeTab === 'geral' ? 'active-neon' : ''}`}
+                                onClick={() => setActiveTab('geral')}
+                            >
+                                VISÃO GERAL
+                            </button>
+                            <button
+                                className={`action-tab-btn ${activeTab === 'ranking' ? 'active-neon' : ''}`}
+                                onClick={() => setActiveTab('ranking')}
+                            >
+                                RANKING
                             </button>
                         </aside>
 
                         <section className="config-quadrants">
-                            <div className="table-wrapper">
-                                <table className="score-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Parâmetros de<br />Jogabilidade:</th>
-                                            {/* Cabeçalhos populados dinamicamente com os nomes das equipes */}
-                                            <th>{getTeamName(0)}</th>
-                                            <th>{getTeamName(1)}</th>
-                                            <th>{getTeamName(2)}</th>
-                                            <th>{getTeamName(3)}</th>
-                                            <th>{getTeamName(4)}</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr className="row-green">
-                                            <td rowSpan="4" className="row-header">
-                                                <strong>I- Número de Corpos<br />Celestes<br />Conquistados</strong>
-                                                <div className="red-dot"></div>
-                                                <small>Cases comuns<br />aos subgrupos</small>
-                                            </td>
-                                            <td>00</td><td>00</td><td>00</td><td>00</td><td>00</td>
-                                        </tr>
-                                        <tr className="row-green"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
-                                        <tr className="row-green"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
-                                        <tr className="row-green bold-row"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
+                            {activeTab === 'geral' ? (
+                                <div className="table-wrapper">
+                                    <table className="score-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Parâmetros de<br />Jogabilidade:</th>
+                                                <th>{getTeamName(0)}</th>
+                                                <th>{getTeamName(1)}</th>
+                                                <th>{getTeamName(2)}</th>
+                                                <th>{getTeamName(3)}</th>
+                                                <th>{getTeamName(4)}</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr className="row-green">
+                                                <td rowSpan="4" className="row-header">
+                                                    <strong>I- Número de Corpos<br />Celestes<br />Conquistados</strong>
+                                                    <div className="red-dot"></div>
+                                                    <small>Cases comuns<br />aos subgrupos</small>
+                                                </td>
+                                                <td>00</td><td>00</td><td>00</td><td>00</td><td>00</td>
+                                            </tr>
+                                            <tr className="row-green"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
+                                            <tr className="row-green"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
+                                            <tr className="row-green bold-row"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
 
-                                        <tr className="row-orange">
-                                            <td rowSpan="4" className="row-header">
-                                                <strong>II- Fluxo de Caixa<br /><small>(MM Spacecoin)</small></strong>
-                                            </td>
-                                            <td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td>
-                                        </tr>
-                                        <tr className="row-orange"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
-                                        <tr className="row-orange"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
-                                        <tr className="row-orange bold-row"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
+                                            <tr className="row-orange">
+                                                <td rowSpan="4" className="row-header">
+                                                    <strong>II- Fluxo de Caixa<br /><small>(MM Spacecoin)</small></strong>
+                                                </td>
+                                                <td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td>
+                                            </tr>
+                                            <tr className="row-orange"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
+                                            <tr className="row-orange"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
+                                            <tr className="row-orange bold-row"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
 
-                                        <tr className="row-yellow">
-                                            <td rowSpan="4" className="row-header">
-                                                <strong>III- Virtus – Índice de<br />Virtudes Humanas<br />Aplicado à Liderança<br /></strong>
-                                                <small>(Variação: 0,0 a 1,0)</small>
-                                            </td>
-                                            <td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td>
-                                        </tr>
-                                        <tr className="row-yellow"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
-                                        <tr className="row-yellow"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
-                                        <tr className="row-yellow bold-row"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
-                                    </tbody>
-                                </table>
-                            </div>
+                                            <tr className="row-yellow">
+                                                <td rowSpan="4" className="row-header">
+                                                    <strong>III- Virtus – Índice de<br />Virtudes Humanas<br />Aplicado à Liderança<br /></strong>
+                                                    <small>(Variação: 0,0 a 1,0)</small>
+                                                </td>
+                                                <td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td>
+                                            </tr>
+                                            <tr className="row-yellow"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
+                                            <tr className="row-yellow"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
+                                            <tr className="row-yellow bold-row"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <div className="cyber-card" style={{ textAlign: 'center', padding: '50px' }}>
+                                    <h3 className="card-title">RANKING GLOBAL</h3>
+                                    <p style={{ color: '#fff' }}>O processamento do Ranking das equipes está sendo calculado.</p>
+                                </div>
+                            )}
                         </section>
                     </div>
                 </main>
