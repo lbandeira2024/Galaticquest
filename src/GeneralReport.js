@@ -25,6 +25,7 @@ const GeneralReport = () => {
     const [groups, setGroups] = useState([]);
 
     // Estilo solicitado: Negrito e fonte 30% maior
+    // (O cursor help agora fica no tooltip-container)
     const highlightedStyle = {
         fontWeight: 'bold',
         fontSize: '1.3em'
@@ -125,45 +126,63 @@ const GeneralReport = () => {
         return `${(coins / 1000000).toFixed(1)} MM`;
     };
 
-    // --- NOVA FUNÇÃO: Calcula corpos celestes em comum (Sem Banco de Dados) ---
-    const getCommonCelestialBodies = () => {
-        if (!groups || groups.length === 0) return "00";
+    // --- NOVA FUNÇÃO: Calcula corpos celestes em comum e prepara o tooltip ---
+    const getCommonCelestialBodiesData = () => {
+        if (!groups || groups.length === 0) {
+            return { countStr: "00", tooltip: "Nenhum corpo celeste comum visitado." };
+        }
+
+        // Mapeamento para guardar o nome original (ex: "Marte" em vez de "marte")
+        const originalNamesMap = {};
 
         // Extrai o histórico deduzido para cada grupo
         const allGroupsVisited = groups.map(g => {
-            // Se a rotaPlanejada ou o routeIndex não existirem, assume um array vazio e index 0
             const rota = g.rotaPlanejada || [];
             const indexAtual = g.routeIndex || 0;
 
             // Pega os locais desde o início da rota até o ponto atual
             const locaisVisitados = rota.slice(0, indexAtual + 1);
 
-            // Filtra e limpa os nomes
             return locaisVisitados
                 .map(local => {
-                    // Limpa o nome do local para bater com a lista (minúsculo, sem acentos, sem espaços)
                     const rawName = local.name || '';
-                    return rawName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+                    const nomeLimpo = rawName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+
+                    // Salva o nome original caso ainda não exista no mapa
+                    if (nomeLimpo && !originalNamesMap[nomeLimpo]) {
+                        originalNamesMap[nomeLimpo] = rawName;
+                    }
+                    return nomeLimpo;
                 })
                 .filter(nomeLimpo => {
-                    // Ignora se o nome limpo estiver na nossa lista de estações ou se for vazio
-                    return nomeLimpo !== '' && !STATIONS_LIST.includes(nomeLimpo);
+                    // Ignora estações, vazio e também a TERRA
+                    return nomeLimpo !== '' && nomeLimpo !== 'terra' && !STATIONS_LIST.includes(nomeLimpo);
                 });
         });
 
-        // Verificação de segurança: se algum grupo não visitou nada (ou a lista ficou vazia após o filtro)
-        if (allGroupsVisited.length === 0 || allGroupsVisited.some(arr => arr.length === 0)) return "00";
+        // Verificação de segurança: se algum grupo não visitou nada (ou a lista ficou vazia)
+        if (allGroupsVisited.length === 0 || allGroupsVisited.some(arr => arr.length === 0)) {
+            return { countStr: "00", tooltip: "Nenhum corpo celeste comum visitado." };
+        }
 
         // Achar a intersecção: nomes que aparecem na rota percorrida de TODOS os grupos
         const commonOnes = allGroupsVisited.reduce((acc, currentList) => {
             return acc.filter(nome => currentList.includes(nome));
         });
 
-        // Garante que não conte planetas repetidos visitados pelo mesmo grupo mais de uma vez
+        // Garante que não conte planetas repetidos
         const uniqueCommonOnes = [...new Set(commonOnes)];
 
-        // Retorna o valor formatado com 2 dígitos
-        return uniqueCommonOnes.length.toString().padStart(2, '0');
+        // Formata as saídas
+        const countStr = uniqueCommonOnes.length.toString().padStart(2, '0');
+
+        // Monta a string do Tooltip pegando os nomes originais de volta
+        const namesList = uniqueCommonOnes.map(limpo => originalNamesMap[limpo]).join(', ');
+        const tooltip = uniqueCommonOnes.length > 0
+            ? `Corpos Visitados: ${namesList}`
+            : "Nenhum corpo celeste comum visitado.";
+
+        return { countStr, tooltip };
     };
 
     // --- ANIMAÇÃO DE FUNDO ---
@@ -205,6 +224,9 @@ const GeneralReport = () => {
             cancelAnimationFrame(animationFrameId);
         };
     }, []);
+
+    // Chama a função uma vez por renderização para usar na tabela
+    const commonBodiesData = getCommonCelestialBodiesData();
 
     return (
         <div className="report-body">
@@ -276,18 +298,43 @@ const GeneralReport = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {/* Bloco I: Número de Corpos Celestes Conquistados */}
+                                            {/* Bloco I: Número de Corpos Celestes Conquistados com Custom Tooltip Cyber/Neon */}
                                             <tr className="row-green">
                                                 <td className="row-header">
                                                     <strong>I- Número de Corpos<br />Celestes<br />Conquistados</strong>
                                                     <div className="red-dot"></div>
                                                     <small>Cases comuns<br />aos subgrupos</small>
                                                 </td>
-                                                <td style={highlightedStyle}>{getCommonCelestialBodies()}</td>
-                                                <td style={highlightedStyle}>{getCommonCelestialBodies()}</td>
-                                                <td style={highlightedStyle}>{getCommonCelestialBodies()}</td>
-                                                <td style={highlightedStyle}>{getCommonCelestialBodies()}</td>
-                                                <td style={highlightedStyle}>{getCommonCelestialBodies()}</td>
+                                                <td style={highlightedStyle}>
+                                                    <div className="cyber-tooltip-container">
+                                                        {commonBodiesData.countStr}
+                                                        <span className="cyber-tooltip-text">{commonBodiesData.tooltip}</span>
+                                                    </div>
+                                                </td>
+                                                <td style={highlightedStyle}>
+                                                    <div className="cyber-tooltip-container">
+                                                        {commonBodiesData.countStr}
+                                                        <span className="cyber-tooltip-text">{commonBodiesData.tooltip}</span>
+                                                    </div>
+                                                </td>
+                                                <td style={highlightedStyle}>
+                                                    <div className="cyber-tooltip-container">
+                                                        {commonBodiesData.countStr}
+                                                        <span className="cyber-tooltip-text">{commonBodiesData.tooltip}</span>
+                                                    </div>
+                                                </td>
+                                                <td style={highlightedStyle}>
+                                                    <div className="cyber-tooltip-container">
+                                                        {commonBodiesData.countStr}
+                                                        <span className="cyber-tooltip-text">{commonBodiesData.tooltip}</span>
+                                                    </div>
+                                                </td>
+                                                <td style={highlightedStyle}>
+                                                    <div className="cyber-tooltip-container">
+                                                        {commonBodiesData.countStr}
+                                                        <span className="cyber-tooltip-text">{commonBodiesData.tooltip}</span>
+                                                    </div>
+                                                </td>
                                             </tr>
 
                                             {/* Bloco II: Fluxo de Caixa */}

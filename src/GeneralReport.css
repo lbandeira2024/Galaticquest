@@ -538,3 +538,58 @@ input:checked+.switch-slider:before {
     margin: 10px auto;
     box-shadow: inset -3px -3px 5px rgba(0, 0, 0, 0.3);
 }
+
+/* =========================================
+   CUSTOM TOOLTIP (NEON CYBER)
+========================================= */
+.cyber-tooltip-container {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.cyber-tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    width: max-content;
+    max-width: 250px;
+    background-color: rgba(0, 0, 0, 0.95);
+    color: var(--neon-cyan);
+    text-align: center;
+    border: 1px solid var(--neon-cyan);
+    border-radius: 6px;
+    padding: 10px 15px;
+    position: absolute;
+    z-index: 1000;
+    /* Posiciona acima do texto */
+    bottom: 150%;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 15px rgba(0, 188, 212, 0.6);
+    font-size: 0.85rem;
+    font-family: var(--font-cyber);
+    font-weight: normal;
+    transition: opacity 0.3s, visibility 0.3s;
+    white-space: normal;
+    line-height: 1.4;
+    text-shadow: none;
+    /* Remove negrito/sombra herdados para melhor leitura */
+}
+
+/* Setinha do balão apontando para baixo */
+.cyber-tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -6px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: var(--neon-cyan) transparent transparent transparent;
+}
+
+/* Efeito Hover para mostrar o Tooltip */
+.cyber-tooltip-container:hover .cyber-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}
