@@ -17,9 +17,7 @@ const GeneralReport = () => {
     const [isPaused, setIsPaused] = useState(false);
     const pauseChannel = useRef(new BroadcastChannel('pause_channel'));
 
-    const [activeTab, setActiveTab] = useState('pontuacao');
-
-    // NOVO ESTADO: Armazena as equipes do jogo atual
+    // ESTADO: Armazena as equipes do jogo atual
     const [teams, setTeams] = useState([]);
 
     // --- FUNÇÕES DOS BOTÕES DO CABEÇALHO ---
@@ -95,7 +93,7 @@ const GeneralReport = () => {
         fetchInitialPauseState();
     }, [apiBaseUrl, gameNumber]);
 
-    // --- NOVA BUSCA: Nomes das Equipes do Jogo Atual ---
+    // --- BUSCA: Nomes das Equipes do Jogo Atual ---
     useEffect(() => {
         const fetchTeams = async () => {
             if (!apiBaseUrl || !gameNumber) return;
@@ -166,10 +164,6 @@ const GeneralReport = () => {
         };
     }, []);
 
-    const handleTagClick = (e) => {
-        e.target.classList.toggle('active');
-    };
-
     return (
         <div className="report-body">
             <canvas ref={canvasRef} className="cosmic-bg"></canvas>
@@ -211,169 +205,69 @@ const GeneralReport = () => {
 
                 <main className="neon-panel-wrapper">
                     <h2 className="panel-main-title">
-                        {activeTab === 'pontuacao' ? 'DESEMPENHO DAS 5 EQUIPES' : 'REGRAS E PONTUAÇÃO'} - GAME {gameNumber || ''}
+                        DESEMPENHO DAS EQUIPES - GAME {gameNumber || ''}
                     </h2>
 
                     <div className="rules-layout-grid">
 
                         <aside className="action-sidebar">
-                            <button
-                                className={`action-tab-btn ${activeTab === 'pontuacao' ? 'active-neon' : ''}`}
-                                onClick={() => setActiveTab('pontuacao')}
-                            >
+                            <button className="action-tab-btn active-neon">
                                 VISUALIZAR PONTUAÇÃO
-                            </button>
-                            <button
-                                className={`action-tab-btn ${activeTab === 'regras' ? 'active-neon' : ''}`}
-                                onClick={() => setActiveTab('regras')}
-                            >
-                                ALTERAR REGRAS
                             </button>
                         </aside>
 
                         <section className="config-quadrants">
+                            <div className="table-wrapper">
+                                <table className="score-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parâmetros de<br />Jogabilidade:</th>
+                                            {/* Cabeçalhos populados dinamicamente com os nomes das equipes */}
+                                            <th>{getTeamName(0)}</th>
+                                            <th>{getTeamName(1)}</th>
+                                            <th>{getTeamName(2)}</th>
+                                            <th>{getTeamName(3)}</th>
+                                            <th>{getTeamName(4)}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr className="row-green">
+                                            <td rowSpan="4" className="row-header">
+                                                <strong>I- Número de Corpos<br />Celestes<br />Conquistados</strong>
+                                                <div className="red-dot"></div>
+                                                <small>Cases comuns<br />aos subgrupos</small>
+                                            </td>
+                                            <td>00</td><td>00</td><td>00</td><td>00</td><td>00</td>
+                                        </tr>
+                                        <tr className="row-green"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
+                                        <tr className="row-green"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
+                                        <tr className="row-green bold-row"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
 
-                            {activeTab === 'pontuacao' ? (
-                                <div className="table-wrapper">
-                                    <table className="score-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Parâmetros de<br />Jogabilidade:</th>
-                                                {/* Cabeçalhos populados dinamicamente com os nomes das equipes */}
-                                                <th>{getTeamName(0)}</th>
-                                                <th>{getTeamName(1)}</th>
-                                                <th>{getTeamName(2)}</th>
-                                                <th>{getTeamName(3)}</th>
-                                                <th>{getTeamName(4)}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <tr className="row-green">
-                                                <td rowSpan="4" className="row-header">
-                                                    <strong>I- Número de Corpos<br />Celestes<br />Conquistados</strong>
-                                                    <div className="red-dot"></div>
-                                                    <small>Cases comuns<br />aos subgrupos</small>
-                                                </td>
-                                                <td>00</td><td>00</td><td>00</td><td>00</td><td>00</td>
-                                            </tr>
-                                            <tr className="row-green"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
-                                            <tr className="row-green"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
-                                            <tr className="row-green bold-row"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
+                                        <tr className="row-orange">
+                                            <td rowSpan="4" className="row-header">
+                                                <strong>II- Fluxo de Caixa<br /><small>(MM Spacecoin)</small></strong>
+                                            </td>
+                                            <td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td>
+                                        </tr>
+                                        <tr className="row-orange"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
+                                        <tr className="row-orange"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
+                                        <tr className="row-orange bold-row"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
 
-                                            <tr className="row-orange">
-                                                <td rowSpan="4" className="row-header">
-                                                    <strong>II- Fluxo de Caixa<br /><small>(MM Spacecoin)</small></strong>
-                                                </td>
-                                                <td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td>
-                                            </tr>
-                                            <tr className="row-orange"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
-                                            <tr className="row-orange"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
-                                            <tr className="row-orange bold-row"><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td><td>000 MM</td></tr>
-
-                                            <tr className="row-yellow">
-                                                <td rowSpan="4" className="row-header">
-                                                    <strong>III- Virtus – Índice de<br />Virtudes Humanas<br />Aplicado à Liderança<br /></strong>
-                                                    <small>(Variação: 0,0 a 1,0)</small>
-                                                </td>
-                                                <td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td>
-                                            </tr>
-                                            <tr className="row-yellow"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
-                                            <tr className="row-yellow"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
-                                            <tr className="row-yellow bold-row"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="cyber-card">
-                                        <h3 className="card-title">BÁSICO</h3>
-                                        <div className="form-row">
-                                            <label>Modo de jogo</label>
-                                            <select className="terminal-dropdown">
-                                                <option>Standard</option>
-                                                <option>Customizado</option>
-                                            </select>
-                                        </div>
-                                        <div className="form-row">
-                                            <label>Dificuldade</label>
-                                            <select className="terminal-dropdown" defaultValue="Normal">
-                                                <option>Easy</option>
-                                                <option>Normal</option>
-                                                <option>Hard</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="cyber-card">
-                                        <h3 className="card-title">MAPA</h3>
-                                        <div className="form-row">
-                                            <label>Biomas de início</label>
-                                            <div className="tags-container">
-                                                <span className="cyber-tag active" onClick={handleTagClick}>Pradaria</span>
-                                                <span className="cyber-tag active" onClick={handleTagClick}>Gelo</span>
-                                                <span className="cyber-tag active" onClick={handleTagClick}>Pântano</span>
-                                                <span className="cyber-tag active" onClick={handleTagClick}>Água</span>
-                                            </div>
-                                        </div>
-                                        <div className="form-row">
-                                            <label>Recursos (Água)</label>
-                                            <label className="cyber-switch">
-                                                <input type="checkbox" defaultChecked />
-                                                <span className="switch-slider"></span>
-                                            </label>
-                                        </div>
-                                        <div className="form-row">
-                                            <label>Recursos (Minério)</label>
-                                            <select className="terminal-dropdown">
-                                                <option>Abundante</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div className="cyber-card">
-                                        <h3 className="card-title">UNIDADES</h3>
-                                        <div className="form-row">
-                                            <label>Velocidade</label>
-                                            <input type="range" className="cyber-range" min="0" max="100" defaultValue="50" />
-                                        </div>
-                                        <div className="form-row">
-                                            <label>Ataque</label>
-                                            <input type="number" className="terminal-input-num" defaultValue="25" />
-                                        </div>
-                                    </div>
-
-                                    <div className="cyber-card">
-                                        <h3 className="card-title">ECONOMIA</h3>
-                                        <div className="form-row">
-                                            <label>Gasto de Ouro</label>
-                                            <input type="range" className="cyber-range" defaultValue="30" />
-                                        </div>
-                                        <div className="form-row">
-                                            <label>Gasto de Comida</label>
-                                            <input type="number" className="terminal-input-num" defaultValue="15" />
-                                        </div>
-                                    </div>
-                                </>
-                            )}
+                                        <tr className="row-yellow">
+                                            <td rowSpan="4" className="row-header">
+                                                <strong>III- Virtus – Índice de<br />Virtudes Humanas<br />Aplicado à Liderança<br /></strong>
+                                                <small>(Variação: 0,0 a 1,0)</small>
+                                            </td>
+                                            <td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td>
+                                        </tr>
+                                        <tr className="row-yellow"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
+                                        <tr className="row-yellow"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
+                                        <tr className="row-yellow bold-row"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </section>
-
-                        <nav className="side-nav-menu">
-                            <button className="nav-menu-item">VISÃO GERAL</button>
-                            <button className="nav-menu-item">BÁSICO</button>
-                            <button className="nav-menu-item active-nav">REGRAS</button>
-                            <button className="nav-menu-item">EQUIPES</button>
-                            <button className="nav-menu-item">VANTAGENS</button>
-                            <button className="nav-menu-item">MUNDO</button>
-                        </nav>
                     </div>
-
-                    {activeTab === 'regras' && (
-                        <div className="footer-actions">
-                            <button className="neon-btn primary-neon" onClick={() => alert('Regras salvas com sucesso!')}>
-                                SALVAR REGRAS
-                            </button>
-                        </div>
-                    )}
                 </main>
             </div>
         </div>
