@@ -858,7 +858,7 @@ const GameConfig = () => {
                                     </button>
                                     <button
                                         type="button"
-                                        onClick={() => window.location.href = `/GeneralReport.html?gameNumber=${gameNumber}`}
+                                        onClick={() => window.location.href = `/GeneralReport.js?gameNumber=${gameNumber}`}
                                         className="game-action-button report-button"
                                     >
                                         REPORTS
