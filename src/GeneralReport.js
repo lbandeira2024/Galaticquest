@@ -233,18 +233,17 @@ const GeneralReport = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            {/* Bloco I alterado para ter apenas 1 linha conforme solicitado */}
                                             <tr className="row-green">
-                                                <td rowSpan="4" className="row-header">
+                                                <td className="row-header">
                                                     <strong>I- Número de Corpos<br />Celestes<br />Conquistados</strong>
                                                     <div className="red-dot"></div>
                                                     <small>Cases comuns<br />aos subgrupos</small>
                                                 </td>
                                                 <td>00</td><td>00</td><td>00</td><td>00</td><td>00</td>
                                             </tr>
-                                            <tr className="row-green"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
-                                            <tr className="row-green"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
-                                            <tr className="row-green bold-row"><td>00</td><td>00</td><td>00</td><td>00</td><td>00</td></tr>
 
+                                            {/* Os demais blocos permanecem inalterados */}
                                             <tr className="row-orange">
                                                 <td rowSpan="4" className="row-header">
                                                     <strong>II- Fluxo de Caixa<br /><small>(MM Spacecoin)</small></strong>
