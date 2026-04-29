@@ -19,6 +19,9 @@ const GeneralReport = () => {
 
     const [activeTab, setActiveTab] = useState('pontuacao');
 
+    // NOVO ESTADO: Armazena as equipes do jogo atual
+    const [teams, setTeams] = useState([]);
+
     // --- FUNÇÕES DOS BOTÕES DO CABEÇALHO ---
     const handleMuteToggle = () => {
         if (musicAudioRef.current) {
@@ -91,7 +94,30 @@ const GeneralReport = () => {
         };
         fetchInitialPauseState();
     }, [apiBaseUrl, gameNumber]);
-    // ---------------------------------------
+
+    // --- NOVA BUSCA: Nomes das Equipes do Jogo Atual ---
+    useEffect(() => {
+        const fetchTeams = async () => {
+            if (!apiBaseUrl || !gameNumber) return;
+            try {
+                const response = await axios.get(`${apiBaseUrl}/games/${gameNumber}/groups-details`);
+                if (response.data && response.data.success) {
+                    // Mapeia apenas os nomes das equipes recebidas da API
+                    const teamNames = response.data.groups.map(g => g.teamName);
+                    setTeams(teamNames);
+                }
+            } catch (error) {
+                console.error("Erro ao buscar equipes:", error);
+            }
+        };
+        fetchTeams();
+    }, [apiBaseUrl, gameNumber]);
+
+    // Função auxiliar para exibir o nome da equipe ou um fallback seguro
+    const getTeamName = (index) => {
+        return teams[index] || `Equipe ${index + 1}`;
+    };
+    // ---------------------------------------------------
 
     // --- ANIMAÇÃO DE ESTRELAS ---
     useEffect(() => {
@@ -161,7 +187,6 @@ const GeneralReport = () => {
                         </div>
                     </div>
 
-                    {/* ADIÇÃO DOS BOTÕES AQUI */}
                     <div className="header-actions">
                         <button
                             onClick={handleMuteToggle}
@@ -214,11 +239,12 @@ const GeneralReport = () => {
                                         <thead>
                                             <tr>
                                                 <th>Parâmetros de<br />Jogabilidade:</th>
-                                                <th>"Guerreiros<br />do Espaço"</th>
-                                                <th>"Piratas Sideral"</th>
-                                                <th>"Star Group"</th>
-                                                <th>"Os Imbatíveis"</th>
-                                                <th>"Não Tem<br />Pra Ninguém"</th>
+                                                {/* Cabeçalhos populados dinamicamente com os nomes das equipes */}
+                                                <th>{getTeamName(0)}</th>
+                                                <th>{getTeamName(1)}</th>
+                                                <th>{getTeamName(2)}</th>
+                                                <th>{getTeamName(3)}</th>
+                                                <th>{getTeamName(4)}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
