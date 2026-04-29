@@ -5,6 +5,9 @@ import { useAudio } from './AudioManager';
 import { useConfig } from './ConfigContext';
 import './GeneralReport.css';
 
+// --- LISTA DE ESTAÇÕES (Baseada no seu SpaceView.js) ---
+const STATIONS_LIST = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boctok'];
+
 const GeneralReport = () => {
     const { gameNumber } = useParams();
     const navigate = useNavigate();
@@ -122,24 +125,45 @@ const GeneralReport = () => {
         return `${(coins / 1000000).toFixed(1)} MM`;
     };
 
-    // --- NOVA FUNÇÃO: Calcula corpos celestes em comum ---
+    // --- NOVA FUNÇÃO: Calcula corpos celestes em comum (Sem Banco de Dados) ---
     const getCommonCelestialBodies = () => {
         if (!groups || groups.length === 0) return "00";
 
-        // Extrair listas de corpos visitados de cada grupo (filtrando estações)
-        const allGroupsVisited = groups.map(g =>
-            (g.visitedPlanets || []).filter(p => p.type !== 'station')
-        );
+        // Extrai o histórico deduzido para cada grupo
+        const allGroupsVisited = groups.map(g => {
+            // Se a rotaPlanejada ou o routeIndex não existirem, assume um array vazio e index 0
+            const rota = g.rotaPlanejada || [];
+            const indexAtual = g.routeIndex || 0;
 
-        if (allGroupsVisited.length === 0) return "00";
+            // Pega os locais desde o início da rota até o ponto atual
+            const locaisVisitados = rota.slice(0, indexAtual + 1);
 
-        // Achar a intersecção: IDs que aparecem em TODOS os grupos
-        const commonOnes = allGroupsVisited.reduce((acc, currentList) => {
-            return acc.filter(id => currentList.includes(id));
+            // Filtra e limpa os nomes
+            return locaisVisitados
+                .map(local => {
+                    // Limpa o nome do local para bater com a lista (minúsculo, sem acentos, sem espaços)
+                    const rawName = local.name || '';
+                    return rawName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
+                })
+                .filter(nomeLimpo => {
+                    // Ignora se o nome limpo estiver na nossa lista de estações ou se for vazio
+                    return nomeLimpo !== '' && !STATIONS_LIST.includes(nomeLimpo);
+                });
         });
 
-        // Retorna o valor formatado com 2 dígitos (ex: "02")
-        return commonOnes.length.toString().padStart(2, '0');
+        // Verificação de segurança: se algum grupo não visitou nada (ou a lista ficou vazia após o filtro)
+        if (allGroupsVisited.length === 0 || allGroupsVisited.some(arr => arr.length === 0)) return "00";
+
+        // Achar a intersecção: nomes que aparecem na rota percorrida de TODOS os grupos
+        const commonOnes = allGroupsVisited.reduce((acc, currentList) => {
+            return acc.filter(nome => currentList.includes(nome));
+        });
+
+        // Garante que não conte planetas repetidos visitados pelo mesmo grupo mais de uma vez
+        const uniqueCommonOnes = [...new Set(commonOnes)];
+
+        // Retorna o valor formatado com 2 dígitos
+        return uniqueCommonOnes.length.toString().padStart(2, '0');
     };
 
     // --- ANIMAÇÃO DE FUNDO ---
@@ -252,7 +276,7 @@ const GeneralReport = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {/* Bloco I: Número de Corpos Celestes Conquistados usando a lógica dinâmica */}
+                                            {/* Bloco I: Número de Corpos Celestes Conquistados */}
                                             <tr className="row-green">
                                                 <td className="row-header">
                                                     <strong>I- Número de Corpos<br />Celestes<br />Conquistados</strong>
