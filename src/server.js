@@ -392,10 +392,40 @@ app.put("/select-ship", async (req, res) => {
   try {
     const { userId, shipId } = req.body;
     const groupId = await getGroupId(userId);
+
+    // 1. Pega os dados do grupo atual para saber em qual jogo (gameNumber) eles estão
+    const grupoAtual = await Grupo.findById(groupId);
+    if (!grupoAtual) {
+      return res.status(404).json({ success: false, message: "Grupo não encontrado." });
+    }
+
+    const currentGameNumber = grupoAtual.gameNumber;
+
+    // 2. Trava de Segurança: Verifica se OUTRO grupo no MESMO JOGO já pegou essa nave
+    const naveJaEscolhida = await Grupo.findOne({
+      gameNumber: currentGameNumber, // Garante que olha apenas para a partida atual
+      naveEscolhida: shipId,         // Procura se o ID da nave já está em uso
+      _id: { $ne: groupId }          // Ignora o próprio grupo (caso estejam clicando de novo)
+    });
+
+    if (naveJaEscolhida) {
+      // Se encontrou outro grupo com a nave, BLOQUEIA a ação e avisa o frontend
+      return res.status(400).json({
+        success: false,
+        message: `Tarde demais! A nave já foi capturada pela equipe ${naveJaEscolhida.teamName}.`
+      });
+    }
+
+    // 3. Se passou pela trava (ninguém pegou), então salva a escolha
     await Grupo.findByIdAndUpdate(groupId, { naveEscolhida: shipId });
     const user = await Usuario.findById(userId).populate('grupo');
+
     res.json({ success: true, user });
-  } catch (error) { res.status(500).json({ success: false }); }
+
+  } catch (error) {
+    console.error("Erro ao selecionar nave:", error);
+    res.status(500).json({ success: false, message: "Erro interno do servidor ao selecionar nave." });
+  }
 });
 
 app.put("/select-team", async (req, res) => {
