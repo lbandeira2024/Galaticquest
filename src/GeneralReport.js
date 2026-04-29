@@ -1,5 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useAudio } from './AudioManager';
+import { useConfig } from './ConfigContext';
 import './GeneralReport.css';
 
 const GeneralReport = () => {
@@ -7,8 +10,90 @@ const GeneralReport = () => {
     const navigate = useNavigate();
     const canvasRef = useRef(null);
 
+    // Contextos e Estados
+    const { apiBaseUrl } = useConfig();
+    const { musicAudioRef } = useAudio();
+    const [isMuted, setIsMuted] = useState(musicAudioRef.current ? musicAudioRef.current.muted : false);
+    const [isPaused, setIsPaused] = useState(false);
+    const pauseChannel = useRef(new BroadcastChannel('pause_channel'));
+
     const [activeTab, setActiveTab] = useState('pontuacao');
 
+    // --- FUNÇÕES DOS BOTÕES DO CABEÇALHO ---
+    const handleMuteToggle = () => {
+        if (musicAudioRef.current) {
+            const newMutedState = !musicAudioRef.current.muted;
+            musicAudioRef.current.muted = newMutedState;
+            setIsMuted(newMutedState);
+        }
+    };
+
+    const handlePauseToggle = async () => {
+        const newPauseState = !isPaused;
+        const actionText = newPauseState ? "PAUSAR" : "RETOMAR";
+
+        if (!window.confirm(`Tem certeza que deseja ${actionText} o GAME ${gameNumber} para todos os jogadores?`)) {
+            return;
+        }
+
+        if (!apiBaseUrl) {
+            alert('Erro: URL da API não configurada.');
+            return;
+        }
+
+        try {
+            const response = await axios.post(`${apiBaseUrl}/games/${gameNumber}/toggle-pause`, {
+                isPaused: newPauseState
+            });
+
+            setIsPaused(newPauseState);
+            alert(response.data.message || `Jogo ${newPauseState ? 'pausado' : 'retomado'} com sucesso.`);
+
+            // Notifica as outras abas/jogadores
+            pauseChannel.current.postMessage({
+                gameNumber: Number(gameNumber),
+                isPaused: newPauseState,
+                controllerId: newPauseState ? 'ADMIN_PAUSE' : null
+            });
+
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || `Erro ao ${actionText.toLowerCase()} o jogo.`;
+            alert(errorMessage);
+        }
+    };
+
+    // Escuta mudanças de Pause de outras abas (ex: do GameConfig)
+    useEffect(() => {
+        const channel = pauseChannel.current;
+        const handleChannelMessage = (event) => {
+            if (typeof event.data.isPaused === 'boolean' && event.data.gameNumber !== undefined) {
+                if (event.data.gameNumber == gameNumber) {
+                    setIsPaused(event.data.isPaused);
+                }
+            }
+        };
+        channel.addEventListener('message', handleChannelMessage);
+        return () => channel.removeEventListener('message', handleChannelMessage);
+    }, [gameNumber]);
+
+    // Busca o estado inicial de pause ao carregar a página
+    useEffect(() => {
+        const fetchInitialPauseState = async () => {
+            if (!apiBaseUrl) return;
+            try {
+                const response = await axios.get(`${apiBaseUrl}/games/${gameNumber}/config`);
+                if (response.data && typeof response.data.isPaused === 'boolean') {
+                    setIsPaused(response.data.isPaused);
+                }
+            } catch (error) {
+                console.error("Erro ao buscar estado de pause:", error);
+            }
+        };
+        fetchInitialPauseState();
+    }, [apiBaseUrl, gameNumber]);
+    // ---------------------------------------
+
+    // --- ANIMAÇÃO DE ESTRELAS ---
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -65,7 +150,6 @@ const GeneralReport = () => {
 
             <div className="cyber-container">
 
-                {/* --- CABEÇALHO ATUALIZADO IGUAL AO GAMECONFIG --- */}
                 <header className="admin-header">
                     <div className="header-content">
                         <img src="/images/ACEE.png" alt="ACEE Logo" className="admin-logo" />
@@ -76,12 +160,29 @@ const GeneralReport = () => {
                             </p>
                         </div>
                     </div>
+
+                    {/* ADIÇÃO DOS BOTÕES AQUI */}
                     <div className="header-actions">
+                        <button
+                            onClick={handleMuteToggle}
+                            className={`audio-toggle-button ${isMuted ? 'muted' : 'active'}`}
+                            title={isMuted ? "Desmutar Áudio" : "Mutar Áudio"}
+                        >
+                            {isMuted ? '🔇' : '🔊'}
+                        </button>
+
+                        <button
+                            onClick={handlePauseToggle}
+                            className={`audio-toggle-button pause-toggle-button ${isPaused ? 'paused' : 'active'}`}
+                            title={isPaused ? "Retomar Jogo" : "Pausar Jogo"}
+                        >
+                            {isPaused ? '▶️' : '⏸️'}
+                        </button>
+
                         <button onClick={() => navigate(-1)} className="logout-button">Voltar</button>
                         <button onClick={() => navigate('/')} className="logout-button">Sair</button>
                     </div>
                 </header>
-                {/* ------------------------------------------------ */}
 
                 <main className="neon-panel-wrapper">
                     <h2 className="panel-main-title">
