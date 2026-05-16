@@ -781,7 +781,8 @@
 /* === FOTO DA EQUIPE NO COCKPIT === */
 .team-photo-frame {
   margin-top: 15px;
-  margin-bottom: auto;
+  margin-bottom: 15px;
+  /* Agora tem uma distância fixa e controlada dos botões */
   width: 100%;
   border: 2px solid #00aaff;
   border-radius: 8px;
@@ -1352,10 +1353,11 @@
 }
 
 .hvs-logo {
-  height: 45px;
+  height: clamp(35px, 4vh, 45px);
   width: auto;
   object-fit: contain;
   filter: drop-shadow(0 0 6px rgba(0, 180, 255, 0.8));
+  flex-shrink: 0;
 }
 
 .pause-button.paused {
@@ -1561,41 +1563,58 @@
 }
 
 .floating-buttons-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 999;
+  position: relative;
+  /* Removemos fixed, bottom e right */
+  z-index: 15;
   display: flex;
-  flex-direction: row-reverse;
+  flex-direction: row;
+  /* Mantém os botões em linha */
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
+  width: 100%;
+  margin-bottom: auto;
+  /* O espaço vazio do painel agora fica ABAIXO dos botões */
 }
 
 .pause-button {
+  flex: 1;
   background-color: rgba(50, 255, 50, 0.2) !important;
   border: 1px solid rgba(79, 195, 247, 0.8);
   color: #fff;
-  padding: 10px 20px;
+  padding: clamp(8px, 1.5vh, 12px) 10px;
   border-radius: 8px;
   cursor: pointer;
   font-family: 'Courier New', monospace;
   font-weight: bold;
+  font-size: clamp(0.75rem, 1vw, 1rem);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sos-button {
-  width: 65px;
-  aspect-ratio: 1/1;
+  flex: 1;
+  /* Removemos width fixo e aspect-ratio */
   background-color: rgba(180, 0, 0, 0.7);
   border: 1px solid rgba(255, 50, 50, 0.5);
   color: #fff;
+  padding: clamp(8px, 1.5vh, 12px) 10px;
   border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
   font-weight: bold;
+  font-size: clamp(0.75rem, 1vw, 1rem);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sos-button.active {
   background-color: rgba(255, 0, 0, 0.9);
   animation: pulse-sos 1.5s infinite;
-  cursor: pointer;
 }
 
 @keyframes pulse-sos {
