@@ -295,13 +295,12 @@
 /* O CONTAINER DO MAPA (Espelhando o .main-display com largura expandida) */
 .stellar-map-floating {
   position: absolute;
-  width: clamp(55%, 68vw, 85%);
-  /* Largura ajustada para encostar nas laterais */
+  width: clamp(50%, 55vw, 60%);
+  /* MEDIDA CORRIGIDA PARA ENCOSTAR NOS PAINÉIS */
   height: clamp(50%, 65vh, 75%);
   left: 50%;
   top: 37%;
   transform: translate(-50%, -50%);
-  /* Centraliza no exato mesmo eixo do ecrã central */
   background: rgba(0, 15, 30, 0.98);
   border: 1px solid rgba(0, 200, 255, 0.8);
   border-radius: 8px;

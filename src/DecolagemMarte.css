@@ -25,8 +25,8 @@
 /* Main Display */
 .main-display {
   position: absolute;
-  width: clamp(55%, 68vw, 85%);
-  /* LARGURA AUMENTADA AQUI */
+  width: clamp(50%, 55vw, 60%);
+  /* MEDIDA CORRIGIDA PARA ENCOSTAR NOS PAINÉIS */
   height: clamp(50%, 65vh, 75%);
   left: 50%;
   top: 37%;
@@ -1155,7 +1155,7 @@
 
 /* O Display Principal agora se adapta à altura e largura disponíveis */
 .main-display {
-  width: clamp(55%, 68vw, 85%);
+  width: clamp(50%, 55vw, 60%);
   /* LARGURA AUMENTADA AQUI TAMBÉM */
   height: clamp(50%, 65vh, 75%);
 }
