@@ -1,24 +1,36 @@
 .mission-timer {
   position: relative;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  /* Alinha o texto perfeitamente à direita como na imagem */
   color: #0f0;
   font-family: 'Courier New', monospace;
-  text-align: right;
   z-index: 10;
-  margin-bottom: clamp(10px, 2vh, 20px);
-  padding-top: clamp(5px, 1vh, 10px);
+
+  /* O SEGREDO: Margem no topo para empurrar o relógio para a zona visível, 
+     escapando do corte gerado pelo zoom 3D do painel */
+  margin-top: clamp(30px, 4vh, 45px);
+
+  /* Espaço exato entre o relógio e a borda do monitor REC/Play */
+  margin-bottom: clamp(10px, 2vh, 15px);
   box-sizing: border-box;
 }
 
 .timer-label {
-  font-size: 0.9em;
-  margin-bottom: 5px;
-  text-shadow: 0 0 5px #0f0;
+  /* Tamanho dinâmico para não transbordar horizontalmente */
+  font-size: clamp(0.7rem, 0.9vw, 0.8rem);
+  margin-bottom: 2px;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
   letter-spacing: 1px;
+  color: #7f7;
 }
 
 .timer-display {
-  font-size: 2em;
+  /* Tamanho exato e dinâmico para manter o peso da fonte sem quebrar a linha */
+  font-size: clamp(1.4rem, 2.2vw, 1.8rem);
   font-weight: bold;
-  text-shadow: 0 0 8px #0f0;
+  text-shadow: 0 0 8px rgba(0, 255, 0, 0.9);
+  line-height: 1;
 }
