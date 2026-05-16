@@ -279,6 +279,39 @@
   /* Garante interação do cursor */
 }
 
+/* OVERLAY - Fundo escuro atrás do mapa para focar a atenção */
+.stellar-map-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.75);
+  z-index: 2000;
+  transform: translateZ(150px);
+  pointer-events: auto;
+}
+
+/* O CONTAINER DO MAPA (Espelhando o .main-display com largura expandida) */
+.stellar-map-floating {
+  position: absolute;
+  width: clamp(55%, 68vw, 85%);
+  /* Largura ajustada para encostar nas laterais */
+  height: clamp(50%, 65vh, 75%);
+  left: 50%;
+  top: 37%;
+  transform: translate(-50%, -50%);
+  /* Centraliza no exato mesmo eixo do ecrã central */
+  background: rgba(0, 15, 30, 0.98);
+  border: 1px solid rgba(0, 200, 255, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 0 50px rgba(0, 150, 255, 0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 2001;
+}
+
 .stellar-map-content {
   width: 100%;
   height: 100%;
@@ -621,6 +654,24 @@
     height: 50px;
     margin-bottom: 0;
     margin-right: 20px;
+  }
+
+  .stellar-map-overlay {
+    position: fixed;
+    /* No mobile, o overlay trava a tela toda */
+    z-index: 9999;
+    transform: none;
+  }
+
+  .stellar-map-floating {
+    position: relative;
+    width: 95%;
+    max-width: 500px;
+    height: 70vh;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
   }
 }
 
