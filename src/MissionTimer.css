@@ -1,22 +1,23 @@
 .mission-timer {
-  position: absolute;
-  top: clamp(10px, 3vh, 40px);
-  right: clamp(10px, 2vw, 30px);
+  position: relative;
+  width: 100%;
   color: #0f0;
   font-family: 'Courier New', monospace;
   text-align: right;
-  z-index: 100;
+  z-index: 10;
+  margin-bottom: clamp(10px, 2vh, 20px);
+  padding-top: clamp(5px, 1vh, 10px);
 }
 
 .timer-label {
-  font-size: clamp(0.6em, 0.9vw, 0.9em);
+  font-size: clamp(0.7em, 1vw, 0.9em);
   margin-bottom: clamp(2px, 0.5vh, 5px);
   text-shadow: 0 0 5px #0f0;
   letter-spacing: 1px;
 }
 
 .timer-display {
-  font-size: clamp(1.2em, 2vw, 2em);
+  font-size: clamp(1.5em, 2.5vw, 2em);
   font-weight: bold;
   text-shadow: 0 0 8px #0f0;
 }
