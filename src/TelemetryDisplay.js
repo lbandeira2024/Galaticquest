@@ -393,18 +393,20 @@ const TelemetryDisplay = ({
       </div>
 
       {showStellarMap && (
-        <div className="stellar-map-floating">
-          {!isForcedMapEdit && (
-            <button className="close-stellar-map-button" onClick={() => handleMapClose(null)}>×</button>
-          )}
-          <Suspense fallback={<div className="loading-map">Carregando Mapa Estelar...</div>}>
-            <StellarMapPlan
-              onCloseMap={handleMapClose}
-              initialRoute={plannedRoute}
-              currentIndex={routeIndex}
-              sosSignalData={sosSignalData}
-            />
-          </Suspense>
+        <div className="stellar-map-overlay">
+          <div className="stellar-map-floating">
+            {!isForcedMapEdit && (
+              <button className="close-stellar-map-button" onClick={() => handleMapClose(null)}>×</button>
+            )}
+            <Suspense fallback={<div className="loading-map">Carregando Mapa Estelar...</div>}>
+              <StellarMapPlan
+                onCloseMap={handleMapClose}
+                initialRoute={plannedRoute}
+                currentIndex={routeIndex}
+                sosSignalData={sosSignalData}
+              />
+            </Suspense>
+          </div>
         </div>
       )}
 
