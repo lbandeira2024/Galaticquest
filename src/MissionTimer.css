@@ -16,6 +16,9 @@
   letter-spacing: 1px;
 }
 
+
+
+
 .timer-display {
   font-size: clamp(1.5em, 2.5vw, 2em);
   font-weight: bold;
