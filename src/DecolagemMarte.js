@@ -136,7 +136,7 @@ const RightMonitorPanel = React.memo(({
       <MissionTimer isPaused={isPaused} />
 
       {/* MONITOR SUPERIOR */}
-      <div className="right-monitor-container" style={{ marginTop: '80px' }}>
+      <div className="right-monitor-container right-monitor-top">
         <div className="monitor-controls">
           <span className={`rec-label ${isTransmissionStarting ? 'blinking-rec' : 'inactive-rec'}`}>REC</span>
           <button

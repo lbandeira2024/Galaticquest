@@ -1613,3 +1613,103 @@
     text-shadow: 0 0 10px #ff0000;
   }
 }
+
+/* ========================================================================== */
+/* ======== RESPONSIVIDADE PARA MONITORES (LAPTOPS, 1080P, 1440P, 4K) ======= */
+/* ========================================================================== */
+
+/* Torna a largura dos painéis laterais dinâmica com limites */
+.left-panel-3d,
+.right-panel-3d {
+  width: clamp(260px, 22vw, 450px);
+  /* Permite scroll invisível caso a tela do monitor seja muito baixa */
+  overflow-y: auto;
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.left-panel-3d::-webkit-scrollbar,
+.right-panel-3d::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari */
+}
+
+/* O Display Principal agora se adapta à altura e largura disponíveis */
+.main-display {
+  width: clamp(45%, 50vw, 65%);
+  height: clamp(50%, 65vh, 75%);
+}
+
+/* Ajuste dinâmico de textos e botões usando clamp() */
+.mission-timer h2 {
+  font-size: clamp(1.5rem, 2.5vw, 3rem);
+}
+
+.route-monitor h4 {
+  font-size: clamp(0.9rem, 1.2vw, 1.3rem);
+}
+
+.ativar-de-btn,
+.inventory-btn {
+  font-size: clamp(0.75rem, 1vw, 1.1rem);
+  min-height: clamp(45px, 6vh, 70px);
+  height: auto;
+}
+
+.route-box {
+  height: clamp(100px, 15vh, 160px);
+}
+
+.monitor-screen {
+  height: clamp(120px, 18vh, 200px);
+}
+
+.team-photo-img {
+  height: clamp(100px, 15vh, 180px);
+}
+
+/* --- MONITORES PEQUENOS / NOTEBOOKS (Ex: 1366x768) --- */
+@media (max-height: 800px) and (min-width: 769px) {
+  .right-monitor-container {
+    margin-top: 10px !important;
+    /* Sobrescreve o estilo inline do JS */
+    margin-bottom: 8px;
+  }
+
+  .propulsion-panel {
+    padding: 10px;
+    margin-bottom: 10px;
+    gap: 5px;
+  }
+
+  .cockpit-controls {
+    bottom: 20px;
+  }
+
+  .minerva-section {
+    margin-top: 10px;
+  }
+}
+
+/* --- MONITORES GIGANTES / ULTRAWIDE (4K+) --- */
+@media (min-width: 2500px) {
+  .left-panel-3d {
+    transform: perspective(1200px) rotateY(10deg) translateZ(50px);
+  }
+
+  .right-panel-3d {
+    transform: perspective(1200px) rotateY(-10deg) translateZ(50px);
+  }
+
+  .propulsion-value {
+    font-size: 1.5em;
+  }
+
+  .speed-gauge-value {
+    font-size: 1.5em;
+  }
+
+  .minerva-title {
+    font-size: 1.5em;
+  }
+}

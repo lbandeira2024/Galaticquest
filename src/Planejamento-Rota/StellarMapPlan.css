@@ -376,14 +376,12 @@
 /* QUADRO DE INFORMAÇÕES (RODAPÉ) */
 .info-panel {
     position: absolute;
-    bottom: 20px;
-    left: 20px;
+    bottom: clamp(10px, 3vh, 30px);
+    left: clamp(10px, 3vw, 30px);
     background: rgba(0, 0, 0, 0.7);
     padding: 15px;
     border-radius: 8px;
-    width: max-content;
-    min-width: 300px;
-    max-width: calc(100% - 40px);
+    width: clamp(300px, 25vw, 450px);
     box-sizing: border-box;
     border: 1px solid #3498db;
     box-shadow: 0 0 20px rgba(52, 152, 219, 0.5);
@@ -534,10 +532,8 @@
     position: absolute;
     top: 20px;
     right: 20px;
-    width: fit-content;
-    min-width: 420px;
-    max-width: calc(100% - 40px);
-    max-height: calc(100% - 40px);
+    width: clamp(350px, 30vw, 550px);
+    max-height: clamp(400px, 90vh, 900px);
     box-sizing: border-box;
     padding: 20px;
     background: rgba(10, 20, 40, 0.98);
@@ -677,7 +673,7 @@
 
 .route-container {
     flex: 1;
-    max-height: 300px;
+    max-height: clamp(200px, 45vh, 600px);
     overflow-y: auto;
     overflow-x: hidden;
     padding-right: 5px;
@@ -913,6 +909,33 @@
     box-shadow: 0 0 5px #00ff00;
 }
 
+/* --- MONITORES PEQUENOS / NOTEBOOKS (Ex: 1366x768) --- */
+@media (max-height: 800px) and (min-width: 481px) {
+    .route-display-panel {
+        top: 10px;
+        right: 10px;
+        padding: 15px;
+    }
+
+    .actions-ultimate {
+        margin-bottom: 10px;
+    }
+
+    .resources-ultimate {
+        margin-bottom: 10px;
+        gap: 8px;
+    }
+
+    .resource-icon-ultimate {
+        width: 32px;
+        height: 32px;
+    }
+
+    .step-ultimate {
+        padding: 6px 0;
+    }
+}
+
 @media (max-width: 480px) {
     .route-display-panel {
         width: calc(100% - 20px);
@@ -932,5 +955,53 @@
         left: 10px;
         right: 10px;
         max-width: none;
+    }
+}
+
+/* --- MONITORES GIGANTES / ULTRAWIDE (4K+) --- */
+@media (min-width: 2500px) {
+
+    .body-label,
+    .moon-label {
+        font-size: 16px !important;
+        padding: 8px 16px !important;
+    }
+
+    .info-panel h3 {
+        font-size: 20px;
+    }
+
+    .info-panel {
+        font-size: 16px;
+    }
+
+    .action-ultimate {
+        font-size: 16px;
+        padding: 15px 25px;
+    }
+
+    .resource-value-ultimate {
+        font-size: 26px;
+    }
+
+    .step-name {
+        font-size: 18px;
+    }
+
+    .step-distance {
+        font-size: 16px;
+    }
+
+    .route-display-panel {
+        padding: 30px;
+    }
+
+    /* Escala dos astros no mapa 4K para não ficarem minúsculos */
+    .celestial-body.planet {
+        transform: scale(1.5) translate(-50%, -50%);
+    }
+
+    .sun {
+        transform: scale(1.5);
     }
 }
