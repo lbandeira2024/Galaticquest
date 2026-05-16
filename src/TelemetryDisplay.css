@@ -1,13 +1,14 @@
 .telemetry-display {
   position: absolute;
-  height: 160px;
-  bottom: 20px;
+  height: auto;
+  min-height: clamp(100px, 15vh, 160px);
+  bottom: clamp(10px, 2vh, 20px);
   left: 50%;
   transform: translateX(-50%) translateZ(120px);
   width: 90%;
-  max-width: 1000px;
+  max-width: 1100px;
   background: rgba(0, 30, 60, 0.85);
-  padding: 15px;
+  padding: clamp(8px, 1.5vh, 15px);
   border: 1px solid rgba(0, 200, 255, 0.4);
   border-radius: 8px;
   z-index: 10;
@@ -18,34 +19,35 @@
   backdrop-filter: blur(3px);
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 20px;
+  gap: clamp(10px, 2vw, 20px);
+  align-items: stretch;
 }
 
 .telemetry-nuclear-panel {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: auto auto;
-  gap: 10px;
+  grid-template-rows: 1fr 1fr;
+  gap: clamp(5px, 1vw, 10px);
 }
 
 .nuclear-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px;
+  justify-content: center;
+  padding: clamp(4px, 1vh, 8px);
   background: rgba(0, 20, 40, 0.6);
   border-radius: 5px;
   border: 1px solid rgba(0, 150, 255, 0.2);
   box-shadow: inset 0 0 5px rgba(0, 100, 200, 0.3);
   transition: all 0.3s ease;
   position: relative;
-  /* ADICIONADO PARA POSICIONAR O DELTA */
 }
 
 .nuclear-label {
-  font-size: 0.75em;
+  font-size: clamp(0.5em, 0.7vw, 0.75em);
   color: #0bf;
-  margin-bottom: 5px;
+  margin-bottom: clamp(2px, 0.5vh, 5px);
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -53,25 +55,21 @@
 
 .progress-container {
   width: 100%;
-  height: 20px;
+  height: clamp(12px, 2vh, 20px);
   background: rgba(0, 20, 40, 0.8);
   border-radius: 5px;
   position: relative;
   overflow: hidden;
-  margin: 5px 0;
+  margin: 2px 0;
 }
 
 .progress-bar {
   height: 100%;
   border-radius: 10px;
   transition: width 0.3s ease;
-
-  /* Flexbox para centralizar o texto DENTRO da barra colorida */
   display: flex;
   align-items: center;
   justify-content: center;
-
-  /* Garante que o texto não suma se a barra for muito pequena */
   min-width: fit-content;
   padding: 0 5px;
 }
@@ -92,7 +90,7 @@
 }
 
 .progress-value {
-  font-size: 0.7em;
+  font-size: clamp(0.55em, 0.8vw, 0.7em);
   color: #fff;
   font-weight: bold;
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
@@ -100,9 +98,6 @@
   z-index: 2;
 }
 
-/* ====================================================
-   ========= ESTILOS DA PORCENTAGEM DE IMPACTO ========
-   ==================================================== */
 .delta-value {
   position: absolute;
   bottom: 1px;
@@ -129,8 +124,6 @@
   }
 }
 
-/* ==================================================== */
-
 .space-coins-panel {
   display: flex;
   flex-direction: column;
@@ -146,14 +139,14 @@
 
 .space-coins-image {
   width: auto;
-  height: 80px;
+  height: clamp(40px, 6vh, 80px);
   margin-bottom: 2px;
   object-fit: contain;
   filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.7));
 }
 
 .space-coins-value {
-  font-size: 1.0em;
+  font-size: clamp(0.8em, 1.2vw, 1em);
   color: #0f0;
   text-shadow: 0 0 5px rgba(0, 255, 0, 0.7),
     0 0 10px rgba(0, 255, 0, 0.5),
@@ -263,11 +256,10 @@
   transform: translateY(-1px);
 }
 
-/* === CONFIGURAÇÕES DO MAPA ESTELAR FLUTUANTE === */
 .stellar-map-floating {
   position: fixed;
-  top: -80%;
-  left: 37.5%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
   z-index: 2000;
   width: 80vw;
@@ -284,8 +276,6 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  transition: transform 0.4s ease-out, opacity 0.4s ease-out;
-  opacity: 1;
 }
 
 .stellar-map-content {
@@ -642,13 +632,6 @@
     width: 90%;
     min-width: 400px;
     height: 70vh;
-  }
-
-  .close-button,
-  .close-stellar-map-button {
-    width: 32px;
-    height: 32px;
-    font-size: 20px;
   }
 }
 
