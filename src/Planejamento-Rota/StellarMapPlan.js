@@ -187,7 +187,7 @@ function routeReducer(state, action) {
     };
 }
 
-const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRoute, currentIndex, onSosDetected, allowSos, sosSignalData }) => {
+const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseButton, initialRoute, currentIndex, onSosDetected, allowSos, sosSignalData }) => {
     const { apiBaseUrl } = useConfig();
     const API_BASE_URL = apiBaseUrl;
 
@@ -364,6 +364,12 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
         <div className="stellar-map" ref={containerRef} style={{ cursor: isDragging ? 'grabbing' : 'grab' }}>
             {plannedRoute.steps.length > 0 && (
                 <div className="route-display-panel ultimate">
+
+                    {/* BOTÃO X POSICIONADO DIRETAMENTE AQUI */}
+                    {showCloseButton && (
+                        <button className="route-panel-close-btn" onClick={() => onCloseMap(null)}>×</button>
+                    )}
+
                     <div className="actions-ultimate">
                         <button className={`action-ultimate ${isRouteConfirmed ? 'edit' : 'confirm'}`}
                             onClick={isRouteConfirmed ? handleEditRoute : handleConfirmRoute}
@@ -590,6 +596,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                     )}
                 </div>
             )}
+
+            {/* CONTROLES DE ZOOM MOVIDOS PARA CAIXA DE ROTA NO CSS, MAS RENDERIZADOS AQUI */}
             <div className="zoom-controls">
                 <button onClick={() => setZoom(prev => Math.min(prev * 1.2, 8))}>+</button>
                 <button onClick={() => setZoom(prev => Math.max(prev / 1.2, 0.3))}>-</button>

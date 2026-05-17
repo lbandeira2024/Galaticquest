@@ -161,7 +161,6 @@
     }
 }
 
-/* FORÇANDO A COR DAS LUAS */
 .celestial-body.moon {
     background: #ff66cc !important;
     background: linear-gradient(45deg, #ff66cc, #9b59b6) !important;
@@ -283,7 +282,6 @@
     min-width: fit-content !important;
 }
 
-/* REGRAS ESPECÍFICAS PARA TODAS AS LUAS */
 .celestial-body.moon .label-container.moon-label-container {
     position: absolute !important;
     top: 50% !important;
@@ -373,7 +371,6 @@
     font-style: italic;
 }
 
-/* QUADRO DE INFORMAÇÕES (RODAPÉ) */
 .info-panel {
     position: absolute;
     bottom: clamp(10px, 3vh, 30px);
@@ -427,39 +424,6 @@
     cursor: pointer;
     padding: 0;
     line-height: 1;
-}
-
-.zoom-controls {
-    position: absolute;
-    bottom: 20px;
-    right: 45px;
-    /* Alinhado perfeitamente com a lateral direita do quadro de rota */
-    display: flex;
-    flex-direction: row;
-    /* Lado a lado (horizontal) */
-    gap: 15px;
-    z-index: 5;
-}
-
-.zoom-controls button {
-    background: rgba(0, 0, 0, 0.7);
-    color: white;
-    border: 1px solid #3498db;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
-}
-
-.zoom-controls button:hover {
-    background-color: #4fc3f7 !important;
-    box-shadow: 0 0 15px rgba(79, 195, 247, 0.7);
 }
 
 .celestial-body.isExoplanet {
@@ -529,16 +493,18 @@
     }
 }
 
-/* QUADRO/PAINEL DE ROTA LATERAL */
+/* ======================================================== */
+/* ======== QUADRO DE ROTA DEFINITIVO (CORRIGIDO) ========= */
+/* ======================================================== */
+
 .route-display-panel {
     position: absolute;
-    top: 20px;
-    right: 45px;
-    /* Empurra o painel mais para a esquerda, fugindo do corte 3D */
-    width: clamp(320px, 28vw, 480px);
-    /* Mais compacto para ficar bonito na tela */
+    top: 25px;
+    right: 25px;
+    width: clamp(280px, 25vw, 380px);
+    /* Mais contido para não ser cortado */
     max-height: calc(100% - 90px);
-    /* Garante que nunca vai cobrir os controles de zoom embaixo */
+    /* Espaço de sobra em baixo para os botões de zoom */
     box-sizing: border-box;
     padding: 20px;
     background: rgba(10, 20, 40, 0.98);
@@ -550,6 +516,71 @@
     flex-direction: column;
     z-index: 10;
 }
+
+/* O NOVO BOTÃO X, MÁGICO, PERFEITAMENTE COLADO NA QUINA SUPERIOR ESQUERDA */
+.route-panel-close-btn {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translate(-50%, -50%);
+    /* O segredo que centraliza a bolinha exata na quina do quadro */
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 60, 60, 0.95);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+    transition: all 0.2s ease;
+}
+
+.route-panel-close-btn:hover {
+    background: rgba(255, 80, 80, 1);
+    transform: translate(-50%, -50%) scale(1.1);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+}
+
+/* CONTROLES DE ZOOM DEITADOS ABAIXO DO PAINEL */
+.zoom-controls {
+    position: absolute;
+    bottom: 25px;
+    right: 25px;
+    display: flex;
+    flex-direction: row;
+    /* Coloca lado a lado */
+    gap: 15px;
+    z-index: 5;
+}
+
+.zoom-controls button {
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: 1px solid #3498db;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+.zoom-controls button:hover {
+    background-color: #4fc3f7 !important;
+    box-shadow: 0 0 15px rgba(79, 195, 247, 0.7);
+}
+
+/* ======================================================== */
 
 .actions-ultimate {
     display: flex;
@@ -1001,7 +1032,6 @@
         padding: 30px;
     }
 
-    /* Escala dos astros no mapa 4K para não ficarem minúsculos */
     .celestial-body.planet {
         transform: scale(1.5) translate(-50%, -50%);
     }

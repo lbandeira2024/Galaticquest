@@ -1,5 +1,4 @@
 import React, { useState, lazy, Suspense, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom'; // <-- NOVO IMPORTE ADICIONADO AQUI
 import axios from 'axios';
 import './TelemetryDisplay.css';
 import { usePause } from './PauseContext';
@@ -141,6 +140,7 @@ const TelemetryDisplay = ({
       const prevVal = Math.round(getNestedValue(prevData, key));
 
       if (currentVal !== prevVal) {
+        // Salva a diferença (delta) ao invés de apenas true
         newHighlights[key] = currentVal - prevVal;
         hasChanges = true;
       }
@@ -156,7 +156,7 @@ const TelemetryDisplay = ({
             delete updated[key];
             return updated;
           });
-        }, 15000);
+        }, 15000); // 15 segundos para sumir a cor e o numero
       });
     }
   }, [lastImpactTimestamp]);
@@ -333,9 +333,6 @@ const TelemetryDisplay = ({
     })
     .filter(ship => ship.imageTransferUrl);
 
-  // Procura o elemento .main-display no DOM para ancorar o portal do mapa
-  const mainDisplayElement = document.querySelector('.main-display');
-
   return (
     <div className="telemetry-display">
       <div className="telemetry-nuclear-panel">
@@ -394,22 +391,21 @@ const TelemetryDisplay = ({
         </div>
       </div>
 
-      {/* RENDERIZAÇÃO DO MAPA USANDO PORTAL DIRETO PARA O MAIN DISPLAY */}
-      {showStellarMap && mainDisplayElement && createPortal(
-        <div className="main-display-map-overlay">
-          {!isForcedMapEdit && (
-            <button className="close-stellar-map-button" onClick={() => handleMapClose(null)}>×</button>
-          )}
-          <Suspense fallback={<div className="loading-map">Carregando Mapa Estelar...</div>}>
-            <StellarMapPlan
-              onCloseMap={handleMapClose}
-              initialRoute={plannedRoute}
-              currentIndex={routeIndex}
-              sosSignalData={sosSignalData}
-            />
-          </Suspense>
-        </div>,
-        mainDisplayElement
+      {/* OVERLAY FIXO QUE GARANTE QUE O MAPA NÃO SERÁ CORTADO PELA CABINE */}
+      {showStellarMap && (
+        <div className="stellar-map-overlay-root">
+          <div className="stellar-map-floating">
+            <Suspense fallback={<div className="loading-map">Carregando Mapa Estelar...</div>}>
+              <StellarMapPlan
+                onCloseMap={handleMapClose}
+                showCloseButton={!isForcedMapEdit}
+                initialRoute={plannedRoute}
+                currentIndex={routeIndex}
+                sosSignalData={sosSignalData}
+              />
+            </Suspense>
+          </div>
+        </div>
       )}
 
       <div className="space-coins-panel">

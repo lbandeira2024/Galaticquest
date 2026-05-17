@@ -148,9 +148,7 @@
 .space-coins-value {
   font-size: clamp(0.8em, 1.2vw, 1em);
   color: #0f0;
-  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7),
-    0 0 10px rgba(0, 255, 0, 0.5),
-    0 0 15px rgba(0, 255, 0, 0.3);
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5), 0 0 15px rgba(0, 255, 0, 0.3);
   font-family: 'Segment7', monospace;
   letter-spacing: 2px;
   background: rgba(0, 20, 0, 0.3);
@@ -169,8 +167,7 @@
 
   100% {
     opacity: 1;
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.9),
-      0 0 20px rgba(0, 255, 0, 0.6);
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.9), 0 0 20px rgba(0, 255, 0, 0.6);
   }
 }
 
@@ -208,64 +205,36 @@
   letter-spacing: 1px;
 }
 
-.stellar-map-button::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: -100%;
-  width: 300%;
-  height: 300%;
-  background: linear-gradient(to top right,
-      transparent 0%,
-      transparent 45%,
-      rgba(255, 255, 255, 0.8) 50%,
-      transparent 55%,
-      transparent 100%);
-  transform: rotate(30deg);
-  animation: shine 10s infinite;
-  opacity: 0;
-}
-
-@keyframes shine {
-  0% {
-    transform: translateX(-100%) translateY(100%) rotate(30deg);
-    opacity: 0;
-  }
-
-  5% {
-    opacity: 0.5;
-  }
-
-  10% {
-    opacity: 0.9;
-  }
-
-  15% {
-    transform: translateX(100%) translateY(-100%) rotate(30deg);
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
 .stellar-map-button:hover:not(:disabled) {
   background: rgba(0, 80, 160, 0.9);
   box-shadow: 0 0 15px rgba(0, 150, 255, 0.5);
   transform: translateY(-1px);
 }
 
-/* CONTAINER PRINCIPAL DO MAPA ESTELAR */
+/* ======================================================= */
+/* ========= ROOT DO PORTAL DO MAPA ESTELAR ============== */
+/* ======================================================= */
+
+.stellar-map-overlay-root {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 999999;
+  /* Sobrepõe tudo, ignorando o 3D */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+}
+
 .stellar-map-floating {
-  position: absolute;
-  top: 37%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 2000;
-  width: clamp(50%, 55vw, 60%);
-  height: clamp(50%, 65vh, 75%);
-  background: rgba(0, 30, 60, 0.98);
+  position: relative;
+  width: clamp(60%, 75vw, 90%);
+  height: clamp(60%, 80vh, 90%);
+  background: rgba(0, 15, 30, 0.98);
   border: 2px solid rgba(0, 200, 255, 0.6);
   border-radius: 12px;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
@@ -274,7 +243,6 @@
   overflow: hidden;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
 .stellar-map-content {
@@ -283,37 +251,6 @@
   padding: 20px;
   box-sizing: border-box;
   overflow: hidden;
-}
-
-/* BOTÃO FECHAR GRUDADO NA QUINA ESQUERDA DO PAINEL DE ROTA */
-.close-stellar-map-button {
-  position: absolute;
-  top: 10px;
-  left: auto;
-  /* Cálculo Mágico: Margem direita do quadro (45px) - Metade do Botão e folga + Largura dinâmica do painel */
-  right: calc(clamp(320px, 28vw, 480px) + 27px);
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 60, 60, 0.9);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  border-radius: 50%;
-  font-size: 22px;
-  font-weight: bold;
-  cursor: pointer;
-  z-index: 2005;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
-}
-
-.close-stellar-map-button:hover {
-  background: rgba(255, 80, 80, 1);
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
-  border-color: #fff;
 }
 
 .forced-alert {
@@ -597,10 +534,8 @@
 
 @media (max-width: 1024px) {
   .stellar-map-floating {
-    left: 50%;
-    width: 90%;
-    min-width: 550px;
-    height: 75vh;
+    width: 95vw;
+    height: 85vh;
   }
 
   .ships-grid {
@@ -632,16 +567,8 @@
   }
 
   .stellar-map-floating {
-    width: 90%;
-    min-width: 400px;
-    height: 70vh;
-  }
-
-  /* Proteção para telas pequenas/mobile (reverte o X para a borda da tela) */
-  .close-stellar-map-button {
-    top: 5px;
-    right: 5px;
-    left: auto;
+    width: 98vw;
+    height: 90vh;
   }
 }
 
@@ -656,12 +583,6 @@
 
   .space-coins-value {
     font-size: 1.1em;
-  }
-
-  .stellar-map-floating {
-    width: 95%;
-    min-width: 300px;
-    height: 70vh;
   }
 
   .close-button,
