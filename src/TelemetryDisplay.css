@@ -202,44 +202,37 @@
   transform: translateY(-1px);
 }
 
-/* ======================================================= */
-/* ====== ROOT DO MODAL DO MAPA (SOBREPÕE TUDO) ========== */
-/* ======================================================= */
-
+/* ROOT DO MODAL DO MAPA (SOBREPÕE TUDO) */
 .stellar-map-overlay-root {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.35);
-  /* Preto bem mais leve e transparente para ver o cockpit */
+  background-color: rgba(0, 0, 0, 0.6);
+  /* Preto suave para ver o cockpit */
   z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: auto;
-  backdrop-filter: none;
-  /* Sem desfoque atrás */
 }
 
 .stellar-map-floating {
   position: relative;
-  width: clamp(50%, 60vw, 75%);
-  height: clamp(50%, 70vh, 85%);
+  width: clamp(50%, 65vw, 85%);
+  height: clamp(50%, 75vh, 90%);
   background: rgba(0, 15, 30, 0.98);
   border: 2px solid rgba(0, 200, 255, 0.6);
   border-radius: 12px;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  /* Essa trava é o que impede as estrelas de saírem do azul! */
-  margin: 0;
-  padding: 0;
+  /* Trava de segurança máxima para estrelas não vazarem da borda arredondada */
+  overflow: hidden !important;
+  isolation: isolate;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
-
-/* ======================================================= */
 
 .forced-alert {
   display: flex;

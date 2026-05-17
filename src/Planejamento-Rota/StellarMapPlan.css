@@ -1,12 +1,14 @@
 .stellar-map {
     position: relative;
     width: 100%;
-    /* MUDANÇA CRUCIAL: height agora é 100% para obedecer perfeitamente o limite do main-display, 
-       garantindo que seus botões de zoom nunca desçam além da tela visível! */
+    /* MUDANÇA CRUCIAL: height agora é 100% para obedecer perfeitamente o limite do main-display */
     height: 100%;
     background: radial-gradient(ellipse at center, #0a0a20 0%, #000000 100%);
+
+    /* ASSEGURA QUE NADA VAZA DO QUADRO COM BORDAS ARREDONDADAS */
     overflow: hidden;
-    /* IMPEDE O VAZAMENTO DAS ESTRELAS */
+    border-radius: inherit;
+
     font-family: 'Arial', sans-serif;
     touch-action: none;
     cursor: grab;
@@ -20,7 +22,10 @@
     position: absolute;
     width: 100%;
     height: 100%;
+
+    /* IMPEDE O VAZAMENTO DAS ESTRELAS PELAS QUINAS */
     overflow: hidden;
+    border-radius: inherit;
     z-index: 0;
 }
 
@@ -502,8 +507,10 @@
 
 .route-display-panel {
     position: absolute;
-    top: 20px;
-    right: 200px;
+    top: 35px;
+    /* Aumentado para fugir do corte do modal */
+    right: 45px;
+    /* Aumentado para o botão X não ser cortado pela tela principal */
     width: clamp(240px, 35%, 380px);
     max-height: calc(100% - 90px);
     box-sizing: border-box;
@@ -518,42 +525,39 @@
     z-index: 10;
 }
 
-/* O BOTÃO X COLADO NA QUINA SUPERIOR DIREITA, POR FORA */
+/* O BOTÃO X COLADO NA QUINA SUPERIOR DIREITA, TOTALMENTE POR FORA */
 .route-panel-close-btn {
     position: absolute;
-    top: 0;
-    right: 0;
-    transform: translate(50%, -50%);
-    /* Força a bolinha para fora do quadro */
-    width: 28px;
-    height: 28px;
+    top: -14px;
+    right: -14px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    background: rgba(255, 60, 60, 0.95);
+    background: rgba(255, 40, 40, 0.95);
     color: white;
-    border: 2px solid rgba(255, 255, 255, 0.5);
-    font-size: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    font-size: 20px;
     font-weight: bold;
     cursor: pointer;
-    z-index: 1001;
-    /* Garante que fique acima de tudo */
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
     transition: all 0.2s ease;
 }
 
 .route-panel-close-btn:hover {
-    background: rgba(255, 80, 80, 1);
-    transform: translate(50%, -50%) scale(1.1);
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+    background: rgba(255, 0, 0, 1);
+    transform: scale(1.15);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 1);
 }
 
 /* CONTROLES DE ZOOM DEITADOS ABAIXO DO PAINEL */
 .zoom-controls {
     position: absolute;
-    bottom: 20px;
-    right: 200px;
+    bottom: 35px;
+    right: 45px;
     display: flex;
     flex-direction: row;
     gap: 15px;
@@ -949,15 +953,13 @@
 @media (max-height: 800px) and (min-width: 481px) {
     .route-display-panel {
         top: 10px;
-        right: 180px;
-        /* <--- Ajuste proporcional para ecrãs menores */
+        right: 15px;
         padding: 15px;
     }
 
     .zoom-controls {
         bottom: 10px;
-        right: 180px;
-        /* <--- Ajuste proporcional para ecrãs menores */
+        right: 15px;
     }
 
     .actions-ultimate {
@@ -1036,13 +1038,11 @@
 
     .route-display-panel {
         padding: 30px;
-        right: 250px;
-        /* <--- Proporcional em ecrãs gigantes */
+        right: 60px;
     }
 
     .zoom-controls {
-        right: 250px;
-        /* <--- Proporcional em ecrãs gigantes */
+        right: 60px;
     }
 
     .celestial-body.planet {
