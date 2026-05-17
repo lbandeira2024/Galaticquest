@@ -196,15 +196,6 @@
   filter: grayscale(50%);
 }
 
-.stellar-map-label {
-  font-size: 0.75em;
-  color: #0bf;
-  margin-bottom: 5px;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
 .stellar-map-button:hover:not(:disabled) {
   background: rgba(0, 80, 160, 0.9);
   box-shadow: 0 0 15px rgba(0, 150, 255, 0.5);
@@ -212,23 +203,34 @@
 }
 
 /* ======================================================= */
-/* ====== O MAPA PERFEITAMENTE DENTRO DO MAIN DISPLAY ==== */
+/* ====== ROOT DO MODAL DO MAPA (SOBREPÕE TUDO) ========== */
 /* ======================================================= */
 
-.stellar-map-in-display {
-  position: absolute;
+.stellar-map-overlay-root {
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 9999;
-  /* Sobrepõe as estrelas e vídeos nativos do monitor */
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+.stellar-map-floating {
+  position: relative;
+  width: clamp(50%, 60vw, 75%);
+  height: clamp(50%, 70vh, 85%);
   background: rgba(0, 15, 30, 0.98);
+  border: 2px solid rgba(0, 200, 255, 0.6);
+  border-radius: 12px;
+  box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  pointer-events: auto;
-  /* Garante interação total com o mouse */
 }
 
 /* ======================================================= */
@@ -514,6 +516,11 @@
   .ships-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .stellar-map-floating {
+    width: 90vw;
+    height: 80vh;
+  }
 }
 
 @media (max-width: 768px) {
@@ -538,6 +545,11 @@
     margin-bottom: 0;
     margin-right: 20px;
   }
+
+  .stellar-map-floating {
+    width: 95vw;
+    height: 85vh;
+  }
 }
 
 @media (max-width: 480px) {
@@ -560,5 +572,10 @@
   .ship-image {
     width: 80px;
     height: 80px;
+  }
+
+  .stellar-map-floating {
+    width: 100vw;
+    height: 95vh;
   }
 }
