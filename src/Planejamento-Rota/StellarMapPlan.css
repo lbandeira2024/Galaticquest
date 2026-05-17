@@ -1,3 +1,7 @@
+/* ==========================================================================
+   ======================= STELLAR MAP & ROUTE PLANNING =======================
+   ========================================================================== */
+
 .stellar-map {
     position: relative;
     width: 100%;
@@ -518,13 +522,17 @@
     display: flex;
     flex-direction: column;
     z-index: 10;
+    overflow: visible !important;
+    /* CRUCIAL: Permite que o botão X fique visível do lado de fora */
 }
 
-/* O BOTÃO X COLADO NA QUINA SUPERIOR DIREITA, POR FORA E SEM CORTES */
+/* O BOTÃO X COLADO NA QUINA SUPERIOR DIREITA, PERFEITAMENTE DO LADO DE FORA DO QUADRO */
 .route-panel-close-btn {
     position: absolute;
-    top: -14px !important;
-    right: -14px !important;
+    top: -16px !important;
+    /* Metade da altura (32px / 2) para alinhar perfeitamente no centro da quina externa */
+    right: -16px !important;
+    /* Metade da largura (32px / 2) para alinhar perfeitamente no centro da quina externa */
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -534,7 +542,7 @@
     font-size: 20px;
     font-weight: bold;
     cursor: pointer;
-    z-index: 9999;
+    z-index: 99999;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -945,8 +953,9 @@
     box-shadow: 0 0 5px #00ff00;
 }
 
-/* === AQUI É O SEGREDO DO PORQUE NÃO ESTAVA MUDANDO ANTES === */
-/* CORREÇÕES PARA TODAS AS RESOLUÇÕES MANTENDO OS 150PX! */
+/* ==========================================================================
+   ============================== MEDIA QUERIES ==============================
+   ========================================================================== */
 
 @media (max-height: 800px) and (min-width: 481px) {
     .route-display-panel {
@@ -958,7 +967,6 @@
     .zoom-controls {
         bottom: 20px;
         right: 700px;
-        /* GARANTIDO O RECUO AQUI TAMBÉM */
     }
 
     .actions-ultimate {
@@ -1038,7 +1046,6 @@
     .route-display-panel {
         padding: 30px;
         right: 250px;
-        /* Proporcional para ecrãs gigantes */
     }
 
     .zoom-controls {
