@@ -207,6 +207,30 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
     const containerRef = useRef(null);
     const [isLoadingProgress, setIsLoadingProgress] = useState(false);
 
+    // REFERÊNCIAS DO DOM PARA FAZER O DESLOCAMENTO SEGURO POR JAVASCRIPT
+    const panelRef = useRef(null);
+    const zoomRef = useRef(null);
+    const closeBtnRef = useRef(null);
+
+    useEffect(() => {
+        // FORÇA BRUTA: Injeta diretamente no elemento independente de qualquer arquivo CSS
+        if (panelRef.current) {
+            // Aumentando o 'right' empurra o painel mais para a esquerda, tirando-o do corte
+            panelRef.current.style.setProperty('right', '280px', 'important');
+            // Aumentando o 'top' desce o painel um pouco mais
+            panelRef.current.style.setProperty('top', '80px', 'important');
+        }
+        if (zoomRef.current) {
+            // É bom manter o controle de zoom alinhado com o painel de rota
+            zoomRef.current.style.setProperty('right', '280px', 'important');
+            zoomRef.current.style.setProperty('bottom', '40px', 'important');
+        }
+        if (closeBtnRef.current) {
+            closeBtnRef.current.style.setProperty('top', '-15px', 'important');
+            closeBtnRef.current.style.setProperty('right', '-15px', 'important');
+        }
+    }, [plannedRoute.steps]);
+
     const stars = useMemo(() => Array.from({ length: 500 }, (_, i) => ({
         id: i, x: Math.random() * 100, y: Math.random() * 100, size: 0.3 + Math.random() * 3,
         opacity: 0.1 + Math.random() * 0.9, delay: Math.random() * 10, duration: 3 + Math.random() * 7
@@ -363,14 +387,12 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
     return (
         <div className="stellar-map" ref={containerRef} style={{ cursor: isDragging ? 'grabbing' : 'grab' }}>
             {plannedRoute.steps.length > 0 && (
-                /* INLINE STYLES ADICIONADOS PARA IGNORAR QUALQUER CACHE DO CSS! */
-                <div className="route-display-panel ultimate" style={{ right: '150px', top: '50px' }}>
+                <div className="route-display-panel ultimate" ref={panelRef}>
 
-                    {/* BOTÃO X DA ROTA - POSICIONADO NA QUINA SUPERIOR DIREITA EXTERNA COM INLINE STYLES */}
                     {showCloseButton && (
                         <button
                             className="route-panel-close-btn"
-                            style={{ position: 'absolute', top: '-15px', right: '-15px', zIndex: 9999 }}
+                            ref={closeBtnRef}
                             onClick={() => onCloseMap(null)}
                         >
                             ×
@@ -604,8 +626,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
                 </div>
             )}
 
-            {/* INLINE STYLES ADICIONADOS PARA IGNORAR QUALQUER CACHE DO CSS! */}
-            <div className="zoom-controls" style={{ right: '150px', bottom: '40px' }}>
+            <div className="zoom-controls" ref={zoomRef}>
                 <button onClick={() => setZoom(prev => Math.min(prev * 1.2, 8))}>+</button>
                 <button onClick={() => setZoom(prev => Math.max(prev / 1.2, 0.3))}>-</button>
                 <button onClick={() => {
