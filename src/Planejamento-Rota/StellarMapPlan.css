@@ -1,9 +1,12 @@
 .stellar-map {
     position: relative;
     width: 100%;
+    /* MUDANÇA CRUCIAL: height agora é 100% para obedecer perfeitamente o limite do main-display, 
+       garantindo que seus botões de zoom nunca desçam além da tela visível! */
     height: 100%;
     background: radial-gradient(ellipse at center, #0a0a20 0%, #000000 100%);
     overflow: hidden;
+    /* IMPEDE O VAZAMENTO DAS ESTRELAS */
     font-family: 'Arial', sans-serif;
     touch-action: none;
     cursor: grab;
@@ -500,9 +503,7 @@
 .route-display-panel {
     position: absolute;
     top: 20px;
-    right: 20px;
-    /* <--- VOLTANDO PARA O VALOR NORMAL POIS O MODAL É LIVRE */
-    /* Largura adaptável em % para caber bem no main-display */
+    right: 200px;
     width: clamp(240px, 35%, 380px);
     max-height: calc(100% - 90px);
     box-sizing: border-box;
@@ -517,22 +518,24 @@
     z-index: 10;
 }
 
-/* O BOTÃO X COLADO NA QUINA SUPERIOR ESQUERDA */
+/* O BOTÃO X COLADO NA QUINA SUPERIOR DIREITA, POR FORA */
 .route-panel-close-btn {
     position: absolute;
     top: 0;
-    left: 0;
-    transform: translate(-50%, -50%);
-    width: 36px;
-    height: 36px;
+    right: 0;
+    transform: translate(50%, -50%);
+    /* Força a bolinha para fora do quadro */
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
     background: rgba(255, 60, 60, 0.95);
     color: white;
     border: 2px solid rgba(255, 255, 255, 0.5);
-    border-radius: 50%;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    z-index: 20;
+    z-index: 1001;
+    /* Garante que fique acima de tudo */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -542,7 +545,7 @@
 
 .route-panel-close-btn:hover {
     background: rgba(255, 80, 80, 1);
-    transform: translate(-50%, -50%) scale(1.1);
+    transform: translate(50%, -50%) scale(1.1);
     box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
 }
 
@@ -550,8 +553,7 @@
 .zoom-controls {
     position: absolute;
     bottom: 20px;
-    right: 20px;
-    /* <--- VOLTANDO PARA O VALOR NORMAL */
+    right: 200px;
     display: flex;
     flex-direction: row;
     gap: 15px;
@@ -947,13 +949,15 @@
 @media (max-height: 800px) and (min-width: 481px) {
     .route-display-panel {
         top: 10px;
-        right: 10px;
+        right: 180px;
+        /* <--- Ajuste proporcional para ecrãs menores */
         padding: 15px;
     }
 
     .zoom-controls {
         bottom: 10px;
-        right: 10px;
+        right: 180px;
+        /* <--- Ajuste proporcional para ecrãs menores */
     }
 
     .actions-ultimate {
@@ -1032,11 +1036,13 @@
 
     .route-display-panel {
         padding: 30px;
-        right: 30px;
+        right: 250px;
+        /* <--- Proporcional em ecrãs gigantes */
     }
 
     .zoom-controls {
-        right: 30px;
+        right: 250px;
+        /* <--- Proporcional em ecrãs gigantes */
     }
 
     .celestial-body.planet {

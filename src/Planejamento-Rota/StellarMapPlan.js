@@ -365,7 +365,7 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
             {plannedRoute.steps.length > 0 && (
                 <div className="route-display-panel ultimate">
 
-                    {/* BOTÃO X POSICIONADO DIRETAMENTE AQUI */}
+                    {/* BOTÃO X POSICIONADO AQUI - ESTILO TOTALMENTE GERENCIADO PELO CSS */}
                     {showCloseButton && (
                         <button className="route-panel-close-btn" onClick={() => onCloseMap(null)}>×</button>
                     )}
