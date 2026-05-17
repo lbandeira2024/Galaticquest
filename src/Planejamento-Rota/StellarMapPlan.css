@@ -1,8 +1,7 @@
 .stellar-map {
     position: relative;
     width: 100%;
-    /* MUDANÇA CRUCIAL: height agora é 100% para obedecer perfeitamente o limite do main-display, 
-       garantindo que seus botões de zoom nunca desçam além da tela visível! */
+    /* MUDANÇA CRUCIAL: height agora é 100% para obedecer perfeitamente o limite do main-display */
     height: 100%;
     background: radial-gradient(ellipse at center, #0a0a20 0%, #000000 100%);
     overflow: hidden;
@@ -502,12 +501,12 @@
 
 .route-display-panel {
     position: absolute;
-    top: 25px;
-    right: 25px;
-    /* Devolta para a borda interna da caixa azul */
-    width: clamp(240px, 30%, 360px);
-    /* Ajustado para não ser tão largo e caber de forma responsiva */
-    max-height: calc(100% - 90px);
+    /* AJUSTE: Movido bem mais para baixo para afastar da borda superior */
+    top: 80px;
+    /* AJUSTE: Movido bem mais para a esquerda para não ser cortado na borda direita */
+    right: 150px;
+    width: clamp(240px, 35%, 380px);
+    max-height: calc(100% - 120px);
     box-sizing: border-box;
     padding: 20px;
     background: rgba(10, 20, 40, 0.98);
@@ -552,9 +551,9 @@
 /* CONTROLES DE ZOOM DEITADOS ABAIXO DO PAINEL */
 .zoom-controls {
     position: absolute;
-    bottom: 25px;
-    right: 25px;
-    /* Alinhado com o painel da rota acima dele */
+    bottom: 40px;
+    /* AJUSTE: Alinhado com a nova posição 'right' do painel da rota */
+    right: 150px;
     display: flex;
     flex-direction: row;
     gap: 15px;
@@ -949,14 +948,16 @@
 
 @media (max-height: 800px) and (min-width: 481px) {
     .route-display-panel {
-        top: 10px;
-        right: 15px;
+        top: 20px;
+        /* AJUSTE: Mantido recuo lateral para telas pequenas */
+        right: 40px;
         padding: 15px;
     }
 
     .zoom-controls {
-        bottom: 10px;
-        right: 15px;
+        bottom: 20px;
+        /* AJUSTE: Mantido recuo lateral para telas pequenas */
+        right: 40px;
     }
 
     .actions-ultimate {
@@ -1035,11 +1036,13 @@
 
     .route-display-panel {
         padding: 30px;
-        right: 60px;
+        /* AJUSTE: Mantido recuo proporcional para 4K */
+        right: 200px;
     }
 
     .zoom-controls {
-        right: 60px;
+        /* AJUSTE: Mantido recuo proporcional para 4K */
+        right: 200px;
     }
 
     .celestial-body.planet {

@@ -453,66 +453,6 @@
   animation: flicker 0.5s infinite alternate;
 }
 
-@keyframes resourceRefillPulse {
-  0% {
-    box-shadow: 0 0 5px #2ecc71;
-  }
-
-  50% {
-    box-shadow: 0 0 25px #2ecc71, 0 0 10px #fff;
-  }
-
-  100% {
-    box-shadow: 0 0 5px #2ecc71;
-  }
-}
-
-.oxygen-refill-active .progress-bar {
-  background: #2ecc71 !important;
-  animation: resourceRefillPulse 0.8s infinite alternate;
-}
-
-.oxygen-refill-active .nuclear-label {
-  color: #2ecc71 !important;
-  text-shadow: 0 0 10px #2ecc71;
-  font-weight: bold;
-}
-
-@keyframes updatedMetricPulse {
-  0% {
-    background-color: #39ff14;
-    box-shadow: 0 0 5px #39ff14;
-  }
-
-  50% {
-    background-color: #ccffcc;
-    box-shadow: 0 0 20px #39ff14, 0 0 10px #fff;
-  }
-
-  100% {
-    background-color: #39ff14;
-    box-shadow: 0 0 5px #39ff14;
-  }
-}
-
-.nuclear-item.highlight-changed {
-  border-color: #39ff14;
-  box-shadow: inset 0 0 15px rgba(57, 255, 20, 0.2);
-  transition: all 0.5s ease;
-}
-
-.nuclear-item.highlight-changed .nuclear-label {
-  color: #39ff14 !important;
-  text-shadow: 0 0 8px #39ff14;
-  font-weight: bold;
-}
-
-.nuclear-item.highlight-changed .progress-bar {
-  background: #39ff14 !important;
-  box-shadow: 0 0 10px #39ff14 !important;
-  animation: updatedMetricPulse 1s infinite alternate;
-}
-
 @media (max-width: 1024px) {
   .ships-grid {
     grid-template-columns: repeat(2, 1fr);
