@@ -502,7 +502,8 @@
 .route-display-panel {
     position: absolute;
     top: 20px;
-    right: 20px;
+    right: 60px;
+    /* <--- AJUSTADO PARA 60PX (Afasta da borda direita cortada) */
     /* Largura adaptável em % para caber bem no main-display */
     width: clamp(240px, 35%, 380px);
     max-height: calc(100% - 90px);
@@ -551,7 +552,8 @@
 .zoom-controls {
     position: absolute;
     bottom: 20px;
-    right: 20px;
+    right: 60px;
+    /* <--- AJUSTADO PARA 60PX (Acompanha o painel acima) */
     display: flex;
     flex-direction: row;
     gap: 15px;
@@ -947,8 +949,15 @@
 @media (max-height: 800px) and (min-width: 481px) {
     .route-display-panel {
         top: 10px;
-        right: 10px;
+        right: 40px;
+        /* <--- AJUSTADO AQUI TAMBÉM */
         padding: 15px;
+    }
+
+    .zoom-controls {
+        bottom: 10px;
+        right: 40px;
+        /* <--- AJUSTADO AQUI TAMBÉM */
     }
 
     .actions-ultimate {
@@ -1027,6 +1036,13 @@
 
     .route-display-panel {
         padding: 30px;
+        right: 100px;
+        /* <--- AJUSTADO PARA TELAS GIGANTES */
+    }
+
+    .zoom-controls {
+        right: 100px;
+        /* <--- AJUSTADO PARA TELAS GIGANTES */
     }
 
     .celestial-body.planet {
