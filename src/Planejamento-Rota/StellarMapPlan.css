@@ -503,7 +503,7 @@
 .route-display-panel {
     position: absolute;
     top: 80px;
-    right: 150px;
+    right: 550px;
     width: clamp(240px, 35%, 380px);
     max-height: calc(100% - 120px);
     box-sizing: border-box;
@@ -551,7 +551,7 @@
 .zoom-controls {
     position: absolute;
     bottom: 40px;
-    right: 150px;
+    right: 550px;
     display: flex;
     flex-direction: row;
     gap: 15px;
@@ -950,14 +950,14 @@
 @media (max-height: 800px) and (min-width: 481px) {
     .route-display-panel {
         top: 20px;
-        right: 150px;
+        right: 550px;
         /* GARANTIDO O RECUO AQUI TAMBÉM */
         padding: 15px;
     }
 
     .zoom-controls {
         bottom: 20px;
-        right: 150px;
+        right: 550px;
         /* GARANTIDO O RECUO AQUI TAMBÉM */
     }
 
