@@ -212,12 +212,15 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0.35);
+  /* Preto bem mais leve e transparente para ver o cockpit */
   z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: auto;
+  backdrop-filter: none;
+  /* Sem desfoque atrás */
 }
 
 .stellar-map-floating {
@@ -231,6 +234,9 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  /* Essa trava é o que impede as estrelas de saírem do azul! */
+  margin: 0;
+  padding: 0;
 }
 
 /* ======================================================= */

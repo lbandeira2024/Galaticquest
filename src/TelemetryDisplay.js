@@ -382,7 +382,7 @@ const TelemetryDisplay = ({
         </div>
 
         <div className="nuclear-item">
-          <span className="stellar-map-label">MAPA ESTELAR</span>
+          <span className="nuclear-label">MAPA ESTELAR</span>
           <button
             className="stellar-map-button"
             onClick={() => !isStellarMapDisabled && setShowStellarMap(true)}
