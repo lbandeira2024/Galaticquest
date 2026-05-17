@@ -322,7 +322,8 @@
 .close-stellar-map-button {
   position: absolute;
   top: 15px;
-  right: 15px;
+  right: 65px;
+  /* <-- VALOR AUMENTADO (Empurra o X para a esquerda) */
   width: 36px;
   height: 36px;
   background: rgba(255, 60, 60, 0.8);
@@ -332,7 +333,7 @@
   font-size: 22px;
   font-weight: bold;
   cursor: pointer;
-  z-index: 10000;
+  z-index: 2001;
   display: flex;
   align-items: center;
   justify-content: center;
