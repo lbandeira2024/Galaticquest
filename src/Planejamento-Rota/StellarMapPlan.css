@@ -502,8 +502,8 @@
 
 .route-display-panel {
     position: absolute;
-    top: 80px;
-    right: 550px;
+    top: 15px;
+    right: 700px;
     width: clamp(240px, 35%, 380px);
     max-height: calc(100% - 120px);
     box-sizing: border-box;
@@ -949,15 +949,15 @@
 
 @media (max-height: 800px) and (min-width: 481px) {
     .route-display-panel {
-        top: 20px;
-        right: 550px;
+        top: 60px;
+        right: 7000px;
         /* GARANTIDO O RECUO AQUI TAMBÉM */
         padding: 15px;
     }
 
     .zoom-controls {
         bottom: 20px;
-        right: 550px;
+        right: 700px;
         /* GARANTIDO O RECUO AQUI TAMBÉM */
     }
 
