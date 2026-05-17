@@ -1,4 +1,5 @@
 import React, { useState, lazy, Suspense, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import './TelemetryDisplay.css';
 import { usePause } from './PauseContext';
@@ -11,7 +12,6 @@ const StellarMapPlan = lazy(() => import('./Planejamento-Rota/StellarMapPlan').c
   default: () => <div className="map-fallback">Mapa Estelar Indisponível</div>
 })));
 
-// Hook auxiliar para pegar o valor anterior de uma variável
 function usePrevious(value) {
   const ref = useRef();
   useEffect(() => {
@@ -26,7 +26,6 @@ const getProgressBarClass = (value) => {
   return 'red';
 };
 
-// Componente de Barra de Progresso com Animação Interna
 const ProgressBar = ({ value: targetValue }) => {
   const [displayValue, setDisplayValue] = useState(targetValue);
 
@@ -76,8 +75,6 @@ const ProgressBar = ({ value: targetValue }) => {
   );
 };
 
-// --- COMPONENTE PRINCIPAL ---
-
 const TelemetryDisplay = ({
   data = {},
   isPaused,
@@ -110,10 +107,23 @@ const TelemetryDisplay = ({
   }, [user, apiBaseUrl, syncSpaceCoins]);
 
   const [onlineShips, setOnlineShips] = useState([]);
-
-  // --- LÓGICA DE DETECÇÃO DE MUDANÇA (HIGHLIGHT VERDE + DELTA PERCENTUAL) ---
   const [highlightedMetrics, setHighlightedMetrics] = useState({});
   const prevData = usePrevious(data);
+
+  // NOVO: Estado para armazenar o DOM Node do monitor central
+  const [mainDisplayNode, setMainDisplayNode] = useState(null);
+
+  useEffect(() => {
+    if (showStellarMap) {
+      // Captura a exata tela central do cockpit
+      const node = document.querySelector('.main-display');
+      if (node) {
+        setMainDisplayNode(node);
+      }
+    } else {
+      setMainDisplayNode(null);
+    }
+  }, [showStellarMap]);
 
   const getNestedValue = (obj, path) => {
     return path.split('.').reduce((acc, part) => (acc && acc[part] !== undefined) ? acc[part] : 0, obj);
@@ -126,13 +136,8 @@ const TelemetryDisplay = ({
     let hasChanges = false;
 
     const keysToCheck = [
-      'propulsion.powerOutput',
-      'direction',
-      'stability',
-      'productivity',
-      'interdependence',
-      'engagement',
-      'atmosphere.o2'
+      'propulsion.powerOutput', 'direction', 'stability',
+      'productivity', 'interdependence', 'engagement', 'atmosphere.o2'
     ];
 
     keysToCheck.forEach(key => {
@@ -140,7 +145,6 @@ const TelemetryDisplay = ({
       const prevVal = Math.round(getNestedValue(prevData, key));
 
       if (currentVal !== prevVal) {
-        // Salva a diferença (delta) ao invés de apenas true
         newHighlights[key] = currentVal - prevVal;
         hasChanges = true;
       }
@@ -156,7 +160,7 @@ const TelemetryDisplay = ({
             delete updated[key];
             return updated;
           });
-        }, 15000); // 15 segundos para sumir a cor e o numero
+        }, 15000);
       });
     }
   }, [lastImpactTimestamp]);
@@ -164,47 +168,27 @@ const TelemetryDisplay = ({
   const renderDelta = (key) => {
     const delta = highlightedMetrics[key];
     if (delta === undefined) return null;
-
     const sign = delta > 0 ? '+' : '';
-    return (
-      <span className="delta-value">
-        {sign}{delta}%
-      </span>
-    );
+    return <span className="delta-value">{sign}{delta}%</span>;
   };
 
   useEffect(() => {
     const executeHeartbeatCycle = async () => {
       const currentUser = userRef.current;
       const currentUrl = baseUrlRef.current;
-
       if (!currentUser?._id || !currentUser?.gameNumber || !currentUrl) return;
 
-      try {
-        await axios.post(`${currentUrl}/heartbeat`, { userId: currentUser._id });
-      } catch (e) { }
-
+      try { await axios.post(`${currentUrl}/heartbeat`, { userId: currentUser._id }); } catch (e) { }
       try {
         const response = await axios.get(`${currentUrl}/games/${currentUser.gameNumber}/online-ships`);
-        if (response.data.success) {
-          setOnlineShips(response.data.onlineShips);
-        }
-      } catch (error) {
-        console.error("Erro ao buscar naves:", error);
-      }
-
+        if (response.data.success) setOnlineShips(response.data.onlineShips);
+      } catch (error) { }
       try {
         const myDataResponse = await axios.get(`${currentUrl}/${currentUser._id}/game-data`);
-        if (myDataResponse.data.success) {
-          if (myDataResponse.data.spaceCoins !== undefined) {
-            if (syncSpaceCoinsRef.current) {
-              syncSpaceCoinsRef.current(myDataResponse.data.spaceCoins);
-            }
-          }
+        if (myDataResponse.data.success && myDataResponse.data.spaceCoins !== undefined) {
+          if (syncSpaceCoinsRef.current) syncSpaceCoinsRef.current(myDataResponse.data.spaceCoins);
         }
-      } catch (error) {
-        console.error("Erro ao sincronizar saldo:", error);
-      }
+      } catch (error) { }
     };
 
     executeHeartbeatCycle();
@@ -226,17 +210,12 @@ const TelemetryDisplay = ({
   useEffect(() => {
     if (spaceCoins === null || spaceCoins === undefined) return;
     const target = spaceCoins;
-    if (displayedCoins === null) {
-      setDisplayedCoins(target);
-      return;
-    }
+    if (displayedCoins === null) { setDisplayedCoins(target); return; }
     clearInterval(animationIntervalRef.current);
     const start = displayedCoins;
     if (target === start) return;
     const diff = target - start;
-    const duration = 750;
-    const tickRate = 25;
-    const ticks = duration / tickRate;
+    const ticks = 750 / 25;
     let step = Math.round(diff / ticks);
     if (step === 0) step = diff > 0 ? 1 : -1;
     animationIntervalRef.current = setInterval(() => {
@@ -248,7 +227,7 @@ const TelemetryDisplay = ({
         }
         return next;
       });
-    }, tickRate);
+    }, 25);
     return () => clearInterval(animationIntervalRef.current);
   }, [spaceCoins]);
 
@@ -257,53 +236,29 @@ const TelemetryDisplay = ({
   const [transferAmounts, setTransferAmounts] = useState({});
   const [rawTransferAmounts, setRawTransferAmounts] = useState({});
 
-  const isStellarMapDisabled =
-    isPaused ||
-    isDobraAtivada ||
-    (!isForcedMapEdit && (distanceKm <= 0 || (data.velocity?.kmh ?? 0) < 60000));
+  const isStellarMapDisabled = isPaused || isDobraAtivada || (!isForcedMapEdit && (distanceKm <= 0 || (data.velocity?.kmh ?? 0) < 60000));
 
   const handleMapClose = (newRouteData) => {
     if (isForcedMapEdit && !newRouteData) return;
-
     setShowStellarMap(false);
     if (onRouteChanged) onRouteChanged(newRouteData);
   };
 
-  const formatSpaceCoins = (value) => {
-    return (Math.round(value || 0)).toString().padStart(9, '0').replace(/(\d{3})(?=\d)/g, '$1.').slice(0, 11);
-  };
-
-  const formatCurrencyInput = (value) => {
-    const numericValue = value.replace(/[^0-9]/g, '');
-    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  };
+  const formatSpaceCoins = (value) => (Math.round(value || 0)).toString().padStart(9, '0').replace(/(\d{3})(?=\d)/g, '$1.').slice(0, 11);
+  const formatCurrencyInput = (value) => value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
   const handleTransferChange = (teamNameKey, value) => {
-    const formattedValue = formatCurrencyInput(value);
-    const numericValue = value.replace(/[^0-9]/g, '') || '0';
-    setTransferAmounts(prev => ({ ...prev, [teamNameKey]: formattedValue }));
-    setRawTransferAmounts(prev => ({ ...prev, [teamNameKey]: parseInt(numericValue) || 0 }));
+    setTransferAmounts(prev => ({ ...prev, [teamNameKey]: formatCurrencyInput(value) }));
+    setRawTransferAmounts(prev => ({ ...prev, [teamNameKey]: parseInt(value.replace(/[^0-9]/g, '')) || 0 }));
   };
 
   const handleTransfer = async () => {
     const totalToTransfer = Object.values(rawTransferAmounts).reduce((sum, amount) => sum + (amount || 0), 0);
-    if (totalToTransfer > (spaceCoins || 0)) {
-      setTransferError('Valor total excede o saldo disponível!');
-      return;
-    }
-    if (totalToTransfer <= 0) {
-      setTransferError('Por favor, insira um valor válido para transferência!');
-      return;
-    }
-    if (!user?._id) {
-      setTransferError('Erro: Usuário não identificado.');
-      return;
-    }
+    if (totalToTransfer > (spaceCoins || 0)) return setTransferError('Valor total excede o saldo disponível!');
+    if (totalToTransfer <= 0) return setTransferError('Por favor, insira um valor válido para transferência!');
+    if (!user?._id) return setTransferError('Erro: Usuário não identificado.');
     try {
-      const response = await axios.post(`${apiBaseUrl}/transfer-funds`, {
-        userId: user._id,
-        transfers: rawTransferAmounts
-      });
+      const response = await axios.post(`${apiBaseUrl}/transfer-funds`, { userId: user._id, transfers: rawTransferAmounts });
       if (response.data.success) {
         setSpaceCoins(response.data.newBalance);
         setTransferAmounts({});
@@ -314,98 +269,74 @@ const TelemetryDisplay = ({
       } else {
         setTransferError(response.data.message);
       }
-    } catch (error) {
-      console.error("Erro ao processar transferência:", error);
-      setTransferError('Erro de comunicação com o servidor.');
-    }
+    } catch (error) { setTransferError('Erro de comunicação com o servidor.'); }
   };
 
   const userTeamName = user?.grupo?.teamName;
-  const otherOnlineShips = onlineShips
-    .filter(ship => ship.name !== userTeamName)
-    .map(ship => {
-      const shipInfo = shipDataMap[ship.id];
-      return {
-        ...ship,
-        imageTransferUrl: shipInfo ? shipInfo.imageTransferUrl : null,
-        shipDisplayName: shipInfo ? shipInfo.name : ship.id
-      };
-    })
-    .filter(ship => ship.imageTransferUrl);
+  const otherOnlineShips = onlineShips.filter(ship => ship.name !== userTeamName).map(ship => ({
+    ...ship, imageTransferUrl: shipDataMap[ship.id]?.imageTransferUrl, shipDisplayName: shipDataMap[ship.id]?.name || ship.id
+  })).filter(ship => ship.imageTransferUrl);
 
   return (
     <div className="telemetry-display">
       <div className="telemetry-nuclear-panel">
-
         <div className={`nuclear-item ${highlightedMetrics['propulsion.powerOutput'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">PROPULSÃO NUCLEAR</span>
           <ProgressBar value={Math.round(parseFloat(data.propulsion?.powerOutput) || 0)} />
           {renderDelta('propulsion.powerOutput')}
         </div>
-
         <div className={`nuclear-item ${highlightedMetrics['direction'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">DIREÇÃO</span>
           <ProgressBar value={Math.round(data.direction ?? 0)} />
           {renderDelta('direction')}
         </div>
-
         <div className={`nuclear-item ${highlightedMetrics['stability'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">ESTABILIDADE</span>
           <ProgressBar value={Math.round(data.stability ?? 0)} />
           {renderDelta('stability')}
         </div>
-
         <div className={`nuclear-item ${highlightedMetrics['productivity'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">PRODUTIVIDADE</span>
           <ProgressBar value={Math.round(data.productivity ?? 0)} />
           {renderDelta('productivity')}
         </div>
-
         <div className={`nuclear-item ${highlightedMetrics['interdependence'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">INTERDEPENDÊNCIA</span>
           <ProgressBar value={Math.round(data.interdependence ?? 0)} />
           {renderDelta('interdependence')}
         </div>
-
         <div className={`nuclear-item ${highlightedMetrics['engagement'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">ENGAJAMENTO</span>
           <ProgressBar value={Math.round(data.engagement ?? 0)} />
           {renderDelta('engagement')}
         </div>
-
         <div className={`nuclear-item ${isOxygenRefilled ? 'oxygen-refill-active' : ''} ${highlightedMetrics['atmosphere.o2'] !== undefined ? 'highlight-changed' : ''}`}>
           <span className="nuclear-label">OXIGÊNIO</span>
           <ProgressBar value={Math.round(data.atmosphere?.o2 ?? 0)} />
           {renderDelta('atmosphere.o2')}
         </div>
-
         <div className="nuclear-item">
           <span className="stellar-map-label">MAPA ESTELAR</span>
-          <button
-            className="stellar-map-button"
-            onClick={() => !isStellarMapDisabled && setShowStellarMap(true)}
-            disabled={isStellarMapDisabled}
-          >
+          <button className="stellar-map-button" onClick={() => !isStellarMapDisabled && setShowStellarMap(true)} disabled={isStellarMapDisabled}>
             ABRIR MAPA
           </button>
         </div>
       </div>
 
-      {/* OVERLAY FIXO QUE GARANTE QUE O MAPA NÃO SERÁ CORTADO PELA CABINE */}
-      {showStellarMap && (
-        <div className="stellar-map-overlay-root">
-          <div className="stellar-map-floating">
-            <Suspense fallback={<div className="loading-map">Carregando Mapa Estelar...</div>}>
-              <StellarMapPlan
-                onCloseMap={handleMapClose}
-                showCloseButton={!isForcedMapEdit}
-                initialRoute={plannedRoute}
-                currentIndex={routeIndex}
-                sosSignalData={sosSignalData}
-              />
-            </Suspense>
-          </div>
-        </div>
+      {/* RENDERIZAÇÃO ESTRELAR EXATAMENTE NO MAIN-DISPLAY */}
+      {showStellarMap && mainDisplayNode && createPortal(
+        <div className="stellar-map-in-display">
+          <Suspense fallback={<div className="loading-map">Carregando Mapa Estelar...</div>}>
+            <StellarMapPlan
+              onCloseMap={handleMapClose}
+              showCloseButton={!isForcedMapEdit}
+              initialRoute={plannedRoute}
+              currentIndex={routeIndex}
+              sosSignalData={sosSignalData}
+            />
+          </Suspense>
+        </div>,
+        mainDisplayNode
       )}
 
       <div className="space-coins-panel">
@@ -419,10 +350,8 @@ const TelemetryDisplay = ({
           <button className="close-transfer-button" onClick={() => { setShowTransferModal(false); setTransferError(''); }}>×</button>
           <h2 className="transfer-title">TRANSFERÊNCIA DE VALORES</h2>
           {transferError && <div className="transfer-error">{transferError}</div>}
-
           {(() => {
-            const userShipNameKey = user?.grupo?.naveEscolhida;
-            const userShipData = shipDataMap[userShipNameKey];
+            const userShipData = shipDataMap[user?.grupo?.naveEscolhida];
             return userShipData ? (
               <div className="origin-container">
                 <img src={userShipData.imageTransferUrl} alt={userShipData.name} className="ship-image" />
@@ -430,27 +359,17 @@ const TelemetryDisplay = ({
               </div>
             ) : (<div className="origin-container"><span className="origin-title">NAVE NÃO ENCONTRADA</span></div>);
           })()}
-
           <div className="ships-grid">
             {otherOnlineShips.length > 0 ? (
               otherOnlineShips.map(ship => (
                 <div className="ship-item" key={ship.name}>
                   <img src={ship.imageTransferUrl} alt={ship.shipDisplayName} className="ship-image" />
                   <span className="ship-name">{ship.shipDisplayName.toUpperCase()}</span>
-                  <input
-                    type="text"
-                    className="transfer-input"
-                    value={transferAmounts[ship.name] || ''}
-                    onChange={(e) => handleTransferChange(ship.name, e.target.value)}
-                    placeholder="0"
-                  />
+                  <input type="text" className="transfer-input" value={transferAmounts[ship.name] || ''} onChange={(e) => handleTransferChange(ship.name, e.target.value)} placeholder="0" />
                 </div>
               ))
-            ) : (
-              <p className="no-ships-online" style={{ gridColumn: '1 / -1', textAlign: 'center' }}>Nenhuma outra nave online para transferência.</p>
-            )}
+            ) : (<p className="no-ships-online" style={{ gridColumn: '1 / -1', textAlign: 'center' }}>Nenhuma outra nave online.</p>)}
           </div>
-
           <div className="transfer-actions">
             <button className="transfer-button cancel-button" onClick={() => setShowTransferModal(false)}>Cancelar</button>
             <button className="transfer-button" onClick={handleTransfer}>Confirmar Transferência</button>

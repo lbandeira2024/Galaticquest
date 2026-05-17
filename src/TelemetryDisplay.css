@@ -212,46 +212,26 @@
 }
 
 /* ======================================================= */
-/* ========= ROOT DO PORTAL DO MAPA ESTELAR ============== */
+/* ====== O MAPA PERFEITAMENTE DENTRO DO MAIN DISPLAY ==== */
 /* ======================================================= */
 
-.stellar-map-overlay-root {
-  position: fixed;
+.stellar-map-in-display {
+  position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.85);
-  z-index: 999999;
-  /* Sobrepõe tudo, ignorando o 3D */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(5px);
-}
-
-.stellar-map-floating {
-  position: relative;
-  width: clamp(60%, 75vw, 90%);
-  height: clamp(60%, 80vh, 90%);
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  /* Sobrepõe as estrelas e vídeos nativos do monitor */
   background: rgba(0, 15, 30, 0.98);
-  border: 2px solid rgba(0, 200, 255, 0.6);
-  border-radius: 12px;
-  box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  margin: 0;
-  padding: 0;
+  pointer-events: auto;
+  /* Garante interação total com o mouse */
 }
 
-.stellar-map-content {
-  width: 100%;
-  height: 100%;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow: hidden;
-}
+/* ======================================================= */
 
 .forced-alert {
   display: flex;
@@ -282,7 +262,8 @@
   }
 }
 
-.loading-map {
+.loading-map,
+.map-fallback {
   color: #0bf;
   text-align: center;
   padding: 20px;
@@ -292,9 +273,6 @@
 
 .map-fallback {
   color: #f00;
-  text-align: center;
-  padding: 20px;
-  font-size: 1.2em;
   text-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
 }
 
@@ -533,11 +511,6 @@
 }
 
 @media (max-width: 1024px) {
-  .stellar-map-floating {
-    width: 95vw;
-    height: 85vh;
-  }
-
   .ships-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -565,11 +538,6 @@
     margin-bottom: 0;
     margin-right: 20px;
   }
-
-  .stellar-map-floating {
-    width: 98vw;
-    height: 90vh;
-  }
 }
 
 @media (max-width: 480px) {
@@ -583,13 +551,6 @@
 
   .space-coins-value {
     font-size: 1.1em;
-  }
-
-  .close-button,
-  .close-stellar-map-button {
-    width: 28px;
-    height: 28px;
-    font-size: 18px;
   }
 
   .ships-grid {
