@@ -1,14 +1,12 @@
 .stellar-map {
     position: relative;
     width: 100%;
-    /* MUDANÇA CRUCIAL: height agora é 100% para obedecer perfeitamente o limite do main-display */
+    /* MUDANÇA CRUCIAL: height agora é 100% para obedecer perfeitamente o limite do main-display, 
+       garantindo que seus botões de zoom nunca desçam além da tela visível! */
     height: 100%;
     background: radial-gradient(ellipse at center, #0a0a20 0%, #000000 100%);
-
-    /* ASSEGURA QUE NADA VAZA DO QUADRO COM BORDAS ARREDONDADAS */
     overflow: hidden;
-    border-radius: inherit;
-
+    /* IMPEDE O VAZAMENTO DAS ESTRELAS */
     font-family: 'Arial', sans-serif;
     touch-action: none;
     cursor: grab;
@@ -22,10 +20,7 @@
     position: absolute;
     width: 100%;
     height: 100%;
-
-    /* IMPEDE O VAZAMENTO DAS ESTRELAS PELAS QUINAS */
     overflow: hidden;
-    border-radius: inherit;
     z-index: 0;
 }
 
@@ -507,11 +502,11 @@
 
 .route-display-panel {
     position: absolute;
-    top: 35px;
-    /* Aumentado para fugir do corte do modal */
-    right: 45px;
-    /* Aumentado para o botão X não ser cortado pela tela principal */
-    width: clamp(240px, 35%, 380px);
+    top: 25px;
+    right: 25px;
+    /* Devolta para a borda interna da caixa azul */
+    width: clamp(240px, 30%, 360px);
+    /* Ajustado para não ser tão largo e caber de forma responsiva */
     max-height: calc(100% - 90px);
     box-sizing: border-box;
     padding: 20px;
@@ -525,11 +520,12 @@
     z-index: 10;
 }
 
-/* O BOTÃO X COLADO NA QUINA SUPERIOR DIREITA, TOTALMENTE POR FORA */
+/* O BOTÃO X COLADO NA QUINA SUPERIOR DIREITA, POR FORA E SEM CORTES */
 .route-panel-close-btn {
     position: absolute;
     top: -14px;
     right: -14px;
+    /* Move-o perfeitamente para a quina direita exterior */
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -556,8 +552,9 @@
 /* CONTROLES DE ZOOM DEITADOS ABAIXO DO PAINEL */
 .zoom-controls {
     position: absolute;
-    bottom: 35px;
-    right: 45px;
+    bottom: 25px;
+    right: 25px;
+    /* Alinhado com o painel da rota acima dele */
     display: flex;
     flex-direction: row;
     gap: 15px;

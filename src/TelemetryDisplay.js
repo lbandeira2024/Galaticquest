@@ -289,6 +289,7 @@ const TelemetryDisplay = ({
         </div>
       </div>
 
+      {/* RENDERIZAÇÃO DO MAPA ESTELAR NO PORTAL */}
       {showStellarMap && createPortal(
         <div className="stellar-map-overlay-root">
           <div className="stellar-map-floating">
