@@ -209,28 +209,28 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.6);
-  /* Preto suave para ver o cockpit */
+  background-color: rgba(0, 0, 0, 0.8);
+  /* Fundo um pouco mais escuro para destacar o mapa */
   z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: auto;
-  backdrop-filter: none;
+  backdrop-filter: blur(2px);
 }
 
-/* QUADRO AZUL AUMENTADO EM 20% E COM PROTEÇÃO CONTRA VAZAMENTO */
+/* QUADRO AZUL AUMENTADO EM QUASE TODA A TELA */
 .stellar-map-floating {
   position: relative;
-  width: clamp(60%, 75vw, 95%);
-  height: clamp(60%, 85vh, 95%);
+  width: 95vw;
+  height: 95vh;
+  max-width: 1920px;
   background: rgba(0, 15, 30, 0.98);
   border: 2px solid rgba(0, 200, 255, 0.6);
   border-radius: 12px;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
   display: flex;
   flex-direction: column;
-  /* Trava de segurança para impedir estrelas e cantos de vazarem */
   overflow: hidden !important;
   isolation: isolate;
   -webkit-mask-image: -webkit-radial-gradient(white, black);
@@ -453,14 +453,18 @@
   animation: flicker 0.5s infinite alternate;
 }
 
+/* =========================================================
+   ====== MEDIA QUERIES ATUALIZADAS (MANTENDO PROPORÇÃO) ===
+   ========================================================= */
+
 @media (max-width: 1024px) {
   .ships-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
   .stellar-map-floating {
-    width: 90vw;
-    height: 85vh;
+    width: 95vw;
+    height: 95vh;
   }
 }
 
@@ -488,8 +492,8 @@
   }
 
   .stellar-map-floating {
-    width: 95vw;
-    height: 85vh;
+    width: 98vw;
+    height: 95vh;
   }
 }
 
@@ -515,8 +519,11 @@
     height: 80px;
   }
 
+  /* NO CELULAR ELE VIRA TELA CHEIA COMPLETA */
   .stellar-map-floating {
     width: 100vw;
-    height: 95vh;
+    height: 100vh;
+    border-radius: 0;
+    border: none;
   }
 }
