@@ -502,8 +502,10 @@
 
 .route-display-panel {
     position: absolute;
-    top: 15px;
-    right: 700px;
+    top: 60px !important;
+    /* Força a descida */
+    right: 60px !important;
+    /* Força o recuo para a esquerda (tira do corte) */
     width: clamp(240px, 35%, 380px);
     max-height: calc(100% - 120px);
     box-sizing: border-box;
@@ -521,9 +523,8 @@
 /* O BOTÃO X COLADO NA QUINA SUPERIOR DIREITA, POR FORA E SEM CORTES */
 .route-panel-close-btn {
     position: absolute;
-    top: -14px;
-    right: -14px;
-    /* Move-o perfeitamente para a quina direita exterior */
+    top: -14px !important;
+    right: -14px !important;
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -949,9 +950,8 @@
 
 @media (max-height: 800px) and (min-width: 481px) {
     .route-display-panel {
-        top: 60px;
-        right: 7000px;
-        /* GARANTIDO O RECUO AQUI TAMBÉM */
+        top: 30px !important;
+        right: 60px !important;
         padding: 15px;
     }
 
