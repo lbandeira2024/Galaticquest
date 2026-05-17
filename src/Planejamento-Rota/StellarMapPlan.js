@@ -363,7 +363,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
     return (
         <div className="stellar-map" ref={containerRef} style={{ cursor: isDragging ? 'grabbing' : 'grab' }}>
             {plannedRoute.steps.length > 0 && (
-                <div className="route-display-panel ultimate">
+                /* INLINE STYLE APLICADO AQUI PARA GARANTIR A POSIÇÃO IGNORANDO O CACHE DO CSS */
+                <div className="route-display-panel ultimate" style={{ right: '150px' }}>
 
                     {/* BOTÃO X POSICIONADO DIRETAMENTE AQUI */}
                     {showCloseButton && (
@@ -597,8 +598,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
                 </div>
             )}
 
-            {/* CONTROLES DE ZOOM MOVIDOS PARA CAIXA DE ROTA NO CSS, MAS RENDERIZADOS AQUI */}
-            <div className="zoom-controls">
+            {/* INLINE STYLE APLICADO AQUI PARA GARANTIR A POSIÇÃO DOS BOTÕES DE ZOOM */}
+            <div className="zoom-controls" style={{ right: '150px' }}>
                 <button onClick={() => setZoom(prev => Math.min(prev * 1.2, 8))}>+</button>
                 <button onClick={() => setZoom(prev => Math.max(prev / 1.2, 0.3))}>-</button>
                 <button onClick={() => {
