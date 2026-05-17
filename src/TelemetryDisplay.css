@@ -1,26 +1,26 @@
 .telemetry-display {
   position: absolute;
   height: auto;
-  min-height: clamp(100px, 15vh, 160px);
-  bottom: clamp(10px, 2vh, 20px);
+  min-height: clamp(80px, 12vh, 140px);
+  bottom: clamp(10px, 4vh, 30px);
   left: 50%;
-  transform: translateX(-50%) translateZ(120px);
-  width: 90%;
-  max-width: 1100px;
+  transform: translateX(-50%) translateZ(110px);
+  width: clamp(50%, 54vw, 58%);
+  max-width: none;
   background: rgba(0, 30, 60, 0.85);
-  padding: clamp(8px, 1.5vh, 15px);
+  padding: clamp(6px, 1vh, 12px) clamp(10px, 1.5vw, 20px);
   border: 1px solid rgba(0, 200, 255, 0.4);
   border-radius: 8px;
-  z-index: 10;
+  z-index: 15;
   font-family: 'Courier New', monospace;
   color: #fff;
   font-weight: bold;
   box-shadow: 0 0 30px rgba(0, 100, 200, 0.5);
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(5px);
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: clamp(10px, 2vw, 20px);
-  align-items: stretch;
+  gap: clamp(10px, 1.5vw, 20px);
+  align-items: center;
 }
 
 .telemetry-nuclear-panel {
@@ -470,8 +470,18 @@
 
 @media (max-width: 768px) {
   .telemetry-display {
+    position: relative;
+    /* Sai do position absolute para respeitar o layout em coluna */
+    bottom: auto;
+    left: auto;
+    transform: none;
+    /* Desliga o translate 3D no celular */
+    width: 95%;
+    /* Ocupa a tela inteira com margem de segurança */
+    margin: 10px auto;
+    order: 4;
+    /* Garante que ela seja o último item abaixo das laterais */
     grid-template-columns: 1fr;
-    width: 90%;
   }
 
   .telemetry-nuclear-panel {

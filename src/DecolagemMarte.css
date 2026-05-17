@@ -25,11 +25,10 @@
 /* Main Display */
 .main-display {
   position: absolute;
-  width: clamp(50%, 55vw, 60%);
-  /* MEDIDA CORRIGIDA PARA ENCOSTAR NOS PAINÉIS */
-  height: clamp(50%, 65vh, 75%);
+  width: clamp(50%, 54vw, 58%);
+  height: clamp(40%, 58vh, 65%);
   left: 50%;
-  top: 37%;
+  top: 34%;
   transform: translate(-50%, -50%) translateZ(100px);
   z-index: 5;
   border-radius: 8px;
@@ -1154,11 +1153,7 @@
 }
 
 /* O Display Principal agora se adapta à altura e largura disponíveis */
-.main-display {
-  width: clamp(50%, 55vw, 60%);
-  /* LARGURA AUMENTADA AQUI TAMBÉM */
-  height: clamp(50%, 65vh, 75%);
-}
+
 
 /* Ajuste dinâmico de textos e botões usando clamp() */
 .mission-timer h2 {
