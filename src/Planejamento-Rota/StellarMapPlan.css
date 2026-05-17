@@ -1,7 +1,8 @@
 .stellar-map {
     position: relative;
     width: 100%;
-    /* MUDANÇA CRUCIAL: height agora é 100% para obedecer perfeitamente o limite do main-display */
+    /* MUDANÇA CRUCIAL: height agora é 100% para obedecer perfeitamente o limite do main-display, 
+       garantindo que seus botões de zoom nunca desçam além da tela visível! */
     height: 100%;
     background: radial-gradient(ellipse at center, #0a0a20 0%, #000000 100%);
     overflow: hidden;
@@ -501,9 +502,7 @@
 
 .route-display-panel {
     position: absolute;
-    /* AJUSTE: Movido bem mais para baixo para afastar da borda superior */
     top: 80px;
-    /* AJUSTE: Movido bem mais para a esquerda para não ser cortado na borda direita */
     right: 150px;
     width: clamp(240px, 35%, 380px);
     max-height: calc(100% - 120px);
@@ -552,7 +551,6 @@
 .zoom-controls {
     position: absolute;
     bottom: 40px;
-    /* AJUSTE: Alinhado com a nova posição 'right' do painel da rota */
     right: 150px;
     display: flex;
     flex-direction: row;
@@ -946,18 +944,21 @@
     box-shadow: 0 0 5px #00ff00;
 }
 
+/* === AQUI É O SEGREDO DO PORQUE NÃO ESTAVA MUDANDO ANTES === */
+/* CORREÇÕES PARA TODAS AS RESOLUÇÕES MANTENDO OS 150PX! */
+
 @media (max-height: 800px) and (min-width: 481px) {
     .route-display-panel {
         top: 20px;
-        /* AJUSTE: Mantido recuo lateral para telas pequenas */
-        right: 40px;
+        right: 150px;
+        /* GARANTIDO O RECUO AQUI TAMBÉM */
         padding: 15px;
     }
 
     .zoom-controls {
         bottom: 20px;
-        /* AJUSTE: Mantido recuo lateral para telas pequenas */
-        right: 40px;
+        right: 150px;
+        /* GARANTIDO O RECUO AQUI TAMBÉM */
     }
 
     .actions-ultimate {
@@ -1036,13 +1037,12 @@
 
     .route-display-panel {
         padding: 30px;
-        /* AJUSTE: Mantido recuo proporcional para 4K */
-        right: 200px;
+        right: 250px;
+        /* Proporcional para ecrãs gigantes */
     }
 
     .zoom-controls {
-        /* AJUSTE: Mantido recuo proporcional para 4K */
-        right: 200px;
+        right: 250px;
     }
 
     .celestial-body.planet {
