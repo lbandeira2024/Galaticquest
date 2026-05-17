@@ -285,33 +285,35 @@
   overflow: hidden;
 }
 
-/* BOTÃO FECHAR MOVIDO PARA O CANTO SUPERIOR ESQUERDO */
+/* BOTÃO FECHAR GRUDADO NA QUINA ESQUERDA DO PAINEL DE ROTA */
 .close-stellar-map-button {
   position: absolute;
-  top: 15px;
-  left: 15px;
-  right: auto;
+  top: 10px;
+  left: auto;
+  /* Cálculo Mágico: Margem direita do quadro (45px) - Metade do Botão e folga + Largura dinâmica do painel */
+  right: calc(clamp(320px, 28vw, 480px) + 27px);
   width: 36px;
   height: 36px;
-  background: rgba(255, 60, 60, 0.8);
+  background: rgba(255, 60, 60, 0.9);
   color: white;
-  border: none;
+  border: 2px solid rgba(255, 255, 255, 0.4);
   border-radius: 50%;
   font-size: 22px;
   font-weight: bold;
   cursor: pointer;
-  z-index: 2001;
+  z-index: 2005;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
 }
 
 .close-stellar-map-button:hover {
   background: rgba(255, 80, 80, 1);
   transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+  border-color: #fff;
 }
 
 .forced-alert {
@@ -633,6 +635,13 @@
     width: 90%;
     min-width: 400px;
     height: 70vh;
+  }
+
+  /* Proteção para telas pequenas/mobile (reverte o X para a borda da tela) */
+  .close-stellar-map-button {
+    top: 5px;
+    right: 5px;
+    left: auto;
   }
 }
 
