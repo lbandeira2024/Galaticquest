@@ -216,12 +216,12 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
         // FORÇA BRUTA: Injeta diretamente no elemento independente de qualquer arquivo CSS
         if (panelRef.current) {
             // Aumentar o valor afasta o painel da borda direita (move para a ESQUERDA)
-            panelRef.current.style.setProperty('right', '350px', 'important');
+            panelRef.current.style.setProperty('right', '550px', 'important');
             panelRef.current.style.setProperty('top', '80px', 'important');
         }
         if (zoomRef.current) {
             // Acompanha o valor de cima para manter o alinhamento
-            zoomRef.current.style.setProperty('right', '350bn  ,,px', 'important');
+            zoomRef.current.style.setProperty('right', '550bn  ,,px', 'important');
             zoomRef.current.style.setProperty('bottom', '40px', 'important');
         }
         if (closeBtnRef.current) {
