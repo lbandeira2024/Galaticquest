@@ -363,11 +363,18 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
     return (
         <div className="stellar-map" ref={containerRef} style={{ cursor: isDragging ? 'grabbing' : 'grab' }}>
             {plannedRoute.steps.length > 0 && (
-                <div className="route-display-panel ultimate">
+                /* INLINE STYLES ADICIONADOS PARA IGNORAR QUALQUER CACHE DO CSS! */
+                <div className="route-display-panel ultimate" style={{ right: '150px', top: '50px' }}>
 
-                    {/* BOTÃO X DA ROTA - POSICIONADO NA QUINA SUPERIOR DIREITA EXTERNA */}
+                    {/* BOTÃO X DA ROTA - POSICIONADO NA QUINA SUPERIOR DIREITA EXTERNA COM INLINE STYLES */}
                     {showCloseButton && (
-                        <button className="route-panel-close-btn" onClick={() => onCloseMap(null)}>×</button>
+                        <button
+                            className="route-panel-close-btn"
+                            style={{ position: 'absolute', top: '-15px', right: '-15px', zIndex: 9999 }}
+                            onClick={() => onCloseMap(null)}
+                        >
+                            ×
+                        </button>
                     )}
 
                     <div className="actions-ultimate">
@@ -597,7 +604,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
                 </div>
             )}
 
-            <div className="zoom-controls">
+            {/* INLINE STYLES ADICIONADOS PARA IGNORAR QUALQUER CACHE DO CSS! */}
+            <div className="zoom-controls" style={{ right: '150px', bottom: '40px' }}>
                 <button onClick={() => setZoom(prev => Math.min(prev * 1.2, 8))}>+</button>
                 <button onClick={() => setZoom(prev => Math.max(prev / 1.2, 0.3))}>-</button>
                 <button onClick={() => {
