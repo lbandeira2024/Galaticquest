@@ -215,14 +215,13 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
     useEffect(() => {
         // FORÇA BRUTA: Injeta diretamente no elemento independente de qualquer arquivo CSS
         if (panelRef.current) {
-            // Aumentando o 'right' empurra o painel mais para a esquerda, tirando-o do corte
-            panelRef.current.style.setProperty('right', '280px', 'important');
-            // Aumentando o 'top' desce o painel um pouco mais
+            // Aumentar o valor afasta o painel da borda direita (move para a ESQUERDA)
+            panelRef.current.style.setProperty('right', '250px', 'important');
             panelRef.current.style.setProperty('top', '80px', 'important');
         }
         if (zoomRef.current) {
-            // É bom manter o controle de zoom alinhado com o painel de rota
-            zoomRef.current.style.setProperty('right', '280px', 'important');
+            // Acompanha o valor de cima para manter o alinhamento
+            zoomRef.current.style.setProperty('right', '250px', 'important');
             zoomRef.current.style.setProperty('bottom', '40px', 'important');
         }
         if (closeBtnRef.current) {
