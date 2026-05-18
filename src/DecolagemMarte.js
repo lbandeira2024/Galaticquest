@@ -683,27 +683,35 @@ const DecolagemMarte = () => {
     return TEAMS_DATA.find(t => t.code === teamCode) || TEAMS_DATA[0];
   }, [user]);
 
-  // --- INTEGRAÇÃO STREAM DECK: ATALHO PARA DOBRA ESPACIAL (ESPAÇO) ---
+  // --- INTEGRAÇÃO STREAM DECK: ATALHO PARA DOBRA ESPACIAL (COM DEBUG) ---
   useEffect(() => {
     const handleStreamDeckHotkey = (e) => {
-      // e.code === 'Space' captura a barra de espaço
-      if (e.code === 'Space') {
-        // MUITO IMPORTANTE: O preventDefault impede que a barra de espaço 
-        // role a página da web para baixo acidentalmente.
+      // 1. Isso avisa se O NAVEGADOR ouviu alguma tecla
+      console.log("⌨️ Tecla pressionada no teclado:", e.code);
+
+      if (e.code === 'Space' || e.key === ' ') {
         e.preventDefault();
 
-        handleDobraEspacial(); // Chama a sua função de dobra
+        // 2. Isso avisa se o IFRAME identificou que foi o ESPAÇO
+        console.log("🚀 Barra de Espaço detectada! Chamando a função de dobra...");
+
+        // 3. Isso avisa se as REGRAS DO JOGO estão bloqueando a dobra
+        if (!isDobraEnabled || isDobraAtivada || isPaused) {
+          console.log("🛑 Ação bloqueada pelas regras do jogo! Status atuais:", { isDobraEnabled, isDobraAtivada, isPaused });
+        } else {
+          console.log("✅ Regras liberadas! Ativando a dobra espacial!");
+        }
+
+        handleDobraEspacial();
       }
     };
 
-    // Adiciona o escutador de teclado
     window.addEventListener('keydown', handleStreamDeckHotkey);
 
-    // Limpeza do escutador quando o componente for desmontado
     return () => {
       window.removeEventListener('keydown', handleStreamDeckHotkey);
     };
-  }, [handleDobraEspacial]);
+  }, [handleDobraEspacial, isDobraEnabled, isDobraAtivada, isPaused]);
 
   useEffect(() => { telemetryRef.current = telemetry; }, [telemetry]);
   useEffect(() => { spaceCoinsRef.current = spaceCoins; }, [spaceCoins]);
