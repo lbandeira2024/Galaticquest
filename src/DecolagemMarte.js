@@ -936,6 +936,7 @@ const DecolagemMarte = () => {
       setTravelStarted(true);
       setDobraCooldownEnd(0);
       setProcessadorO2(0);
+      setIsDobraEnabled(false); // <--- CORREÇÃO: Reseta o botão da dobra!
       setIsDeparting(false);
     }, 4000);
   }, [playSFX, triggerMinervaInterplanetarySpeed]);
@@ -1004,6 +1005,7 @@ const DecolagemMarte = () => {
         setTravelStarted(true);
         setDobraCooldownEnd(0);
         setProcessadorO2(0);
+        setIsDobraEnabled(false); // <--- CORREÇÃO: Reseta o botão da dobra!
         setRefetchTrigger(prev => prev + 1);
         setIsDeparting(false);
       }, 4000);
