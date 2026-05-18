@@ -683,36 +683,6 @@ const DecolagemMarte = () => {
     return TEAMS_DATA.find(t => t.code === teamCode) || TEAMS_DATA[0];
   }, [user]);
 
-  // --- INTEGRAÇÃO STREAM DECK: ATALHO PARA DOBRA ESPACIAL (COM DEBUG) ---
-  useEffect(() => {
-    const handleStreamDeckHotkey = (e) => {
-      // 1. Isso avisa se O NAVEGADOR ouviu alguma tecla
-      console.log("⌨️ Tecla pressionada no teclado:", e.code);
-
-      if (e.code === 'Space' || e.key === ' ') {
-        e.preventDefault();
-
-        // 2. Isso avisa se o IFRAME identificou que foi o ESPAÇO
-        console.log("🚀 Barra de Espaço detectada! Chamando a função de dobra...");
-
-        // 3. Isso avisa se as REGRAS DO JOGO estão bloqueando a dobra
-        if (!isDobraEnabled || isDobraAtivada || isPaused) {
-          console.log("🛑 Ação bloqueada pelas regras do jogo! Status atuais:", { isDobraEnabled, isDobraAtivada, isPaused });
-        } else {
-          console.log("✅ Regras liberadas! Ativando a dobra espacial!");
-        }
-
-        handleDobraEspacial();
-      }
-    };
-
-    window.addEventListener('keydown', handleStreamDeckHotkey);
-
-    return () => {
-      window.removeEventListener('keydown', handleStreamDeckHotkey);
-    };
-  }, [handleDobraEspacial, isDobraEnabled, isDobraAtivada, isPaused]);
-
   useEffect(() => { telemetryRef.current = telemetry; }, [telemetry]);
   useEffect(() => { spaceCoinsRef.current = spaceCoins; }, [spaceCoins]);
   useEffect(() => { travelStartedRef.current = travelStarted; }, [travelStarted]);
@@ -1118,6 +1088,32 @@ const DecolagemMarte = () => {
     if (minervaTimeoutRef.current) clearTimeout(minervaTimeoutRef.current);
     minervaTimeoutRef.current = setTimeout(() => { setMinervaImage('/images/Minerva/Minerva_Active.gif'); }, DOBRA_DURATION_IN_MS + 3000);
   }, [isDobraEnabled, isDobraAtivada, isPaused, playSound, saveTelemetryData, playSFX]);
+
+  // --- COLE AQUI: INTEGRAÇÃO STREAM DECK: ATALHO PARA DOBRA ESPACIAL (COM DEBUG) ---
+  useEffect(() => {
+    const handleStreamDeckHotkey = (e) => {
+      console.log("⌨️ Tecla pressionada no teclado:", e.code);
+
+      if (e.code === 'Space' || e.key === ' ') {
+        e.preventDefault();
+        console.log("🚀 Barra de Espaço detectada! Chamando a função de dobra...");
+
+        if (!isDobraEnabled || isDobraAtivada || isPaused) {
+          console.log("🛑 Ação bloqueada pelas regras do jogo! Status atuais:", { isDobraEnabled, isDobraAtivada, isPaused });
+        } else {
+          console.log("✅ Regras liberadas! Ativando a dobra espacial!");
+        }
+
+        handleDobraEspacial();
+      }
+    };
+
+    window.addEventListener('keydown', handleStreamDeckHotkey);
+
+    return () => {
+      window.removeEventListener('keydown', handleStreamDeckHotkey);
+    };
+  }, [handleDobraEspacial, isDobraEnabled, isDobraAtivada, isPaused]);
 
   const handleInventory = useCallback(() => { if (!isPaused) { setShowInventory(true); playSound('/sounds/inventory-open.mp3'); } }, [isPaused, playSound]);
 
