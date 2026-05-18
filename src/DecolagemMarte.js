@@ -683,6 +683,28 @@ const DecolagemMarte = () => {
     return TEAMS_DATA.find(t => t.code === teamCode) || TEAMS_DATA[0];
   }, [user]);
 
+  // --- INTEGRAÇÃO STREAM DECK: ATALHO PARA DOBRA ESPACIAL (ESPAÇO) ---
+  useEffect(() => {
+    const handleStreamDeckHotkey = (e) => {
+      // e.code === 'Space' captura a barra de espaço
+      if (e.code === 'Space') {
+        // MUITO IMPORTANTE: O preventDefault impede que a barra de espaço 
+        // role a página da web para baixo acidentalmente.
+        e.preventDefault();
+
+        handleDobraEspacial(); // Chama a sua função de dobra
+      }
+    };
+
+    // Adiciona o escutador de teclado
+    window.addEventListener('keydown', handleStreamDeckHotkey);
+
+    // Limpeza do escutador quando o componente for desmontado
+    return () => {
+      window.removeEventListener('keydown', handleStreamDeckHotkey);
+    };
+  }, [handleDobraEspacial]);
+
   useEffect(() => { telemetryRef.current = telemetry; }, [telemetry]);
   useEffect(() => { spaceCoinsRef.current = spaceCoins; }, [spaceCoins]);
   useEffect(() => { travelStartedRef.current = travelStarted; }, [travelStarted]);
