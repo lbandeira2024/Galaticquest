@@ -1728,7 +1728,9 @@ const DecolagemMarte = () => {
     return 45000;
   }, [isDobraAtivada, isBoostingTo60k, isFinalApproach]);
 
+  // ---> CORREÇÃO APLICADA AQUI: A regra dos 60.000 voltou para bloquear a Pausa! <---
   const isPauseButtonDisabled = telemetry.velocity.kmh < 60000 || isDobraAtivada || distanceKm <= 0;
+
   const currentDialogueStep = activeChallengeData?.dialogo?.[dialogueIndex];
   const currentCharacterId = currentDialogueStep?.personagemId;
   const currentCharacterData = currentCharacterId ? desafiosData.personagens[currentCharacterId] : null;
