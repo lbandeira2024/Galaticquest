@@ -1089,32 +1089,6 @@ const DecolagemMarte = () => {
     minervaTimeoutRef.current = setTimeout(() => { setMinervaImage('/images/Minerva/Minerva_Active.gif'); }, DOBRA_DURATION_IN_MS + 3000);
   }, [isDobraEnabled, isDobraAtivada, isPaused, playSound, saveTelemetryData, playSFX]);
 
-  // --- COLE AQUI: INTEGRAÇÃO STREAM DECK: ATALHO PARA DOBRA ESPACIAL (COM DEBUG) ---
-  useEffect(() => {
-    const handleStreamDeckHotkey = (e) => {
-      console.log("⌨️ Tecla pressionada no teclado:", e.code);
-
-      if (e.code === 'Space' || e.key === ' ') {
-        e.preventDefault();
-        console.log("🚀 Barra de Espaço detectada! Chamando a função de dobra...");
-
-        if (!isDobraEnabled || isDobraAtivada || isPaused) {
-          console.log("🛑 Ação bloqueada pelas regras do jogo! Status atuais:", { isDobraEnabled, isDobraAtivada, isPaused });
-        } else {
-          console.log("✅ Regras liberadas! Ativando a dobra espacial!");
-        }
-
-        handleDobraEspacial();
-      }
-    };
-
-    window.addEventListener('keydown', handleStreamDeckHotkey);
-
-    return () => {
-      window.removeEventListener('keydown', handleStreamDeckHotkey);
-    };
-  }, [handleDobraEspacial, isDobraEnabled, isDobraAtivada, isPaused]);
-
   const handleInventory = useCallback(() => { if (!isPaused) { setShowInventory(true); playSound('/sounds/inventory-open.mp3'); } }, [isPaused, playSound]);
 
   const handleTransferO2 = async () => {
@@ -1815,6 +1789,80 @@ const DecolagemMarte = () => {
     }
     setShowStellarMap(show);
   }, [distanceKm, isForcedMapEdit, playSound]);
+
+  // --- INÍCIO: CENTRAL DE ATALHOS (TECLADO E STREAM DECK) ---
+  useEffect(() => {
+    const handleGlobalHotkeys = (e) => {
+      // Ignora os atalhos se o jogador estiver digitando em um campo de texto, para evitar bugs
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      // Converte a tecla para minúscula, assim o atalho funciona mesmo com CapsLock ligado!
+      const key = e.key.toLowerCase();
+
+      switch (key) {
+        case ' ': // Barra de espaço
+          e.preventDefault();
+          if (!isDobraEnabled || isDobraAtivada || isPaused) return;
+          handleDobraEspacial();
+          break;
+
+        case 'p': // Pausar jogo
+          e.preventDefault();
+          if (!isPauseButtonDisabled && !isRestoringSOS) togglePause();
+          break;
+
+        case 's': // Ativar S.O.S
+          e.preventDefault();
+          if (isSOSActive) handleSOS();
+          break;
+
+        case 'i': // Inventário
+          e.preventDefault();
+          handleInventory(); // O próprio handleInventory já barra o clique se estiver pausado
+          break;
+
+        case 'g': // Glossário
+          e.preventDefault();
+          if (!isPaused) setShowGlossary(true);
+          break;
+
+        case 'm': // Mapa Estelar
+          e.preventDefault();
+          if (!isPaused) handleToggleMap(true);
+          break;
+
+        case 'a': // Minerva
+          e.preventDefault();
+          handleMinervaClick();
+          break;
+
+        case 'o': // Processador O2 (letra 'o', não zero)
+          e.preventDefault();
+          if (!isO2TransferDisabled) handleOpenO2Modal();
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalHotkeys);
+
+    return () => {
+      window.removeEventListener('keydown', handleGlobalHotkeys);
+    };
+  }, [
+    // Todas essas funções precisam estar nesta lista para o React reconhecê-las
+    handleDobraEspacial, isDobraEnabled, isDobraAtivada, isPaused,
+    togglePause, isPauseButtonDisabled, isRestoringSOS,
+    handleSOS, isSOSActive,
+    handleInventory,
+    setShowGlossary,
+    handleToggleMap,
+    handleMinervaClick,
+    handleOpenO2Modal, isO2TransferDisabled
+  ]);
+  // --- FIM: CENTRAL DE ATALHOS ---
 
   if (isLoadingRoute) return <div className="tela-decolagem" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5em', color: '#00aaff', textShadow: '0 0 10px #00aaff' }}>Buscando dados da missão...</div>;
 
