@@ -914,7 +914,7 @@ const DecolagemMarte = () => {
       setTravelStarted(true);
       setDobraCooldownEnd(0);
       setProcessadorO2(0);
-      setIsDobraEnabled(false); // <--- CORREÇÃO: Reseta o botão da dobra!
+      setIsDobraEnabled(false);
       setIsDeparting(false);
     }, 4000);
   }, [playSFX, triggerMinervaInterplanetarySpeed]);
@@ -983,7 +983,7 @@ const DecolagemMarte = () => {
         setTravelStarted(true);
         setDobraCooldownEnd(0);
         setProcessadorO2(0);
-        setIsDobraEnabled(false); // <--- CORREÇÃO: Reseta o botão da dobra!
+        setIsDobraEnabled(false);
         setRefetchTrigger(prev => prev + 1);
         setIsDeparting(false);
       }, 4000);
@@ -1728,7 +1728,7 @@ const DecolagemMarte = () => {
     return 45000;
   }, [isDobraAtivada, isBoostingTo60k, isFinalApproach]);
 
-  const isPauseButtonDisabled = telemetry.velocity.kmh < 60000 || isDobraAtivada || distanceKm <= 0;
+  const isPauseButtonDisabled = isDobraAtivada || distanceKm <= 0;
   const currentDialogueStep = activeChallengeData?.dialogo?.[dialogueIndex];
   const currentCharacterId = currentDialogueStep?.personagemId;
   const currentCharacterData = currentCharacterId ? desafiosData.personagens[currentCharacterId] : null;
@@ -1793,14 +1793,13 @@ const DecolagemMarte = () => {
   // --- INÍCIO: CENTRAL DE ATALHOS (TECLADO E STREAM DECK) ---
   useEffect(() => {
     const handleGlobalHotkeys = (e) => {
-      // Ignora os atalhos se o jogador estiver digitando em um campo de texto, para evitar bugs
+      // Ignora os atalhos se o jogador estiver digitando em um campo de texto
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
-      // Converte a tecla para minúscula, assim o atalho funciona mesmo com CapsLock ligado!
       const key = e.key.toLowerCase();
 
       switch (key) {
-        case ' ': // Barra de espaço
+        case ' ': // Barra de espaço (Dobra)
           e.preventDefault();
           if (!isDobraEnabled || isDobraAtivada || isPaused) return;
           handleDobraEspacial();
@@ -1818,7 +1817,14 @@ const DecolagemMarte = () => {
 
         case 'i': // Inventário
           e.preventDefault();
-          handleInventory(); // O próprio handleInventory já barra o clique se estiver pausado
+          if (isPaused) return;
+
+          // TRAVA DO INVENTÁRIO: Não abre em voo se estiver na Dobra ou < 60.000 km/h
+          if (distanceKmRef.current > 0 && (isDobraAtivadaRef.current || telemetryRef.current.velocity.kmh < 60000)) {
+            console.log("❌ Inventário bloqueado pelas regras de voo.");
+            return;
+          }
+          handleInventory();
           break;
 
         case 'g': // Glossário
@@ -1828,7 +1834,21 @@ const DecolagemMarte = () => {
 
         case 'm': // Mapa Estelar
           e.preventDefault();
-          if (!isPaused) handleToggleMap(true);
+          if (isPaused) return;
+
+          // Se o jogo obrigar a abrir o mapa (ex: Mudar Rota no S.O.S), ele libera
+          if (isForcedMapEditRef.current) {
+            handleToggleMap(true);
+            break;
+          }
+
+          // TRAVA DO MAPA: Não abre em voo se estiver na Dobra ou < 60.000 km/h (Aproximação/Decolagem)
+          if (distanceKmRef.current > 0 && (isDobraAtivadaRef.current || telemetryRef.current.velocity.kmh < 60000)) {
+            console.log("❌ Mapa bloqueado pelas regras de voo.");
+            return;
+          }
+
+          handleToggleMap(true);
           break;
 
         case 'a': // Minerva
@@ -1836,7 +1856,7 @@ const DecolagemMarte = () => {
           handleMinervaClick();
           break;
 
-        case 'o': // Processador O2 (letra 'o', não zero)
+        case 'o': // Processador O2 (letra 'o')
           e.preventDefault();
           if (!isO2TransferDisabled) handleOpenO2Modal();
           break;
@@ -1852,7 +1872,6 @@ const DecolagemMarte = () => {
       window.removeEventListener('keydown', handleGlobalHotkeys);
     };
   }, [
-    // Todas essas funções precisam estar nesta lista para o React reconhecê-las
     handleDobraEspacial, isDobraEnabled, isDobraAtivada, isPaused,
     togglePause, isPauseButtonDisabled, isRestoringSOS,
     handleSOS, isSOSActive,
