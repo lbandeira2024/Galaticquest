@@ -1728,7 +1728,7 @@ const DecolagemMarte = () => {
     return 45000;
   }, [isDobraAtivada, isBoostingTo60k, isFinalApproach]);
 
-  const isPauseButtonDisabled = isDobraAtivada || distanceKm <= 0;
+  const isPauseButtonDisabled = telemetry.velocity.kmh < 60000 || isDobraAtivada || distanceKm <= 0;
   const currentDialogueStep = activeChallengeData?.dialogo?.[dialogueIndex];
   const currentCharacterId = currentDialogueStep?.personagemId;
   const currentCharacterData = currentCharacterId ? desafiosData.personagens[currentCharacterId] : null;
@@ -1817,13 +1817,7 @@ const DecolagemMarte = () => {
 
         case 'i': // Inventário
           e.preventDefault();
-          if (isPaused) return;
-
-          // TRAVA DO INVENTÁRIO: Não abre em voo se estiver na Dobra ou < 60.000 km/h
-          if (distanceKmRef.current > 0 && (isDobraAtivadaRef.current || telemetryRef.current.velocity.kmh < 60000)) {
-            console.log("❌ Inventário bloqueado pelas regras de voo.");
-            return;
-          }
+          // Inventário liberado para abrir em qualquer momento, assim como a Minerva
           handleInventory();
           break;
 
@@ -1836,7 +1830,6 @@ const DecolagemMarte = () => {
           e.preventDefault();
           if (isPaused) return;
 
-          // Se o jogo obrigar a abrir o mapa (ex: Mudar Rota no S.O.S), ele libera
           if (isForcedMapEditRef.current) {
             handleToggleMap(true);
             break;
