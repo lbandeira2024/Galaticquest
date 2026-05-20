@@ -944,15 +944,22 @@ const DecolagemMarte = () => {
       if (newOriginStep && newDestinationStep) {
         setOriginPlanet({ nome: newOriginStep.name });
         setSelectedPlanet({ nome: newDestinationStep.name });
-        const newDist = newDestinationStep.distance || 300000000;
-        setDistanceKm(newDist);
-        distanceKmRef.current = newDist;
+
+        // --- AS DUAS LINHAS ABAIXO FORAM REMOVIDAS ---
+        // Elas faziam com que a distância restante voltasse ao total inicial da rota, reiniciando o voo visualmente.
+        // const newDist = newDestinationStep.distance || 300000000;
+        // setDistanceKm(newDist);
+        // distanceKmRef.current = newDist;
+        // ---------------------------------------------
       }
+
+      // Mantemos a flag como falsa para o voo continuar normalmente
       setArrivedAtMars(false);
-      setIsFinalApproach(false);
+      // Não alteramos o isFinalApproach para não quebrar a aproximação se já estiver perto
 
       setTimeout(() => { routeChangeLockRef.current = false; }, 500);
     } else {
+      // ... resto do código original do else (quando não está em voo) mantido igual ...
       playSFX('/sounds/empuxo.wav');
       setIsDeparting(true);
       setShowStoreModal(false);
