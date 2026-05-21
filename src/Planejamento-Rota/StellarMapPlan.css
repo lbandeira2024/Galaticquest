@@ -719,7 +719,7 @@
     flex: 1;
     max-height: clamp(200px, 45vh, 600px);
     overflow-y: auto;
-    overflow-x: hidden;
+    overflow-x: visible;
     padding-right: 5px;
     margin-top: 10px;
 }
@@ -799,7 +799,7 @@
     text-align: left;
     white-space: normal;
     line-height: 1.2;
-    word-wrap: break-word;
+    overflow-wrap: anywhere;
 }
 
 .step-distance {
@@ -810,28 +810,56 @@
     flex-shrink: 0;
 }
 
+.step-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-left: 4px;
+    position: relative;
+    z-index: 4;
+}
+
 .remove-step {
-    margin-left: 8px;
-    background: none;
-    border: none;
-    color: #e74c3c;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    background: rgba(231, 76, 60, 0.14);
+    border: 1px solid rgba(231, 76, 60, 0.75);
+    border-radius: 50%;
+    color: #ff6b6b;
     cursor: pointer;
     font-size: 18px;
+    font-weight: bold;
     line-height: 1;
-    padding: 0 5px;
+    padding: 0;
     flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.remove-step:hover:not(:disabled) {
+    background: rgba(231, 76, 60, 0.28);
+    box-shadow: 0 0 8px rgba(231, 76, 60, 0.6);
+}
+
+.remove-step:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
 }
 
 .step-move-controls {
-    position: absolute;
-    right: 30px;
-    top: 50%;
-    transform: translateY(-50%);
+    position: static;
+    transform: none;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 3;
+    width: 18px;
+    flex-shrink: 0;
 }
 
 .move-step-button {
