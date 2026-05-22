@@ -507,10 +507,9 @@
 .route-display-panel {
     position: absolute;
     top: 60px !important;
-    /* Força a descida */
     right: 60px !important;
-    /* Força o recuo para a esquerda (tira do corte) */
-    width: clamp(240px, 35%, 380px);
+    /* AUMENTADO: de 240px para 320px para garantir que não vai esmagar os elementos */
+    width: clamp(320px, 40%, 450px);
     max-height: calc(100% - 120px);
     box-sizing: border-box;
     padding: 20px;
@@ -523,16 +522,12 @@
     flex-direction: column;
     z-index: 10;
     overflow: visible !important;
-    /* CRUCIAL: Permite que o botão X fique visível do lado de fora */
 }
 
-/* O BOTÃO X COLADO NA QUINA SUPERIOR DIREITA, PERFEITAMENTE DO LADO DE FORA DO QUADRO */
 .route-panel-close-btn {
     position: absolute;
     top: -16px !important;
-    /* Metade da altura (32px / 2) para alinhar perfeitamente no centro da quina externa */
     right: -16px !important;
-    /* Metade da largura (32px / 2) para alinhar perfeitamente no centro da quina externa */
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -556,7 +551,6 @@
     box-shadow: 0 0 15px rgba(255, 0, 0, 1);
 }
 
-/* CONTROLES DE ZOOM DEITADOS ABAIXO DO PAINEL */
 .zoom-controls {
     position: absolute;
     bottom: 40px;
@@ -719,7 +713,8 @@
     flex: 1;
     max-height: clamp(200px, 45vh, 600px);
     overflow-y: auto;
-    overflow-x: visible;
+    /* REMOVIDO o overflow-x: visible. Hidden impede o scroll horizontal irritante */
+    overflow-x: hidden;
     padding-right: 5px;
     margin-top: 10px;
 }
@@ -787,6 +782,7 @@
     justify-content: space-between;
     align-items: center;
     flex-grow: 1;
+    /* MIN-WIDTH 0 É VITAL PARA O FLEXBOX NÃO TRANSBORDAR */
     min-width: 0;
     padding: 0;
     gap: 10px;
@@ -805,7 +801,8 @@
 .step-distance {
     font-size: 13px;
     color: #bbdefb;
-    min-width: 85px;
+    /* REDUZIDO LEVEMENTE PARA AJUDAR NA DISTRIBUIÇÃO DO ESPAÇO */
+    min-width: 65px;
     text-align: right;
     flex-shrink: 0;
 }
@@ -819,6 +816,8 @@
     margin-left: 4px;
     position: relative;
     z-index: 4;
+    /* TRAVA A LARGURA PARA QUE OS BOTÕES NUNCA SEJAM ESMAGADOS PRA FORA */
+    min-width: 60px;
 }
 
 .remove-step {
@@ -846,8 +845,10 @@
 }
 
 .remove-step:disabled {
-    opacity: 0.35;
+    /* Melhoria visual para saber que o X está ali, mas desativado */
+    opacity: 0.5;
     cursor: not-allowed;
+    background: rgba(231, 76, 60, 0.05);
 }
 
 .step-move-controls {
