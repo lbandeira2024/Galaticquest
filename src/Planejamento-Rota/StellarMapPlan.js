@@ -430,13 +430,17 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
                                             <span className="step-name">{displayName}</span>
                                             <span className="step-distance">{index === 0 ? "PONTO DE PARTIDA" : `${step.distance.toLocaleString()} km`}</span>
                                         </div>
-                                        {hoveredStep === index && !isRouteConfirmed && index > 0 && (
-                                            <div className="step-move-controls">
-                                                <button className="move-step-button up" onClick={() => handleMoveStep(index, 'up')} disabled={isLoadingProgress || isStepLocked}></button>
-                                                <button className="move-step-button down" onClick={() => handleMoveStep(index, 'down')} disabled={isLoadingProgress || isStepLocked || index >= plannedRoute.steps.length - 1}></button>
-                                            </div>
-                                        )}
-                                        {index > 0 && <button className="remove-step" onClick={() => handleRemoveStep(index)} disabled={isLoadingProgress || isRouteConfirmed || isStepLocked}>×</button>}
+                                        <div className="step-actions">
+                                            {!isRouteConfirmed && index > 0 && (
+                                                <div className="step-move-controls">
+                                                    <button className="move-step-button up" onClick={() => handleMoveStep(index, 'up')} disabled={isLoadingProgress || isStepLocked}>▲</button>
+                                                    <button className="move-step-button down" onClick={() => handleMoveStep(index, 'down')} disabled={isLoadingProgress || isStepLocked || index >= plannedRoute.steps.length - 1}>▼</button>
+                                                </div>
+                                            )}
+                                            {index > 0 && (
+                                                <button className="remove-step" onClick={() => handleRemoveStep(index)} disabled={isLoadingProgress || isRouteConfirmed || isStepLocked}>×</button>
+                                            )}
+                                        </div>
                                     </div>
                                 );
                             })}
