@@ -508,11 +508,13 @@
     position: absolute;
     top: 60px !important;
     right: 60px !important;
-    /* AUMENTADO: de 240px para 320px para garantir que não vai esmagar os elementos */
-    width: clamp(320px, 40%, 450px);
+    /* LARGURA DINÂMICA: Cresce automaticamente para caber o texto, mas não passa da tela */
+    width: auto !important;
+    min-width: 440px;
+    max-width: 85vw;
     max-height: calc(100% - 120px);
     box-sizing: border-box;
-    padding: 20px;
+    padding: 15px 20px;
     background: rgba(10, 20, 40, 0.98);
     border: 1px solid #4fc3f7;
     box-shadow: 0 0 30px rgba(79, 195, 247, 0.6);
@@ -779,45 +781,42 @@
 
 .step-content {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     flex-grow: 1;
-    /* MIN-WIDTH 0 É VITAL PARA O FLEXBOX NÃO TRANSBORDAR */
-    min-width: 0;
     padding: 0;
-    gap: 10px;
+    gap: 6px;
+    /* Espaço ocioso reduzido */
 }
 
 .step-name {
-    font-size: 14px;
+    font-size: 13.5px;
     color: white;
-    flex: 1;
-    text-align: left;
-    white-space: normal;
+    white-space: nowrap;
+    /* OBRIGA a ficar em 1 linha */
+    flex-shrink: 0;
+    /* Proíbe o flexbox de tentar esmagar o nome */
     line-height: 1.2;
-    overflow-wrap: anywhere;
 }
 
 .step-distance {
-    font-size: 13px;
+    font-size: 12.5px;
     color: #bbdefb;
-    /* REDUZIDO LEVEMENTE PARA AJUDAR NA DISTRIBUIÇÃO DO ESPAÇO */
-    min-width: 65px;
-    text-align: right;
+    white-space: nowrap;
+    /* OBRIGA a ficar em 1 linha */
     flex-shrink: 0;
+    /* Proíbe de esmagar a distância */
+    margin-left: auto;
+    /* Empurra a distância totalmente para a direita */
 }
 
 .step-actions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 8px;
+    gap: 4px;
     flex-shrink: 0;
-    margin-left: 4px;
-    position: relative;
-    z-index: 4;
-    /* TRAVA A LARGURA PARA QUE OS BOTÕES NUNCA SEJAM ESMAGADOS PRA FORA */
-    min-width: 60px;
+    /* BLINDA os botões: Nunca serão esmagados ou empurrados */
+    margin-left: 8px;
 }
 
 .remove-step {
@@ -859,14 +858,9 @@
     z-index: 3;
     width: 20px;
     flex-shrink: 0;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
-}
-
-.step-ultimate:hover .step-move-controls {
-    opacity: 1;
-    visibility: visible;
+    /* AS SETAS AGORA FICAM VISÍVEIS O TEMPO TODO */
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 .move-step-button {
