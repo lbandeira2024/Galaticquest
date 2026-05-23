@@ -268,6 +268,11 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
         [plannedRoute.steps, currentIndex]
     );
 
+    const plannedDestinations = useMemo(() =>
+        plannedRoute.steps.slice(currentIndex + 2).map(step => step.name),
+        [plannedRoute.steps, currentIndex]
+    );
+
     const handleBodyClick = useCallback((body) => {
         if (isRouteConfirmed) return;
         if (visitedDestinations.includes(body.name)) return;
@@ -508,7 +513,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
 
                     const planetStatus = planet.name === nextDestination ? 'next-destination'
                         : visitedDestinations.includes(planet.name) ? 'visited'
-                            : '';
+                            : plannedDestinations.includes(planet.name) ? 'planned-destination'
+                                : '';
                     return (
                         <React.Fragment key={index}>
                             <div className={`orbit ${planet.isAsteroidBelt ? 'asteroid-belt' : ''} ${planet.isKuiperBelt ? 'kuiper-belt' : ''}`} style={{
@@ -554,7 +560,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
 
                                 const moonStatus = moon.name === nextDestination ? 'next-destination'
                                     : visitedDestinations.includes(moon.name) ? 'visited'
-                                        : '';
+                                        : plannedDestinations.includes(moon.name) ? 'planned-destination'
+                                            : '';
                                 const currentMoonRotation = rotationAngles[moon.name] || 0;
 
                                 const isLabelVisible = visibleMoonLabel === moon.name;

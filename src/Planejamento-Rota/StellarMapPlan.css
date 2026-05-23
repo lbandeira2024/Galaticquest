@@ -972,6 +972,43 @@
     box-shadow: 0 0 5px #00ff00;
 }
 
+/* ======================================================== */
+/* ======= STATUS VISUAL DOS CORPOS MARCADOS NA ROTA ====== */
+/* ======================================================== */
+
+.celestial-body.visited {
+    filter: drop-shadow(0 0 10px #bbbbbb) brightness(1.15);
+    outline: 2px solid rgba(187, 187, 187, 0.85);
+    outline-offset: 4px;
+}
+
+.celestial-body.next-destination {
+    filter: drop-shadow(0 0 16px #ff3b30) brightness(1.35);
+    outline: 2px solid rgba(255, 59, 48, 0.95);
+    outline-offset: 5px;
+    animation: nextBodyPulse 1.6s infinite ease-in-out;
+}
+
+.celestial-body.planned-destination {
+    filter: drop-shadow(0 0 13px #4fc3f7) brightness(1.25);
+    outline: 2px solid rgba(79, 195, 247, 0.9);
+    outline-offset: 4px;
+}
+
+@keyframes nextBodyPulse {
+
+    0%,
+    100% {
+        outline-offset: 4px;
+        filter: drop-shadow(0 0 12px #ff3b30) brightness(1.25);
+    }
+
+    50% {
+        outline-offset: 8px;
+        filter: drop-shadow(0 0 24px #ff3b30) brightness(1.55);
+    }
+}
+
 /* ==========================================================================
    ============================== MEDIA QUERIES ==============================
    ========================================================================== */
