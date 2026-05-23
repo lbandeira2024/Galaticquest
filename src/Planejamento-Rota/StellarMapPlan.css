@@ -507,8 +507,7 @@
 .route-display-panel {
     position: absolute;
     top: 60px !important;
-    left: 60px !important;
-    right: auto !important;
+    right: 60px !important;
     /* LARGURA DINÂMICA: Cresce automaticamente para caber o texto, mas não passa da tela */
     width: auto !important;
     min-width: 440px;
@@ -980,8 +979,7 @@
 @media (max-height: 800px) and (min-width: 481px) {
     .route-display-panel {
         top: 30px !important;
-        left: 60px !important;
-        right: auto !important;
+        right: 60px !important;
         padding: 15px;
     }
 
@@ -1066,8 +1064,7 @@
 
     .route-display-panel {
         padding: 30px;
-        left: 250px;
-        right: auto;
+        right: 250px;
     }
 
     .zoom-controls {
