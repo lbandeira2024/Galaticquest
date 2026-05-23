@@ -150,7 +150,7 @@ const SelecaoRota = () => {
 
   useEffect(() => {
     const currentMusic = "/sounds/trilha_galatica_v1.mp3";
-    playTrack(currentMusic, { loop: true, isPrimary: false });
+    playTrack(currentMusic, { loop: true, isPrimary: false, volume: 0.5 });
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");

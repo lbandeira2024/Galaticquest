@@ -25,6 +25,9 @@ const SelecaoNave = () => {
   const [selectedShip, setSelectedShip] = useState(null);
   const [shipConfirmed, setShipConfirmed] = useState(false);
 
+  // ESTADO NOVO: Guardar as naves que já foram pegas
+  const [navesOcupadas, setNavesOcupadas] = useState([]);
+
   const ships = [
     { id: 1, code: "ARTEMIS1", name: "Artemis I", image: "/images/Naves/01.Artemis1.png", year: "2104", description: "Primeira nave interestelar construída pela humanidade. Tecnologia antiga, mas extremamente confiável.", speed: "86.340.227 km/h (8% da velocidade da luz)", capacity: "100 tripulantes", fuel: "Excelente – usa reatores de fusão com reciclagem total de matéria.", autonomy: "2 anos", weightLimit: "500 toneladas", recommendedSpeed: "0.08c (24.000 km/s)", fuelCapacity: "200 toneladas", oxygenCapacity: "61.3 toneladas", provisionsCapacity: "109.5 toneladas", },
     { id: 2, code: "OBERONX", name: "Oberon X", image: "/images/Naves/02.oberonX.png", year: "2135", description: "Projeto militar desativado, adaptado para exploração. Equilibrada e confiável.", speed: "129.510.342 km/h", capacity: "80 tripulantes", fuel: "Boa – utiliza células de antimatéria com controle automatizado.", autonomy: "4 anos", weightLimit: "300 toneladas", recommendedSpeed: "0.12c (36.000 km/s)", fuelCapacity: "150 toneladas", oxygenCapacity: "98.1 toneladas (4 anos)", provisionsCapacity: "175.2 toneladas (4 anos)" },
@@ -36,8 +39,32 @@ const SelecaoNave = () => {
   // CORREÇÃO: Hook para garantir que a música continue tocando (igual ao CadastroForm)
   useEffect(() => {
     const currentMusic = "/sounds/trilha_galatica_v1.mp3";
-    playTrack(currentMusic, { loop: true, isPrimary: false });
+    playTrack(currentMusic, { loop: true, isPrimary: false, volume: 0.5 });
   }, [playTrack]);
+
+  // NOVO HOOK: Buscar naves ocupadas (Polling a cada 3 segundos)
+  useEffect(() => {
+    if (!user || !user.gameNumber) return;
+
+    const buscarNavesOcupadas = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/games/${user.gameNumber}/online-ships`);
+        if (response.data.success) {
+          // Filtra para não bloquear a nave que o PRÓPRIO usuário já confirmou
+          const otherTeamsShips = response.data.onlineShips.filter(
+            n => !user.grupo || n.name !== user.grupo.teamName
+          );
+          setNavesOcupadas(otherTeamsShips);
+        }
+      } catch (error) {
+        console.error("Erro ao buscar naves ocupadas:", error);
+      }
+    };
+
+    buscarNavesOcupadas();
+    const interval = setInterval(buscarNavesOcupadas, 3000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -87,8 +114,9 @@ const SelecaoNave = () => {
     return () => clearTimeout(staticTimer);
   }, []);
 
-  const handleShipSelect = (ship) => {
-    if (!shipConfirmed) {
+  const handleShipSelect = (ship, isOcupada) => {
+    // Só seleciona se não estiver confirmada e não estiver ocupada por outro
+    if (!shipConfirmed && !isOcupada) {
       setSelectedShip(ship);
     }
   };
@@ -124,7 +152,8 @@ const SelecaoNave = () => {
         }
       } catch (error) {
         console.error("Erro na API ao selecionar a nave:", error);
-        alert(`❌ Ocorreu um erro de comunicação ao salvar sua escolha: ${error.response?.data?.message || error.message}`);
+        // O erro que adicionamos no server.js vai ser exibido aqui
+        alert(`❌ ${error.response?.data?.message || "Ocorreu um erro de comunicação ao salvar sua escolha."}`);
       }
     } else if (shipConfirmed) {
       navigate("/SelecaoEquipe");
@@ -168,21 +197,37 @@ const SelecaoNave = () => {
       <div className="selection-container">
         <div className="ships-section">
           <h2>Frota Disponível</h2>
-          {ships.map((ship) => (
-            <div
-              key={ship.id}
-              className={`ship-option ${selectedShip?.id === ship.id ? "selected" : ""} ${shipConfirmed ? "disabled" : ""}`}
-              onClick={() => handleShipSelect(ship)}
-            >
-              <img src={ship.image} alt={ship.name} className="ship-image" />
-              <div>
-                <h3>{ship.name}</h3>
-                <p><strong>Ano:</strong> {ship.year}</p>
-                <p><strong>Velocidade:</strong> {ship.speed}</p>
-                <p><strong>Capacidade:</strong> {ship.capacity}</p>
+          {ships.map((ship) => {
+            // Verifica se a nave atual já foi escolhida
+            const naveOcupadaInfo = navesOcupadas.find(n => n.id === ship.code);
+            const isOcupada = !!naveOcupadaInfo;
+
+            return (
+              <div
+                key={ship.id}
+                className={`ship-option ${selectedShip?.id === ship.id ? "selected" : ""} ${shipConfirmed ? "disabled" : ""} ${isOcupada ? "indisponivel" : ""}`}
+                onClick={() => handleShipSelect(ship, isOcupada)}
+              >
+                {/* O overlay com o cadeado SVG nativo aparece se estiver ocupada */}
+                {isOcupada && (
+                  <div className="bloqueio-overlay">
+                    <svg className="icone-cadeado" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12 17a2 2 0 100-4 2 2 0 000 4zm6-9h-1V6a5 5 0 00-10 0v2H6a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V10a2 2 0 00-2-2zM9 6a3 3 0 016 0v2H9V6zm9 14H6V10h12v10z" />
+                    </svg>
+                    <span style={{ textAlign: 'center' }}>Capturada por:<br />{naveOcupadaInfo.name}</span>
+                  </div>
+                )}
+
+                <img src={ship.image} alt={ship.name} className="ship-image" />
+                <div>
+                  <h3>{ship.name}</h3>
+                  <p><strong>Ano:</strong> {ship.year}</p>
+                  <p><strong>Velocidade:</strong> {ship.speed}</p>
+                  <p><strong>Capacidade:</strong> {ship.capacity}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="ship-details">

@@ -1,51 +1,53 @@
 .telemetry-display {
   position: absolute;
-  height: 160px;
-  bottom: 20px;
+  height: auto;
+  min-height: clamp(80px, 12vh, 140px);
+  bottom: clamp(10px, 4vh, 30px);
   left: 50%;
-  transform: translateX(-50%) translateZ(120px);
-  width: 90%;
-  max-width: 1000px;
+  transform: translateX(-50%) translateZ(110px);
+  width: clamp(50%, 54vw, 58%);
+  max-width: none;
   background: rgba(0, 30, 60, 0.85);
-  padding: 15px;
+  padding: clamp(6px, 1vh, 12px) clamp(10px, 1.5vw, 20px);
   border: 1px solid rgba(0, 200, 255, 0.4);
   border-radius: 8px;
-  z-index: 10;
+  z-index: 15;
   font-family: 'Courier New', monospace;
   color: #fff;
   font-weight: bold;
   box-shadow: 0 0 30px rgba(0, 100, 200, 0.5);
-  backdrop-filter: blur(3px);
+  backdrop-filter: blur(5px);
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 20px;
+  gap: clamp(10px, 1.5vw, 20px);
+  align-items: center;
 }
 
 .telemetry-nuclear-panel {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: auto auto;
-  gap: 10px;
+  grid-template-rows: 1fr 1fr;
+  gap: clamp(5px, 1vw, 10px);
 }
 
 .nuclear-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px;
+  justify-content: center;
+  padding: clamp(4px, 1vh, 8px);
   background: rgba(0, 20, 40, 0.6);
   border-radius: 5px;
   border: 1px solid rgba(0, 150, 255, 0.2);
   box-shadow: inset 0 0 5px rgba(0, 100, 200, 0.3);
   transition: all 0.3s ease;
   position: relative;
-  /* ADICIONADO PARA POSICIONAR O DELTA */
 }
 
 .nuclear-label {
-  font-size: 0.75em;
+  font-size: clamp(0.5em, 0.7vw, 0.75em);
   color: #0bf;
-  margin-bottom: 5px;
+  margin-bottom: clamp(2px, 0.5vh, 5px);
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -53,25 +55,21 @@
 
 .progress-container {
   width: 100%;
-  height: 20px;
+  height: clamp(12px, 2vh, 20px);
   background: rgba(0, 20, 40, 0.8);
   border-radius: 5px;
   position: relative;
   overflow: hidden;
-  margin: 5px 0;
+  margin: 2px 0;
 }
 
 .progress-bar {
   height: 100%;
   border-radius: 10px;
   transition: width 0.3s ease;
-
-  /* Flexbox para centralizar o texto DENTRO da barra colorida */
   display: flex;
   align-items: center;
   justify-content: center;
-
-  /* Garante que o texto não suma se a barra for muito pequena */
   min-width: fit-content;
   padding: 0 5px;
 }
@@ -92,7 +90,7 @@
 }
 
 .progress-value {
-  font-size: 0.7em;
+  font-size: clamp(0.55em, 0.8vw, 0.7em);
   color: #fff;
   font-weight: bold;
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
@@ -100,9 +98,6 @@
   z-index: 2;
 }
 
-/* ====================================================
-   ========= ESTILOS DA PORCENTAGEM DE IMPACTO ========
-   ==================================================== */
 .delta-value {
   position: absolute;
   bottom: 1px;
@@ -129,8 +124,6 @@
   }
 }
 
-/* ==================================================== */
-
 .space-coins-panel {
   display: flex;
   flex-direction: column;
@@ -146,18 +139,16 @@
 
 .space-coins-image {
   width: auto;
-  height: 80px;
+  height: clamp(40px, 6vh, 80px);
   margin-bottom: 2px;
   object-fit: contain;
   filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.7));
 }
 
 .space-coins-value {
-  font-size: 1.0em;
+  font-size: clamp(0.8em, 1.2vw, 1em);
   color: #0f0;
-  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7),
-    0 0 10px rgba(0, 255, 0, 0.5),
-    0 0 15px rgba(0, 255, 0, 0.3);
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7), 0 0 10px rgba(0, 255, 0, 0.5), 0 0 15px rgba(0, 255, 0, 0.3);
   font-family: 'Segment7', monospace;
   letter-spacing: 2px;
   background: rgba(0, 20, 0, 0.3);
@@ -176,8 +167,7 @@
 
   100% {
     opacity: 1;
-    text-shadow: 0 0 10px rgba(0, 255, 0, 0.9),
-      0 0 20px rgba(0, 255, 0, 0.6);
+    text-shadow: 0 0 10px rgba(0, 255, 0, 0.9), 0 0 20px rgba(0, 255, 0, 0.6);
   }
 }
 
@@ -206,121 +196,44 @@
   filter: grayscale(50%);
 }
 
-.stellar-map-label {
-  font-size: 0.75em;
-  color: #0bf;
-  margin-bottom: 5px;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.stellar-map-button::after {
-  content: '';
-  position: absolute;
-  top: 100%;
-  left: -100%;
-  width: 300%;
-  height: 300%;
-  background: linear-gradient(to top right,
-      transparent 0%,
-      transparent 45%,
-      rgba(255, 255, 255, 0.8) 50%,
-      transparent 55%,
-      transparent 100%);
-  transform: rotate(30deg);
-  animation: shine 10s infinite;
-  opacity: 0;
-}
-
-@keyframes shine {
-  0% {
-    transform: translateX(-100%) translateY(100%) rotate(30deg);
-    opacity: 0;
-  }
-
-  5% {
-    opacity: 0.5;
-  }
-
-  10% {
-    opacity: 0.9;
-  }
-
-  15% {
-    transform: translateX(100%) translateY(-100%) rotate(30deg);
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 0;
-  }
-}
-
 .stellar-map-button:hover:not(:disabled) {
   background: rgba(0, 80, 160, 0.9);
   box-shadow: 0 0 15px rgba(0, 150, 255, 0.5);
   transform: translateY(-1px);
 }
 
-/* === CONFIGURAÇÕES DO MAPA ESTELAR FLUTUANTE === */
-.stellar-map-floating {
+/* ROOT DO MODAL DO MAPA (SOBREPÕE TUDO) */
+.stellar-map-overlay-root {
   position: fixed;
-  top: -80%;
-  left: 37.5%;
-  transform: translate(-50%, -50%);
-  z-index: 2000;
-  width: 80vw;
-  max-width: 1500px;
-  height: 90vh;
-  max-height: 95vh;
-  background: rgba(0, 30, 60, 0.98);
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.8);
+  /* Fundo um pouco mais escuro para destacar o mapa */
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  backdrop-filter: blur(2px);
+}
+
+/* QUADRO AZUL AUMENTADO EM QUASE TODA A TELA */
+.stellar-map-floating {
+  position: relative;
+  width: 95vw;
+  height: 95vh;
+  max-width: 1920px;
+  background: rgba(0, 15, 30, 0.98);
   border: 2px solid rgba(0, 200, 255, 0.6);
   border-radius: 12px;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  transition: transform 0.4s ease-out, opacity 0.4s ease-out;
-  opacity: 1;
-}
-
-.stellar-map-content {
-  width: 100%;
-  height: 100%;
-  padding: 20px;
-  box-sizing: border-box;
-  overflow: hidden;
-}
-
-.close-stellar-map-button {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 60, 60, 0.8);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  font-size: 22px;
-  font-weight: bold;
-  cursor: pointer;
-  z-index: 2001;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
-}
-
-.close-stellar-map-button:hover {
-  background: rgba(255, 80, 80, 1);
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+  overflow: hidden !important;
+  isolation: isolate;
+  -webkit-mask-image: -webkit-radial-gradient(white, black);
 }
 
 .forced-alert {
@@ -352,7 +265,8 @@
   }
 }
 
-.loading-map {
+.loading-map,
+.map-fallback {
   color: #0bf;
   text-align: center;
   padding: 20px;
@@ -362,9 +276,6 @@
 
 .map-fallback {
   color: #f00;
-  text-align: center;
-  padding: 20px;
-  font-size: 1.2em;
   text-shadow: 0 0 5px rgba(255, 0, 0, 0.7);
 }
 
@@ -542,83 +453,35 @@
   animation: flicker 0.5s infinite alternate;
 }
 
-@keyframes resourceRefillPulse {
-  0% {
-    box-shadow: 0 0 5px #2ecc71;
-  }
-
-  50% {
-    box-shadow: 0 0 25px #2ecc71, 0 0 10px #fff;
-  }
-
-  100% {
-    box-shadow: 0 0 5px #2ecc71;
-  }
-}
-
-.oxygen-refill-active .progress-bar {
-  background: #2ecc71 !important;
-  animation: resourceRefillPulse 0.8s infinite alternate;
-}
-
-.oxygen-refill-active .nuclear-label {
-  color: #2ecc71 !important;
-  text-shadow: 0 0 10px #2ecc71;
-  font-weight: bold;
-}
-
-@keyframes updatedMetricPulse {
-  0% {
-    background-color: #39ff14;
-    box-shadow: 0 0 5px #39ff14;
-  }
-
-  50% {
-    background-color: #ccffcc;
-    box-shadow: 0 0 20px #39ff14, 0 0 10px #fff;
-  }
-
-  100% {
-    background-color: #39ff14;
-    box-shadow: 0 0 5px #39ff14;
-  }
-}
-
-.nuclear-item.highlight-changed {
-  border-color: #39ff14;
-  box-shadow: inset 0 0 15px rgba(57, 255, 20, 0.2);
-  transition: all 0.5s ease;
-}
-
-.nuclear-item.highlight-changed .nuclear-label {
-  color: #39ff14 !important;
-  text-shadow: 0 0 8px #39ff14;
-  font-weight: bold;
-}
-
-.nuclear-item.highlight-changed .progress-bar {
-  background: #39ff14 !important;
-  box-shadow: 0 0 10px #39ff14 !important;
-  animation: updatedMetricPulse 1s infinite alternate;
-}
+/* =========================================================
+   ====== MEDIA QUERIES ATUALIZADAS (MANTENDO PROPORÇÃO) ===
+   ========================================================= */
 
 @media (max-width: 1024px) {
-  .stellar-map-floating {
-    left: 50%;
-    width: 90%;
-    min-width: 550px;
-    height: 75vh;
-  }
-
   .ships-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stellar-map-floating {
+    width: 95vw;
+    height: 95vh;
   }
 }
 
 @media (max-width: 768px) {
   .telemetry-display {
+    position: relative;
+    /* Sai do position absolute para respeitar o layout em coluna */
+    bottom: auto;
+    left: auto;
+    transform: none;
+    /* Desliga o translate 3D no celular */
+    width: 95%;
+    /* Ocupa a tela inteira com margem de segurança */
+    margin: 10px auto;
+    order: 4;
+    /* Garante que ela seja o último item abaixo das laterais */
     grid-template-columns: 1fr;
-    width: 90%;
   }
 
   .telemetry-nuclear-panel {
@@ -639,16 +502,8 @@
   }
 
   .stellar-map-floating {
-    width: 90%;
-    min-width: 400px;
-    height: 70vh;
-  }
-
-  .close-button,
-  .close-stellar-map-button {
-    width: 32px;
-    height: 32px;
-    font-size: 20px;
+    width: 98vw;
+    height: 95vh;
   }
 }
 
@@ -665,19 +520,6 @@
     font-size: 1.1em;
   }
 
-  .stellar-map-floating {
-    width: 95%;
-    min-width: 300px;
-    height: 70vh;
-  }
-
-  .close-button,
-  .close-stellar-map-button {
-    width: 28px;
-    height: 28px;
-    font-size: 18px;
-  }
-
   .ships-grid {
     grid-template-columns: 1fr;
   }
@@ -685,5 +527,13 @@
   .ship-image {
     width: 80px;
     height: 80px;
+  }
+
+  /* NO CELULAR ELE VIRA TELA CHEIA COMPLETA */
+  .stellar-map-floating {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    border: none;
   }
 }

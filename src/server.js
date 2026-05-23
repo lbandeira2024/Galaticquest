@@ -104,6 +104,9 @@ const GrupoSchema = new mongoose.Schema({
   rotaPlanejada: [{ name: String, distance: Number, fuel: Number, from: String }],
   routeIndex: { type: Number, default: 0 },
   processadorO2: { type: Number, default: 0, min: 0 },
+  // --- ATUALIZAÇÃO S.O.S ---
+  sosHistory: { type: [Number], default: [] },
+  // -------------------------
   loginon: { type: Number, default: 0 },
   lastHeartbeat: { type: Date, default: Date.now },
   telemetryState: {
@@ -115,9 +118,7 @@ const GrupoSchema = new mongoose.Schema({
     interdependence: { type: Number, default: 100 },
     engagement: { type: Number, default: 100 }
   },
-  // --- ATUALIZAÇÃO: Campo gameNumber adicionado ---
   gameNumber: { type: Number },
-  // ------------------------------------------------
   isLocked: { type: Boolean, default: false },
   photoUrl: { type: String }
 }, { timestamps: true });
@@ -228,6 +229,24 @@ app.post("/:userId/update-gamedata", async (req, res) => {
     res.json({ success: true, user });
   } catch (error) { res.status(500).json({ success: false }); }
 });
+
+// --- ROTA EXCLUSIVA PARA GRAVAR S.O.S ---
+app.post("/:userId/record-sos-history", async (req, res) => {
+  try {
+    const { sosId } = req.body;
+    if (sosId === undefined) return res.status(400).json({ success: false, message: "sosId é obrigatório" });
+
+    const groupId = await getGroupId(req.params.userId);
+    await Grupo.findByIdAndUpdate(groupId, {
+      $addToSet: { sosHistory: Number(sosId) }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+// ----------------------------------------
 
 app.get("/:userId/game-data", async (req, res) => {
   try {
@@ -372,9 +391,7 @@ app.post("/save-team-name", async (req, res) => {
       membros: ids,
       loginon: 1,
       isLocked: false,
-      // --- ATUALIZAÇÃO: Gravando o gameNumber no grupo ---
       gameNumber: criador.gameNumber
-      // ---------------------------------------------------
     });
 
     await Usuario.updateMany({ _id: { $in: ids } }, { $set: { grupo: novoGrupo._id } });
@@ -392,10 +409,36 @@ app.put("/select-ship", async (req, res) => {
   try {
     const { userId, shipId } = req.body;
     const groupId = await getGroupId(userId);
+
+    const grupoAtual = await Grupo.findById(groupId);
+    if (!grupoAtual) {
+      return res.status(404).json({ success: false, message: "Grupo não encontrado." });
+    }
+
+    const currentGameNumber = grupoAtual.gameNumber;
+
+    const naveJaEscolhida = await Grupo.findOne({
+      gameNumber: currentGameNumber,
+      naveEscolhida: shipId,
+      _id: { $ne: groupId }
+    });
+
+    if (naveJaEscolhida) {
+      return res.status(400).json({
+        success: false,
+        message: `Tarde demais! A nave já foi capturada pela equipe ${naveJaEscolhida.teamName}.`
+      });
+    }
+
     await Grupo.findByIdAndUpdate(groupId, { naveEscolhida: shipId });
     const user = await Usuario.findById(userId).populate('grupo');
+
     res.json({ success: true, user });
-  } catch (error) { res.status(500).json({ success: false }); }
+
+  } catch (error) {
+    console.error("Erro ao selecionar nave:", error);
+    res.status(500).json({ success: false, message: "Erro interno do servidor ao selecionar nave." });
+  }
 });
 
 app.put("/select-team", async (req, res) => {
@@ -422,13 +465,12 @@ app.get('/group/:groupId/all-cds-challenges', async (req, res) => {
   try {
     const desafios = await CDS.find({ grupo: req.params.groupId });
 
-    // --- CORREÇÃO: Agora passa o 'texto' que vem do banco para o frontend ---
     res.json({
       success: true,
       challenges: desafios.map(d => ({
         desafioId: d.desafioId,
         escolhaIdLetter: d.escolha.id,
-        texto: d.escolha.texto, // <--- ADICIONADO AQUI
+        texto: d.escolha.texto,
         timestamp: d.timestamp
       }))
     });
@@ -540,7 +582,6 @@ app.get("/users/by-company", async (req, res) => {
   try {
     const { company } = req.query;
     if (!company) return res.status(400).json({ success: false, message: "Empresa obrigatória." });
-    // Adicionado gameNumber e numeroLiderados para o frontend conseguir filtrar
     const users = await Usuario.find({ empresa: company }, 'nome email setor regional cargo tempoLideranca gameNumber numeroLiderados').lean();
     res.json({ success: true, users });
   } catch (error) { res.status(500).json({ success: false }); }

@@ -25,10 +25,10 @@
 /* Main Display */
 .main-display {
   position: absolute;
-  width: 60%;
-  height: 72%;
+  width: clamp(50%, 54vw, 58%);
+  height: clamp(40%, 58vh, 65%);
   left: 50%;
-  top: 37%;
+  top: 34%;
   transform: translate(-50%, -50%) translateZ(100px);
   z-index: 5;
   border-radius: 8px;
@@ -80,7 +80,7 @@
 .right-panel-3d {
   position: absolute;
   top: 0;
-  width: 20%;
+  width: clamp(260px, 22vw, 450px);
   height: 100%;
   background: linear-gradient(145deg, #001a33 0%, #002b52 100%);
   z-index: 4;
@@ -89,6 +89,13 @@
   display: flex;
   flex-direction: column;
   transition: transform 0.5s ease-out;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.left-panel-3d::-webkit-scrollbar,
+.right-panel-3d::-webkit-scrollbar {
+  display: none;
 }
 
 .left-panel-3d {
@@ -120,6 +127,7 @@
       transparent 30%,
       transparent 70%,
       rgba(0, 40, 80, 0.7) 100%);
+  pointer-events: none;
 }
 
 .left-panel-3d::after,
@@ -132,6 +140,7 @@
     linear-gradient(rgba(0, 120, 200, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 120, 200, 0.1) 1px, transparent 1px);
   background-size: 25px 25px;
+  pointer-events: none;
 }
 
 /* Route Monitor Styles */
@@ -147,7 +156,7 @@
 
 .route-monitor h4 {
   margin-bottom: 15px;
-  font-size: 1.0em;
+  font-size: clamp(0.9rem, 1.2vw, 1.3rem);
   color: rgba(11, 223, 50, 0.789);
   text-shadow: 0 0 5px rgba(13, 255, 0, 0.848);
 }
@@ -161,7 +170,7 @@
   border-radius: 10px;
   padding: 20px;
   box-shadow: inset 0 0 15px rgba(0, 80, 150, 0.4);
-  height: 140px;
+  height: clamp(100px, 15vh, 160px);
   position: relative;
   flex-direction: column;
 }
@@ -252,7 +261,7 @@
 
 .mission-timer h2 {
   margin: 0;
-  font-size: 2em;
+  font-size: clamp(1.5rem, 2.5vw, 3rem);
   letter-spacing: 2px;
 }
 
@@ -300,7 +309,7 @@
 
 .monitor-screen {
   width: 100%;
-  height: 150px;
+  height: clamp(120px, 18vh, 200px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -397,8 +406,8 @@
 .ativar-de-btn,
 .inventory-btn {
   width: 100%;
-  padding: 10px 8px;
-  font-size: 0.9em;
+  padding: clamp(5px, 1vh, 10px) 8px;
+  font-size: clamp(0.6em, 0.9vw, 0.9em);
   font-family: 'Courier New', monospace;
   font-weight: bold;
   text-transform: uppercase;
@@ -410,14 +419,15 @@
   overflow: hidden;
   transition: all 0.3s ease;
   z-index: 5;
-  white-space: nowrap;
-  text-overflow: ellipsis;
+  white-space: normal;
   box-sizing: border-box;
   margin: 0;
-  min-height: 56px;
-  height: 56px;
-  white-space: normal;
-  line-height: 1.2;
+  min-height: unset;
+  height: clamp(40px, 6vh, 56px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
 }
 
 /* Dobra Espacial Button */
@@ -584,7 +594,7 @@
 .speed-gauge-value {
   color: #0f0;
   font-family: 'Courier New', monospace;
-  font-size: 1.1em;
+  font-size: clamp(0.9em, 1.2vw, 1.3em);
   text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
 }
 
@@ -667,7 +677,7 @@
 .minerva-title {
   color: #0bf;
   font-family: 'Orbitron', 'Courier New', monospace;
-  font-size: 1.1em;
+  font-size: clamp(0.9em, 1.1vw, 1.2em);
   font-weight: 500;
   text-align: center;
   letter-spacing: 3px;
@@ -747,7 +757,7 @@
   color: #0bf;
   border: 1px solid rgba(0, 200, 255, 0.4);
   border-radius: 5px;
-  padding: 8px 15px;
+  padding: clamp(4px, 1vh, 8px) clamp(5px, 1vw, 15px);
   font-family: 'Courier New', monospace;
   font-weight: bold;
   cursor: pointer;
@@ -757,7 +767,8 @@
   box-shadow: 0 0 10px rgba(0, 100, 200, 0.3);
   z-index: 10;
   pointer-events: auto;
-  width: 130px;
+  width: clamp(80px, 12vw, 130px);
+  font-size: clamp(0.6em, 0.9vw, 0.9em);
   box-sizing: border-box;
 }
 
@@ -770,7 +781,8 @@
 /* === FOTO DA EQUIPE NO COCKPIT === */
 .team-photo-frame {
   margin-top: 15px;
-  margin-bottom: auto;
+  margin-bottom: 15px;
+  /* Agora tem uma distância fixa e controlada dos botões */
   width: 100%;
   border: 2px solid #00aaff;
   border-radius: 8px;
@@ -798,7 +810,7 @@
 
 .team-photo-img {
   width: 100%;
-  height: 140px;
+  height: clamp(80px, 12vh, 140px);
   object-fit: cover;
   display: block;
   filter: sepia(20%) contrast(1.1) brightness(0.9);
@@ -816,506 +828,12 @@
   pointer-events: none;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .tela-decolagem {
-    height: auto;
-    min-height: 100vh;
-    overflow-y: auto;
-    overflow-x: hidden;
-  }
-
-  .cockpit-container {
-    display: flex;
-    flex-direction: column;
-    height: auto;
-    position: relative;
-    perspective: none;
-    transform: none;
-  }
-
-  .left-panel-3d,
-  .right-panel-3d,
-  .main-display {
-    position: relative;
-    width: 95%;
-    max-width: 500px;
-    margin: 10px auto;
-    left: auto;
-    top: auto;
-    transform: none;
-    height: auto;
-    box-shadow: none;
-    border: 1px solid rgba(0, 180, 255, 0.4);
-    padding: 10px;
-  }
-
-  .main-display {
-    order: 1;
-    height: 60vh;
-  }
-
-  .left-panel-3d {
-    order: 2;
-  }
-
-  .right-panel-3d {
-    order: 3;
-  }
-
-  .mission-timer {
-    top: 15px;
-    right: 15px;
-    bottom: auto;
-    transform: none;
-    font-size: 0.9em;
-  }
-
-  .mission-timer h2 {
-    font-size: 1.5em;
-  }
-
-  .right-monitor-container {
-    padding: 8px;
-  }
-
-  .monitor-screen {
-    height: 150px;
-  }
-
-  .propulsion-panel {
-    grid-template-columns: repeat(2, 1fr);
-    padding: 10px;
-  }
-
-  .propulsion-indicator h4 {
-    font-size: 0.8em;
-  }
-
-  .dobra-buttons-container {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  .dobra-btn-wrapper {
-    width: 100%;
-  }
-
-  .ativar-de-btn,
-  .inventory-btn {
-    font-size: 0.9em;
-    padding: 12px 8px;
-    min-height: 50px;
-    height: 50px;
-  }
-
-  .floating-buttons-container {
-    bottom: 10px;
-    right: 10px;
-    gap: 5px;
-  }
-
-  .pause-button {
-    padding: 8px 12px;
-    font-size: 0.9rem;
-  }
-
-  .sos-button {
-    width: 50px;
-    font-size: 0.7rem;
-  }
-
-  .team-photo-frame {
-    margin-bottom: 10px;
-    height: auto;
-  }
-
-  .team-photo-img {
-    height: 180px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tela-decolagem.shaking {
-    animation: none;
-  }
-
-  .cockpit-container {
-    transition: none;
-  }
-
-  .ativar-de-btn,
-  .ativar-de-btn::before,
-  .ativar-de-btn.active,
-  .inventory-btn,
-  .inventory-btn::before {
-    animation: none;
-  }
-}
-
-.speed-gauge-fill.is-dobra-active {
-  background: linear-gradient(90deg,
-      #ff0000 0%,
-      #ff8000 10%,
-      #ffff00 20%,
-      #00ff00 30%,
-      #00ffff 40%,
-      #0000ff 50%,
-      #8000ff 60%,
-      #ff00ff 70%,
-      #ff0080 80%,
-      #ff0000 90%,
-      #ff8000 100%);
-  animation: rainbow-pulse 2s infinite alternate;
-}
-
-@keyframes rainbow-pulse {
-  0% {
-    opacity: 0.8;
-    background-size: 100% 100%;
-  }
-
-  100% {
-    opacity: 1;
-    background-size: 200% 100%;
-  }
-}
-
-.speed-gauge-fill.is-dobra-active::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.3) 50%,
-      rgba(255, 255, 255, 0) 100%);
-  animation: shine-move 1.5s infinite linear;
-}
-
-@keyframes shine-move {
-  0% {
-    transform: translateX(-100%);
-  }
-
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes staticFlicker {
-  0% {
-    opacity: 0.8;
-    filter: brightness(1.1) contrast(1.3);
-  }
-
-  50% {
-    opacity: 0.9;
-    filter: brightness(1.3) contrast(1.5);
-  }
-
-  100% {
-    opacity: 1;
-    filter: brightness(1.2) contrast(1.4);
-  }
-}
-
-.close-button {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 60, 60, 0.8);
-  color: white;
-  border: none;
-  border-radius: 50%;
-  font-size: 22px;
-  font-weight: bold;
-  cursor: pointer;
-  z-index: 1001;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: 0 0 10px rgba(255, 0, 0, 0.4);
-}
-
-.close-button:hover {
-  background: rgba(255, 80, 80, 1);
-  transform: scale(1.1);
-  box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
-}
-
-.bolsa-espacial-container {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.bolsa-espacial-imagem {
-  width: 100px;
-  height: auto;
-  filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.6));
-  animation: brilhoBolsa 6s infinite;
-}
-
-@keyframes brilhoBolsa {
-
-  0%,
-  100% {
-    filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.6));
-  }
-
-  50% {
-    filter: drop-shadow(0 0 15px rgba(0, 255, 255, 1));
-  }
-}
-
-.bolsa-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  margin-left: 15px;
-  z-index: 10;
-}
-
-.bolsa-button img {
-  width: 60px;
-  height: auto;
-  filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.6));
-  animation: brilhoBolsa 6s infinite;
-  transition: transform 0.3s ease;
-}
-
-.bolsa-button:hover img {
-  transform: scale(1.1);
-}
-
-@keyframes blink-animation {
-
-  0%,
-  100% {
-    opacity: 1;
-    text-shadow: 0 0 8px rgba(255, 0, 0, 1);
-  }
-
-  50% {
-    opacity: 0.6;
-    text-shadow: 0 0 4px rgba(255, 0, 0, 0.7);
-  }
-}
-
-.rec-label {
-  font-size: 1.3em;
-  font-weight: bold;
-  transition: color 0.4s ease, text-shadow 0.4s ease, opacity 0.4s ease;
-}
-
-.rec-label.inactive-rec {
-  color: #5a0000;
-  text-shadow: none;
-  opacity: 0.7;
-}
-
-.rec-label.blinking-rec {
-  color: #f00;
-  text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
-  animation: blink-animation 1.2s infinite;
-}
-
-.transmission-message {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: yellow;
-  font-family: 'Courier New', monospace;
-  font-size: 1.4em;
-  font-weight: bold;
-  text-align: center;
-  padding: 10px;
-  text-shadow: 0 0 10px yellow;
-  animation: text-fade-in 2s ease-in-out;
-}
-
-@keyframes text-fade-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-.monitor-text-display {
-  width: 100%;
-  height: 100%;
-  padding: 15px;
-  box-sizing: border-box;
-  color: #f6faf5df;
-  font-family: 'Courier New', monospace;
-  font-size: 1em;
-  line-height: 1.4;
-  text-align: left;
-  white-space: pre-wrap;
-  text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.monitor-text-display p {
-  margin: 0;
-}
-
-@keyframes pulse-bright {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff;
-    color: #fff;
-  }
-
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 12px #00ffff, 0 0 20px #00ffff;
-    color: #00ffff;
-  }
-
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff;
-    color: #fff;
-  }
-}
-
-.play-button.pulsing-play {
-  opacity: 1;
-  cursor: pointer;
-  border: 1px solid #00ffff;
-  animation: pulse-bright 2s infinite;
-}
-
-.play-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.palavra-chave {
-  color: yellow;
-  font-weight: bold;
-  text-shadow: 0 0 5px rgba(255, 255, 0, 0.7);
-}
-
-.dialogue-character-name {
-  color: yellow;
-  font-weight: bold;
-}
-
-.floating-buttons-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 999;
-  display: flex;
-  flex-direction: row-reverse;
-  align-items: center;
-  gap: 10px;
-}
-
-.hvs-logo {
-  height: 45px;
-  width: auto;
-  object-fit: contain;
-  filter: drop-shadow(0 0 6px rgba(0, 180, 255, 0.8));
-}
-
-.pause-button {
-  background-color: rgba(50, 255, 50, 0.2) !important;
-  border: 1px solid rgba(79, 195, 247, 0.8);
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 8px;
-  backdrop-filter: blur(5px);
-  cursor: pointer;
-  font-size: 1rem;
-  font-family: 'Courier New', monospace;
-  font-weight: bold;
-  text-shadow: 0 0 5px #4fc3f7;
-  transition: background-color 0.3s ease, opacity 0.3s ease;
-}
-
-.pause-button.paused {
-  background-color: rgba(50, 255, 50, 0.2) !important;
-}
-
-.pause-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.sos-button {
-  width: 65px;
-  aspect-ratio: 1 / 1;
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: rgba(180, 0, 0, 0.7);
-  border: 1px solid rgba(255, 50, 50, 0.5);
-  color: #fff;
-  padding: 5px;
-  border-radius: 8px;
-  backdrop-filter: blur(5px);
-  cursor: not-allowed;
-  font-size: 0.8rem;
-  font-family: 'Courier New', monospace;
-  font-weight: bold;
-  text-shadow: 0 0 5px #f55;
-  opacity: 0.7;
-  transition: background-color 0.3s ease, opacity 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
-}
-
-.sos-button.active {
-  background-color: rgba(255, 0, 0, 0.9);
-  border: 1px solid rgba(255, 100, 100, 0.8);
-  cursor: pointer;
-  text-shadow: 0 0 8px #ff0000;
-  opacity: 1;
-  animation: pulse-sos 1.5s infinite;
-}
-
-.sos-button.active:hover {
-  transform: scale(1.02);
-}
-
-@keyframes pulse-sos {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
-  }
-
-  50% {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(255, 0, 0, 1);
-  }
-
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
-  }
-}
-
+/* O2 Processor Display */
 .o2-processor-display {
   width: 100%;
-  margin-top: 5px;
-  padding: 8px;
+  margin-top: auto;
+  margin-bottom: clamp(5px, 2vh, 15px);
+  padding: clamp(4px, 1vh, 8px);
   background: rgba(0, 20, 40, 0.6);
   border-radius: 8px;
   border: 1px solid rgba(0, 180, 255, 0.3);
@@ -1331,10 +849,10 @@
 .o2-processor-label {
   color: #00ffcc;
   font-family: 'Courier New', monospace;
-  font-size: 0.9em;
+  font-size: clamp(0.7em, 1vw, 0.9em);
   font-weight: bold;
   letter-spacing: 2px;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   text-shadow: 0 0 8px rgba(0, 255, 204, 0.7);
 }
 
@@ -1343,7 +861,7 @@
   gap: 4px;
   width: 90%;
   max-width: 150px;
-  height: 20px;
+  height: clamp(12px, 2vh, 20px);
   padding: 3px;
   background: rgba(0, 0, 0, 0.5);
   border: 1px solid #00ffcc;
@@ -1366,12 +884,12 @@
 }
 
 .o2-transfer-button {
-  width: 100px;
-  padding: 0.25rem 1rem;
+  width: clamp(80px, 10vw, 100px);
+  padding: clamp(2px, 0.5vh, 4px) clamp(5px, 1vw, 10px);
   margin-top: 0;
   background-color: #1d4ed8;
   color: white;
-  font-size: 0.7em;
+  font-size: clamp(0.5em, 0.8vw, 0.7em);
   font-family: 'Courier New', monospace;
   font-weight: bold;
   text-transform: uppercase;
@@ -1611,5 +1129,559 @@
   100% {
     color: #ff0000;
     text-shadow: 0 0 10px #ff0000;
+  }
+}
+
+/* ========================================================================== */
+/* ======== RESPONSIVIDADE PARA MONITORES (LAPTOPS, 1080P, 1440P, 4K) ======= */
+/* ========================================================================== */
+
+/* Torna a largura dos painéis laterais dinâmica com limites */
+.left-panel-3d,
+.right-panel-3d {
+  width: clamp(260px, 22vw, 450px);
+  /* Permite scroll invisível caso a tela do monitor seja muito baixa */
+  overflow-y: auto;
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.left-panel-3d::-webkit-scrollbar,
+.right-panel-3d::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari */
+}
+
+/* O Display Principal agora se adapta à altura e largura disponíveis */
+
+
+/* Ajuste dinâmico de textos e botões usando clamp() */
+.mission-timer h2 {
+  font-size: clamp(1.5rem, 2.5vw, 3rem);
+}
+
+.route-monitor h4 {
+  font-size: clamp(0.9rem, 1.2vw, 1.3rem);
+}
+
+.ativar-de-btn,
+.inventory-btn {
+  font-size: clamp(0.75rem, 1vw, 1.1rem);
+  min-height: clamp(45px, 6vh, 70px);
+  height: auto;
+}
+
+.route-box {
+  height: clamp(100px, 15vh, 160px);
+}
+
+.monitor-screen {
+  height: clamp(120px, 18vh, 200px);
+}
+
+.team-photo-img {
+  height: clamp(100px, 15vh, 180px);
+}
+
+/* --- MONITORES PEQUENOS / NOTEBOOKS (Ex: 1366x768) --- */
+@media (max-height: 800px) and (min-width: 769px) {
+  .right-monitor-container {
+    margin-top: 10px !important;
+    /* Sobrescreve o estilo inline do JS */
+    margin-bottom: 8px;
+  }
+
+  .propulsion-panel {
+    padding: 10px;
+    margin-bottom: 10px;
+    gap: 5px;
+  }
+
+  .cockpit-controls {
+    bottom: 20px;
+  }
+
+  .minerva-section {
+    margin-top: 10px;
+  }
+}
+
+/* --- MONITORES GIGANTES / ULTRAWIDE (4K+) --- */
+@media (min-width: 2500px) {
+  .left-panel-3d {
+    transform: perspective(1200px) rotateY(10deg) translateZ(50px);
+  }
+
+  .right-panel-3d {
+    transform: perspective(1200px) rotateY(-10deg) translateZ(50px);
+  }
+
+  .propulsion-value {
+    font-size: 1.5em;
+  }
+
+  .speed-gauge-value {
+    font-size: 1.5em;
+  }
+
+  .minerva-title {
+    font-size: 1.5em;
+  }
+}
+
+/* ============================================================== */
+/* CLASSES REINSERIDAS (BOLSA, TRANSMISSÃO, S.O.S E ALERTAS)      */
+/* ============================================================== */
+
+.bolsa-espacial-container {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bolsa-espacial-imagem {
+  width: 100px;
+  height: auto;
+  filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.6));
+  animation: brilhoBolsa 6s infinite;
+}
+
+@keyframes brilhoBolsa {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.6));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 15px rgba(0, 255, 255, 1));
+  }
+}
+
+.transmission-message {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: yellow;
+  font-family: 'Courier New', monospace;
+  font-size: 1.4em;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  text-shadow: 0 0 10px yellow;
+  animation: text-fade-in 2s ease-in-out;
+}
+
+@keyframes text-fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.monitor-text-display {
+  width: 100%;
+  height: 100%;
+  padding: 15px;
+  box-sizing: border-box;
+  color: #f6faf5df;
+  font-family: 'Courier New', monospace;
+  font-size: 1em;
+  line-height: 1.4;
+  text-align: left;
+  white-space: pre-wrap;
+  text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.monitor-text-display p {
+  margin: 0;
+}
+
+@keyframes pulse-bright {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff;
+    color: #fff;
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 12px #00ffff, 0 0 20px #00ffff;
+    color: #00ffff;
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff;
+    color: #fff;
+  }
+}
+
+.play-button.pulsing-play {
+  opacity: 1;
+  cursor: pointer;
+  border: 1px solid #00ffff;
+  animation: pulse-bright 2s infinite;
+}
+
+.play-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.palavra-chave {
+  color: yellow;
+  font-weight: bold;
+  text-shadow: 0 0 5px rgba(255, 255, 0, 0.7);
+}
+
+.dialogue-character-name {
+  color: yellow;
+  font-weight: bold;
+}
+
+.hvs-logo {
+  height: clamp(35px, 4vh, 45px);
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 6px rgba(0, 180, 255, 0.8));
+  flex-shrink: 0;
+}
+
+.pause-button.paused {
+  background-color: rgba(50, 255, 50, 0.2) !important;
+}
+
+.pause-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.sos-button.active:hover {
+  transform: scale(1.02);
+}
+
+/* Shaders and Sweep Shine FX */
+.glossary-button::after,
+.shine-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%);
+  transform: skewX(-25deg);
+  animation: sweep-shine 3s infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes sweep-shine {
+  0% {
+    left: -150%;
+  }
+
+  20% {
+    left: 200%;
+  }
+
+  100% {
+    left: 200%;
+  }
+}
+
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Minerva Warp Active Glow */
+.minerva-image.minerva-rainbow-glow {
+  animation: minervaRainbowPulse 1.5s infinite linear;
+  border-radius: 50%;
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes minervaRainbowPulse {
+  0% {
+    filter: drop-shadow(0 0 15px #ff0000) brightness(1.2);
+  }
+
+  15% {
+    filter: drop-shadow(0 0 15px #ff8000) brightness(1.2);
+  }
+
+  30% {
+    filter: drop-shadow(0 0 15px #ffff00) brightness(1.2);
+  }
+
+  45% {
+    filter: drop-shadow(0 0 15px #00ff00) brightness(1.2);
+  }
+
+  60% {
+    filter: drop-shadow(0 0 15px #00ffff) brightness(1.2);
+  }
+
+  75% {
+    filter: drop-shadow(0 0 15px #0000ff) brightness(1.2);
+  }
+
+  90% {
+    filter: drop-shadow(0 0 15px #ff00ff) brightness(1.2);
+  }
+
+  100% {
+    filter: drop-shadow(0 0 15px #ff0000) brightness(1.2);
+  }
+}
+
+.minerva-title.highlighted {
+  animation: minervaTitleRainbow 3s infinite linear;
+}
+
+@keyframes minervaTitleRainbow {
+  0% {
+    color: #ff0000;
+    text-shadow: 0 0 10px #ff0000;
+  }
+
+  15% {
+    color: #ff8000;
+    text-shadow: 0 0 10px #ff8000;
+  }
+
+  30% {
+    color: #ffff00;
+    text-shadow: 0 0 10px #ffff00;
+  }
+
+  45% {
+    color: #00ff00;
+    text-shadow: 0 0 10px #00ff00;
+  }
+
+  60% {
+    color: #00ffff;
+    text-shadow: 0 0 10px #00ffff;
+  }
+
+  75% {
+    color: #0000ff;
+    text-shadow: 0 0 10px #0000ff;
+  }
+
+  90% {
+    color: #ff00ff;
+    text-shadow: 0 0 10px #ff00ff;
+  }
+
+  100% {
+    color: #ff0000;
+    text-shadow: 0 0 10px #ff0000;
+  }
+}
+
+.speed-gauge-fill.is-dobra-active {
+  background: linear-gradient(90deg, #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff00ff, #ff0000);
+  animation: rainbow-pulse 2s infinite alternate;
+}
+
+@keyframes rainbow-pulse {
+  0% {
+    opacity: 0.8;
+    background-size: 100% 100%;
+  }
+
+  100% {
+    opacity: 1;
+    background-size: 200% 100%;
+  }
+}
+
+.close-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 60, 60, 0.8);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 22px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.bolsa-button img {
+  width: clamp(35px, 5vw, 60px);
+  height: auto;
+  filter: drop-shadow(0 0 6px rgba(0, 200, 255, 0.6));
+  animation: brilhoBolsa 6s infinite;
+  transition: transform 0.3s ease;
+}
+
+.bolsa-button:hover img {
+  transform: scale(1.1);
+}
+
+.rec-label.blinking-rec {
+  color: #f00;
+  text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+  animation: blink-animation 1.2s infinite;
+}
+
+@keyframes blink-animation {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.floating-buttons-container {
+  position: relative;
+  /* Removemos fixed, bottom e right */
+  z-index: 15;
+  display: flex;
+  flex-direction: row;
+  /* Mantém os botões em linha */
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: auto;
+  /* O espaço vazio do painel agora fica ABAIXO dos botões */
+}
+
+.pause-button {
+  flex: 1;
+  background-color: rgba(50, 255, 50, 0.2) !important;
+  border: 1px solid rgba(79, 195, 247, 0.8);
+  color: #fff;
+  padding: clamp(8px, 1.5vh, 12px) 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  font-size: clamp(0.75rem, 1vw, 1rem);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sos-button {
+  flex: 1;
+  /* Removemos width fixo e aspect-ratio */
+  background-color: rgba(180, 0, 0, 0.7);
+  border: 1px solid rgba(255, 50, 50, 0.5);
+  color: #fff;
+  padding: clamp(8px, 1.5vh, 12px) 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  font-size: clamp(0.75rem, 1vw, 1rem);
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sos-button.active {
+  background-color: rgba(255, 0, 0, 0.9);
+  animation: pulse-sos 1.5s infinite;
+}
+
+@keyframes pulse-sos {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+  }
+
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(255, 0, 0, 1);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.7);
+  }
+}
+
+/* Responsive Media Viewports */
+@media (max-width: 768px) {
+  .tela-decolagem {
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .cockpit-container {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    perspective: none;
+    transform: none;
+  }
+
+  .left-panel-3d,
+  .right-panel-3d,
+  .main-display {
+    position: relative;
+    width: 95%;
+    max-width: 500px;
+    margin: 10px auto;
+    transform: none;
+    height: auto;
+    padding: 10px;
+  }
+
+  .main-display {
+    order: 1;
+    height: 60vh;
+  }
+
+  .left-panel-3d {
+    order: 2;
+  }
+
+  .right-panel-3d {
+    order: 3;
+  }
+
+  .propulsion-panel {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dobra-buttons-container {
+    flex-direction: column;
+  }
+
+  .dobra-btn-wrapper {
+    width: 100%;
   }
 }

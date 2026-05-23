@@ -433,3 +433,41 @@
         opacity: 1;
     }
 }
+
+/* --- LÓGICA DE BLOQUEIO E NAVE CINZENTA --- */
+
+.ship-option.indisponivel .ship-image {
+    filter: grayscale(100%) opacity(40%);
+    pointer-events: none;
+}
+
+.ship-option.indisponivel {
+    border-color: #555;
+    background: rgba(20, 20, 20, 0.7);
+    cursor: not-allowed;
+    position: relative;
+}
+
+.bloqueio-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #ff4d4d;
+    font-weight: bold;
+    font-size: 1.1rem;
+    z-index: 10;
+    border-radius: 10px;
+}
+
+.icone-cadeado {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 10px;
+}

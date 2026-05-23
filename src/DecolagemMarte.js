@@ -136,7 +136,7 @@ const RightMonitorPanel = React.memo(({
       <MissionTimer isPaused={isPaused} />
 
       {/* MONITOR SUPERIOR */}
-      <div className="right-monitor-container" style={{ marginTop: '80px' }}>
+      <div className="right-monitor-container">
         <div className="monitor-controls">
           <span className={`rec-label ${isTransmissionStarting ? 'blinking-rec' : 'inactive-rec'}`}>REC</span>
           <button
@@ -465,12 +465,15 @@ const PLANET_DATA_FOR_SOS = [
   { name: "Ceres", orbitRadius: 60 }, { name: "Eris", orbitRadius: 165 }
 ];
 const STATION_NAMES = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boctok'];
+
+// --- LISTA DE S.O.S ---
 const SOS_EVENTS_LIST = [
   { id: 1, name: 'Piratas Espaciais', description: 'ALERTA! O sinal era uma isca. Piratas interceptaram a nave. Prepare-se para um possível confronto ou negociação hostil.', image: '/images/pirates.png' },
   { id: 2, name: 'Astronauta Morto', description: 'Encontramos um traje à deriva. Infelizmente, não há sinais vitais. Podemos recuperar equipamentos e dados da missão dele.', image: '/images/dead_astronaut.png' },
   { id: 3, name: 'Nave Destruída', description: 'Destroços de uma antiga batalha ou acidente. Há muita sucata valiosa e contêineres que podem conter recursos úteis.', image: '/images/destroyed_ship.png' },
   { id: 4, name: 'Objeto Alienígena', description: 'Identificamos um artefato de origem desconhecida emitindo o sinal. Sua tecnologia parece avançada e fora dos padrões da ACEE.', image: '/images/static_signal.png' }
 ];
+
 const hasWaterList = new Set([
   "Marte", "Mercúrio", "Ceres", "Plutão", "Haumea", "Eris", "Makemake", "Lua", "Europa", "Ganímedes",
   "Calisto", "Titã", "Encelado", "Tritão", "Caronte", "Titania", "Oberon", "Vesta", "Trappist1e",
@@ -517,6 +520,11 @@ const DecolagemMarte = () => {
   const API_BASE_URL = apiBaseUrl;
   const { spaceCoins, setSpaceCoins, syncSpaceCoins } = useSpaceCoins();
   const alarmAudio = useMemo(() => new Audio('/sounds/evacuation-alarm.mp3'), []);
+
+  // --- CONTROLE DE ESTADOS DO S.O.S ---
+  const [usedSosIds, setUsedSosIds] = useState([]);
+  const usedSosIdsRef = useRef([]);
+  useEffect(() => { usedSosIdsRef.current = usedSosIds; }, [usedSosIds]);
 
   const playSFX = useCallback((url) => {
     try {
@@ -627,9 +635,7 @@ const DecolagemMarte = () => {
   const [showMinervaOnMonitor, setShowMinervaOnMonitor] = useState(false);
   const [groupId, setGroupId] = useState(null);
 
-  // ESTADO DA MINERVA (Começa em false e só muda no momento da escolha)
   const [isMinervaHighlighted, setIsMinervaHighlighted] = useState(false);
-
   const [isCooldownOver, setIsCooldownOver] = useState(true);
 
   const [isForcedMapEdit, setIsForcedMapEdit] = useState(false);
@@ -908,6 +914,7 @@ const DecolagemMarte = () => {
       setTravelStarted(true);
       setDobraCooldownEnd(0);
       setProcessadorO2(0);
+      setIsDobraEnabled(false);
       setIsDeparting(false);
     }, 4000);
   }, [playSFX, triggerMinervaInterplanetarySpeed]);
@@ -937,15 +944,22 @@ const DecolagemMarte = () => {
       if (newOriginStep && newDestinationStep) {
         setOriginPlanet({ nome: newOriginStep.name });
         setSelectedPlanet({ nome: newDestinationStep.name });
-        const newDist = newDestinationStep.distance || 300000000;
-        setDistanceKm(newDist);
-        distanceKmRef.current = newDist;
+
+        // --- AS DUAS LINHAS ABAIXO FORAM REMOVIDAS ---
+        // Elas faziam com que a distância restante voltasse ao total inicial da rota, reiniciando o voo visualmente.
+        // const newDist = newDestinationStep.distance || 300000000;
+        // setDistanceKm(newDist);
+        // distanceKmRef.current = newDist;
+        // ---------------------------------------------
       }
+
+      // Mantemos a flag como falsa para o voo continuar normalmente
       setArrivedAtMars(false);
-      setIsFinalApproach(false);
+      // Não alteramos o isFinalApproach para não quebrar a aproximação se já estiver perto
 
       setTimeout(() => { routeChangeLockRef.current = false; }, 500);
     } else {
+      // ... resto do código original do else (quando não está em voo) mantido igual ...
       playSFX('/sounds/empuxo.wav');
       setIsDeparting(true);
       setShowStoreModal(false);
@@ -976,6 +990,7 @@ const DecolagemMarte = () => {
         setTravelStarted(true);
         setDobraCooldownEnd(0);
         setProcessadorO2(0);
+        setIsDobraEnabled(false);
         setRefetchTrigger(prev => prev + 1);
         setIsDeparting(false);
       }, 4000);
@@ -1024,9 +1039,7 @@ const DecolagemMarte = () => {
       });
     } catch (error) { console.error("ERRO: Falha ao registrar escolha:", error); }
 
-    // GATILHO QUE ACENDE A MINERVA AO FAZER A ESCOLHA NO MODAL
     setIsMinervaHighlighted(true);
-
     setShowEscolhaModal(false); setShowConfirmacaoModal(true);
   };
 
@@ -1248,6 +1261,13 @@ const DecolagemMarte = () => {
           if (data.spaceCoins !== undefined) syncSpaceCoinsRef.current(data.spaceCoins);
           if (data.processadorO2 !== undefined) setProcessadorO2(data.processadorO2);
 
+          // --- CARREGAR HISTÓRICO DE S.O.S ---
+          if (data.sosHistory) {
+            setUsedSosIds(data.sosHistory);
+            usedSosIdsRef.current = data.sosHistory;
+          }
+          // ------------------------------------
+
           let photo = data.photoUrl;
           if (!photo && gameNumberRef.current && data.teamName) {
             photo = constructPhotoUrl(gameNumberRef.current, data.teamName);
@@ -1451,7 +1471,6 @@ const DecolagemMarte = () => {
     return () => { if (restoreIntervalRef.current) clearInterval(restoreIntervalRef.current); };
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
 
-
   useEffect(() => {
     const gameLoop = (timestamp) => {
       if (isPausedRef.current) {
@@ -1534,14 +1553,53 @@ const DecolagemMarte = () => {
 
           if (isSosDestination && !isForcedMapEditRef.current) {
             if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEventRef.current) {
-              const randIndex = Math.floor(Math.random() * 4);
-              setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
+
+              // --- AQUI ESTÁ A IMPLEMENTAÇÃO DO FILTRO ANTI-REPETIÇÃO ---
+              const availableEvents = SOS_EVENTS_LIST.filter(ev => !usedSosIdsRef.current.includes(ev.id));
+
+              if (availableEvents.length > 0) {
+                const randIndex = Math.floor(Math.random() * availableEvents.length);
+                const selectedEvent = availableEvents[randIndex];
+
+                setSosSurpriseEvent(selectedEvent);
+                sosSurpriseEventRef.current = selectedEvent;
+
+                // Grava imediatamente no banco para o evento não ser sorteado novamente se a página recarregar
+                fetch(`${API_BASE_URL}/${userId}/record-sos-history`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ sosId: selectedEvent.id })
+                }).catch(err => console.error("Erro ao salvar S.O.S no histórico:", err));
+
+                // Atualiza o estado local
+                setUsedSosIds(prev => [...prev, selectedEvent.id]);
+              } else {
+                console.log("Todos os eventos S.O.S. já foram explorados.");
+              }
+              // -------------------------------------------------------------
             }
+
             if (newDistance <= 0 && !arrivedAtMarsRef.current) {
               setArrivedAtMars(true); setSpeed(0);
+
+              // Prevenção extra caso o evento não tenha sido sorteado nos 1000km
               if (!sosSurpriseEventRef.current) {
-                const randIndex = Math.floor(Math.random() * 4);
-                setSosSurpriseEvent(SOS_EVENTS_LIST[randIndex]);
+                const availableEvents = SOS_EVENTS_LIST.filter(ev => !usedSosIdsRef.current.includes(ev.id));
+                if (availableEvents.length > 0) {
+                  const randIndex = Math.floor(Math.random() * availableEvents.length);
+                  const selectedEvent = availableEvents[randIndex];
+
+                  setSosSurpriseEvent(selectedEvent);
+                  sosSurpriseEventRef.current = selectedEvent;
+
+                  fetch(`${API_BASE_URL}/${userId}/record-sos-history`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sosId: selectedEvent.id })
+                  }).catch(err => console.error("Erro ao salvar S.O.S no histórico:", err));
+
+                  setUsedSosIds(prev => [...prev, selectedEvent.id]);
+                }
               }
 
               const newRouteIndex = routeIndexRef.current + 1;
@@ -1581,7 +1639,6 @@ const DecolagemMarte = () => {
             if (isStation) {
               setTimeout(() => { setShowStoreModal(true); }, 2500);
             } else {
-              // MELHORIA DE BUSCA ROBUSTA
               const desafioEncontrado = desafiosData.desafios?.find(d =>
                 normalizeName(d.planeta) === targetName ||
                 (selPlanet.desafioId && d.id === selPlanet.desafioId)
@@ -1678,7 +1735,9 @@ const DecolagemMarte = () => {
     return 45000;
   }, [isDobraAtivada, isBoostingTo60k, isFinalApproach]);
 
+  // ---> CORREÇÃO APLICADA AQUI: A regra dos 60.000 voltou para bloquear a Pausa! <---
   const isPauseButtonDisabled = telemetry.velocity.kmh < 60000 || isDobraAtivada || distanceKm <= 0;
+
   const currentDialogueStep = activeChallengeData?.dialogo?.[dialogueIndex];
   const currentCharacterId = currentDialogueStep?.personagemId;
   const currentCharacterData = currentCharacterId ? desafiosData.personagens[currentCharacterId] : null;
@@ -1730,7 +1789,6 @@ const DecolagemMarte = () => {
     const duration = currentStep.duracao || (currentStep.texto.length * 50 + 2000);
     const timer = setTimeout(() => { handleNextDialogue(); }, duration);
 
-    // CORREÇÃO CRÍTICA DO TEMPORIZADOR
     return () => clearTimeout(timer);
   }, [dialogueIndex, isTransmissionStarting, activeChallengeData, handleNextDialogue]);
 
@@ -1740,6 +1798,92 @@ const DecolagemMarte = () => {
     }
     setShowStellarMap(show);
   }, [distanceKm, isForcedMapEdit, playSound]);
+
+  // --- INÍCIO: CENTRAL DE ATALHOS (TECLADO E STREAM DECK) ---
+  useEffect(() => {
+    const handleGlobalHotkeys = (e) => {
+      // Ignora os atalhos se o jogador estiver digitando em um campo de texto
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+      const key = e.key.toLowerCase();
+
+      switch (key) {
+        case ' ': // Barra de espaço (Dobra)
+          e.preventDefault();
+          if (!isDobraEnabled || isDobraAtivada || isPaused) return;
+          handleDobraEspacial();
+          break;
+
+        case 'p': // Pausar jogo
+          e.preventDefault();
+          if (!isPauseButtonDisabled && !isRestoringSOS) togglePause();
+          break;
+
+        case 's': // Ativar S.O.S
+          e.preventDefault();
+          if (isSOSActive) handleSOS();
+          break;
+
+        case 'i': // Inventário
+          e.preventDefault();
+          // Inventário liberado para abrir em qualquer momento, assim como a Minerva
+          handleInventory();
+          break;
+
+        case 'g': // Glossário
+          e.preventDefault();
+          if (!isPaused) setShowGlossary(true);
+          break;
+
+        case 'm': // Mapa Estelar
+          e.preventDefault();
+          if (isPaused) return;
+
+          if (isForcedMapEditRef.current) {
+            handleToggleMap(true);
+            break;
+          }
+
+          // TRAVA DO MAPA: Não abre em voo se estiver na Dobra ou < 60.000 km/h (Aproximação/Decolagem)
+          if (distanceKmRef.current > 0 && (isDobraAtivadaRef.current || telemetryRef.current.velocity.kmh < 60000)) {
+            console.log("❌ Mapa bloqueado pelas regras de voo.");
+            return;
+          }
+
+          handleToggleMap(true);
+          break;
+
+        case 'a': // Minerva
+          e.preventDefault();
+          handleMinervaClick();
+          break;
+
+        case 'o': // Processador O2 (letra 'o')
+          e.preventDefault();
+          if (!isO2TransferDisabled) handleOpenO2Modal();
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleGlobalHotkeys);
+
+    return () => {
+      window.removeEventListener('keydown', handleGlobalHotkeys);
+    };
+  }, [
+    handleDobraEspacial, isDobraEnabled, isDobraAtivada, isPaused,
+    togglePause, isPauseButtonDisabled, isRestoringSOS,
+    handleSOS, isSOSActive,
+    handleInventory,
+    setShowGlossary,
+    handleToggleMap,
+    handleMinervaClick,
+    handleOpenO2Modal, isO2TransferDisabled
+  ]);
+  // --- FIM: CENTRAL DE ATALHOS ---
 
   if (isLoadingRoute) return <div className="tela-decolagem" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5em', color: '#00aaff', textShadow: '0 0 10px #00aaff' }}>Buscando dados da missão...</div>;
 

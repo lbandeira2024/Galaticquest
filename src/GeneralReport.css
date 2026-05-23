@@ -1,0 +1,595 @@
+/* =========================================
+   VARIÁVEIS DE TEMA (MODO CYBER/NEON)
+========================================= */
+:root {
+    --bg-dark: #000000;
+    --panel-bg: rgba(0, 0, 0, 0.85);
+    --card-bg: rgba(0, 0, 0, 0.5);
+    --border-color: rgba(255, 152, 0, 0.4);
+    --neon-orange: #ff9800;
+    --neon-orange-glow: rgba(255, 152, 0, 0.5);
+    --neon-yellow: #ffc400;
+    --neon-cyan: #00bcd4;
+    --text-main: #cccccc;
+    --font-cyber: 'Courier New', monospace;
+}
+
+/* =========================================
+   ESTILOS GERAIS
+========================================= */
+.report-body {
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    font-family: var(--font-cyber);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.cosmic-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.cyber-container {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* =========================================
+   HEADER (Baseado no GameConfig)
+========================================= */
+.admin-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    max-width: 1400px;
+    justify-content: space-between;
+    border-bottom: 2px solid #ff9800;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    text-align: left;
+}
+
+.admin-logo {
+    height: 60px;
+}
+
+.admin-header h1 {
+    color: #ff9800;
+    font-size: 2.2rem;
+    margin: 0;
+    text-shadow: 0 0 10px rgba(255, 152, 0, 0.7);
+}
+
+.welcome-message {
+    color: #ccc;
+    font-size: 0.9rem;
+    margin: 5px 0 0 0;
+}
+
+.user-name {
+    font-weight: bold;
+    color: #ffc400;
+    text-shadow: 0 0 5px rgba(255, 196, 0, 0.5);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+}
+
+.logout-button {
+    background: none;
+    border: 1px solid #ff9800;
+    color: #ff9800;
+    padding: 8px 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.logout-button:hover {
+    background-color: #ff9800;
+    color: #000;
+}
+
+/* BOTÕES DE AUDIO E PAUSA CIRCULARES */
+.audio-toggle-button {
+    background: none;
+    border: 1px solid #444;
+    color: #ccc;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    font-size: 1.2rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+}
+
+.audio-toggle-button.active:hover {
+    border-color: #ff9800;
+    color: #ff9800;
+}
+
+.audio-toggle-button.muted {
+    border-color: #ff9800;
+    color: #ffc400;
+    box-shadow: 0 0 8px rgba(255, 196, 0, 0.7);
+    background-color: rgba(255, 152, 0, 0.1);
+}
+
+.audio-toggle-button.muted:hover {
+    background-color: rgba(255, 152, 0, 0.3);
+}
+
+.pause-toggle-button.paused {
+    border-color: #ff3366;
+    color: #ff3366;
+    box-shadow: 0 0 8px rgba(255, 51, 102, 0.7);
+    background-color: rgba(255, 51, 102, 0.1);
+}
+
+.pause-toggle-button.paused:hover {
+    background-color: rgba(255, 51, 102, 0.3);
+}
+
+
+/* =========================================
+   PAINEL PRINCIPAL & LAYOUT GRID
+========================================= */
+.neon-panel-wrapper {
+    background: var(--panel-bg);
+    border: 2px solid var(--neon-orange);
+    border-radius: 10px;
+    box-shadow: 0 0 30px var(--neon-orange-glow);
+    padding: 30px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.panel-main-title {
+    color: var(--neon-yellow);
+    font-size: 2.2rem;
+    margin: 0 0 30px 0;
+    text-shadow: 0 0 10px rgba(255, 196, 0, 0.8);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+}
+
+.rules-layout-grid {
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+/* =========================================
+   COLUNA 1: MENU ESQUERDO
+========================================= */
+.action-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 220px;
+    flex-shrink: 0;
+}
+
+.action-tab-btn {
+    background: transparent;
+    border: 1px solid var(--neon-orange);
+    color: var(--neon-orange);
+    padding: 12px;
+    font-family: var(--font-cyber);
+    font-size: 0.85rem;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-tab-btn:hover {
+    background: rgba(255, 152, 0, 0.2);
+}
+
+.action-tab-btn.active-neon {
+    background: var(--neon-orange);
+    color: var(--bg-dark);
+    box-shadow: 0 0 15px var(--neon-orange-glow);
+}
+
+/* =========================================
+   COLUNA 2: CARDS CENTRAIS DE CONFIGURAÇÃO
+========================================= */
+.config-quadrants {
+    flex-grow: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.cyber-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    transition: box-shadow 0.3s;
+}
+
+.cyber-card:hover {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 188, 212, 0.3);
+}
+
+.card-title {
+    color: var(--neon-cyan);
+    font-size: 1.2rem;
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px dashed var(--border-color);
+    padding-bottom: 8px;
+}
+
+.form-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.form-row label {
+    font-size: 0.95rem;
+    color: var(--text-main);
+}
+
+/* Inputs e Selects */
+.terminal-dropdown,
+.terminal-input-num {
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--neon-orange);
+    color: white;
+    font-family: var(--font-cyber);
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    width: 140px;
+    outline: none;
+}
+
+.terminal-dropdown:focus,
+.terminal-input-num:focus {
+    border-color: var(--neon-yellow);
+    box-shadow: 0 0 8px rgba(255, 196, 0, 0.6);
+}
+
+/* Range Slider */
+.cyber-range {
+    -webkit-appearance: none;
+    width: 140px;
+    background: transparent;
+}
+
+.cyber-range::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    background: var(--border-color);
+    border-radius: 2px;
+}
+
+.cyber-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    background: var(--neon-orange);
+    cursor: pointer;
+    margin-top: -7px;
+    box-shadow: 0 0 10px var(--neon-orange-glow);
+}
+
+/* Toggle Switch (Interruptor) */
+.cyber-switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+}
+
+.cyber-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.switch-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border-color);
+    border-radius: 24px;
+    transition: 0.4s;
+}
+
+.switch-slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-main);
+    border-radius: 50%;
+    transition: 0.4s;
+}
+
+input:checked+.switch-slider {
+    background-color: rgba(255, 152, 0, 0.3);
+    border-color: var(--neon-orange);
+    box-shadow: 0 0 10px var(--neon-orange-glow);
+}
+
+input:checked+.switch-slider:before {
+    transform: translateX(22px);
+    background-color: var(--neon-orange);
+}
+
+/* Tags de Biomas */
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
+    width: 180px;
+}
+
+.cyber-tag {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border: 1px solid var(--neon-cyan);
+    border-radius: 4px;
+    color: var(--neon-cyan);
+    background: rgba(0, 188, 212, 0.1);
+    cursor: pointer;
+}
+
+.cyber-tag.active {
+    background: var(--neon-cyan);
+    color: var(--bg-dark);
+    box-shadow: 0 0 8px rgba(0, 188, 212, 0.6);
+    font-weight: bold;
+}
+
+/* =========================================
+   COLUNA 3: MENU DIREITO
+========================================= */
+.side-nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 160px;
+    flex-shrink: 0;
+    border-left: 1px solid var(--border-color);
+    padding-left: 20px;
+}
+
+.nav-menu-item {
+    background: transparent;
+    border: none;
+    color: #888;
+    text-align: left;
+    font-family: var(--font-cyber);
+    font-size: 0.9rem;
+    padding: 12px 10px;
+    cursor: pointer;
+    transition: 0.3s;
+    border-left: 3px solid transparent;
+}
+
+.nav-menu-item:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-menu-item.active-nav {
+    color: var(--neon-orange);
+    border-left-color: var(--neon-orange);
+    background: rgba(255, 152, 0, 0.1);
+    font-weight: bold;
+    text-shadow: 0 0 5px var(--neon-orange-glow);
+}
+
+/* =========================================
+   BOTÕES E RODAPÉ
+========================================= */
+.neon-btn {
+    padding: 10px 20px;
+    font-family: var(--font-cyber);
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+}
+
+.outline-btn {
+    background: transparent;
+    border: 1px solid var(--neon-orange);
+    color: var(--neon-orange);
+}
+
+.outline-btn:hover {
+    background: var(--neon-orange);
+    color: var(--bg-dark);
+}
+
+.footer-actions {
+    margin-top: 40px;
+    display: flex;
+    justify-content: flex-end;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+
+.primary-neon {
+    background-color: var(--neon-orange);
+    color: var(--bg-dark);
+    border: none;
+    padding: 15px 30px;
+    font-size: 1rem;
+    box-shadow: 0 0 20px var(--neon-orange-glow);
+}
+
+.primary-neon:hover {
+    background-color: var(--neon-yellow);
+    box-shadow: 0 0 25px rgba(255, 196, 0, 0.8);
+}
+
+/* ========================================================
+   ESTILOS EXCLUSIVOS DA TABELA DE PONTUAÇÃO (DA IMAGEM)
+======================================================== */
+.table-wrapper {
+    grid-column: 1 / -1;
+    overflow-x: auto;
+    background: white;
+    border-radius: 8px;
+    padding: 2px;
+}
+
+.score-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: Arial, sans-serif;
+    color: black;
+    text-align: center;
+}
+
+.score-table th {
+    background-color: #558ed5;
+    color: white;
+    padding: 15px;
+    border: 1px solid black;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.score-table td {
+    padding: 10px;
+    border: 1px solid black;
+    font-size: 14px;
+}
+
+.row-header {
+    background-color: #e6e6e6 !important;
+    text-align: center;
+}
+
+.row-green td {
+    background-color: #c4d79b;
+}
+
+.row-orange td {
+    background-color: #f79646;
+}
+
+.row-yellow td {
+    background-color: #ffc000;
+}
+
+.bold-row td {
+    font-weight: bold;
+}
+
+.red-dot {
+    width: 25px;
+    height: 25px;
+    background-color: #c00000;
+    border-radius: 50%;
+    margin: 10px auto;
+    box-shadow: inset -3px -3px 5px rgba(0, 0, 0, 0.3);
+}
+
+/* =========================================
+   CUSTOM TOOLTIP (NEON CYBER)
+========================================= */
+.cyber-tooltip-container {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.cyber-tooltip-text {
+    visibility: hidden;
+    opacity: 0;
+    width: max-content;
+    max-width: 250px;
+    background-color: rgba(0, 0, 0, 0.95);
+    color: var(--neon-cyan);
+    text-align: center;
+    border: 1px solid var(--neon-cyan);
+    border-radius: 6px;
+    padding: 10px 15px;
+    position: absolute;
+    z-index: 1000;
+    /* Posiciona acima do texto */
+    bottom: 150%;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 15px rgba(0, 188, 212, 0.6);
+    font-size: 0.85rem;
+    font-family: var(--font-cyber);
+    font-weight: normal;
+    transition: opacity 0.3s, visibility 0.3s;
+    white-space: normal;
+    line-height: 1.4;
+    text-shadow: none;
+    /* Remove negrito/sombra herdados para melhor leitura */
+}
+
+/* Setinha do balão apontando para baixo */
+.cyber-tooltip-text::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -6px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: var(--neon-cyan) transparent transparent transparent;
+}
+
+/* Efeito Hover para mostrar o Tooltip */
+.cyber-tooltip-container:hover .cyber-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+}

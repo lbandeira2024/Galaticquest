@@ -49,12 +49,45 @@ const FOOD_PER_KM = 30;
 const MAX_FUEL = 98000;
 
 const realDistances = {
-    "Sol": 0, "Mercurio": 57.9, "Venus": 108.2, "Terra": 149.6, "Marte": 227.9, "Ceres": 413.7, "Jupiter": 778.3,
-    "Saturno": 1427, "Urano": 2871, "Netuno": 4498, "Plutao": 5906, "Haumea": 6484, "Makemake": 6785, "Eris": 10125,
-    "Lua": 0.384, "Fobos": 0.009, "Deimos": 0.023, "Io": 0.421, "Europa": 0.670, "Ganímedes": 1.07, "Calisto": 1.88,
-    "Titã": 1.221, "Encelado": 0.238, "Mimas": 0.185, "Titania": 0.436, "Oberon": 0.583, "Tritao": 0.354, "Caronte": 0.019,
-    "Proxima Centauri b": 40230, "Trappist1e": 39140, "Kepler186f": 49200, "ACEE": 0.564, "Salyut": 6206,
-    "Delfos": 2875, "Mol": 4500, "Skylab": 115, "Almaz": 6000, "Tiangong": 1500, "Boctok": 39142
+    "Sol": 0,
+    "Mercurio": 57.9,
+    "Venus": 108.2,
+    "Terra": 149.6,
+    "Marte": 227.9,
+    "Ceres": 413.7,
+    "Jupiter": 778.3,
+    "Saturno": 1427,
+    "Urano": 2871,
+    "Netuno": 4498,
+    "Plutao": 5906,
+    "Haumea": 6484,
+    "Makemake": 6785,
+    "Eris": 10125,
+    "Lua": 0.384,
+    "Fobos": 0.009,
+    "Deimos": 0.023,
+    "Io": 0.421,
+    "Europa": 0.670,
+    "Ganímedes": 1.07,
+    "Calisto": 1.88,
+    "Titã": 1.221,
+    "Encelado": 0.238,
+    "Mimas": 0.185,
+    "Titania": 0.436,
+    "Oberon": 0.583,
+    "Tritao": 0.354,
+    "Caronte": 0.019,
+    "Proxima Centauri b": 40230,
+    "Trappist1e": 39140,
+    "Kepler186f": 49200,
+    "ACEE": 0.564,
+    "Salyut": 6206,
+    "Delfos": 2875,
+    "Mol": 4500,
+    "Skylab": 115,
+    "Almaz": 6000,
+    "Tiangong": 1500,
+    "Boctok": 39142
 };
 
 const solarSystem = {
@@ -108,86 +141,144 @@ const getDistanceFromJSON = (from, to) => {
     const formatName = (name) => name.replace(/ /g, '_').replace(/-/g, '_');
     const key1 = `${formatName(from)}_${formatName(to)}`;
     const key2 = `${formatName(to)}_${formatName(from)}`;
+
     if (transferDistances[key1]) return transferDistances[key1];
     if (transferDistances[key2]) return transferDistances[key2];
 
     const distanceFrom = getDistanceValue(from);
     const distanceTo = getDistanceValue(to);
+
     return Math.abs(distanceFrom - distanceTo) * 1e6;
 };
 
 const estimateFuel = (distance, transferType) => {
-    const fuelFactors = { 'direct': 0.5, 'hohmann': 1.0, 'gravity-assist': 1.8 };
+    const fuelFactors = {
+        direct: 0.5,
+        hohmann: 1.0,
+        'gravity-assist': 1.8
+    };
+
     const baseFuel = distance / 5000;
     return Math.round(baseFuel * (fuelFactors[transferType] || 1.0));
 };
 
 const initialRouteState = {
-    distance: 0, fuel: 0, food: 0, oxygen: 0, steps: [],
-    fuelPercentage: 0, foodPercentage: 0, oxygenPercentage: 0,
+    distance: 0,
+    fuel: 0,
+    food: 0,
+    oxygen: 0,
+    steps: [],
+    fuelPercentage: 0,
+    foodPercentage: 0,
+    oxygenPercentage: 0
 };
 
 function routeReducer(state, action) {
     let newSteps = [...state.steps];
+
     switch (action.type) {
         case 'SET_SAVED_ROUTE':
             newSteps = action.payload.steps;
             break;
+
         case 'ADD_STEP':
             if (newSteps.some(step => step.name === action.payload.destination)) return state;
+
             if (newSteps.length === 0) {
-                newSteps.push({ name: "Terra", distance: 0, fuel: 0, from: "Origem" });
+                newSteps.push({
+                    name: "Terra",
+                    distance: 0,
+                    fuel: 0,
+                    from: "Origem"
+                });
             }
+
             const lastStep = newSteps[newSteps.length - 1];
             const distance = getDistanceFromJSON(lastStep.name, action.payload.destination);
+
             newSteps.push({
                 name: action.payload.destination,
-                distance: distance,
+                distance,
                 fuel: estimateFuel(distance, 'direct'),
                 from: lastStep.name,
                 type: 'direct'
             });
             break;
+
         case 'REMOVE_STEP':
             if (action.payload.index === 0) return state;
             newSteps.splice(action.payload.index, 1);
             break;
+
         case 'REORDER_STEP':
             const { index, direction } = action.payload;
             const targetIndex = index + (direction === 'up' ? -1 : 1);
+
             if (index === 0 || targetIndex === 0) return state;
             if (index >= newSteps.length || targetIndex >= newSteps.length) return state;
+
             [newSteps[index], newSteps[targetIndex]] = [newSteps[targetIndex], newSteps[index]];
             break;
+
         case 'CLEAR_ROUTE':
-            return { ...initialRouteState, steps: [{ name: "Terra", distance: 0, fuel: 0, from: "Origem" }] };
+            return {
+                ...initialRouteState,
+                steps: [
+                    {
+                        name: "Terra",
+                        distance: 0,
+                        fuel: 0,
+                        from: "Origem"
+                    }
+                ]
+            };
+
         default:
             throw new Error();
     }
+
     for (let i = 1; i < newSteps.length; i++) {
         const fromBody = newSteps[i - 1].name;
         const toBody = newSteps[i].name;
-        const distance = getDistanceFromJSON(fromBody, toBody);
+        const stepDistance = getDistanceFromJSON(fromBody, toBody);
+
         newSteps[i] = {
             ...newSteps[i],
-            distance: distance,
-            fuel: estimateFuel(distance, newSteps[i].type || 'direct'),
-            from: fromBody,
+            distance: stepDistance,
+            fuel: estimateFuel(stepDistance, newSteps[i].type || 'direct'),
+            from: fromBody
         };
     }
+
     const totalDistance = newSteps.reduce((sum, step) => sum + (step.distance || 0), 0);
     const totalFuel = newSteps.reduce((sum, step) => sum + (step.fuel || 0), 0);
     const totalFood = Math.round(totalDistance * FOOD_PER_KM);
     const totalOxygen = Math.round(totalDistance * OXYGEN_PER_PERSON_PER_DAY * CREW_SIZE);
+
     return {
-        steps: newSteps, distance: totalDistance, fuel: totalFuel, food: totalFood, oxygen: totalOxygen,
+        steps: newSteps,
+        distance: totalDistance,
+        fuel: totalFuel,
+        food: totalFood,
+        oxygen: totalOxygen,
         fuelPercentage: calculatePercentage(totalFuel, MAX_FUEL),
         foodPercentage: calculatePercentage(totalFood, MAX_FOOD),
-        oxygenPercentage: calculatePercentage(totalOxygen, MAX_OXYGEN),
+        oxygenPercentage: calculatePercentage(totalOxygen, MAX_OXYGEN)
     };
 }
 
-const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRoute, currentIndex, onSosDetected, allowSos, sosSignalData }) => {
+const StellarMapPlan = ({
+    onRouteComplete,
+    onRouteReset,
+    onCloseMap,
+    showCloseButton,
+    hideClearButton = false,
+    initialRoute,
+    currentIndex = 0,
+    onSosDetected,
+    allowSos,
+    sosSignalData
+}) => {
     const { apiBaseUrl } = useConfig();
     const API_BASE_URL = apiBaseUrl;
 
@@ -202,14 +293,24 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
     const [hoveredStep, setHoveredStep] = useState(null);
     const [rotationAngles, setRotationAngles] = useState({});
     const [userId, setUserId] = useState(null);
+    const [isLoadingProgress, setIsLoadingProgress] = useState(false);
+    const [visibleMoonLabel, setVisibleMoonLabel] = useState(null);
 
     const sosSignal = sosSignalData;
     const containerRef = useRef(null);
-    const [isLoadingProgress, setIsLoadingProgress] = useState(false);
+    const panelRef = useRef(null);
+    const zoomRef = useRef(null);
+    const closeBtnRef = useRef(null);
+    const moonLabelTimeoutRef = useRef(null);
 
     const stars = useMemo(() => Array.from({ length: 500 }, (_, i) => ({
-        id: i, x: Math.random() * 100, y: Math.random() * 100, size: 0.3 + Math.random() * 3,
-        opacity: 0.1 + Math.random() * 0.9, delay: Math.random() * 10, duration: 3 + Math.random() * 7
+        id: i,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: 0.3 + Math.random() * 3,
+        opacity: 0.1 + Math.random() * 0.9,
+        delay: Math.random() * 10,
+        duration: 3 + Math.random() * 7
     })), []);
 
     const isSosAdded = useMemo(() => {
@@ -219,36 +320,58 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
 
     useEffect(() => {
         const storedUser = JSON.parse(localStorage.getItem('user'));
-        if (storedUser && storedUser._id) setUserId(storedUser._id);
+        if (storedUser && storedUser._id) {
+            setUserId(storedUser._id);
+        }
     }, []);
 
     useEffect(() => {
         if (initialRoute && initialRoute.length > 0) {
-            dispatchRouteAction({ type: 'SET_SAVED_ROUTE', payload: { steps: initialRoute } });
+            dispatchRouteAction({
+                type: 'SET_SAVED_ROUTE',
+                payload: { steps: initialRoute }
+            });
             setIsRouteConfirmed(false);
         }
     }, [initialRoute, currentIndex]);
 
     const isRouteModified = useMemo(() => {
-        if (!initialRoute || initialRoute.length === 0) return plannedRoute.steps.length > 1;
-        if (plannedRoute.steps.length !== initialRoute.length) return true;
+        if (!initialRoute || initialRoute.length === 0) {
+            return plannedRoute.steps.length > 1;
+        }
+
+        if (plannedRoute.steps.length !== initialRoute.length) {
+            return true;
+        }
+
         return plannedRoute.steps.some((step, idx) => step.name !== initialRoute[idx].name);
     }, [plannedRoute.steps, initialRoute]);
 
     useEffect(() => {
         const updateAngles = () => {
             const newRotationAngles = {};
+
             solarSystem.planets.forEach(planet => {
-                if (planet.orbitSpeed > 0) planet.angle = (planet.angle + planet.orbitSpeed) % 360;
-                if (planet.rotationSpeed > 0) newRotationAngles[planet.name] = (rotationAngles[planet.name] || 0) + planet.rotationSpeed;
+                if (planet.orbitSpeed > 0) {
+                    planet.angle = (planet.angle + planet.orbitSpeed) % 360;
+                }
+
+                if (planet.rotationSpeed > 0) {
+                    newRotationAngles[planet.name] = (rotationAngles[planet.name] || 0) + planet.rotationSpeed;
+                }
 
                 planet.moons.forEach(moon => {
                     moon.angle = (moon.angle + moon.orbitSpeed) % 360;
                     newRotationAngles[moon.name] = (rotationAngles[moon.name] || 0) + moon.rotationSpeed;
                 });
             });
-            setRotationAngles(prev => ({ ...prev, ...newRotationAngles }));
+
+            setRotationAngles(prev => ({
+                ...prev,
+                ...newRotationAngles
+            }));
         };
+
         const interval = setInterval(updateAngles, 50);
         return () => clearInterval(interval);
     }, [rotationAngles]);
@@ -259,69 +382,127 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
     );
 
     const nextDestination = useMemo(() =>
-        (currentIndex + 1 < plannedRoute.steps.length) ? plannedRoute.steps[currentIndex + 1].name : null,
+        (currentIndex + 1 < plannedRoute.steps.length)
+            ? plannedRoute.steps[currentIndex + 1].name
+            : null,
+        [plannedRoute.steps, currentIndex]
+    );
+
+    const plannedDestinations = useMemo(() =>
+        plannedRoute.steps.slice(currentIndex + 2).map(step => step.name),
         [plannedRoute.steps, currentIndex]
     );
 
     const handleBodyClick = useCallback((body) => {
         if (isRouteConfirmed) return;
-        if (visitedDestinations.includes(body.name)) return;
+        if (!body?.name) return;
+
+        // Terra é apenas ponto de partida.
+        // Não pode ser adicionada novamente e não abre quadro informativo.
+        if (body.name === "Terra") return;
+
+        // Sol também não pode ser incluído na rota.
         if (body.name === "Sol") return;
-        if (body.name === "Terra" && plannedRoute.steps.length > 1) {
-            setSelectedBody(body);
-            return;
-        }
-        dispatchRouteAction({ type: 'ADD_STEP', payload: { destination: body.name } });
-    }, [isRouteConfirmed, visitedDestinations, plannedRoute.steps.length]);
+
+        if (visitedDestinations.includes(body.name)) return;
+
+        dispatchRouteAction({
+            type: 'ADD_STEP',
+            payload: { destination: body.name }
+        });
+    }, [isRouteConfirmed, visitedDestinations]);
 
     const handleRemoveStep = useCallback((index) => {
         if (index <= (currentIndex + 1)) return;
-        dispatchRouteAction({ type: 'REMOVE_STEP', payload: { index } });
+
+        dispatchRouteAction({
+            type: 'REMOVE_STEP',
+            payload: { index }
+        });
     }, [currentIndex]);
 
     const handleMoveStep = useCallback((index, direction) => {
         if (index <= (currentIndex + 1)) return;
+
         const targetIndex = index + (direction === 'up' ? -1 : 1);
+
         if (targetIndex === currentIndex + 1) return;
-        dispatchRouteAction({ type: 'REORDER_STEP', payload: { index, direction } });
+
+        dispatchRouteAction({
+            type: 'REORDER_STEP',
+            payload: { index, direction }
+        });
     }, [currentIndex]);
 
     const handleConfirmRoute = useCallback(() => {
         if (plannedRoute.steps.length <= 1) return;
+
         new Audio('/sounds/03.system-selection.mp3').play();
         setWaveAnimation(true);
         setIsRouteConfirmed(true);
-        if (onRouteComplete) onRouteComplete(plannedRoute);
-        if (onCloseMap) onCloseMap({ newPlannedRoute: plannedRoute.steps, newRouteIndex: currentIndex });
+
+        if (onRouteComplete) {
+            onRouteComplete(plannedRoute);
+        }
+
+        if (onCloseMap) {
+            onCloseMap({
+                newPlannedRoute: plannedRoute.steps,
+                newRouteIndex: currentIndex
+            });
+        }
+
         setTimeout(() => setWaveAnimation(false), 5000);
     }, [plannedRoute, onRouteComplete, onCloseMap, currentIndex]);
 
-    const handleEditRoute = useCallback(() => setIsRouteConfirmed(false), []);
+    const handleEditRoute = useCallback(() => {
+        setIsRouteConfirmed(false);
+    }, []);
+
     const handleClearRoute = useCallback(() => {
-        if (!isRouteConfirmed) dispatchRouteAction({ type: 'CLEAR_ROUTE' });
+        if (!isRouteConfirmed) {
+            dispatchRouteAction({ type: 'CLEAR_ROUTE' });
+        }
     }, [isRouteConfirmed]);
 
     useEffect(() => {
         const container = containerRef.current;
         if (!container) return;
+
         const handleMouseDown = (e) => {
             if (e.target.closest('button')) return;
+
             setIsDragging(true);
-            setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y });
+            setDragStart({
+                x: e.clientX - position.x,
+                y: e.clientY - position.y
+            });
         };
+
         const handleMouseMove = (e) => {
-            if (isDragging) setPosition({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y });
+            if (isDragging) {
+                setPosition({
+                    x: e.clientX - dragStart.x,
+                    y: e.clientY - dragStart.y
+                });
+            }
         };
-        const handleMouseUp = () => setIsDragging(false);
+
+        const handleMouseUp = () => {
+            setIsDragging(false);
+        };
+
         const handleWheel = (e) => {
             e.preventDefault();
             const delta = e.deltaY > 0 ? 0.9 : 1.1;
             setZoom(prev => Math.min(Math.max(prev * delta, 0.3), 8));
         };
+
         container.addEventListener('wheel', handleWheel, { passive: false });
         container.addEventListener('mousedown', handleMouseDown);
         window.addEventListener('mousemove', handleMouseMove);
         window.addEventListener('mouseup', handleMouseUp);
+
         return () => {
             container.removeEventListener('wheel', handleWheel);
             container.removeEventListener('mousedown', handleMouseDown);
@@ -343,12 +524,13 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
         return '';
     };
 
-    const [visibleMoonLabel, setVisibleMoonLabel] = useState(null);
-    const moonLabelTimeoutRef = useRef(null);
-
     const handleMoonInteraction = useCallback((moonName) => {
-        if (moonLabelTimeoutRef.current) clearTimeout(moonLabelTimeoutRef.current);
+        if (moonLabelTimeoutRef.current) {
+            clearTimeout(moonLabelTimeoutRef.current);
+        }
+
         setVisibleMoonLabel(moonName);
+
         moonLabelTimeoutRef.current = setTimeout(() => {
             setVisibleMoonLabel(null);
         }, 3000);
@@ -356,45 +538,101 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
 
     useEffect(() => {
         return () => {
-            if (moonLabelTimeoutRef.current) clearTimeout(moonLabelTimeoutRef.current);
+            if (moonLabelTimeoutRef.current) {
+                clearTimeout(moonLabelTimeoutRef.current);
+            }
         };
     }, []);
 
     return (
-        <div className="stellar-map" ref={containerRef} style={{ cursor: isDragging ? 'grabbing' : 'grab' }}>
+        <div
+            className="stellar-map"
+            ref={containerRef}
+            style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+        >
             {plannedRoute.steps.length > 0 && (
-                <div className="route-display-panel ultimate">
+                <div className="route-display-panel ultimate" ref={panelRef}>
+                    {showCloseButton && (
+                        <button
+                            className="route-panel-close-btn"
+                            ref={closeBtnRef}
+                            onClick={() => onCloseMap(null)}
+                        >
+                            ×
+                        </button>
+                    )}
+
                     <div className="actions-ultimate">
-                        <button className={`action-ultimate ${isRouteConfirmed ? 'edit' : 'confirm'}`}
+                        <button
+                            className={`action-ultimate ${isRouteConfirmed ? 'edit' : 'confirm'}`}
                             onClick={isRouteConfirmed ? handleEditRoute : handleConfirmRoute}
-                            disabled={isRouteConfirmed ? false : (!isRouteModified || plannedRoute.steps.length <= 1)}>
-                            <span className="button-icon">{isRouteConfirmed ? '✎' : '✓'}</span>
+                            disabled={isRouteConfirmed ? false : (!isRouteModified || plannedRoute.steps.length <= 1)}
+                        >
+                            <span className="button-icon">
+                                {isRouteConfirmed ? '✎' : '✓'}
+                            </span>
                             {isRouteConfirmed ? 'EDITAR' : 'CONFIRMAR'}
                         </button>
-                        <button className="action-ultimate clear" onClick={handleClearRoute} disabled={isRouteConfirmed || currentIndex > 0}>
-                            <span className="button-icon">×</span> LIMPAR
-                        </button>
+
+                        {!hideClearButton && (
+                            <button
+                                className="action-ultimate clear"
+                                onClick={handleClearRoute}
+                                disabled={isRouteConfirmed || currentIndex > 0}
+                            >
+                                <span className="button-icon">×</span> LIMPAR
+                            </button>
+                        )}
                     </div>
 
                     <div className="resources-ultimate">
                         <div className="resource-ultimate fuel-ultimate">
-                            <img src="/images/Plan/Combustivel-port.png" alt="Fuel" className="resource-icon-ultimate" />
-                            <div className="resource-value-ultimate">{Math.round(plannedRoute.fuelPercentage)}%</div>
-                            <div className={`resource-warning ${getWarningClass(plannedRoute.fuel, MAX_FUEL)}`} style={{ display: getWarning(plannedRoute.fuel, MAX_FUEL, 'combustível') ? 'block' : 'none' }}>
+                            <img
+                                src="/images/Plan/Combustivel-port.png"
+                                alt="Fuel"
+                                className="resource-icon-ultimate"
+                            />
+                            <div className="resource-value-ultimate">
+                                {Math.round(plannedRoute.fuelPercentage)}%
+                            </div>
+                            <div
+                                className={`resource-warning ${getWarningClass(plannedRoute.fuel, MAX_FUEL)}`}
+                                style={{ display: getWarning(plannedRoute.fuel, MAX_FUEL, 'combustível') ? 'block' : 'none' }}
+                            >
                                 {getWarning(plannedRoute.fuel, MAX_FUEL, 'combustível')}
                             </div>
                         </div>
+
                         <div className="resource-ultimate oxygen-ultimate">
-                            <img src="/images/Plan/Oxigenio-port.png" alt="O2" className="resource-icon-ultimate" />
-                            <div className="resource-value-ultimate">{Math.round(plannedRoute.oxygenPercentage)}%</div>
-                            <div className={`resource-warning ${getWarningClass(plannedRoute.oxygen, MAX_OXYGEN)}`} style={{ display: getWarning(plannedRoute.oxygen, MAX_OXYGEN, 'oxigênio') ? 'block' : 'none' }}>
+                            <img
+                                src="/images/Plan/Oxigenio-port.png"
+                                alt="O2"
+                                className="resource-icon-ultimate"
+                            />
+                            <div className="resource-value-ultimate">
+                                {Math.round(plannedRoute.oxygenPercentage)}%
+                            </div>
+                            <div
+                                className={`resource-warning ${getWarningClass(plannedRoute.oxygen, MAX_OXYGEN)}`}
+                                style={{ display: getWarning(plannedRoute.oxygen, MAX_OXYGEN, 'oxigênio') ? 'block' : 'none' }}
+                            >
                                 {getWarning(plannedRoute.oxygen, MAX_OXYGEN, 'oxigênio')}
                             </div>
                         </div>
+
                         <div className="resource-ultimate food-ultimate">
-                            <img src="/images/Plan/Comida-port.png" alt="Food" className="resource-icon-ultimate" />
-                            <div className="resource-value-ultimate">{Math.round(plannedRoute.foodPercentage)}%</div>
-                            <div className={`resource-warning ${getWarningClass(plannedRoute.food, MAX_FOOD)}`} style={{ display: getWarning(plannedRoute.food, MAX_FOOD, 'provisões') ? 'block' : 'none' }}>
+                            <img
+                                src="/images/Plan/Comida-port.png"
+                                alt="Food"
+                                className="resource-icon-ultimate"
+                            />
+                            <div className="resource-value-ultimate">
+                                {Math.round(plannedRoute.foodPercentage)}%
+                            </div>
+                            <div
+                                className={`resource-warning ${getWarningClass(plannedRoute.food, MAX_FOOD)}`}
+                                style={{ display: getWarning(plannedRoute.food, MAX_FOOD, 'provisões') ? 'block' : 'none' }}
+                            >
                                 {getWarning(plannedRoute.food, MAX_FOOD, 'provisões')}
                             </div>
                         </div>
@@ -403,24 +641,64 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                     <div className="route-container">
                         <div className="route-ultimate">
                             {plannedRoute.steps.map((step, index) => {
-                                const markerClass = index <= currentIndex ? "origin-marker" : index === currentIndex + 1 ? "next-destination-marker" : "normal-marker";
+                                const markerClass = index <= currentIndex
+                                    ? "origin-marker"
+                                    : index === currentIndex + 1
+                                        ? "next-destination-marker"
+                                        : "normal-marker";
+
                                 const isStepLocked = index <= (currentIndex + 1);
                                 const displayName = getDisplayNameWithDrop(step.name);
 
                                 return (
-                                    <div key={index} className="step-ultimate" onMouseEnter={() => !isRouteConfirmed && setHoveredStep(index)} onMouseLeave={() => !isRouteConfirmed && setHoveredStep(null)}>
+                                    <div
+                                        key={index}
+                                        className="step-ultimate"
+                                        onMouseEnter={() => !isRouteConfirmed && setHoveredStep(index)}
+                                        onMouseLeave={() => !isRouteConfirmed && setHoveredStep(null)}
+                                    >
                                         <div className={`step-marker ${markerClass}`}></div>
+
                                         <div className="step-content">
                                             <span className="step-name">{displayName}</span>
-                                            <span className="step-distance">{index === 0 ? "PONTO DE PARTIDA" : `${step.distance.toLocaleString()} km`}</span>
+                                            <span className="step-distance">
+                                                {index === 0
+                                                    ? "PONTO DE PARTIDA"
+                                                    : `${step.distance.toLocaleString()} km`}
+                                            </span>
                                         </div>
-                                        {hoveredStep === index && !isRouteConfirmed && index > 0 && (
-                                            <div className="step-move-controls">
-                                                <button className="move-step-button up" onClick={() => handleMoveStep(index, 'up')} disabled={isLoadingProgress || isStepLocked}></button>
-                                                <button className="move-step-button down" onClick={() => handleMoveStep(index, 'down')} disabled={isLoadingProgress || isStepLocked || index >= plannedRoute.steps.length - 1}></button>
-                                            </div>
-                                        )}
-                                        {index > 0 && <button className="remove-step" onClick={() => handleRemoveStep(index)} disabled={isLoadingProgress || isRouteConfirmed || isStepLocked}>×</button>}
+
+                                        <div className="step-actions">
+                                            {!isRouteConfirmed && index > 0 && (
+                                                <div className="step-move-controls">
+                                                    <button
+                                                        className="move-step-button up"
+                                                        onClick={() => handleMoveStep(index, 'up')}
+                                                        disabled={isLoadingProgress || isStepLocked}
+                                                    >
+                                                        ▲
+                                                    </button>
+
+                                                    <button
+                                                        className="move-step-button down"
+                                                        onClick={() => handleMoveStep(index, 'down')}
+                                                        disabled={isLoadingProgress || isStepLocked || index >= plannedRoute.steps.length - 1}
+                                                    >
+                                                        ▼
+                                                    </button>
+                                                </div>
+                                            )}
+
+                                            {index > 0 && (
+                                                <button
+                                                    className="remove-step"
+                                                    onClick={() => handleRemoveStep(index)}
+                                                    disabled={isLoadingProgress || isRouteConfirmed || isStepLocked}
+                                                >
+                                                    ×
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 );
                             })}
@@ -428,19 +706,47 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                     </div>
                 </div>
             )}
+
             <div className="star-field">
-                {stars.map(star => <div key={`star-${star.id}`} className="star" style={{ left: `${star.x}%`, top: `${star.y}%`, width: `${star.size}px`, height: `${star.size}px`, opacity: star.opacity, animationDelay: `${star.delay}s`, animationDuration: `${star.duration}s` }} />)}
+                {stars.map(star => (
+                    <div
+                        key={`star-${star.id}`}
+                        className="star"
+                        style={{
+                            left: `${star.x}%`,
+                            top: `${star.y}%`,
+                            width: `${star.size}px`,
+                            height: `${star.size}px`,
+                            opacity: star.opacity,
+                            animationDelay: `${star.delay}s`,
+                            animationDuration: `${star.duration}s`
+                        }}
+                    />
+                ))}
             </div>
+
             <div className="grid-3d"></div>
 
-            <div className="solar-system" style={{
-                transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px)) scale(${zoom})`,
-                transition: isDragging ? 'none' : 'transform 0.3s ease'
-            }}>
-                <div className="celestial-body sun" style={{
-                    width: `${solarSystem.sun.radius}px`, height: `${solarSystem.sun.radius}px`,
-                    left: `${solarSystem.sun.x}%`, top: `${solarSystem.sun.y}%`
-                }} onClick={(e) => { e.stopPropagation(); handleBodyClick(solarSystem.sun); }}>
+            <div
+                className="solar-system"
+                style={{
+                    transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px)) scale(${zoom})`,
+                    transition: isDragging ? 'none' : 'transform 0.3s ease'
+                }}
+            >
+                <div
+                    className="celestial-body sun"
+                    style={{
+                        width: `${solarSystem.sun.radius}px`,
+                        height: `${solarSystem.sun.radius}px`,
+                        left: `${solarSystem.sun.x}%`,
+                        top: `${solarSystem.sun.y}%`
+                    }}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleBodyClick(solarSystem.sun);
+                    }}
+                >
                     <div className="sun-fire"></div>
                     <div className="sun-core"></div>
                     <div className="sun-corona"></div>
@@ -461,7 +767,8 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                     const sosOffsetY = -3;
 
                     return (
-                        <div className="celestial-body sos-signal"
+                        <div
+                            className="celestial-body sos-signal"
                             style={{
                                 left: `${hostX + sosOffsetX}%`,
                                 top: `${hostY + sosOffsetY}%`,
@@ -475,7 +782,9 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                         >
                             <div className="sos-pulse"></div>
                             <div className="label-container">
-                                <span className="body-label sos-label">{getDisplayName(sosSignal.name)}</span>
+                                <span className="body-label sos-label">
+                                    {getDisplayName(sosSignal.name)}
+                                </span>
                             </div>
                         </div>
                     );
@@ -486,41 +795,64 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                     const planetX = solarSystem.sun.x + Math.cos(planetAngleRad) * planet.orbitRadius;
                     const planetY = solarSystem.sun.y + Math.sin(planetAngleRad) * planet.orbitRadius;
 
-                    const planetStatus = planet.name === nextDestination ? 'next-destination'
-                        : visitedDestinations.includes(planet.name) ? 'visited'
-                            : '';
+                    const planetStatus = planet.name === nextDestination
+                        ? 'next-destination'
+                        : visitedDestinations.includes(planet.name)
+                            ? 'visited'
+                            : plannedDestinations.includes(planet.name)
+                                ? 'planned-destination'
+                                : '';
+
                     return (
                         <React.Fragment key={index}>
-                            <div className={`orbit ${planet.isAsteroidBelt ? 'asteroid-belt' : ''} ${planet.isKuiperBelt ? 'kuiper-belt' : ''}`} style={{
-                                width: `${planet.orbitRadius * 2}%`, height: `${planet.orbitRadius * 2}%`,
-                                left: `${solarSystem.sun.x}%`, top: `${solarSystem.sun.y}%`
-                            }}></div>
+                            <div
+                                className={`orbit ${planet.isAsteroidBelt ? 'asteroid-belt' : ''} ${planet.isKuiperBelt ? 'kuiper-belt' : ''}`}
+                                style={{
+                                    width: `${planet.orbitRadius * 2}%`,
+                                    height: `${planet.orbitRadius * 2}%`,
+                                    left: `${solarSystem.sun.x}%`,
+                                    top: `${solarSystem.sun.y}%`
+                                }}
+                            ></div>
 
                             {(planet.radius > 0 || planet.isStation) && (
-                                <div className={`celestial-body ${planet.isStation ? 'station' : 'planet'}
-                                    ${planet.isExoplanet ? 'isExoplanet' : ''}
-                                    ${planet.isDwarfPlanet ? 'dwarf-planet' : ''}
-                                    ${planetStatus}`}
+                                <div
+                                    className={`celestial-body ${planet.isStation ? 'station' : 'planet'}
+                                        ${planet.isExoplanet ? 'isExoplanet' : ''}
+                                        ${planet.isDwarfPlanet ? 'dwarf-planet' : ''}
+                                        ${planetStatus}`}
                                     style={{
-                                        width: `${planet.radius}px`, height: `${planet.radius}px`,
-                                        left: `${planetX}%`, top: `${planetY}%`,
+                                        width: `${planet.radius}px`,
+                                        height: `${planet.radius}px`,
+                                        left: `${planetX}%`,
+                                        top: `${planetY}%`,
                                         background: planet.color,
                                         transform: `translate(-50%, -50%) rotate(${rotationAngles[planet.name] || 0}deg)`,
-                                        boxShadow: planet.isStation ? `0 0 8px ${planet.color}` : `0 0 15px ${planet.color}`
+                                        boxShadow: planet.isStation
+                                            ? `0 0 8px ${planet.color}`
+                                            : `0 0 15px ${planet.color}`
                                     }}
-                                    onClick={(e) => { e.stopPropagation(); handleBodyClick(planet); }}>
-
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleBodyClick(planet);
+                                    }}
+                                >
                                     {planet.hasRings && (
-                                        <div className="planet-rings" style={{
-                                            width: `${planet.radius * 2.5}px`,
-                                            height: `${planet.radius * 0.6}px`
-                                        }}></div>
+                                        <div
+                                            className="planet-rings"
+                                            style={{
+                                                width: `${planet.radius * 2.5}px`,
+                                                height: `${planet.radius * 0.6}px`
+                                            }}
+                                        ></div>
                                     )}
 
                                     <div className="label-container">
-                                        <span className={`body-label
-                                            ${planet.isExoplanet ? 'exoplanet-label' : ''}
-                                            ${planet.isDwarfPlanet ? 'dwarf-planet-label' : ''}`}>
+                                        <span
+                                            className={`body-label
+                                                ${planet.isExoplanet ? 'exoplanet-label' : ''}
+                                                ${planet.isDwarfPlanet ? 'dwarf-planet-label' : ''}`}
+                                        >
                                             {getDisplayName(planet.name)}
                                         </span>
                                     </div>
@@ -532,29 +864,38 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                 const moonX = planetX + Math.cos(moonAngleRad) * moon.orbitRadius;
                                 const moonY = planetY + Math.sin(moonAngleRad) * moon.orbitRadius;
 
-                                const moonStatus = moon.name === nextDestination ? 'next-destination'
-                                    : visitedDestinations.includes(moon.name) ? 'visited'
-                                        : '';
-                                const currentMoonRotation = rotationAngles[moon.name] || 0;
+                                const moonStatus = moon.name === nextDestination
+                                    ? 'next-destination'
+                                    : visitedDestinations.includes(moon.name)
+                                        ? 'visited'
+                                        : plannedDestinations.includes(moon.name)
+                                            ? 'planned-destination'
+                                            : '';
 
+                                const currentMoonRotation = rotationAngles[moon.name] || 0;
                                 const isLabelVisible = visibleMoonLabel === moon.name;
                                 const visualRotation = isLabelVisible ? 0 : currentMoonRotation;
 
                                 return (
                                     <React.Fragment key={`moon-${index}-${moonIndex}`}>
-                                        <div className="orbit moon-orbit" style={{
-                                            width: `${moon.orbitRadius * 2}%`,
-                                            height: `${moon.orbitRadius * 2}%`,
-                                            left: `${planetX}%`,
-                                            top: `${planetY}%`
-                                        }}></div>
+                                        <div
+                                            className="orbit moon-orbit"
+                                            style={{
+                                                width: `${moon.orbitRadius * 2}%`,
+                                                height: `${moon.orbitRadius * 2}%`,
+                                                left: `${planetX}%`,
+                                                top: `${planetY}%`
+                                            }}
+                                        ></div>
 
                                         <div
                                             className={`celestial-body moon ${moonStatus} ${isLabelVisible ? 'show-label' : ''}`}
                                             data-name={moon.name}
                                             style={{
-                                                width: `${moon.radius}px`, height: `${moon.radius}px`,
-                                                left: `${moonX}%`, top: `${moonY}%`,
+                                                width: `${moon.radius}px`,
+                                                height: `${moon.radius}px`,
+                                                left: `${moonX}%`,
+                                                top: `${moonY}%`,
                                                 transform: `translate(-50%, -50%) rotate(${visualRotation}deg)`
                                             }}
                                             onClick={(e) => {
@@ -564,10 +905,15 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                                             }}
                                             onMouseEnter={() => handleMoonInteraction(moon.name)}
                                         >
-                                            <div className="label-container moon-label-container" style={{
-                                                transform: `rotate(${-visualRotation}deg)`
-                                            }}>
-                                                <span className="body-label moon-label">{getDisplayName(moon.name)}</span>
+                                            <div
+                                                className="label-container moon-label-container"
+                                                style={{
+                                                    transform: `rotate(${-visualRotation}deg)`
+                                                }}
+                                            >
+                                                <span className="body-label moon-label">
+                                                    {getDisplayName(moon.name)}
+                                                </span>
                                             </div>
                                         </div>
                                     </React.Fragment>
@@ -577,26 +923,46 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, initialRout
                     );
                 })}
             </div>
+
             {selectedBody && (
                 <div className="info-panel">
                     <div className="info-panel-header">
                         <h3>{getDisplayName(selectedBody.name)}</h3>
-                        <button className="close-button" onClick={() => setSelectedBody(null)}>×</button>
+                        <button
+                            className="close-button"
+                            onClick={() => setSelectedBody(null)}
+                        >
+                            ×
+                        </button>
                     </div>
+
                     {selectedBody.description && (
                         <div className="info-section">
-                            <p style={{ color: '#b2ff59', fontStyle: 'italic' }}>{selectedBody.description}</p>
+                            <p style={{ color: '#b2ff59', fontStyle: 'italic' }}>
+                                {selectedBody.description}
+                            </p>
                         </div>
                     )}
                 </div>
             )}
-            <div className="zoom-controls">
-                <button onClick={() => setZoom(prev => Math.min(prev * 1.2, 8))}>+</button>
-                <button onClick={() => setZoom(prev => Math.max(prev / 1.2, 0.3))}>-</button>
-                <button onClick={() => {
-                    setZoom(1);
-                    setPosition({ x: 0, y: 0 });
-                }}>⟲</button>
+
+            <div className="zoom-controls" ref={zoomRef}>
+                <button onClick={() => setZoom(prev => Math.min(prev * 1.2, 8))}>
+                    +
+                </button>
+
+                <button onClick={() => setZoom(prev => Math.max(prev / 1.2, 0.3))}>
+                    -
+                </button>
+
+                <button
+                    onClick={() => {
+                        setZoom(1);
+                        setPosition({ x: 0, y: 0 });
+                    }}
+                >
+                    ⟲
+                </button>
             </div>
         </div>
     );
