@@ -40,7 +40,7 @@ const getMemberImage = (teamCode, index) => {
   }
 };
 
-// --- COMPONENTES OTIMIZADOS (React.memo) ---
+// --- COMPONENTES OTIMIZADOS (React.memo com Custom Comparators) ---
 
 // 1. Painel Esquerdo
 const LeftControlPanel = React.memo(({
@@ -119,6 +119,25 @@ const LeftControlPanel = React.memo(({
       </div>
     </div>
   );
+}, (prevProps, nextProps) => {
+  // Ignora a mudança de referência inteira do objeto 'telemetry', avalia apenas a velocidade.
+  return (
+    prevProps.distanceKm === nextProps.distanceKm &&
+    prevProps.progress === nextProps.progress &&
+    prevProps.isDobraAtivada === nextProps.isDobraAtivada &&
+    prevProps.isDobraEnabled === nextProps.isDobraEnabled &&
+    prevProps.isPaused === nextProps.isPaused &&
+    prevProps.originPlanet === nextProps.originPlanet &&
+    prevProps.destinationPlanet === nextProps.destinationPlanet &&
+    prevProps.maxSpeed === nextProps.maxSpeed &&
+    prevProps.isBoosting === nextProps.isBoosting &&
+    prevProps.minervaImage === nextProps.minervaImage &&
+    prevProps.isMinervaHighlighted === nextProps.isMinervaHighlighted &&
+    prevProps.processadorO2 === nextProps.processadorO2 &&
+    prevProps.isO2TransferDisabled === nextProps.isO2TransferDisabled &&
+    prevProps.mainDisplayState === nextProps.mainDisplayState &&
+    prevProps.telemetry.velocity.kmh === nextProps.telemetry.velocity.kmh
+  );
 });
 
 // 2. Painel Direito
@@ -171,7 +190,6 @@ const RightMonitorPanel = React.memo(({
               ) : (
                 <>
                   {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
-                  {/* OTIMIZAÇÃO: Sem state randômico em JS, flicker feito via CSS (.staticFlicker) */}
                   {monitorState === 'static' && <img src="/images/No_Signal.png" alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
                 </>
               )}
@@ -191,7 +209,6 @@ const RightMonitorPanel = React.memo(({
           ) : (
             <>
               {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
-              {/* OTIMIZAÇÃO: Sem state randômico em JS, flicker feito via CSS */}
               {monitorState === 'static' && <img src="/images/No_Signal.png" alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
             </>
           )}
@@ -257,6 +274,26 @@ const RightMonitorPanel = React.memo(({
         <img src="/images/HVS-21.png" alt="HVS-21" className="hvs-logo" onError={(e) => { e.target.style.display = 'none'; }} />
       </div>
     </div>
+  );
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.isPaused === nextProps.isPaused &&
+    prevProps.isTransmissionStarting === nextProps.isTransmissionStarting &&
+    prevProps.isDialogueFinished === nextProps.isDialogueFinished &&
+    prevProps.monitorState === nextProps.monitorState &&
+    prevProps.showMinervaOnMonitor === nextProps.showMinervaOnMonitor &&
+    prevProps.showCriticalWarpFail === nextProps.showCriticalWarpFail &&
+    prevProps.showWarpDisabledMessage === nextProps.showWarpDisabledMessage &&
+    prevProps.isForcedMapEdit === nextProps.isForcedMapEdit &&
+    prevProps.isSosMinervaActive === nextProps.isSosMinervaActive &&
+    prevProps.isDeparting === nextProps.isDeparting &&
+    prevProps.currentCharacterData === nextProps.currentCharacterData &&
+    prevProps.currentDialogueStep === nextProps.currentDialogueStep &&
+    prevProps.teamPhotoUrl === nextProps.teamPhotoUrl &&
+    prevProps.isSOSActive === nextProps.isSOSActive &&
+    prevProps.hasFundsForSOS === nextProps.hasFundsForSOS &&
+    prevProps.isRestoringSOS === nextProps.isRestoringSOS &&
+    prevProps.isPauseButtonDisabled === nextProps.isPauseButtonDisabled
   );
 });
 
@@ -414,6 +451,22 @@ const MainDisplayWindow = React.memo(({
         />
       )}
     </div>
+  );
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.mainDisplayState === nextProps.mainDisplayState &&
+    prevProps.isDobraAtivada === nextProps.isDobraAtivada &&
+    prevProps.distanceKm === nextProps.distanceKm &&
+    prevProps.arrivedAtMars === nextProps.arrivedAtMars &&
+    prevProps.isPaused === nextProps.isPaused &&
+    prevProps.selectedPlanet?.nome === nextProps.selectedPlanet?.nome &&
+    prevProps.isDeparting === nextProps.isDeparting &&
+    prevProps.showStoreModal === nextProps.showStoreModal &&
+    prevProps.showSosSurprise === nextProps.showSosSurprise &&
+    prevProps.sosSurpriseEvent === nextProps.sosSurpriseEvent &&
+    prevProps.routeIndex === nextProps.routeIndex &&
+    prevProps.plannedRoute === nextProps.plannedRoute &&
+    prevProps.telemetry.velocity.kmh === nextProps.telemetry.velocity.kmh
   );
 });
 
@@ -684,7 +737,9 @@ const DecolagemMarte = () => {
     return TEAMS_DATA.find(t => t.code === teamCode) || TEAMS_DATA[0];
   }, [user]);
 
-  useEffect(() => { telemetryRef.current = telemetry; }, [telemetry]);
+  // useEffect redundant de sincronização de Ref foi Removido:
+  // useEffect(() => { telemetryRef.current = telemetry; }, [telemetry]); // <-- OTIMIZADO
+
   useEffect(() => { spaceCoinsRef.current = spaceCoins; }, [spaceCoins]);
   useEffect(() => { travelStartedRef.current = travelStarted; }, [travelStarted]);
   useEffect(() => { arrivedAtMarsRef.current = arrivedAtMars; }, [arrivedAtMars]);
@@ -1467,7 +1522,6 @@ const DecolagemMarte = () => {
 
   // ========================================================
   // OTIMIZAÇÃO CRÍTICA: GAME LOOP REFATORADO
-  // O objeto NÃO é mais clonado a cada 10ms. Alterado de forma limpa.
   // ========================================================
   useEffect(() => {
     const gameLoop = (timestamp) => {
@@ -1802,40 +1856,38 @@ const DecolagemMarte = () => {
   // --- INÍCIO: CENTRAL DE ATALHOS (TECLADO E STREAM DECK) ---
   useEffect(() => {
     const handleGlobalHotkeys = (e) => {
-      // Ignora os atalhos se o jogador estiver digitando em um campo de texto
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
       const key = e.key.toLowerCase();
 
       switch (key) {
-        case ' ': // Barra de espaço (Dobra)
+        case ' ':
           e.preventDefault();
           if (!isDobraEnabled || isDobraAtivada || isPaused) return;
           handleDobraEspacial();
           break;
 
-        case 'p': // Pausar jogo
+        case 'p':
           e.preventDefault();
           if (!isPauseButtonDisabled && !isRestoringSOS) togglePause();
           break;
 
-        case 's': // Ativar S.O.S
+        case 's':
           e.preventDefault();
           if (isSOSActive) handleSOS();
           break;
 
-        case 'i': // Inventário
+        case 'i':
           e.preventDefault();
-          // Inventário liberado para abrir em qualquer momento, assim como a Minerva
           handleInventory();
           break;
 
-        case 'g': // Glossário
+        case 'g':
           e.preventDefault();
           if (!isPaused) setShowGlossary(true);
           break;
 
-        case 'm': // Mapa Estelar
+        case 'm':
           e.preventDefault();
           if (isPaused) return;
 
@@ -1844,7 +1896,6 @@ const DecolagemMarte = () => {
             break;
           }
 
-          // TRAVA DO MAPA: Não abre em voo se estiver na Dobra ou < 60.000 km/h (Aproximação/Decolagem)
           if (distanceKmRef.current > 0 && (isDobraAtivadaRef.current || telemetryRef.current.velocity.kmh < 60000)) {
             console.log("❌ Mapa bloqueado pelas regras de voo.");
             return;
@@ -1853,12 +1904,12 @@ const DecolagemMarte = () => {
           handleToggleMap(true);
           break;
 
-        case 'a': // Minerva
+        case 'a':
           e.preventDefault();
           handleMinervaClick();
           break;
 
-        case 'o': // Processador O2 (letra 'o')
+        case 'o':
           e.preventDefault();
           if (!isO2TransferDisabled) handleOpenO2Modal();
           break;
