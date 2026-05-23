@@ -296,7 +296,7 @@ const TelemetryDisplay = ({
             <Suspense fallback={<div className="loading-map">Carregando Mapa Estelar...</div>}>
               <StellarMapPlan
                 onCloseMap={handleMapClose}
-                showCloseButton={!isForcedMapEdit}
+                showCloseButton={true}
                 hideClearButton={true}
                 initialRoute={plannedRoute}
                 currentIndex={routeIndex}

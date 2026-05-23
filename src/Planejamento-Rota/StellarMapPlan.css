@@ -514,7 +514,7 @@
     height: auto;
     max-height: calc(100% - 120px);
     box-sizing: border-box;
-    padding: 52px 20px 15px 20px;
+    padding: 58px 20px 15px 20px;
     background: rgba(10, 20, 40, 0.98);
     border: 1px solid #4fc3f7;
     box-shadow: 0 0 30px rgba(79, 195, 247, 0.6);
@@ -527,25 +527,31 @@
 }
 
 .route-panel-close-btn {
-    position: absolute;
-    top: 8px !important;
-    left: 8px !important;
+    position: absolute !important;
+    top: 10px !important;
+    left: 10px !important;
     right: auto !important;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: rgba(255, 40, 40, 0.98);
-    color: white;
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    font-size: 22px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 12px rgba(255, 0, 0, 0.9);
-    transition: all 0.2s ease;
+    bottom: auto !important;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 0, 0, 0.98) !important;
+    color: #ffffff !important;
+    border: 2px solid rgba(255, 255, 255, 0.95) !important;
+    font-size: 24px !important;
+    font-weight: 900 !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    z-index: 999999 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 0 14px rgba(255, 0, 0, 1) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
 }
 
 .route-panel-close-btn:hover {
@@ -995,7 +1001,7 @@
     .route-display-panel {
         top: 30px !important;
         right: 60px !important;
-        padding: 15px;
+        padding: 58px 20px 15px 20px !important;
     }
 
     .zoom-controls {
@@ -1085,7 +1091,7 @@
     }
 
     .route-display-panel {
-        padding: 30px;
+        padding: 58px 20px 15px 20px !important;
         right: 250px;
     }
 
