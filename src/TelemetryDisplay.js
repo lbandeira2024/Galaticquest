@@ -297,6 +297,7 @@ const TelemetryDisplay = ({
               <StellarMapPlan
                 onCloseMap={handleMapClose}
                 showCloseButton={!isForcedMapEdit}
+                hideClearButton={true}
                 initialRoute={plannedRoute}
                 currentIndex={routeIndex}
                 sosSignalData={sosSignalData}

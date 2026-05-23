@@ -187,7 +187,18 @@ function routeReducer(state, action) {
     };
 }
 
-const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseButton, initialRoute, currentIndex, onSosDetected, allowSos, sosSignalData }) => {
+const StellarMapPlan = ({
+    onRouteComplete,
+    onRouteReset,
+    onCloseMap,
+    showCloseButton,
+    hideClearButton = false,
+    initialRoute,
+    currentIndex,
+    onSosDetected,
+    allowSos,
+    sosSignalData
+}) => {
     const { apiBaseUrl } = useConfig();
     const API_BASE_URL = apiBaseUrl;
 
@@ -392,9 +403,15 @@ const StellarMapPlan = ({ onRouteComplete, onRouteReset, onCloseMap, showCloseBu
                             <span className="button-icon">{isRouteConfirmed ? '✎' : '✓'}</span>
                             {isRouteConfirmed ? 'EDITAR' : 'CONFIRMAR'}
                         </button>
-                        <button className="action-ultimate clear" onClick={handleClearRoute} disabled={isRouteConfirmed || currentIndex > 0}>
-                            <span className="button-icon">×</span> LIMPAR
-                        </button>
+                        {!hideClearButton && (
+                            <button
+                                className="action-ultimate clear"
+                                onClick={handleClearRoute}
+                                disabled={isRouteConfirmed || currentIndex > 0}
+                            >
+                                <span className="button-icon">×</span> LIMPAR
+                            </button>
+                        )}
                     </div>
 
                     <div className="resources-ultimate">
