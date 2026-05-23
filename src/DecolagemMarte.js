@@ -124,7 +124,7 @@ const LeftControlPanel = React.memo(({
 // 2. Painel Direito
 const RightMonitorPanel = React.memo(({
   isPaused, isTransmissionStarting, isDialogueFinished, handleReplayDialogue,
-  handleNextDialogue, monitorState, staticScreenSeed, showMinervaOnMonitor,
+  handleNextDialogue, monitorState, showMinervaOnMonitor,
   showCriticalWarpFail, showWarpDisabledMessage, isForcedMapEdit, isSosMinervaActive,
   isDeparting, currentCharacterData, currentDialogueStep, highlightKeywords,
   setShowGlossary, handleInventory, teamPhotoUrl, API_BASE_URL,
@@ -171,7 +171,8 @@ const RightMonitorPanel = React.memo(({
               ) : (
                 <>
                   {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
-                  {monitorState === 'static' && <img src={`/images/No_Signal.png?seed=${staticScreenSeed}`} alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
+                  {/* OTIMIZAÇÃO: Sem state randômico em JS, flicker feito via CSS (.staticFlicker) */}
+                  {monitorState === 'static' && <img src="/images/No_Signal.png" alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
                 </>
               )}
             </>
@@ -190,7 +191,8 @@ const RightMonitorPanel = React.memo(({
           ) : (
             <>
               {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
-              {monitorState === 'static' && <img src={`/images/No_Signal.png?seed=${staticScreenSeed}`} alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
+              {/* OTIMIZAÇÃO: Sem state randômico em JS, flicker feito via CSS */}
+              {monitorState === 'static' && <img src="/images/No_Signal.png" alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
             </>
           )}
         </div>
@@ -588,7 +590,6 @@ const DecolagemMarte = () => {
   const monitorStateRef = useRef(monitorState);
 
   const [mainDisplayState, setMainDisplayState] = useState('acee');
-  const [staticScreenSeed, setStaticScreenSeed] = useState(Math.random());
 
   const mainDisplayStateRef = useRef(mainDisplayState);
 
@@ -944,22 +945,12 @@ const DecolagemMarte = () => {
       if (newOriginStep && newDestinationStep) {
         setOriginPlanet({ nome: newOriginStep.name });
         setSelectedPlanet({ nome: newDestinationStep.name });
-
-        // --- AS DUAS LINHAS ABAIXO FORAM REMOVIDAS ---
-        // Elas faziam com que a distância restante voltasse ao total inicial da rota, reiniciando o voo visualmente.
-        // const newDist = newDestinationStep.distance || 300000000;
-        // setDistanceKm(newDist);
-        // distanceKmRef.current = newDist;
-        // ---------------------------------------------
       }
 
-      // Mantemos a flag como falsa para o voo continuar normalmente
       setArrivedAtMars(false);
-      // Não alteramos o isFinalApproach para não quebrar a aproximação se já estiver perto
 
       setTimeout(() => { routeChangeLockRef.current = false; }, 500);
     } else {
-      // ... resto do código original do else (quando não está em voo) mantido igual ...
       playSFX('/sounds/empuxo.wav');
       setIsDeparting(true);
       setShowStoreModal(false);
@@ -1457,6 +1448,7 @@ const DecolagemMarte = () => {
           if (currentVal < 100) { anyChanged = true; allFull = false; return Math.min(100, currentVal + 2); }
           return currentVal;
         };
+
         telemetryRef.current.atmosphere.o2 = restoreValue(telemetryRef.current.atmosphere.o2);
         telemetryRef.current.propulsion.powerOutput = restoreValue(telemetryRef.current.propulsion.powerOutput);
         telemetryRef.current.direction = restoreValue(telemetryRef.current.direction);
@@ -1464,13 +1456,19 @@ const DecolagemMarte = () => {
         telemetryRef.current.productivity = restoreValue(telemetryRef.current.productivity);
         telemetryRef.current.interdependence = restoreValue(telemetryRef.current.interdependence);
         telemetryRef.current.engagement = restoreValue(telemetryRef.current.engagement);
-        if (anyChanged) setTelemetry(prev => ({ ...prev, ...telemetryRef.current }));
+
+        if (anyChanged) setTelemetry({ ...telemetryRef.current });
+
         if (allFull) { clearInterval(restoreIntervalRef.current); setIsRestoringSOS(false); saveTelemetryData(); }
       }, 50);
     } else if (isPaused && restoreIntervalRef.current) { clearInterval(restoreIntervalRef.current); }
     return () => { if (restoreIntervalRef.current) clearInterval(restoreIntervalRef.current); };
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
 
+  // ========================================================
+  // OTIMIZAÇÃO CRÍTICA: GAME LOOP REFATORADO
+  // O objeto NÃO é mais clonado a cada 10ms. Alterado de forma limpa.
+  // ========================================================
   useEffect(() => {
     const gameLoop = (timestamp) => {
       if (isPausedRef.current) {
@@ -1516,11 +1514,23 @@ const DecolagemMarte = () => {
 
           if (travelStartedRef.current) {
             const SPEED_OF_LIGHT_KMH = 1079252848.8;
-            telemetryRef.current = { ...telemetryRef.current, velocity: { kmh: newKmh, ms: newKmh / 3.6, rel: `${(newKmh / SPEED_OF_LIGHT_KMH).toFixed(7)}c` } };
 
+            // ATUALIZAÇÃO REFINADA - Evita criar um novo objeto a cada ciclo do requestAnimationFrame
             if (timestamp - lastRenderTime.current > 100) {
-              setTelemetry({ ...telemetryRef.current });
+              telemetryRef.current = {
+                ...telemetryRef.current,
+                velocity: {
+                  kmh: newKmh,
+                  ms: newKmh / 3.6,
+                  rel: `${(newKmh / SPEED_OF_LIGHT_KMH).toFixed(7)}c`
+                }
+              };
+              setTelemetry(telemetryRef.current);
               lastRenderTime.current = timestamp;
+            } else {
+              telemetryRef.current.velocity.kmh = newKmh;
+              telemetryRef.current.velocity.ms = newKmh / 3.6;
+              telemetryRef.current.velocity.rel = `${(newKmh / SPEED_OF_LIGHT_KMH).toFixed(7)}c`;
             }
           }
         }
@@ -1554,7 +1564,7 @@ const DecolagemMarte = () => {
           if (isSosDestination && !isForcedMapEditRef.current) {
             if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEventRef.current) {
 
-              // --- AQUI ESTÁ A IMPLEMENTAÇÃO DO FILTRO ANTI-REPETIÇÃO ---
+              // --- FILTRO ANTI-REPETIÇÃO ---
               const availableEvents = SOS_EVENTS_LIST.filter(ev => !usedSosIdsRef.current.includes(ev.id));
 
               if (availableEvents.length > 0) {
@@ -1564,14 +1574,12 @@ const DecolagemMarte = () => {
                 setSosSurpriseEvent(selectedEvent);
                 sosSurpriseEventRef.current = selectedEvent;
 
-                // Grava imediatamente no banco para o evento não ser sorteado novamente se a página recarregar
                 fetch(`${API_BASE_URL}/${userId}/record-sos-history`, {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ sosId: selectedEvent.id })
                 }).catch(err => console.error("Erro ao salvar S.O.S no histórico:", err));
 
-                // Atualiza o estado local
                 setUsedSosIds(prev => [...prev, selectedEvent.id]);
               } else {
                 console.log("Todos os eventos S.O.S. já foram explorados.");
@@ -1582,7 +1590,6 @@ const DecolagemMarte = () => {
             if (newDistance <= 0 && !arrivedAtMarsRef.current) {
               setArrivedAtMars(true); setSpeed(0);
 
-              // Prevenção extra caso o evento não tenha sido sorteado nos 1000km
               if (!sosSurpriseEventRef.current) {
                 const availableEvents = SOS_EVENTS_LIST.filter(ev => !usedSosIdsRef.current.includes(ev.id));
                 if (availableEvents.length > 0) {
@@ -1722,12 +1729,6 @@ const DecolagemMarte = () => {
     return () => cancelAnimationFrame(animationFrameId.current);
   }, [API_BASE_URL, userId, playSFX]);
 
-  useEffect(() => {
-    if ((monitorState !== 'static' && mainDisplayState !== 'static') || isPaused) return;
-    const interval = setInterval(() => { setStaticScreenSeed(Math.random()); }, 100);
-    return () => clearInterval(interval);
-  }, [monitorState, mainDisplayState, isPaused]);
-
   const currentMaxSpeed = useMemo(() => {
     if (isDobraAtivada) return 100000000;
     if (isBoostingTo60k) return 60000;
@@ -1735,7 +1736,6 @@ const DecolagemMarte = () => {
     return 45000;
   }, [isDobraAtivada, isBoostingTo60k, isFinalApproach]);
 
-  // ---> CORREÇÃO APLICADA AQUI: A regra dos 60.000 voltou para bloquear a Pausa! <---
   const isPauseButtonDisabled = telemetry.velocity.kmh < 60000 || isDobraAtivada || distanceKm <= 0;
 
   const currentDialogueStep = activeChallengeData?.dialogo?.[dialogueIndex];
@@ -1918,7 +1918,6 @@ const DecolagemMarte = () => {
           handleReplayDialogue={handleReplayDialogue}
           handleNextDialogue={handleNextDialogue}
           monitorState={monitorState}
-          staticScreenSeed={staticScreenSeed}
           showMinervaOnMonitor={showMinervaOnMonitor}
           showCriticalWarpFail={showCriticalWarpFail}
           showWarpDisabledMessage={showWarpDisabledMessage}

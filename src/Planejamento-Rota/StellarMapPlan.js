@@ -340,7 +340,8 @@ const StellarMapPlan = ({
     }, [checkScroll]);
     // ========================================================
 
-    const stars = useMemo(() => Array.from({ length: 500 }, (_, i) => ({
+    // OTIMIZAÇÃO: Reduzido de 500 para 150 estrelas para não travar o FPS
+    const stars = useMemo(() => Array.from({ length: 150 }, (_, i) => ({
         id: i,
         x: Math.random() * 100,
         y: Math.random() * 100,
@@ -409,7 +410,8 @@ const StellarMapPlan = ({
             }));
         };
 
-        const interval = setInterval(updateAngles, 50);
+        // OTIMIZAÇÃO: Loop de atualização de ângulos relaxado de 50ms para 100ms
+        const interval = setInterval(updateAngles, 100);
         return () => clearInterval(interval);
     }, [rotationAngles]);
 
