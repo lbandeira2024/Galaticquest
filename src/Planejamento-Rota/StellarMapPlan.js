@@ -303,7 +303,45 @@ const StellarMapPlan = ({
     const closeBtnRef = useRef(null);
     const moonLabelTimeoutRef = useRef(null);
 
-    const stars = useMemo(() => Array.from({ length: 500 }, (_, i) => ({
+    // ========================================================
+    // NOVOS STATES E REFS PARA AS SETAS DE SCROLL
+    // ========================================================
+    const routeContainerRef = useRef(null);
+    const [showScrollArrows, setShowScrollArrows] = useState(false);
+    const [scrollState, setScrollState] = useState({ isTop: true, isBottom: false });
+
+    const checkScroll = useCallback(() => {
+        if (routeContainerRef.current) {
+            const { scrollTop, scrollHeight, clientHeight } = routeContainerRef.current;
+            const canScroll = scrollHeight > clientHeight + 2;
+            setShowScrollArrows(canScroll);
+            setScrollState({
+                isTop: scrollTop <= 0,
+                isBottom: Math.ceil(scrollTop + clientHeight) >= scrollHeight - 2
+            });
+        }
+    }, []);
+
+    useEffect(() => {
+        checkScroll();
+        window.addEventListener('resize', checkScroll);
+        return () => window.removeEventListener('resize', checkScroll);
+    }, [plannedRoute.steps, checkScroll]);
+
+    const scrollList = useCallback((direction) => {
+        if (routeContainerRef.current) {
+            const scrollAmount = 120;
+            routeContainerRef.current.scrollBy({
+                top: direction === 'up' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+            setTimeout(checkScroll, 300);
+        }
+    }, [checkScroll]);
+    // ========================================================
+
+    // OTIMIZAÇÃO: Reduzido de 500 para 150 estrelas para não travar o FPS
+    const stars = useMemo(() => Array.from({ length: 150 }, (_, i) => ({
         id: i,
         x: Math.random() * 100,
         y: Math.random() * 100,
@@ -372,7 +410,8 @@ const StellarMapPlan = ({
             }));
         };
 
-        const interval = setInterval(updateAngles, 50);
+        // OTIMIZAÇÃO: Loop de atualização de ângulos relaxado de 50ms para 100ms
+        const interval = setInterval(updateAngles, 100);
         return () => clearInterval(interval);
     }, [rotationAngles]);
 
@@ -638,71 +677,86 @@ const StellarMapPlan = ({
                         </div>
                     </div>
 
-                    <div className="route-container">
-                        <div className="route-ultimate">
-                            {plannedRoute.steps.map((step, index) => {
-                                const markerClass = index <= currentIndex
-                                    ? "origin-marker"
-                                    : index === currentIndex + 1
-                                        ? "next-destination-marker"
-                                        : "normal-marker";
+                    {/* WRAPPER E SETAS DE SCROLL APLICADAS AQUI */}
+                    <div className="route-list-wrapper">
+                        {showScrollArrows && !scrollState.isTop && (
+                            <button className="scroll-arrow-btn scroll-up" onClick={() => scrollList('up')}>
+                                &#x25B2;
+                            </button>
+                        )}
 
-                                const isStepLocked = index <= (currentIndex + 1);
-                                const displayName = getDisplayNameWithDrop(step.name);
+                        <div className="route-container" ref={routeContainerRef} onScroll={checkScroll}>
+                            <div className="route-ultimate">
+                                {plannedRoute.steps.map((step, index) => {
+                                    const markerClass = index <= currentIndex
+                                        ? "origin-marker"
+                                        : index === currentIndex + 1
+                                            ? "next-destination-marker"
+                                            : "normal-marker";
 
-                                return (
-                                    <div
-                                        key={index}
-                                        className="step-ultimate"
-                                        onMouseEnter={() => !isRouteConfirmed && setHoveredStep(index)}
-                                        onMouseLeave={() => !isRouteConfirmed && setHoveredStep(null)}
-                                    >
-                                        <div className={`step-marker ${markerClass}`}></div>
+                                    const isStepLocked = index <= (currentIndex + 1);
+                                    const displayName = getDisplayNameWithDrop(step.name);
 
-                                        <div className="step-content">
-                                            <span className="step-name">{displayName}</span>
-                                            <span className="step-distance">
-                                                {index === 0
-                                                    ? "PONTO DE PARTIDA"
-                                                    : `${step.distance.toLocaleString()} km`}
-                                            </span>
-                                        </div>
+                                    return (
+                                        <div
+                                            key={index}
+                                            className="step-ultimate"
+                                            onMouseEnter={() => !isRouteConfirmed && setHoveredStep(index)}
+                                            onMouseLeave={() => !isRouteConfirmed && setHoveredStep(null)}
+                                        >
+                                            <div className={`step-marker ${markerClass}`}></div>
 
-                                        <div className="step-actions">
-                                            {!isRouteConfirmed && index > 0 && (
-                                                <div className="step-move-controls">
+                                            <div className="step-content">
+                                                <span className="step-name">{displayName}</span>
+                                                <span className="step-distance">
+                                                    {index === 0
+                                                        ? "PONTO DE PARTIDA"
+                                                        : `${step.distance.toLocaleString()} km`}
+                                                </span>
+                                            </div>
+
+                                            <div className="step-actions">
+                                                {!isRouteConfirmed && index > 0 && (
+                                                    <div className="step-move-controls">
+                                                        <button
+                                                            className="move-step-button up"
+                                                            onClick={() => handleMoveStep(index, 'up')}
+                                                            disabled={isLoadingProgress || isStepLocked}
+                                                        >
+                                                            ▲
+                                                        </button>
+
+                                                        <button
+                                                            className="move-step-button down"
+                                                            onClick={() => handleMoveStep(index, 'down')}
+                                                            disabled={isLoadingProgress || isStepLocked || index >= plannedRoute.steps.length - 1}
+                                                        >
+                                                            ▼
+                                                        </button>
+                                                    </div>
+                                                )}
+
+                                                {index > 0 && (
                                                     <button
-                                                        className="move-step-button up"
-                                                        onClick={() => handleMoveStep(index, 'up')}
-                                                        disabled={isLoadingProgress || isStepLocked}
+                                                        className="remove-step"
+                                                        onClick={() => handleRemoveStep(index)}
+                                                        disabled={isLoadingProgress || isRouteConfirmed || isStepLocked}
                                                     >
-                                                        ▲
+                                                        ×
                                                     </button>
-
-                                                    <button
-                                                        className="move-step-button down"
-                                                        onClick={() => handleMoveStep(index, 'down')}
-                                                        disabled={isLoadingProgress || isStepLocked || index >= plannedRoute.steps.length - 1}
-                                                    >
-                                                        ▼
-                                                    </button>
-                                                </div>
-                                            )}
-
-                                            {index > 0 && (
-                                                <button
-                                                    className="remove-step"
-                                                    onClick={() => handleRemoveStep(index)}
-                                                    disabled={isLoadingProgress || isRouteConfirmed || isStepLocked}
-                                                >
-                                                    ×
-                                                </button>
-                                            )}
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
+                            </div>
                         </div>
+
+                        {showScrollArrows && !scrollState.isBottom && (
+                            <button className="scroll-arrow-btn scroll-down" onClick={() => scrollList('down')}>
+                                &#x25BC;
+                            </button>
+                        )}
                     </div>
                 </div>
             )}

@@ -2412,33 +2412,68 @@
                 },
                 {
                     "personagemId": "aletheia",
-                    "texto": "É fato que ocorreu o atraso. Ao meu ver, justificado pelo excesso de trabalho com as novas frentes não previstas. Defendo que continuem os projetos e reforço minha crença na dupla, combinando aqui um novo prazo de entrega.",
-                    "duracao": 16500
+                    "texto": "É fato que ocorreu o atraso. Ao meu ver, justificado pelo excesso de trabalho com as novas frentes não previstas. ",
+                    "duracao": 2500
+                },
+                {
+                    "personagemId": "aletheia",
+                    "texto": "Defendo que continuem os projetos e reforço minha crença na dupla, combinando aqui um novo prazo de entrega.",
+                    "duracao": 2500
                 },
                 {
                     "personagemId": "aquiles",
-                    "texto": "Acho que daria para conciliar com as novas frentes. Eles estão morosos e não nos posicionaram em nenhum momento. A expectativa é grande; o tempo é curto e o asteroide Bennu vem aí.",
-                    "duracao": 13700
+                    "texto": "Acho que daria para conciliar com as novas frentes. Eles estão morosos e não nos posicionaram em nenhum momento.",
+                    "duracao": 2500
+                },
+                {
+                    "personagemId": "aquiles",
+                    "texto": "A expectativa é grande; o tempo é curto e o asteroide Bennu vem aí.",
+                    "duracao": 2500
                 },
                 {
                     "personagemId": "sisifo",
-                    "texto": "Eu desprezaria o problema com Bennu. A probabilidade é remota, apontam os estudos. Foquemos nos investimentos que prevê uma tecnologia avançada para eliminar outros asteroides. O Capitão Kirk e Nora devem continuar à frente dos estudos. Não há como aumentar a equipe, tampouco repassá-los a Liu Yang e Ares, que irão gastar mais tempo nos estudos.",
-                    "duracao": 24600
+                    "texto": "Eu desprezaria o problema com Bennu. A probabilidade é remota, apontam os estudos. Foquemos nos investimentos que prevê ",
+                    "duracao": 2500
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "uma tecnologia avançada para eliminar outros asteroides. O Capitão Kirk e Nora devem continuar à frente dos estudos. ",
+                    "duracao": 2500
+                },
+                {
+                    "personagemId": "sisifo",
+                    "texto": "Não há como aumentar a equipe, tampouco repassá-los a Liu Yang e Ares, que irão gastar mais tempo nos estudos.",
+                    "duracao": 2500
                 },
                 {
                     "personagemId": "demeter",
-                    "texto": "O Capitão Kirk e Nora precisam ser ouvidos; eles são craques e sensatos; serão sinceros sobre o status trazendo informações ricas sobre ele. Precisamos ter paciência sem perder o objetivo.",
-                    "duracao": 14200
+                    "texto": "O Capitão Kirk e Nora precisam ser ouvidos; eles são craques e sensatos; serão sinceros sobre o status trazendo informações ",
+                    "duracao": 2500
+                },
+                {
+                    "personagemId": "demeter",
+                    "texto": "ricas sobre ele. Precisamos ter paciência sem perder o objetivo.",
+                    "duracao": 2500
                 },
                 {
                     "personagemId": "cerruti",
-                    "texto": "Deméter, você como os outros são responsáveis para trazerem suas percepções. Não há tempo para desculpas. Sou pela substituição imediata de Capitão Kirk e Nora, e a colisão pode ocorrer sim.",
-                    "duracao": 14300
+                    "texto": "Deméter, você como os outros são responsáveis para trazerem suas percepções. Não há tempo para desculpas. ",
+                    "duracao": 2500
+                },
+                {
+                    "personagemId": "cerruti",
+                    "texto": "Sou pela substituição imediata de Capitão Kirk e Nora, e a colisão pode ocorrer sim.",
+                    "duracao": 2500
                 },
                 {
                     "personagemId": "kopenawa",
-                    "texto": "Liu e Ares ainda não possuem experiência. O Capitão Kirk e Nora precisam de mais empowerment, com repasse de algumas atividades deles, se for o caso.",
-                    "duracao": 11600
+                    "texto": "Liu e Ares ainda não possuem experiência. O Capitão Kirk e Nora precisam de mais empowerment, ",
+                    "duracao": 2500
+                },
+                {
+                    "personagemId": "kopenawa",
+                    "texto": "com repasse de algumas atividades deles, se for o caso.",
+                    "duracao": 2500
                 },
                 {
                     "personagemId": "bill_dale",
