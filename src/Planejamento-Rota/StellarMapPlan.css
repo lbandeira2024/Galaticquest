@@ -5,12 +5,9 @@
 .stellar-map {
     position: relative;
     width: 100%;
-    /* MUDANÇA CRUCIAL: height agora é 100% para obedecer perfeitamente o limite do main-display, 
-       garantindo que seus botões de zoom nunca desçam além da tela visível! */
     height: 100%;
     background: radial-gradient(ellipse at center, #0a0a20 0%, #000000 100%);
     overflow: hidden;
-    /* IMPEDE O VAZAMENTO DAS ESTRELAS */
     font-family: 'Arial', sans-serif;
     touch-action: none;
     cursor: grab;
@@ -501,7 +498,7 @@
 }
 
 /* ======================================================== */
-/* ======== QUADRO DE ROTA DEFINITIVO (CORRIGIDO) ========= */
+/* ======== QUADRO DE ROTA DEFINITIVO ===================== */
 /* ======================================================== */
 
 .route-display-panel {
@@ -523,13 +520,13 @@
     display: flex;
     flex-direction: column;
     z-index: 10;
-    overflow: hidden !important;
+    overflow: visible !important;
 }
 
 .route-panel-close-btn {
     position: absolute !important;
-    top: 10px !important;
-    left: 10px !important;
+    top: -18px !important;
+    left: -18px !important;
     right: auto !important;
     bottom: auto !important;
     width: 36px !important;
@@ -555,9 +552,9 @@
 }
 
 .route-panel-close-btn:hover {
-    background: rgba(255, 0, 0, 1);
+    background: rgba(255, 0, 0, 1) !important;
     transform: scale(1.15);
-    box-shadow: 0 0 15px rgba(255, 0, 0, 1);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 1) !important;
 }
 
 .zoom-controls {
@@ -590,8 +587,6 @@
     background-color: #4fc3f7 !important;
     box-shadow: 0 0 15px rgba(79, 195, 247, 0.7);
 }
-
-/* ======================================================== */
 
 .actions-ultimate {
     display: flex;
@@ -795,16 +790,13 @@
     flex-grow: 1;
     padding: 0;
     gap: 6px;
-    /* Espaço ocioso reduzido */
 }
 
 .step-name {
     font-size: 13.5px;
     color: white;
     white-space: nowrap;
-    /* OBRIGA a ficar em 1 linha */
     flex-shrink: 0;
-    /* Proíbe o flexbox de tentar esmagar o nome */
     line-height: 1.2;
 }
 
@@ -812,11 +804,8 @@
     font-size: 12.5px;
     color: #bbdefb;
     white-space: nowrap;
-    /* OBRIGA a ficar em 1 linha */
     flex-shrink: 0;
-    /* Proíbe de esmagar a distância */
     margin-left: auto;
-    /* Empurra a distância totalmente para a direita */
 }
 
 .step-actions {
@@ -825,7 +814,6 @@
     justify-content: flex-end;
     gap: 4px;
     flex-shrink: 0;
-    /* BLINDA os botões: Nunca serão esmagados ou empurrados */
     margin-left: 8px;
 }
 
@@ -854,7 +842,6 @@
 }
 
 .remove-step:disabled {
-    /* Melhoria visual para saber que o X está ali, mas desativado */
     opacity: 0.5;
     cursor: not-allowed;
     background: rgba(231, 76, 60, 0.05);
@@ -868,7 +855,6 @@
     z-index: 3;
     width: 20px;
     flex-shrink: 0;
-    /* AS SETAS AGORA FICAM VISÍVEIS O TEMPO TODO */
     opacity: 1 !important;
     visibility: visible !important;
 }
@@ -984,7 +970,7 @@
 
 /* ======================================================== */
 /* ======= STATUS DOS CORPOS MARCADOS NA ROTA ============= */
-/* Aura removida: os corpos selecionados mantêm apenas a aparência original. */
+/* Aura removida: os corpos selecionados mantêm aparência original. */
 /* ======================================================== */
 
 .celestial-body.visited,
@@ -1002,6 +988,7 @@
         top: 30px !important;
         right: 60px !important;
         padding: 58px 20px 15px 20px !important;
+        overflow: visible !important;
     }
 
     .zoom-controls {
@@ -1036,7 +1023,7 @@
         right: 10px;
         max-width: none;
         max-height: calc(100% - 80px);
-        overflow: hidden !important;
+        overflow: visible !important;
     }
 
     .route-container {
@@ -1093,6 +1080,7 @@
     .route-display-panel {
         padding: 58px 20px 15px 20px !important;
         right: 250px;
+        overflow: visible !important;
     }
 
     .zoom-controls {
