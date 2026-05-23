@@ -508,10 +508,10 @@
     position: absolute;
     top: 60px !important;
     right: 60px !important;
-    /* LARGURA DINÂMICA: Cresce automaticamente para caber o texto, mas não passa da tela */
     width: auto !important;
     min-width: 440px;
     max-width: 85vw;
+    height: auto;
     max-height: calc(100% - 120px);
     box-sizing: border-box;
     padding: 15px 20px;
@@ -523,7 +523,7 @@
     display: flex;
     flex-direction: column;
     z-index: 10;
-    overflow: visible !important;
+    overflow: hidden !important;
 }
 
 .route-panel-close-btn {
@@ -712,13 +712,15 @@
 }
 
 .route-container {
-    flex: 1;
-    max-height: clamp(200px, 45vh, 600px);
-    overflow-y: auto;
-    /* REMOVIDO o overflow-x: visible. Hidden impede o scroll horizontal irritante */
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: clamp(180px, 42vh, 520px);
+    overflow-y: auto !important;
     overflow-x: hidden;
-    padding-right: 5px;
+    padding-right: 8px;
     margin-top: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #4fc3f7 rgba(0, 0, 0, 0.25);
 }
 
 .route-container::-webkit-scrollbar {
@@ -736,7 +738,8 @@
 }
 
 .route-ultimate {
-    padding: 5px 0;
+    padding: 5px 0 12px 0;
+    min-height: max-content;
 }
 
 .step-ultimate {
@@ -973,40 +976,14 @@
 }
 
 /* ======================================================== */
-/* ======= STATUS VISUAL DOS CORPOS MARCADOS NA ROTA ====== */
+/* ======= STATUS DOS CORPOS MARCADOS NA ROTA ============= */
+/* Aura removida: os corpos selecionados mantêm apenas a aparência original. */
 /* ======================================================== */
 
-.celestial-body.visited {
-    filter: drop-shadow(0 0 10px #bbbbbb) brightness(1.15);
-    outline: 2px solid rgba(187, 187, 187, 0.85);
-    outline-offset: 4px;
-}
-
-.celestial-body.next-destination {
-    filter: drop-shadow(0 0 16px #ff3b30) brightness(1.35);
-    outline: 2px solid rgba(255, 59, 48, 0.95);
-    outline-offset: 5px;
-    animation: nextBodyPulse 1.6s infinite ease-in-out;
-}
-
+.celestial-body.visited,
+.celestial-body.next-destination,
 .celestial-body.planned-destination {
-    filter: drop-shadow(0 0 13px #4fc3f7) brightness(1.25);
-    outline: 2px solid rgba(79, 195, 247, 0.9);
-    outline-offset: 4px;
-}
-
-@keyframes nextBodyPulse {
-
-    0%,
-    100% {
-        outline-offset: 4px;
-        filter: drop-shadow(0 0 12px #ff3b30) brightness(1.25);
-    }
-
-    50% {
-        outline-offset: 8px;
-        filter: drop-shadow(0 0 24px #ff3b30) brightness(1.55);
-    }
+    outline: none !important;
 }
 
 /* ==========================================================================
@@ -1051,6 +1028,13 @@
         left: 10px;
         right: 10px;
         max-width: none;
+        max-height: calc(100% - 80px);
+        overflow: hidden !important;
+    }
+
+    .route-container {
+        max-height: 45vh;
+        overflow-y: auto !important;
     }
 
     .resources-ultimate {
@@ -1114,8 +1098,5 @@
 
     .sun {
         transform: scale(1.5);
-
-
-
     }
 }
