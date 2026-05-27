@@ -255,27 +255,23 @@ const CadastroForm = () => {
     }
   };
 
-  // --- FUNÇÃO DE REDIRECIONAMENTO CORRIGIDA ---
+  // --- FUNÇÃO DE REDIRECIONAMENTO ---
   const redirectToNextStep = (user) => {
     console.log("🔍 Verificando redirecionamento para:", user.email);
 
     if (!user.autorizado) { navigate("/ContadorRegressivo"); return; }
     if (!user.grupo) { navigate("/BoasVindas"); return; }
 
-    // Verifica APENAS se o grupo está trancado
-    // Tenta 'isLocked' (padrão Mongoose) ou 'locked'
     const isLocked = user.grupo.isLocked === true || user.grupo.locked === true;
 
     console.log("🔒 Status de bloqueio do grupo:", isLocked);
 
-    // Se NÃO estiver trancado, vai para o Lobby para formar o time
     if (!isLocked) {
       console.log("⚠️ Grupo aberto: Redirecionando para Lobby.");
       navigate("/LobbyGrupos");
       return;
     }
 
-    // Se estiver trancado, PULA o lobby e verifica as próximas etapas
     console.log("✅ Grupo trancado: Avançando para próximas etapas.");
 
     if (!user.grupo.naveEscolhida) { navigate("/SelecaoNave"); return; }
@@ -300,13 +296,11 @@ const CadastroForm = () => {
       const response = await axios.post(`${API_BASE_URL}/login`, loginData);
       if (response.data.success) {
 
-        // Ativa Fullscreen
         enterFullScreen();
 
         const loggedInUser = response.data.usuario;
         login(loggedInUser);
 
-        // Delay para garantir que o state/fullscreen processe
         setTimeout(() => {
           if (loggedInUser.administrador === true) {
             navigate("/admin");
@@ -379,7 +373,8 @@ const CadastroForm = () => {
 
       <img src="/images/logogalaticQuest.png" className="game-logo" alt="Galactic Quest" />
       <div className="solar-system">
-        <img src="/images/Terra.png" className="planet earth" alt="Terra" />
+        {/* Alterado com sucesso para .webp */}
+        <img src="/images/Terra.webp" className="planet earth" alt="Terra" />
         <img src="/images/Mercury.png" className="planet mercury" alt="Mercúrio" />
         <img src="/images/venus.png" className="planet venus" alt="Vênus" />
         <img src="/images/Sun.png" className="sun" alt="Sol" />
@@ -401,11 +396,6 @@ const CadastroForm = () => {
             <button type="submit" className={isLaunching ? "launching" : ""}>
               {isLaunching ? "🚀" : t('loginButton')}
             </button>
-            {/* LINK REMOVIDO PARA EVITAR REGISTRO MANUAL
-            <p onClick={() => setIsRegistering(true)} className="toggle-form">
-              {t('toggleToRegister')}
-            </p>
-            */}
           </form>
         ) : (
           <form onSubmit={handleRegisterSubmit} className="cadastro-form">
