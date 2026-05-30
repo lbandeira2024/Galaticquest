@@ -83,8 +83,9 @@ const PLANET_MUSIC_CONFIG = {
   proteu: { src: '/sounds/proteu/tritao.mp3', volume: 0.5 }
 };
 
-const STAR_HUES = [210, 120, 30, 0, 60];
-const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 80%)`);
+/* ATUALIZADO: Foco em tons frios da imagem (Azul, Ciano, Azul Escuro) e um raro amarelo estelar */
+const STAR_HUES = [210, 180, 240, 200, 45];
+const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 85%)`);
 
 const getPlanetScale = (planetName) => {
   const giants = ['jupiter', 'saturno', 'netuno'];
@@ -105,11 +106,12 @@ const resetStar = (star, width, height, isWarping) => {
   star.z = width + (Math.random() * (width * 0.5));
 
   const isDeepSpace = Math.random() > 0.3;
-  star.size = (Math.random() * 2 + 0.8) * (isDeepSpace ? 0.6 : 1);
+  /* ATUALIZADO: Leve ajuste no tamanho base para dar mais dinamismo a estrelas de fundo */
+  star.size = (Math.random() * 2.2 + 0.5) * (isDeepSpace ? 0.6 : 1);
   star.hueIndex = Math.floor(Math.random() * 5);
   star.twinkleSpeed = Math.random() * 0.05 + 0.01;
   star.twinklePhase = Math.random() * Math.PI * 2;
-  star.baseAlpha = isDeepSpace ? (Math.random() * 0.3 + 0.1) : (Math.random() * 0.6 + 0.4);
+  star.baseAlpha = isDeepSpace ? (Math.random() * 0.3 + 0.1) : (Math.random() * 0.7 + 0.3);
   star.baseSpeed = Math.random() * 15 + 1;
   star.isFastStar = false;
 };
@@ -199,7 +201,8 @@ const SpaceView = ({
 
   useEffect(() => {
     if (starsRef.current.length === 0) {
-      starsRef.current = Array.from({ length: 800 }, () => generateStar(window.innerWidth, window.innerHeight, false));
+      /* ATUALIZADO: Quantidade de estrelas aumentada para 1500 simulando a densidade da imagem */
+      starsRef.current = Array.from({ length: 1500 }, () => generateStar(window.innerWidth, window.innerHeight, false));
       fastStarsRef.current = Array.from({ length: 40 }, () => generateStar(window.innerWidth, window.innerHeight, false, true));
     }
   }, []);
@@ -352,8 +355,8 @@ const SpaceView = ({
       const velY = velocity.current.y * 0.1;
 
       if (currentCtxAlpha !== 1.0) { ctx.globalAlpha = 1.0; currentCtxAlpha = 1.0; }
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, width, height);
+      /* ATUALIZADO: Limpeza do canvas mantendo compatibilidade com o fundo gradiente via opacidade */
+      ctx.clearRect(0, 0, width, height);
 
       for (let i = 0; i < starArray.length; i++) {
         const star = starArray[i];
@@ -389,11 +392,12 @@ const SpaceView = ({
           currentCtxAlpha = targetAlpha;
         }
 
-        if (starSpeedHigh) {
+        /* ATUALIZADO: Algumas estrelas recebem cor HSL, outras branco/azul claro para misturar como na foto */
+        if (starSpeedHigh || star.hueIndex < 3) {
           ctx.fillStyle = STAR_COLORS_HSL[star.hueIndex];
           ctx.fillRect(x, y, size * 1.5, size * 1.5);
         } else {
-          ctx.fillStyle = '#ffffff';
+          ctx.fillStyle = '#f0f8ff';
           ctx.fillRect(x, y, size, size);
         }
       }
