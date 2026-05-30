@@ -88,6 +88,13 @@ const CadastroForm = () => {
   }, []);
   // --------------------------------------------------------
 
+  // --- PRELOAD DA IMAGEM DA TERRA ---
+  useEffect(() => {
+    const preloadEarth = new Image();
+    preloadEarth.src = "/images/Terra.png";
+  }, []);
+  // --------------------------------------------------------
+
   // --- BUSCAR LISTAS ---
   useEffect(() => {
     const fetchLists = async () => {
@@ -379,7 +386,8 @@ const CadastroForm = () => {
 
       <img src="/images/logogalaticQuest.png" className="game-logo" alt="Galactic Quest" />
       <div className="solar-system">
-        <img src="/images/Terra.png" className="planet earth" alt="Terra" />
+        {/* IMAGEM DA TERRA COM PRIORIDADE MÁXIMA DE FETCH */}
+        <img src="/images/Terra.png" className="planet earth" alt="Terra" fetchPriority="high" loading="eager" />
         <img src="/images/Mercury.png" className="planet mercury" alt="Mercúrio" />
         <img src="/images/venus.png" className="planet venus" alt="Vênus" />
         <img src="/images/Sun.png" className="sun" alt="Sol" />
@@ -401,11 +409,6 @@ const CadastroForm = () => {
             <button type="submit" className={isLaunching ? "launching" : ""}>
               {isLaunching ? "🚀" : t('loginButton')}
             </button>
-            {/* LINK REMOVIDO PARA EVITAR REGISTRO MANUAL
-            <p onClick={() => setIsRegistering(true)} className="toggle-form">
-              {t('toggleToRegister')}
-            </p>
-            */}
           </form>
         ) : (
           <form onSubmit={handleRegisterSubmit} className="cadastro-form">
