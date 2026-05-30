@@ -91,7 +91,7 @@ const CadastroForm = () => {
   // --- PRELOAD DA IMAGEM DA TERRA ---
   useEffect(() => {
     const preloadEarth = new Image();
-    preloadEarth.src = "/images/Terra.png";
+    preloadEarth.src = "/images/Terra.webp"; // <-- Atualizado para .webp
   }, []);
   // --------------------------------------------------------
 
@@ -387,7 +387,7 @@ const CadastroForm = () => {
       <img src="/images/logogalaticQuest.png" className="game-logo" alt="Galactic Quest" />
       <div className="solar-system">
         {/* IMAGEM DA TERRA COM PRIORIDADE MÁXIMA DE FETCH */}
-        <img src="/images/Terra.png" className="planet earth" alt="Terra" fetchPriority="high" loading="eager" />
+        <img src="/images/Terra.webp" className="planet earth" alt="Terra" fetchPriority="high" loading="eager" /> {/* <-- Atualizado para .webp */}
         <img src="/images/Mercury.png" className="planet mercury" alt="Mercúrio" />
         <img src="/images/venus.png" className="planet venus" alt="Vênus" />
         <img src="/images/Sun.png" className="sun" alt="Sol" />
