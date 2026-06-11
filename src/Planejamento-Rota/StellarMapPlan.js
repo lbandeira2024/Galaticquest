@@ -451,27 +451,38 @@ const StellarMapPlan = ({
         });
     }, [isRouteConfirmed, visitedDestinations]);
 
+    // =========================================================================
+    // LÓGICA DE BLOQUEIO ATUALIZADA
+    // Um passo só está bloqueado se ele for a localização atual (<= currentIndex)
+    // OU se a nave já estiver a caminho desse passo (estava na initialRoute e 
+    // é o índice imediatamente após o currentIndex).
+    // Qualquer corpo adicionado recentemente que ultrapasse a initialRoute
+    // poderá ser livremente movido ou removido.
+    // =========================================================================
     const handleRemoveStep = useCallback((index) => {
-        if (index <= (currentIndex + 1)) return;
+        const isLocked = index <= currentIndex || (initialRoute && index < initialRoute.length && index === currentIndex + 1);
+        if (isLocked) return;
 
         dispatchRouteAction({
             type: 'REMOVE_STEP',
             payload: { index }
         });
-    }, [currentIndex]);
+    }, [currentIndex, initialRoute]);
 
     const handleMoveStep = useCallback((index, direction) => {
-        if (index <= (currentIndex + 1)) return;
+        const isLocked = index <= currentIndex || (initialRoute && index < initialRoute.length && index === currentIndex + 1);
+        if (isLocked) return;
 
         const targetIndex = index + (direction === 'up' ? -1 : 1);
 
-        if (targetIndex === currentIndex + 1) return;
+        const isTargetLocked = targetIndex <= currentIndex || (initialRoute && targetIndex < initialRoute.length && targetIndex === currentIndex + 1);
+        if (isTargetLocked) return;
 
         dispatchRouteAction({
             type: 'REORDER_STEP',
             payload: { index, direction }
         });
-    }, [currentIndex]);
+    }, [currentIndex, initialRoute]);
 
     const handleConfirmRoute = useCallback(() => {
         if (plannedRoute.steps.length <= 1) return;
@@ -677,7 +688,6 @@ const StellarMapPlan = ({
                         </div>
                     </div>
 
-                    {/* WRAPPER E SETAS DE SCROLL APLICADAS AQUI */}
                     <div className="route-list-wrapper">
                         {showScrollArrows && !scrollState.isTop && (
                             <button className="scroll-arrow-btn scroll-up" onClick={() => scrollList('up')}>
@@ -694,7 +704,9 @@ const StellarMapPlan = ({
                                             ? "next-destination-marker"
                                             : "normal-marker";
 
-                                    const isStepLocked = index <= (currentIndex + 1);
+                                    // VARIÁVEL DE BLOQUEIO VISUAL E LÓGICO
+                                    const isStepLocked = index <= currentIndex || (initialRoute && index < initialRoute.length && index === currentIndex + 1);
+
                                     const displayName = getDisplayNameWithDrop(step.name);
 
                                     return (
