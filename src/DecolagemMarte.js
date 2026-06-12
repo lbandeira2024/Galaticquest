@@ -120,7 +120,6 @@ const LeftControlPanel = React.memo(({
     </div>
   );
 }, (prevProps, nextProps) => {
-  // Ignora a mudança de referência inteira do objeto 'telemetry', avalia apenas a velocidade.
   return (
     prevProps.distanceKm === nextProps.distanceKm &&
     prevProps.progress === nextProps.progress &&
@@ -714,6 +713,7 @@ const DecolagemMarte = () => {
   const sosSurpriseEventRef = useRef(sosSurpriseEvent);
 
   const [showSosSurprise, setShowSosSurprise] = useState(false);
+  const [playingSosVideo, setPlayingSosVideo] = useState(false); // NOVO ESTADO DE VÍDEO
 
   const minervaEventTriggered = useRef(false);
   const hideMinervaTimerRef = useRef(null);
@@ -736,9 +736,6 @@ const DecolagemMarte = () => {
     const teamCode = user?.teamCode || "E1";
     return TEAMS_DATA.find(t => t.code === teamCode) || TEAMS_DATA[0];
   }, [user]);
-
-  // useEffect redundant de sincronização de Ref foi Removido:
-  // useEffect(() => { telemetryRef.current = telemetry; }, [telemetry]); // <-- OTIMIZADO
 
   useEffect(() => { spaceCoinsRef.current = spaceCoins; }, [spaceCoins]);
   useEffect(() => { travelStartedRef.current = travelStarted; }, [travelStarted]);
@@ -1569,7 +1566,6 @@ const DecolagemMarte = () => {
           if (travelStartedRef.current) {
             const SPEED_OF_LIGHT_KMH = 1079252848.8;
 
-            // ATUALIZAÇÃO REFINADA - Evita criar um novo objeto a cada ciclo do requestAnimationFrame
             if (timestamp - lastRenderTime.current > 100) {
               telemetryRef.current = {
                 ...telemetryRef.current,
@@ -1667,7 +1663,8 @@ const DecolagemMarte = () => {
               setRouteIndex(newRouteIndex);
               saveCurrentProgressRef.current(newRouteIndex);
 
-              setShowSosSurprise(true);
+              // CHAMA O VÍDEO PRIMEIRO EM VEZ DO MODAL
+              setPlayingSosVideo(true);
             }
           }
 
@@ -2097,6 +2094,32 @@ const DecolagemMarte = () => {
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* OVERLAY DO VÍDEO DE S.O.S FULLSCREEN */}
+      {playingSosVideo && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 99999, // Z-index bem alto para sobrepor tudo
+          backgroundColor: '#000',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <video
+            src="/images/SOS/nick.webm"
+            autoPlay
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            onEnded={() => {
+              setPlayingSosVideo(false);
+              setShowSosSurprise(true);
+            }}
+          />
         </div>
       )}
     </div>
