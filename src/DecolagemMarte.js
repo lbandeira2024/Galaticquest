@@ -447,6 +447,7 @@ const MainDisplayWindow = React.memo(({
           event={sosSurpriseEvent}
           onMudarRota={handleMudarRota}
           onSeguirPlano={handleSeguirPlano}
+          hasRoute={plannedRoute && (routeIndex + 1) < plannedRoute.length}
         />
       )}
     </div>
@@ -470,7 +471,7 @@ const MainDisplayWindow = React.memo(({
 });
 
 // --- UTILS & MODALS ---
-const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano }) => {
+const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano, hasRoute }) => {
   if (!event) return null;
   const getRiskColor = (id) => {
     switch (id) {
@@ -501,7 +502,9 @@ const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano }) => {
         </div>
         <div className="store-action-buttons" style={{ position: 'relative', justifyContent: 'center', marginTop: '20px', bottom: 'auto', right: 'auto' }}>
           <button type="button" className="buy-button action-button-mudar" onClick={(e) => { e.preventDefault(); onMudarRota(); }} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>MUDAR ROTA</button>
-          <button type="button" className="buy-button action-button-seguir" onClick={(e) => { e.preventDefault(); onSeguirPlano(); }} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>SEGUIR PLANO</button>
+          {hasRoute && (
+            <button type="button" className="buy-button action-button-seguir" onClick={(e) => { e.preventDefault(); onSeguirPlano(); }} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>SEGUIR PLANO</button>
+          )}
         </div>
       </div>
     </div>
@@ -713,7 +716,7 @@ const DecolagemMarte = () => {
   const sosSurpriseEventRef = useRef(sosSurpriseEvent);
 
   const [showSosSurprise, setShowSosSurprise] = useState(false);
-  const [playingSosVideo, setPlayingSosVideo] = useState(false); // NOVO ESTADO DE VÍDEO
+  const [playingSosVideo, setPlayingSosVideo] = useState(false);
 
   const minervaEventTriggered = useRef(false);
   const hideMinervaTimerRef = useRef(null);
@@ -923,15 +926,17 @@ const DecolagemMarte = () => {
   useEffect(() => { handleChallengeEndRef.current = handleChallengeEnd; }, [handleChallengeEnd]);
 
   const handleMudarRota = useCallback(() => {
+    stopAllAudio(); // Para a música do S.O.S ao abrir o mapa
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
     setIsForcedMapEdit(true);
     setShowStellarMap(true);
-  }, []);
+  }, [stopAllAudio]);
 
   const handleSeguirPlano = useCallback(() => {
+    stopAllAudio(); // Para a música do S.O.S ao decidir seguir em frente
     if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
@@ -970,9 +975,10 @@ const DecolagemMarte = () => {
       setIsDobraEnabled(false);
       setIsDeparting(false);
     }, 4000);
-  }, [playSFX, triggerMinervaInterplanetarySpeed]);
+  }, [playSFX, triggerMinervaInterplanetarySpeed, stopAllAudio]);
 
   const handleRouteChanged = useCallback((newRouteData) => {
+    stopAllAudio(); // Garante o silêncio/reset ao mudar a rota para seguir viagem
     if (!newRouteData || !newRouteData.newPlannedRoute || newRouteData.newRouteIndex === undefined) {
       if (!isForcedMapEdit) { setShowStellarMap(false); }
       return;
@@ -1038,7 +1044,7 @@ const DecolagemMarte = () => {
         setIsDeparting(false);
       }, 4000);
     }
-  }, [saveNewRouteAndProgress, playSFX, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit, triggerMinervaInterplanetarySpeed]);
+  }, [saveNewRouteAndProgress, playSFX, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit, triggerMinervaInterplanetarySpeed, stopAllAudio]);
 
   const handleEscolha = async (opcao, desafioId, impactos) => {
     setIsTransmissionStarting(false); setIsDialogueFinished(false);
@@ -1640,7 +1646,8 @@ const DecolagemMarte = () => {
             if (newDistance <= 0 && !arrivedAtMarsRef.current) {
               setArrivedAtMars(true); setSpeed(0);
 
-              playSFX('/sounds/nick/nick.mp3');
+              // Toca a música usando o gerenciador principal para manter em loop enquanto estiver na tela
+              playTrack('/sounds/nick/nick.mp3', { loop: true, isPrimary: true });
 
               if (!sosSurpriseEventRef.current) {
                 const availableEvents = SOS_EVENTS_LIST.filter(ev => !usedSosIdsRef.current.includes(ev.id));
@@ -1780,7 +1787,7 @@ const DecolagemMarte = () => {
 
     animationFrameId.current = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animationFrameId.current);
-  }, [API_BASE_URL, userId, playSFX]);
+  }, [API_BASE_URL, userId, playSFX, playTrack]);
 
   const currentMaxSpeed = useMemo(() => {
     if (isDobraAtivada) return 100000000;
