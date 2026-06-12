@@ -1640,6 +1640,8 @@ const DecolagemMarte = () => {
             if (newDistance <= 0 && !arrivedAtMarsRef.current) {
               setArrivedAtMars(true); setSpeed(0);
 
+              playSFX('/sounds/nick/nick.mp3');
+
               if (!sosSurpriseEventRef.current) {
                 const availableEvents = SOS_EVENTS_LIST.filter(ev => !usedSosIdsRef.current.includes(ev.id));
                 if (availableEvents.length > 0) {
