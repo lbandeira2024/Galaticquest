@@ -40,6 +40,20 @@ const getMemberImage = (teamCode, index) => {
   }
 };
 
+const getShipImage = (shipName) => {
+  if (!shipName) return '/images/NeoEclipseDigital.png'; // Fallback de segurança
+
+  // toUpperCase() garante que vai funcionar independente de como estiver escrito no banco
+  switch (shipName.toUpperCase()) {
+    case 'ARTEMIS1': return '/images/Artemis1Digital.png';
+    case 'OBERONX': return '/images/OberonXDigital.png';
+    case 'GAIANOVA': return '/images/GaiaNovaDigital.png';
+    case 'STRATUSV': return '/images/StrausVDigital.png';
+    case 'NEOECLIPSE': return '/images/NeoEclipseDigital.png';
+    default: return '/images/NeoEclipseDigital.png';
+  }
+};
+
 // --- COMPONENTES OTIMIZADOS (React.memo com Custom Comparators) ---
 
 // 1. Painel Esquerdo
@@ -885,7 +899,7 @@ const DecolagemMarte = () => {
       setTelemetry(prev => {
         const newPropulsion = impactos.nuclearPropulsion !== undefined ? applyImpact(prev.propulsion.powerOutput, impactos.nuclearPropulsion) : prev.propulsion.powerOutput;
         const newO2 = impactos.oxygen !== undefined ? applyImpact(prev.atmosphere.o2, impactos.oxygen) : prev.atmosphere.o2;
-        const newDirection = impactos.direction !== undefined ? applyImpact(prev.direction, কপprev.direction) : prev.direction;
+        const newDirection = impactos.direction !== undefined ? applyImpact(prev.direction, impactos.direction) : prev.direction;
         const newStability = impactos.stability !== undefined ? applyImpact(prev.stability, impactos.stability) : prev.stability;
         const newProductivity = impactos.productivity !== undefined ? applyImpact(prev.productivity, impactos.productivity) : prev.productivity;
         const newEngagement = impactos.engagement !== undefined ? applyImpact(prev.engagement, impactos.engagement) : prev.engagement;
@@ -1964,6 +1978,20 @@ const DecolagemMarte = () => {
   return (
     <div className={`tela-decolagem ${isShaking ? 'shaking' : ''}`}>
       <div ref={cockpitRef} className="cockpit-container">
+
+        {/* === NOVO DISPLAY DA NAVE AQUI === */}
+        {chosenShip && (
+          <div className="ship-status-display">
+            <img
+              src={getShipImage(chosenShip)}
+              alt={`Esquema da Nave ${chosenShip}`}
+              className="ship-status-image"
+            />
+            <div className="ship-status-name">{chosenShip}</div>
+          </div>
+        )}
+        {/* ================================== */}
+
         <LeftControlPanel
           telemetry={telemetry}
           distanceKm={distanceKm}
