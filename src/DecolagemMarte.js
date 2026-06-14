@@ -979,11 +979,13 @@ const DecolagemMarte = () => {
   }, [playSFX, triggerMinervaInterplanetarySpeed, stopAllAudio, fadeOutAudio, playTrack]);
 
   const handleRouteChanged = useCallback((newRouteData) => {
-    if (fadeOutAudio) fadeOutAudio(2000); else stopAllAudio();
     if (!newRouteData || !newRouteData.newPlannedRoute || newRouteData.newRouteIndex === undefined) {
       if (!isForcedMapEdit) { setShowStellarMap(false); }
       return;
     }
+
+    if (fadeOutAudio) fadeOutAudio(2000); else stopAllAudio();
+
     setIsForcedMapEdit(false);
     setShowStellarMap(false);
     setShowSosSurprise(false);
