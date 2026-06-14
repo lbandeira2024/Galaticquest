@@ -172,6 +172,32 @@ h2 {
     font-size: 1.2rem;
 }
 
+/* Vices Section Styling */
+.vices-section {
+    margin-top: 1.5rem;
+    border-top: 1px dashed rgba(255, 60, 60, 0.4);
+    padding-top: 1rem;
+}
+
+.vices-section h5 {
+    color: #ff3b3b;
+    margin: 0 0 0.5rem 0;
+    font-size: 1.05rem;
+    text-shadow: 0 0 5px rgba(255, 60, 60, 0.6);
+    letter-spacing: 1px;
+}
+
+.vices-section ul {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.vices-section li {
+    color: #ffb3b3;
+    font-size: 0.95rem;
+    margin-bottom: 0.4rem;
+}
+
 /* Glossary Styles */
 .glossary-section {
     margin-top: 3rem;
@@ -185,6 +211,84 @@ h2 {
     padding: 1rem;
     border-radius: 6px;
     border-left: 3px solid #0bf;
+}
+
+/* Virtues Table Section Styles */
+.virtues-table-section {
+    margin-top: 4rem;
+    border-top: 1px solid rgba(0, 180, 255, 0.3);
+    padding-top: 2rem;
+}
+
+.virtues-table-section h3 {
+    color: #0f0;
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+    margin-bottom: 2rem;
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.galactic-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(0, 15, 30, 0.6);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(0, 180, 255, 0.3);
+}
+
+.galactic-table th,
+.galactic-table td {
+    padding: 1.2rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(0, 180, 255, 0.2);
+    vertical-align: top;
+    font-size: 0.95rem;
+}
+
+.galactic-table th {
+    background: rgba(0, 50, 100, 0.8);
+    color: #0bf;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 0 0 5px rgba(0, 180, 255, 0.5);
+}
+
+.galactic-table tr:hover {
+    background: rgba(0, 80, 150, 0.2);
+}
+
+.galactic-table tr:last-child td {
+    border-bottom: none;
+}
+
+.galactic-table .virtue-name {
+    color: #ff0;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(255, 255, 0, 0.5);
+    width: 20%;
+    font-size: 1.05rem;
+}
+
+.galactic-table .vice-text {
+    color: #ffb3b3;
+    width: 35%;
+}
+
+.galactic-table td ul {
+    margin: 0;
+    padding-left: 1.2rem;
+}
+
+.galactic-table td li {
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
 }
 
 /* Star Particles */
@@ -246,6 +350,16 @@ h2 {
     .virtues-toggle-btn {
         padding: 10px 20px;
         font-size: 0.9rem;
+    }
+
+    .galactic-table th,
+    .galactic-table td {
+        padding: 0.8rem;
+        font-size: 0.85rem;
+    }
+
+    .galactic-table .virtue-name {
+        width: 25%;
     }
 }
 

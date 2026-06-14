@@ -731,7 +731,7 @@ const DecolagemMarte = () => {
 
   const canDecreaseDistanceRef = useRef(false);
 
-  const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
+  const { playTrack, playSound, stopAllAudio, unlockAudio, fadeOutAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
   const isPausedRef = useRef(isPaused);
 
@@ -926,17 +926,16 @@ const DecolagemMarte = () => {
   useEffect(() => { handleChallengeEndRef.current = handleChallengeEnd; }, [handleChallengeEnd]);
 
   const handleMudarRota = useCallback(() => {
-    stopAllAudio(); // Para a música do S.O.S ao abrir o mapa
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
     setIsForcedMapEdit(true);
     setShowStellarMap(true);
-  }, [stopAllAudio]);
+  }, []);
 
   const handleSeguirPlano = useCallback(() => {
-    stopAllAudio(); // Para a música do S.O.S ao decidir seguir em frente
+    if (fadeOutAudio) fadeOutAudio(2000); else stopAllAudio();
     if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
@@ -974,11 +973,13 @@ const DecolagemMarte = () => {
       setProcessadorO2(0);
       setIsDobraEnabled(false);
       setIsDeparting(false);
+
+      playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
     }, 4000);
-  }, [playSFX, triggerMinervaInterplanetarySpeed, stopAllAudio]);
+  }, [playSFX, triggerMinervaInterplanetarySpeed, stopAllAudio, fadeOutAudio, playTrack]);
 
   const handleRouteChanged = useCallback((newRouteData) => {
-    stopAllAudio(); // Garante o silêncio/reset ao mudar a rota para seguir viagem
+    if (fadeOutAudio) fadeOutAudio(2000); else stopAllAudio();
     if (!newRouteData || !newRouteData.newPlannedRoute || newRouteData.newRouteIndex === undefined) {
       if (!isForcedMapEdit) { setShowStellarMap(false); }
       return;
@@ -1042,9 +1043,11 @@ const DecolagemMarte = () => {
         setIsDobraEnabled(false);
         setRefetchTrigger(prev => prev + 1);
         setIsDeparting(false);
+
+        playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
       }, 4000);
     }
-  }, [saveNewRouteAndProgress, playSFX, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit, triggerMinervaInterplanetarySpeed, stopAllAudio]);
+  }, [saveNewRouteAndProgress, playSFX, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit, triggerMinervaInterplanetarySpeed, stopAllAudio, fadeOutAudio, playTrack]);
 
   const handleEscolha = async (opcao, desafioId, impactos) => {
     setIsTransmissionStarting(false); setIsDialogueFinished(false);
@@ -1232,7 +1235,7 @@ const DecolagemMarte = () => {
       }, 13000);
 
       setTimeout(() => {
-        if (isMounted.current) { setMainDisplayState('static'); setMonitorState('static'); }
+        if (isMounted.current) { stopAllAudio(); setMainDisplayState('static'); setMonitorState('static'); }
       }, 23000);
 
       setTimeout(() => {
