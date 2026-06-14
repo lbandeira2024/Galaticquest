@@ -44,12 +44,16 @@
 }
 
 /* ==========================================================
-   ====== DISPLAY DE IDENTIFICAÇÃO DA NAVE (TOPO) ===========
+   ====== DISPLAY DE IDENTIFICAÇÃO DA NAVE (MEIO) ===========
    ========================================================== */
 .ship-status-display {
   position: absolute;
-  /* Posiciona no pequeno espaço entre o teto do painel e o main display */
-  top: 1.5vh;
+
+  /* A MÁGICA ACONTECE AQUI: 
+     Desce o painel para a marca de 65% da tela, 
+     ficando logo abaixo do main-display e acima da telemetria */
+  top: 65vh;
+
   left: 50%;
   transform: translateX(-50%) translateZ(150px);
 
