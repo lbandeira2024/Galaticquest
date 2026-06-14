@@ -43,6 +43,64 @@
   justify-content: center;
 }
 
+/* ==========================================================
+   ====== DISPLAY DE IDENTIFICAÇÃO DA NAVE (TOPO) ===========
+   ========================================================== */
+.ship-status-display {
+  position: absolute;
+  /* Posiciona no pequeno espaço entre o teto do painel e o main display */
+  top: 1.5vh;
+  left: 50%;
+  transform: translateX(-50%) translateZ(150px);
+
+  /* Mantém a largura exata do vidro principal */
+  width: clamp(50%, 54vw, 58%);
+
+  /* LIMITA A ALTURA DO PAINEL */
+  height: clamp(30px, 3.5vh, 45px);
+  box-sizing: border-box;
+
+  background-color: rgba(0, 15, 0, 0.85);
+  border: 1px solid rgba(0, 255, 0, 0.4);
+  box-shadow: 0 0 15px rgba(0, 255, 0, 0.2), inset 0 0 10px rgba(0, 255, 0, 0.1);
+  border-radius: 8px;
+
+  display: flex;
+  justify-content: flex-start;
+  /* Alinha os itens à esquerda */
+  align-items: center;
+  padding: 0 clamp(15px, 2vw, 30px);
+  /* Espaçamento interno lateral */
+
+  z-index: 50;
+  color: #0f0;
+  font-family: 'Courier New', monospace;
+  will-change: transform;
+}
+
+.ship-status-image {
+  /* LIMITA O TAMANHO DA IMAGEM */
+  height: 85%;
+  /* Pega apenas 85% da altura da div pai, deixando uma margem */
+  max-width: 80px;
+  /* Impede que imagens muito compridas empurrem o texto */
+  width: auto;
+  object-fit: contain;
+  /* Garante que a imagem encolha proporcionalmente sem distorcer */
+  margin-right: 15px;
+  filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.8));
+}
+
+.ship-status-name {
+  font-size: clamp(0.9rem, 1.2vw, 1.2rem);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
+  white-space: nowrap;
+  /* Evita que nomes longos quebrem para a linha de baixo */
+}
+
 /* ======================= NOVA CLASSE ADICIONADA ======================= */
 .cloud-animation-video {
   width: 100%;
@@ -1683,5 +1741,16 @@
 
   .dobra-btn-wrapper {
     width: 100%;
+  }
+
+  .ship-status-display {
+    position: relative;
+    width: 95%;
+    height: 35px;
+    margin: 5px auto;
+    transform: none;
+    left: auto;
+    top: auto;
+    order: 0;
   }
 }
