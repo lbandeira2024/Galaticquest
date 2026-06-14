@@ -45,12 +45,12 @@ const getShipImage = (shipName) => {
 
   // toUpperCase() garante que vai funcionar independente de como estiver escrito no banco
   switch (shipName.toUpperCase()) {
-    case 'ARTEMIS1': return '../images/Naves/hud/Artemis1Digital.webp';
-    case 'OBERONX': return '../images/Naves/hud/OberonXDigital.webp';
-    case 'GAIANOVA': return '../images/Naves/hud/GaiaNovaDigital.webp';
-    case 'STRATUSV': return '../images/Naves/hud/StrausVDigital.webp';
-    case 'NEOECLIPSE': return '../images/Naves/hud/NeoEclipseDigital.webp';
-    default: return '/images/Naves/hud/NeoEclipseDigital.webp';
+    case 'ARTEMIS1': return '../images/Naves/Artemis1Digital.webp';
+    case 'OBERONX': return '../images/Naves/OberonXDigital.webp';
+    case 'GAIANOVA': return '../images/Naves/GaiaNovaDigital.webp';
+    case 'STRATUSV': return '../images/Naves/StrausVDigital.webp';
+    case 'NEOECLIPSE': return '../images/Naves/NeoEclipseDigital.webp';
+    default: return '/images/Naves/NeoEclipseDigital.webp';
   }
 };
 
