@@ -885,7 +885,7 @@ const DecolagemMarte = () => {
       setTelemetry(prev => {
         const newPropulsion = impactos.nuclearPropulsion !== undefined ? applyImpact(prev.propulsion.powerOutput, impactos.nuclearPropulsion) : prev.propulsion.powerOutput;
         const newO2 = impactos.oxygen !== undefined ? applyImpact(prev.atmosphere.o2, impactos.oxygen) : prev.atmosphere.o2;
-        const newDirection = impactos.direction !== undefined ? applyImpact(prev.direction, impactos.direction) : prev.direction;
+        const newDirection = impactos.direction !== undefined ? applyImpact(prev.direction, কপprev.direction) : prev.direction;
         const newStability = impactos.stability !== undefined ? applyImpact(prev.stability, impactos.stability) : prev.stability;
         const newProductivity = impactos.productivity !== undefined ? applyImpact(prev.productivity, impactos.productivity) : prev.productivity;
         const newEngagement = impactos.engagement !== undefined ? applyImpact(prev.engagement, impactos.engagement) : prev.engagement;
@@ -926,13 +926,14 @@ const DecolagemMarte = () => {
   useEffect(() => { handleChallengeEndRef.current = handleChallengeEnd; }, [handleChallengeEnd]);
 
   const handleMudarRota = useCallback(() => {
+    stopAllAudio(); // Para a música do S.O.S ao abrir o mapa
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
     setIsForcedMapEdit(true);
     setShowStellarMap(true);
-  }, []);
+  }, [stopAllAudio]);
 
   const handleSeguirPlano = useCallback(() => {
     if (fadeOutAudio) fadeOutAudio(2000); else stopAllAudio();
@@ -984,8 +985,6 @@ const DecolagemMarte = () => {
       return;
     }
 
-    if (fadeOutAudio) fadeOutAudio(2000); else stopAllAudio();
-
     setIsForcedMapEdit(false);
     setShowStellarMap(false);
     setShowSosSurprise(false);
@@ -994,6 +993,7 @@ const DecolagemMarte = () => {
     const { newPlannedRoute, newRouteIndex } = newRouteData;
     const isInFlight = !arrivedAtMars && travelStarted;
 
+    // Se já estiver em voo, não pára o áudio! Apenas muda o destino em background.
     if (isInFlight) {
       routeChangeLockRef.current = true;
       saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
@@ -1012,6 +1012,10 @@ const DecolagemMarte = () => {
 
       setTimeout(() => { routeChangeLockRef.current = false; }, 500);
     } else {
+      // Se NÃO estiver em voo (ou seja, estava parado e decidiu descolar),
+      // aqui sim, paramos o áudio/aplicamos fade para tocar o som de descolagem e depois a música.
+      if (fadeOutAudio) fadeOutAudio(2000); else stopAllAudio();
+
       playSFX('/sounds/empuxo.wav');
       setIsDeparting(true);
       setShowStoreModal(false);
