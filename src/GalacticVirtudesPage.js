@@ -402,7 +402,7 @@ const GalacticVirtudesPage = ({ onClose }) => {
                     </div>
 
                     <section className="virtues-table-section">
-                        <h3>QUADRO DAS DOZE VIRTUDES CHAVES QUE TRADUZEM O LÍDER TRANSFORMADOR, E SUAS ANTÍTESES (VÍCIOS)[cite: 59]:</h3>
+                        <h3>QUADRO DAS DOZE VIRTUDES CHAVES QUE TRADUZEM O LÍDER TRANSFORMADOR, E SUAS ANTÍTESES (VÍCIOS)</h3>
                         <div className="table-responsive">
                             <table className="galactic-table">
                                 <thead>
@@ -414,206 +414,206 @@ const GalacticVirtudesPage = ({ onClose }) => {
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td className="virtue-name">CONHECER A SI MESMO [cite: 21]</td>
+                                        <td className="virtue-name">CONHECER A SI MESMO</td>
                                         <td>
                                             <ul>
-                                                <li>Procurar de forma contínua o auto conhecimento[cite: 26, 27].</li>
-                                                <li>Conseguir identificar, avaliar e refletir sobre os impactos de seus comportamentos, conhecendo-se melhor nas pessoas e grupos sociais diversos[cite: 28].</li>
-                                                <li>Ter maturidade suficiente para se posicionar de forma assertiva, e encaminhar as melhores soluções em qualquer contexto que estiver envolvido[cite: 29].</li>
+                                                <li>Procurar de forma contínua o auto conhecimento.</li>
+                                                <li>Conseguir identificar, avaliar e refletir sobre os impactos de seus comportamentos, conhecendo-se melhor nas pessoas e grupos sociais diversos.</li>
+                                                <li>Ter maturidade suficiente para se posicionar de forma assertiva, e encaminhar as melhores soluções em qualquer contexto que estiver envolvido.</li>
                                             </ul>
                                         </td>
                                         <td className="vice-text">
                                             <ul>
-                                                <li>“Líder” dependente do outro e com baixa assertividade[cite: 47].</li>
-                                                <li>Dependente da opinião alheia; inseguro[cite: 48].</li>
-                                                <li>Despreza o autoconhecimento; tem um forte realismo prático como norteador da vida[cite: 49].</li>
+                                                <li>“Líder” dependente do outro e com baixa assertividade.</li>
+                                                <li>Dependente da opinião alheia; inseguro.</li>
+                                                <li>Despreza o autoconhecimento; tem um forte realismo prático como norteador da vida.</li>
                                             </ul>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="virtue-name">PROPÓSITO [cite: 22]</td>
+                                        <td className="virtue-name">PROPÓSITO</td>
                                         <td>
                                             <ul>
-                                                <li>Ter um sonho, uma grande meta, um conjunto de metas menores – que estimule, impulsione – a cada um de nós, e na relação com o outro; ter uma razão para lutar com orgulho[cite: 31, 32].</li>
-                                                <li>Ter disposição e entusiasmo de querer realizar o sonho sonhado, que se transforma em planos realizáveis[cite: 33].</li>
-                                                <li>Saber transformar a ideia em projeto e materializá-la como possível, fazendo com que nasça a esperança em outros, e acompanhá-lo com entusiasmo[cite: 34].</li>
+                                                <li>Ter um sonho, uma grande meta, um conjunto de metas menores – que estimule, impulsione – a cada um de nós, e na relação com o outro; ter uma razão para lutar com orgulho.</li>
+                                                <li>Ter disposição e entusiasmo de querer realizar o sonho sonhado, que se transforma em planos realizáveis.</li>
+                                                <li>Saber transformar a ideia em projeto e materializá-la como possível, fazendo com que nasça a esperança em outros, e acompanhá-lo com entusiasmo.</li>
                                             </ul>
                                         </td>
                                         <td className="vice-text">
                                             <ul>
-                                                <li>É um “líder” pessimista; prostrado[cite: 50].</li>
-                                                <li>Autodesvalorização; não acredita em si mesmo[cite: 51].</li>
-                                                <li>Depressão; desiludido; não tem sonhos, projetos; acomodado e é cético demais[cite: 52].</li>
+                                                <li>É um “líder” pessimista; prostrado.</li>
+                                                <li>Autodesvalorização; não acredita em si mesmo.</li>
+                                                <li>Depressão; desiludido; não tem sonhos, projetos; acomodado e é cético demais.</li>
                                             </ul>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="virtue-name">CORAGEM [cite: 23]</td>
+                                        <td className="virtue-name">CORAGEM</td>
                                         <td>
                                             <ul>
-                                                <li>Tomar decisões que envolvam incertezas e a possibilidade de perdas, com o objetivo de alcançar algo importante[cite: 36].</li>
-                                                <li>Agir em defesa de outras pessoas que estão sendo injustiçadas, ou que não têm voz, mesmo que implique em riscos pessoais[cite: 37].</li>
-                                                <li>Agir, apesar do medo, com o coração e de acordo com suas convicções para transformar a realidade, ou situação[cite: 38].</li>
+                                                <li>Tomar decisões que envolvam incertezas e a possibilidade de perdas, com o objetivo de alcançar algo importante.</li>
+                                                <li>Agir em defesa de outras pessoas que estão sendo injustiçadas, ou que não têm voz, mesmo que implique em riscos pessoais.</li>
+                                                <li>Agir, apesar do medo, com o coração e de acordo com suas convicções para transformar a realidade, ou situação.</li>
                                             </ul>
                                         </td>
                                         <td className="vice-text">
                                             <ul>
-                                                <li>Este “líder” tem medo de tomar a inicia-tiva e correr riscos[cite: 53].</li>
-                                                <li>“Líder” recluso; baixa auto estima[cite: 54].</li>
-                                                <li>Apresenta insegurança psicológica[cite: 55].</li>
+                                                <li>Este “líder” tem medo de tomar a inicia-tiva e correr riscos.</li>
+                                                <li>“Líder” recluso; baixa auto estima.</li>
+                                                <li>Apresenta insegurança psicológica.</li>
                                             </ul>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="virtue-name">AGIR COM A VERDADE [cite: 24]</td>
+                                        <td className="virtue-name">AGIR COM A VERDADE</td>
                                         <td>
                                             <ul>
-                                                <li>Saber remover o oculto, isto é, o “véu sobre algo esquecido” com sinceridade pelo bem comum[cite: 40].</li>
-                                                <li>Inspirar-se a ir além das aparências dos comportamentos, a questionar o previsto, a compreender ambiguidades e distinguir narrativas de fatos, ruídos de vieses[cite: 41].</li>
-                                                <li>Usar as regras e códigos estabelecidos com bom senso, que se transformam em práticas virtuosas no comportamento de liderança, sem jamais fugir do cerne da questão ou da essência das coisas[cite: 42].</li>
+                                                <li>Saber remover o oculto, isto é, o “véu sobre algo esquecido” com sinceridade pelo bem comum.</li>
+                                                <li>Inspirar-se a ir além das aparências dos comportamentos, a questionar o previsto, a compreender ambiguidades e distinguir narrativas de fatos, ruídos de vieses.</li>
+                                                <li>Usar as regras e códigos estabelecidos com bom senso, que se transformam em práticas virtuosas no comportamento de liderança, sem jamais fugir do cerne da questão ou da essência das coisas.</li>
                                             </ul>
                                         </td>
                                         <td className="vice-text">
                                             <ul>
-                                                <li>“Líder” desonesto, injusto, incoerente e dissimulado. Age pela conveniência[cite: 56].</li>
-                                                <li>Falsificação ou omissão de dados[cite: 57].</li>
-                                                <li>Mente em negociações, tendendo a encobrir erros ou má conduta[cite: 58].</li>
+                                                <li>“Líder” desonesto, injusto, incoerente e dissimulado. Age pela conveniência.</li>
+                                                <li>Falsificação ou omissão de dados.</li>
+                                                <li>Mente em negociações, tendendo a encobrir erros ou má conduta.</li>
                                             </ul>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="virtue-name">DISCIPLINA [cite: 60]</td>
+                                        <td className="virtue-name">DISCIPLINA</td>
                                         <td>
                                             <ul>
-                                                <li>Atuar com método e lógica no trabalho, a observar os passos necessários para se chegar a uma solução satisfatória e possível[cite: 65].</li>
-                                                <li>Representa, na conexão, estimular o aprendizado do outro – a sua educação, para ser melhor do que se é, e para poder contribuir ao contexto[cite: 66].</li>
-                                                <li>Representa valorizar no outro a busca da teoria, de conceitos, de modelos, que o ajudem como líder/liderado a dar forma, a interpretar a realidade, a ver e enfrentar oportunidades e situações ou problemas[cite: 67].</li>
+                                                <li>Atuar com método e lógica no trabalho, a observar os passos necessários para se chegar a uma solução satisfatória e possível.</li>
+                                                <li>Representa, na conexão, estimular o aprendizado do outro – a sua educação, para ser melhor do que se é, e para poder contribuir ao contexto.</li>
+                                                <li>Representa valorizar no outro a busca da teoria, de conceitos, de modelos, que o ajudem como líder/liderado a dar forma, a interpretar a realidade, a ver e enfrentar oportunidades e situações ou problemas.</li>
                                             </ul>
                                         </td>
                                         <td className="vice-text">
                                             <ul>
-                                                <li>Este “líder” apresenta falta de autocontrole; ausência de rigor, de método[cite: 85].</li>
-                                                <li>“Líder” com dificuldades de manter foco em metas/objetivos[cite: 86].</li>
-                                                <li>Tende a procrastinação, ociosidade e preguiça[cite: 87].</li>
+                                                <li>Este “líder” apresenta falta de autocontrole; ausência de rigor, de método.</li>
+                                                <li>“Líder” com dificuldades de manter foco em metas/objetivos.</li>
+                                                <li>Tende a procrastinação, ociosidade e preguiça.</li>
                                             </ul>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="virtue-name">PAIXÃO POR PESSOAS [cite: 61]</td>
+                                        <td className="virtue-name">PAIXÃO POR PESSOAS</td>
                                         <td>
                                             <ul>
-                                                <li>Posicionar as pessoas em primeiro lugar[cite: 69].</li>
-                                                <li>Desenvolver a empatia e o acolhimento, além de promover o engajamento[cite: 70].</li>
-                                                <li>Ter a consciência sobre as decisões tomadas como líder, que impactam no ambiente e geram consequências[cite: 71].</li>
+                                                <li>Posicionar as pessoas em primeiro lugar.</li>
+                                                <li>Desenvolver a empatia e o acolhimento, além de promover o engajamento.</li>
+                                                <li>Ter a consciência sobre as decisões tomadas como líder, que impactam no ambiente e geram consequências.</li>
                                             </ul>
                                         </td>
                                         <td className="vice-text">
                                             <ul>
-                                                <li>Prefere o distanciamento como “líder”[cite: 88].</li>
-                                                <li>Promove a evitação do contato, da conexão humana. Desconfia da virtude como algo transformador e que ajuda de verdade[cite: 89]. Privilegia o individual ao invés do coletivo[cite: 90].</li>
-                                                <li>Tem desprezo pelas pessoas; o foco é apenas nos processos, metas e resultados[cite: 91].</li>
+                                                <li>Prefere o distanciamento como “líder”.</li>
+                                                <li>Promove a evitação do contato, da conexão humana. Desconfia da virtude como algo transformador e que ajuda de verdade. Privilegia o individual ao invés do coletivo.</li>
+                                                <li>Tem desprezo pelas pessoas; o foco é apenas nos processos, metas e resultados.</li>
                                             </ul>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="virtue-name">GENEROSIDADE [cite: 62]</td>
+                                        <td className="virtue-name">GENEROSIDADE</td>
                                         <td>
                                             <ul>
-                                                <li>Ajudar naturalmente os outros à serem melhores em suas competências técnicas e humanas[cite: 73].</li>
-                                                <li>Tem a consciência de que a solidarieda-de é suporte às pessoas em torno do propósito[cite: 74].</li>
-                                                <li>Respeitar profundamente a individualidade; incentivo ao engajamento; reconhecer, elogiar e agradecer[cite: 75]. Promove o diálogo sensível, a empatia, e a harmonia entre lideranças e as pessoas de um modo geral[cite: 76].</li>
+                                                <li>Ajudar naturalmente os outros à serem melhores em suas competências técnicas e humanas.</li>
+                                                <li>Tem a consciência de que a solidarieda-de é suporte às pessoas em torno do propósito.</li>
+                                                <li>Respeitar profundamente a individualidade; incentivo ao engajamento; reconhecer, elogiar e agradecer. Promove o diálogo sensível, a empatia, e a harmonia entre lideranças e as pessoas de um modo geral.</li>
                                             </ul>
                                         </td>
                                         <td className="vice-text">
                                             <ul>
-                                                <li>Este “líder” tende a levar as pessoas/ equipe ao esgotamento (burnout)[cite: 92].</li>
-                                                <li>Apresenta sentimento de inferioridade[cite: 93].</li>
-                                                <li>Explora o outro de forma ilimitada, buscando argumentos práticos e de resultados; “os fins justificam os meios”[cite: 94].</li>
+                                                <li>Este “líder” tende a levar as pessoas/ equipe ao esgotamento (burnout).</li>
+                                                <li>Apresenta sentimento de inferioridade.</li>
+                                                <li>Explora o outro de forma ilimitada, buscando argumentos práticos e de resultados; “os fins justificam os meios”.</li>
                                             </ul>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="virtue-name">SIMPLICIDADE [cite: 63]</td>
+                                        <td className="virtue-name">SIMPLICIDADE</td>
                                         <td>
                                             <ul>
-                                                <li>Representa levar a disciplina e pô-la em conexão na sua forma simples, através de uma linguagem totalmente acessível[cite: 78].</li>
-                                                <li>Observar a busca de maneiras para explicitar a análise de uma situação, conflito ou problema, observando o entendimento pleno do que se quer elucidar[cite: 79].</li>
-                                                <li>Saber se comunicar de modo eficaz, sem a fala hermética comum, promovendo sondagens sobre o entendimento[cite: 80].</li>
+                                                <li>Representa levar a disciplina e pô-la em conexão na sua forma simples, através de uma linguagem totalmente acessível.</li>
+                                                <li>Observar a busca de maneiras para explicitar a análise de uma situação, conflito ou problema, observando o entendimento pleno do que se quer elucidar.</li>
+                                                <li>Saber se comunicar de modo eficaz, sem a fala hermética comum, promovendo sondagens sobre o entendimento.</li>
                                             </ul>
                                         </td>
                                         <td className="vice-text">
                                             <ul>
-                                                <li>Este “líder” se norteia pela ostentação e manutenção do status quo[cite: 95].</li>
-                                                <li>Este “líder” apresenta cobiça (desejo insaciável por dinheiro, bens, etc.). Avareza[cite: 96].</li>
-                                                <li>Confusão desnecessária (de criar complexidade sem necessidade de pensamentos, planos ou comunicação; dificuldade de ir direto ao ponto[cite: 97].</li>
+                                                <li>Este “líder” se norteia pela ostentação e manutenção do status quo.</li>
+                                                <li>Este “líder” apresenta cobiça (desejo insaciável por dinheiro, bens, etc.). Avareza.</li>
+                                                <li>Confusão desnecessária (de criar complexidade sem necessidade de pensamentos, planos ou comunicação; dificuldade de ir direto ao ponto.</li>
                                             </ul>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="virtue-name">HUMILDADE [cite: 98]</td>
+                                        <td className="virtue-name">HUMILDADE</td>
                                         <td>
                                             <ul>
-                                                <li>Resume-se à capacidade de não superestimar o outro, nem se colocar abaixo dele. Não é de se auto promover[cite: 103].</li>
-                                                <li>Perspicaz, modesto, o ser humilde passa a ser admirado como pessoa, ao contrário daquele que se mostra fleumático e distante seus relacionamentos e pouco empático[cite: 104].</li>
-                                                <li>Confiável, promove, naturalmente, o engajamento e a conexão da equipe de trabalho, sabendo usar a gratidão[cite: 105].</li>
+                                                <li>Resume-se à capacidade de não superestimar o outro, nem se colocar abaixo dele. Não é de se auto promover.</li>
+                                                <li>Perspicaz, modesto, o ser humilde passa a ser admirado como pessoa, ao contrário daquele que se mostra fleumático e distante seus relacionamentos e pouco empático.</li>
+                                                <li>Confiável, promove, naturalmente, o engajamento e a conexão da equipe de trabalho, sabendo usar a gratidão.</li>
                                             </ul>
                                         </td>
                                         <td className="vice-text">
                                             <ul>
-                                                <li>Este “líder” apresenta passividade; auto-exploração[cite: 124].</li>
-                                                <li>Seu perfil é de alguém subserviente; servilismo[cite: 125].</li>
-                                                <li>Apresenta modéstia excessiva[cite: 126].</li>
+                                                <li>Este “líder” apresenta passividade; auto-exploração.</li>
+                                                <li>Seu perfil é de alguém subserviente; servilismo.</li>
+                                                <li>Apresenta modéstia excessiva.</li>
                                             </ul>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="virtue-name">PERSEVERANÇA [cite: 99]</td>
+                                        <td className="virtue-name">PERSEVERANÇA</td>
                                         <td>
                                             <ul>
-                                                <li>Ser constante, firme e persistente em um propósito determinado, mesmo diante de obstáculos, dificuldades ou desânimo[cite: 107].</li>
-                                                <li>Manter o foco e o esforço em direção a um objetivo, resistindo à tentativa de desistir[cite: 108].</li>
-                                                <li>Ser uma fonte inspiradora para a prática de todas as virtudes, que está ligada à motivação, disciplina e à capacidade de superar a frustração e os reveses[cite: 109].</li>
+                                                <li>Ser constante, firme e persistente em um propósito determinado, mesmo diante de obstáculos, dificuldades ou desânimo.</li>
+                                                <li>Manter o foco e o esforço em direção a um objetivo, resistindo à tentativa de desistir.</li>
+                                                <li>Ser uma fonte inspiradora para a prática de todas as virtudes, que está ligada à motivação, disciplina e à capacidade de superar a frustração e os reveses.</li>
                                             </ul>
                                         </td>
                                         <td className="vice-text">
                                             <ul>
-                                                <li>Desistência[cite: 127].</li>
-                                                <li>Impulsividade no sentido de ser incapaz de manter o foco[cite: 128].</li>
-                                                <li>Tende a ser um “líder” complacente, sem ímpeto; pode ser acomodado[cite: 129].</li>
+                                                <li>Desistência.</li>
+                                                <li>Impulsividade no sentido de ser incapaz de manter o foco.</li>
+                                                <li>Tende a ser um “líder” complacente, sem ímpeto; pode ser acomodado.</li>
                                             </ul>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="virtue-name">PROTAGONISMO [cite: 100]</td>
+                                        <td className="virtue-name">PROTAGONISMO</td>
                                         <td>
                                             <ul>
-                                                <li>Manifestar a prática do comportamento pioneiro – testando a ideia, o conceito e o modelo de algo, que ajuda a avançar/consolidar um processo de melhoria no contexto[cite: 111].</li>
-                                                <li>É um líder realizador, voluntário na jornada, que protagoniza as virtudes[cite: 112].</li>
-                                                <li>Sua voluntariedade está ligada diretamente a um propósito que foi construído[cite: 113]. Revela habilidade de mudar as experiências e corrigir rumos com energia para transformar[cite: 114].</li>
+                                                <li>Manifestar a prática do comportamento pioneiro – testando a ideia, o conceito e o modelo de algo, que ajuda a avançar/consolidar um processo de melhoria no contexto.</li>
+                                                <li>É um líder realizador, voluntário na jornada, que protagoniza as virtudes.</li>
+                                                <li>Sua voluntariedade está ligada diretamente a um propósito que foi construído. Revela habilidade de mudar as experiências e corrigir rumos com energia para transformar.</li>
                                             </ul>
                                         </td>
                                         <td className="vice-text">
                                             <ul>
-                                                <li>Este “líder” apresenta vitimismo (acomodado)[cite: 130].</li>
-                                                <li>Apresenta inércia (acomodado, complacente, pouca energia mobilizadora)[cite: 131].</li>
-                                                <li>É um “líder” reativo ao mundo, às pessoas e as ações importantes[cite: 132].</li>
+                                                <li>Este “líder” apresenta vitimismo (acomodado).</li>
+                                                <li>Apresenta inércia (acomodado, complacente, pouca energia mobilizadora).</li>
+                                                <li>É um “líder” reativo ao mundo, às pessoas e as ações importantes.</li>
                                             </ul>
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td className="virtue-name">RESPEITO À DIVERSIDADE [cite: 101]</td>
+                                        <td className="virtue-name">RESPEITO À DIVERSIDADE</td>
                                         <td>
                                             <ul>
-                                                <li>Ir além da tolerância, adotando na liderança uma postura ativa de reconhecimento da igualdade entre os diferentes [cite: 116]; saber celebrar a riqueza que a variedade traz para a experiência virtuosa da equipe[cite: 117].</li>
-                                                <li>Criar uma cultura de inclusão na liderança, bem como de engajamento, ao explicitar quando necessário, que existem múltiplas perspectivas, histórias e modos de vida válidos[cite: 118].</li>
-                                                <li>Compreender a alteridade, regularizando o “outro” na sua singularidade[cite: 119].</li>
+                                                <li>Ir além da tolerância, adotando na liderança uma postura ativa de reconhecimento da igualdade entre os diferentes; saber celebrar a riqueza que a variedade traz para a experiência virtuosa da equipe.</li>
+                                                <li>Criar uma cultura de inclusão na liderança, bem como de engajamento, ao explicitar quando necessário, que existem múltiplas perspectivas, histórias e modos de vida válidos.</li>
+                                                <li>Compreender a alteridade, regularizando o “outro” na sua singularidade.</li>
                                             </ul>
                                         </td>
                                         <td className="vice-text">
                                             <ul>
-                                                <li>Este “líder” age com preconceito e estereótipos[cite: 133].</li>
-                                                <li>Age com discriminação e distanciamentos não observando outros aspectos da situação[cite: 134].</li>
-                                                <li>Individualista, tende a menosprezar o outro que age e pensa diferente[cite: 135]. Age pela exclusão e pela não equidade, muitas vezes sem perceber[cite: 136].</li>
+                                                <li>Este “líder” age com preconceito e estereótipos.</li>
+                                                <li>Age com discriminação e distanciamentos não observando outros aspectos da situação.</li>
+                                                <li>Individualista, tende a menosprezar o outro que age e pensa diferente. Age pela exclusão e pela não equidade, muitas vezes sem perceber.</li>
                                             </ul>
                                         </td>
                                     </tr>

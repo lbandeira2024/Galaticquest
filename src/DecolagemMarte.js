@@ -1235,11 +1235,19 @@ const DecolagemMarte = () => {
       }, 13000);
 
       setTimeout(() => {
-        if (isMounted.current) { stopAllAudio(); setMainDisplayState('static'); setMonitorState('static'); }
+        if (isMounted.current) {
+          // stopAllAudio(); // REMOVIDO PARA MANTER O SOM DA DECOLAGEM DURANTE A ESTÁTICA
+          setMainDisplayState('static');
+          setMonitorState('static');
+        }
       }, 23000);
 
       setTimeout(() => {
-        if (isMounted.current) { stopAllAudio(); setMainDisplayState('stars'); setMonitorState('on'); }
+        if (isMounted.current) {
+          stopAllAudio(); // Aqui o som para definitivamente ao chegar às estrelas
+          setMainDisplayState('stars');
+          setMonitorState('on');
+        }
       }, 45000);
     }
   }, [isLoadingRoute, routeIndex, unlockAudio, playTrack, stopAllAudio]);
