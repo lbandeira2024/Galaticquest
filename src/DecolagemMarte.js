@@ -41,15 +41,15 @@ const getMemberImage = (teamCode, index) => {
 };
 
 const getShipImage = (shipName) => {
-  if (!shipName) return '/images/Naves/hud/NeoEclipseDigital.webp'; // Fallback de segurança
+  if (!shipName) return '/images/Naves/NeoEclipseDigital.webp'; // Fallback de segurança
 
   // toUpperCase() garante que vai funcionar independente de como estiver escrito no banco
   switch (shipName.toUpperCase()) {
-    case 'ARTEMIS1': return '../images/Naves/Artemis1Digital.webp';
-    case 'OBERONX': return '../images/Naves/OberonXDigital.webp';
-    case 'GAIANOVA': return '../images/Naves/GaiaNovaDigital.webp';
-    case 'STRATUSV': return '../images/Naves/StrausVDigital.webp';
-    case 'NEOECLIPSE': return '../images/Naves/NeoEclipseDigital.webp';
+    case 'ARTEMIS1': return '/images/Naves/Artemis1Digital.webp';
+    case 'OBERONX': return '/images/Naves/OberonXDigital.webp';
+    case 'GAIANOVA': return '/images/Naves/GaiaNovaDigital.webp';
+    case 'STRATUSV': return '/images/Naves/StrausVDigital.webp';
+    case 'NEOECLIPSE': return '/images/Naves/NeoEclipseDigital.webp';
     default: return '/images/Naves/NeoEclipseDigital.webp';
   }
 };
