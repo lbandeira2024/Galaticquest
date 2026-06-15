@@ -52,8 +52,8 @@
   /* Define a âncora do topo (borda inferior do main display) + 5px de gap */
   top: calc(64vh + 5px);
 
-  /* Define a âncora de baixo (borda superior dos controles) + 5px de gap */
-  bottom: calc(22vh + 5px);
+  /* Estica o painel para baixo alterando a âncora inferior */
+  bottom: calc(18vh + 5px);
 
   /* A MÁGICA ACONTECE AQUI: 
      A propriedade height foi removida. O painel estica sozinho entre o top e o bottom */
@@ -85,9 +85,9 @@
 }
 
 .ship-status-image {
-  /* A imagem vai ter a altura do painel menos 10px, 
-     criando um respiro (margem) de 5px em cima e embaixo dentro do próprio HUD */
-  height: calc(100% - 10px);
+  /* Trava a altura da imagem para que ela não estique com o painel */
+  height: 100%;
+  max-height: 75px;
 
   max-width: 150px;
   width: auto;
