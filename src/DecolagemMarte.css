@@ -49,17 +49,18 @@
 .ship-status-display {
   position: absolute;
 
-  /* Sobe um pouco o painel para não bater na telemetria em baixo */
-  top: 62vh;
+  /* Define a âncora do topo (borda inferior do main display) + 5px de gap */
+  top: calc(64vh + 5px);
+
+  /* Define a âncora de baixo (borda superior dos controles) + 5px de gap */
+  bottom: calc(22vh + 5px);
+
+  /* A MÁGICA ACONTECE AQUI: 
+     A propriedade height foi removida. O painel estica sozinho entre o top e o bottom */
 
   left: 50%;
   transform: translateX(-50%) translateZ(150px);
-
-  /* Mantém a largura exata do vidro principal */
   width: clamp(50%, 54vw, 58%);
-
-  /* LIMITA A ALTURA DO PAINEL (AUMENTADA) */
-  height: clamp(60px, 8vh, 90px);
   box-sizing: border-box;
 
   background-color: rgba(0, 15, 0, 0.85);
@@ -79,17 +80,16 @@
   font-family: 'Courier New', monospace;
   will-change: transform;
 
-  /* Garante que a imagem não vaze do painel */
+  /* CORTA O QUE PASSAR DA BORDA */
   overflow: hidden;
 }
 
 .ship-status-image {
-  /* Altura ajustada para caber perfeitamente no novo painel */
-  height: 90%;
+  /* A imagem vai ter a altura do painel menos 10px, 
+     criando um respiro (margem) de 5px em cima e embaixo dentro do próprio HUD */
+  height: calc(100% - 10px);
 
-  /* Largura máxima ajustada */
   max-width: 150px;
-
   width: auto;
   object-fit: contain;
 
