@@ -83,15 +83,18 @@
 }
 
 .ship-status-image {
-  /* LIMITA O TAMANHO DA IMAGEM */
-  height: 85%;
-  /* Pega apenas 85% da altura da div pai, deixando uma margem */
-  max-width: 80px;
-  /* Impede que imagens muito compridas empurrem o texto */
+  /* Altura aumentada em 3x (85% * 3 = 255%) para a imagem crescer e vazar do painel */
+  height: 255%;
+
+  /* Largura máxima aumentada em 3x (80px * 3 = 240px) para não cortar a imagem */
+  max-width: 240px;
+
   width: auto;
   object-fit: contain;
-  /* Garante que a imagem encolha proporcionalmente sem distorcer */
-  margin-right: 15px;
+
+  /* Você pode querer aumentar um pouco a margem para separar mais do texto agora que a imagem está maior */
+  margin-right: 25px;
+
   filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.8));
 }
 
