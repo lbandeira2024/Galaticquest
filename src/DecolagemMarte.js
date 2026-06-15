@@ -39,20 +39,23 @@ const getMemberImage = (teamCode, index) => {
     default: return index === 0 ? 'default1' : index === 1 ? 'default2' : index === 2 ? 'default3' : index === 3 ? 'default4' : 'default5';
   }
 };
-
 const getShipImage = (shipName) => {
-  // Pega a URL base do projeto (funciona tanto local quanto no GitHub Pages/Hospedagens)
-  const baseUrl = process.env.PUBLIC_URL || '/Galaticquest';
-
-  if (!shipName) return `${baseUrl}/images/Naves/NeoEclipseDigital.webp`; // Fallback
+  // Como está hospedado na Amazon (raiz), o caminho direto com "/" funciona perfeitamente
+  if (!shipName) return '/images/Naves/NeoEclipseDigital.webp'; // Fallback
 
   switch (shipName.toUpperCase()) {
-    case 'ARTEMIS1': return `${baseUrl}/images/Naves/Artemis1Digital.webp`;
-    case 'OBERONX': return `${baseUrl}/images/Naves/OberonXDigital.webp`;
-    case 'GAIANOVA': return `${baseUrl}/images/Naves/GaiaNovaDigital.webp`;
-    case 'STRATUSV': return `${baseUrl}/images/Naves/StrausVDigital.webp`;
-    case 'NEOECLIPSE': return `${baseUrl}/images/Naves/NeoEclipseDigital.webp`;
-    default: return `${baseUrl}/images/Naves/NeoEclipseDigital.webp`;
+    case 'ARTEMIS1':
+      return '/images/Naves/Artemis1Digital.webp';
+    case 'OBERONX':
+      return '/images/Naves/OberonXDigital.webp';
+    case 'GAIANOVA':
+      return '/images/Naves/GaiaNovaDigital.webp';
+    case 'STRATUSV':
+      return '/images/Naves/StrausVDigital.webp'; // Mantive a grafia do ficheiro (Straus)
+    case 'NEOECLIPSE':
+      return '/images/Naves/NeoEclipseDigital.webp';
+    default:
+      return '/images/Naves/NeoEclipseDigital.webp';
   }
 };
 
