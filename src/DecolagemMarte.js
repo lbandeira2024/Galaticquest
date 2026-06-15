@@ -23,7 +23,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 // --- CONSTANTES DE DADOS DA TRIPULAÇÃO ---
 const TEAMS_DATA = [
   { id: 1, code: "E1", description: "Equipe especializada em exploração", missions: 12, achievements: ["Primeira equipe a mapear o Cinturão de Asteroides X-47", "Desenvolveu sistema de navegação em ambientes de alta gravidade", "Recorde de permanência em ambientes hostis: 487 dias"], members: [{ role: "Coordenador Espacial", name: "Sisifo", experience: "45 anos", details: "Engenheiro Aeroespacial", country: "Espanha" }, { role: "Cientista", name: "Neo", experience: "39 anos", details: "Cientista de Recursos Naturais Raros e Astrobotânica", country: "Americano" }, { role: "Engenheira", name: "Tamara", experience: "32 anos", details: "Física e Engenheira Aero Espacial", country: "Americana" }, { role: "Engenheira", name: "Ares", experience: "39 anos", details: "Engenheira Aeronáutico, PhD em Sist. de Oxigenação sob condições adversas", country: "Espanha" }, { role: "Engenheira", name: "Mae", experience: "37 anos", details: "Engenheira Química, PhD", country: "Americana" }] },
-  { id: 2, code: "E2", description: "Equipe especializada em diplomacia", missions: 18, achievements: ["Mediou conflito intercolonial em Marte (2147)", "Equipe com maior índice de resolução pacífica de incidentes", "Desenvolveu protocolos de comunicação intercultural"], members: [{ role: "Coordenadora Espacial", name: "Aletheia", experience: "40 anos", details: "Engenharia Aeronáutica", country: "Romena" }, { role: "Capitão", name: "Kirk", experience: "30 anos", details: "Ergo. Químico, PhD em Matemática e Pepito Espacial", country: "Americano" }, { role: "Cientista", name: "Maureen", experience: "43 anos", details: "Ergo. Astrofísica, PhD em Geometria Espacial", country: "Canadense" }, { role: "Piloto", name: "Hazza Ali", experience: "37 anos", details: "Piloto Militar", country: "Árabe" }, { role: "Engenheiro", name: "Ilia Ramon", experience: "49 anos", details: "Ergo. Aeronáutico e Piloto de Caça", country: "Israelense" }] },
+  { id: 2, code: "E2", description: "Equipe especializada em diplomacia", missions: 18, achievements: ["Mediou conflito intercolonial em Marte (2147)", "Equipe com maior índice de resolução pacífica de incidentes", "Desenvolveu protocols de comunicação intercultural"], members: [{ role: "Coordenadora Espacial", name: "Aletheia", experience: "40 anos", details: "Engenharia Aeronáutica", country: "Romena" }, { role: "Capitão", name: "Kirk", experience: "30 anos", details: "Ergo. Químico, PhD em Matemática e Pepito Espacial", country: "Americano" }, { role: "Cientista", name: "Maureen", experience: "43 anos", details: "Ergo. Astrofísica, PhD em Geometria Espacial", country: "Canadense" }, { role: "Piloto", name: "Hazza Ali", experience: "37 anos", details: "Piloto Militar", country: "Árabe" }, { role: "Engenheiro", name: "Ilia Ramon", experience: "49 anos", details: "Ergo. Aeronáutico e Piloto de Caça", country: "Israelense" }] },
   { id: 3, code: "E3", description: "Equipe especializada em combate", missions: 24, achievements: ["Defesa bem-sucedida da Base Lunar Alpha contra ataque de 2149", "Treinou 87% dos pilotos de combate ativos", "Desenvolveu táticas de defesa em gravidade zero"], members: [{ role: "Coordenador Espacial", name: "Kopenawa", experience: "55 anos", details: "Astrofísico e Engenheiro Espacial", country: "Mexicano" }, { role: "Médico", name: "Marek", experience: "47 anos", details: "Psiquiatra Psicanalista, PhD em Doenças Pós-Espaciais", country: "Tcheco" }, { role: "Nutricionista", name: "Farna", experience: "34 anos", details: "Nutricionista Espacial", country: "Polonesa" }, { role: "Biólogo", name: "Zachary", experience: "42 anos", details: "Biólogo e Infectologista, PhD", country: "Americano" }, { role: "Engenheiro", name: "Iuri", experience: "30 anos", details: "Ergo. Aeronáutico e músico", country: "Ítalo-russo" }, { role: "Tripulante convidada", name: "Zahy", experience: "35 anos", details: "Indígena brasileira", country: "Brasileira" }] },
   { id: 4, code: "E4", description: "Equipe especializada em pesquisa", missions: 15, achievements: ["Descoberta de 3 novos elementos em asteroides", "Desenvolveu sistema de análise de solo planetário em tempo real", "Publicou 47 artigos científicos em revistas de prestígio"], members: [{ role: "Coordenadora Espacial", name: "Deméter", experience: "42 anos", details: "Geóloga espacial, PhD", country: "Canadense" }, { role: "Engenheiro", name: "Semolek", experience: "40 anos", details: "Ergo. Especialista em Sist. de Sensores Espaciais e Aéreos", country: "Russo" }, { role: "Engenheira", name: "Nora", experience: "27 anos", details: "Engenheira Mecânica Especialista em Eventos Espaciais Atípicos", country: "Árabe" }, { role: "Física", name: "Liu", experience: "43 anos", details: "Física Nuclear", country: "Chinesa" }, { role: "Engenheiro", name: "Pétros", experience: "34 anos", details: "Engenheiro de Sistemas", country: "Grego" }] },
   { id: 5, code: "E5", description: "Equipe especializada em engenharia", missions: 21, achievements: ["Projetou o sistema de propulsão usado em 78% das naves atuais", "Recorde de reparos em órbita: 147 em missão única", "Desenvolveu materiais autoregenerativos para cascos de nave"], members: [{ role: "Coordenador Espacial", name: "Aguiles", experience: "35 anos", details: "Ergo. Mecânico Aero Espacial", country: "Italiano" }, { role: "Engenheiro", name: "Noguchi", experience: "38 anos", details: "Engenheiro Aeronáutico", country: "Japonês" }, { role: "Médica", name: "Chiaki", experience: "46 anos", details: "Médica, PhD em doenças espaciais", country: "Japonesa" }, { role: "Engenheiro", name: "Gorjah", experience: "32 anos", details: "Eng. Elétrico PhD em Logística Espacial", country: "Americano" }, { role: "Astrobiólogo", name: "Atena", experience: "38 anos", details: "Astrobiólogo, PhD", country: "Russa" }] }
@@ -39,8 +39,8 @@ const getMemberImage = (teamCode, index) => {
     default: return index === 0 ? 'default1' : index === 1 ? 'default2' : index === 2 ? 'default3' : index === 3 ? 'default4' : 'default5';
   }
 };
+
 const getShipImage = (shipName) => {
-  // Como está hospedado na Amazon (raiz), o caminho direto com "/" funciona perfeitamente
   if (!shipName) return '/images/NeoEclipseDigital.webp'; // Fallback
 
   switch (shipName.toUpperCase()) {
@@ -51,7 +51,7 @@ const getShipImage = (shipName) => {
     case 'GAIANOVA':
       return '/images/GaiaNovaDigital.webp';
     case 'STRATUSV':
-      return '/images/StrausVDigital.webp'; // Mantive a grafia do ficheiro (Straus)
+      return '/images/StrausVDigital.webp';
     case 'NEOECLIPSE':
       return '/images/NeoEclipseDigital.webp';
     default:
@@ -945,14 +945,14 @@ const DecolagemMarte = () => {
   useEffect(() => { handleChallengeEndRef.current = handleChallengeEnd; }, [handleChallengeEnd]);
 
   const handleMudarRota = useCallback(() => {
-    stopAllAudio(); // Para a música do S.O.S ao abrir o mapa
+    playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
     setIsForcedMapEdit(true);
     setShowStellarMap(true);
-  }, [stopAllAudio]);
+  }, [playTrack]);
 
   const handleSeguirPlano = useCallback(() => {
     if (fadeOutAudio) fadeOutAudio(2000); else stopAllAudio();
@@ -1012,7 +1012,6 @@ const DecolagemMarte = () => {
     const { newPlannedRoute, newRouteIndex } = newRouteData;
     const isInFlight = !arrivedAtMars && travelStarted;
 
-    // Se já estiver em voo, não pára o áudio! Apenas muda o destino em background.
     if (isInFlight) {
       routeChangeLockRef.current = true;
       saveNewRouteAndProgress(newRouteIndex, newPlannedRoute);
@@ -1031,8 +1030,6 @@ const DecolagemMarte = () => {
 
       setTimeout(() => { routeChangeLockRef.current = false; }, 500);
     } else {
-      // Se NÃO estiver em voo (ou seja, estava parado e decidiu descolar),
-      // aqui sim, paramos o áudio/aplicamos fade para tocar o som de descolagem e depois a música.
       if (fadeOutAudio) fadeOutAudio(2000); else stopAllAudio();
 
       playSFX('/sounds/empuxo.wav');
@@ -1261,7 +1258,6 @@ const DecolagemMarte = () => {
 
       setTimeout(() => {
         if (isMounted.current) {
-          // stopAllAudio(); // REMOVIDO PARA MANTER O SOM DA DECOLAGEM DURANTE A ESTÁTICA
           setMainDisplayState('static');
           setMonitorState('static');
         }
@@ -1269,7 +1265,7 @@ const DecolagemMarte = () => {
 
       setTimeout(() => {
         if (isMounted.current) {
-          stopAllAudio(); // Aqui o som para definitivamente ao chegar às estrelas
+          stopAllAudio();
           setMainDisplayState('stars');
           setMonitorState('on');
         }
@@ -1346,12 +1342,10 @@ const DecolagemMarte = () => {
           if (data.spaceCoins !== undefined) syncSpaceCoinsRef.current(data.spaceCoins);
           if (data.processadorO2 !== undefined) setProcessadorO2(data.processadorO2);
 
-          // --- CARREGAR HISTÓRICO DE S.O.S ---
           if (data.sosHistory) {
             setUsedSosIds(data.sosHistory);
             usedSosIdsRef.current = data.sosHistory;
           }
-          // ------------------------------------
 
           let photo = data.photoUrl;
           if (!photo && gameNumberRef.current && data.teamName) {
@@ -1656,7 +1650,6 @@ const DecolagemMarte = () => {
           if (isSosDestination && !isForcedMapEditRef.current) {
             if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEventRef.current) {
 
-              // --- FILTRO ANTI-REPETIÇÃO ---
               const availableEvents = SOS_EVENTS_LIST.filter(ev => !usedSosIdsRef.current.includes(ev.id));
 
               if (availableEvents.length > 0) {
@@ -1676,13 +1669,11 @@ const DecolagemMarte = () => {
               } else {
                 console.log("Todos os eventos S.O.S. já foram explorados.");
               }
-              // -------------------------------------------------------------
             }
 
             if (newDistance <= 0 && !arrivedAtMarsRef.current) {
               setArrivedAtMars(true); setSpeed(0);
 
-              // Toca a música usando o gerenciador principal para manter em loop enquanto estiver na tela
               playTrack('/sounds/nick/nick.mp3', { loop: true, isPrimary: true });
 
               if (!sosSurpriseEventRef.current) {
@@ -1708,7 +1699,6 @@ const DecolagemMarte = () => {
               setRouteIndex(newRouteIndex);
               saveCurrentProgressRef.current(newRouteIndex);
 
-              // CHAMA O VÍDEO PRIMEIRO EM VEZ DO MODAL
               setPlayingSosVideo(true);
             }
           }
@@ -1895,7 +1885,7 @@ const DecolagemMarte = () => {
     setShowStellarMap(show);
   }, [distanceKm, isForcedMapEdit, playSound]);
 
-  // --- INÍCIO: CENTRAL DE ATALHOS (TECLADO E STREAM DECK) ---
+  // --- CENTRAL DE ATALHOS ---
   useEffect(() => {
     const handleGlobalHotkeys = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
@@ -1962,7 +1952,6 @@ const DecolagemMarte = () => {
     };
 
     window.addEventListener('keydown', handleGlobalHotkeys);
-
     return () => {
       window.removeEventListener('keydown', handleGlobalHotkeys);
     };
@@ -1976,7 +1965,6 @@ const DecolagemMarte = () => {
     handleMinervaClick,
     handleOpenO2Modal, isO2TransferDisabled
   ]);
-  // --- FIM: CENTRAL DE ATALHOS ---
 
   if (isLoadingRoute) return <div className="tela-decolagem" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5em', color: '#00aaff', textShadow: '0 0 10px #00aaff' }}>Buscando dados da missão...</div>;
 
@@ -1984,7 +1972,6 @@ const DecolagemMarte = () => {
     <div className={`tela-decolagem ${isShaking ? 'shaking' : ''}`}>
       <div ref={cockpitRef} className="cockpit-container">
 
-        {/* === NOVO DISPLAY DA NAVE AQUI === */}
         {chosenShip && (
           <div className="ship-status-display">
             <img
@@ -1995,7 +1982,6 @@ const DecolagemMarte = () => {
             <div className="ship-status-name">{chosenShip}</div>
           </div>
         )}
-        {/* ================================== */}
 
         <LeftControlPanel
           telemetry={telemetry}
@@ -2164,7 +2150,7 @@ const DecolagemMarte = () => {
           left: 0,
           width: '100vw',
           height: '100vh',
-          zIndex: 99999, // Z-index bem alto para sobrepor tudo
+          zIndex: 99999,
           backgroundColor: '#000',
           display: 'flex',
           justifyContent: 'center',

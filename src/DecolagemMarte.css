@@ -48,38 +48,27 @@
    ========================================================== */
 .ship-status-display {
   position: absolute;
-
-  /* A MÁGICA ACONTECE AQUI: 
-     Desce o painel para a marca de 65% da tela, 
-     ficando logo abaixo do main-display e acima da telemetria */
   top: 65vh;
-
   left: 50%;
   transform: translateX(-50%) translateZ(150px);
-
-  /* Mantém a largura exata do vidro principal */
   width: clamp(50%, 54vw, 58%);
-
-  /* LIMITA A ALTURA DO PAINEL */
   height: clamp(30px, 3.5vh, 45px);
   box-sizing: border-box;
-
   background-color: rgba(0, 15, 0, 0.85);
   border: 1px solid rgba(0, 255, 0, 0.4);
   box-shadow: 0 0 15px rgba(0, 255, 0, 0.2), inset 0 0 10px rgba(0, 255, 0, 0.1);
   border-radius: 8px;
-
   display: flex;
   justify-content: flex-start;
-  /* Alinha os itens à esquerda */
   align-items: center;
   padding: 0 clamp(15px, 2vw, 30px);
-  /* Espaçamento interno lateral */
-
   z-index: 50;
   color: #0f0;
   font-family: 'Courier New', monospace;
   will-change: transform;
+
+  /* 👇 ADICIONE ESTA LINHA PARA CORTAR O EXCESSO 👇 */
+  overflow: hidden;
 }
 
 .ship-status-image {
