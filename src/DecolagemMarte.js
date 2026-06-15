@@ -42,7 +42,7 @@ const getMemberImage = (teamCode, index) => {
 
 const getShipImage = (shipName) => {
   // Pega a URL base do projeto (funciona tanto local quanto no GitHub Pages/Hospedagens)
-  const baseUrl = process.env.PUBLIC_URL || '';
+  const baseUrl = process.env.PUBLIC_URL || '/Galaticquest';
 
   if (!shipName) return `${baseUrl}/images/Naves/NeoEclipseDigital.webp`; // Fallback
 
