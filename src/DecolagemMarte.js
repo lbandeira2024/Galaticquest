@@ -41,21 +41,21 @@ const getMemberImage = (teamCode, index) => {
 };
 const getShipImage = (shipName) => {
   // Como está hospedado na Amazon (raiz), o caminho direto com "/" funciona perfeitamente
-  if (!shipName) return '/images/Naves/NeoEclipseDigital.webp'; // Fallback
+  if (!shipName) return '/images/NeoEclipseDigital.webp'; // Fallback
 
   switch (shipName.toUpperCase()) {
     case 'ARTEMIS1':
-      return '/images/Naves/Artemis1Digital.webp';
+      return '/images/Artemis1Digital.webp';
     case 'OBERONX':
-      return '/images/Naves/OberonXDigital.webp';
+      return '/images/OberonXDigital.webp';
     case 'GAIANOVA':
-      return '/images/Naves/GaiaNovaDigital.webp';
+      return '/images/GaiaNovaDigital.webp';
     case 'STRATUSV':
-      return '/images/Naves/StrausVDigital.webp'; // Mantive a grafia do ficheiro (Straus)
+      return '/images/StrausVDigital.webp'; // Mantive a grafia do ficheiro (Straus)
     case 'NEOECLIPSE':
-      return '/images/Naves/NeoEclipseDigital.webp';
+      return '/images/NeoEclipseDigital.webp';
     default:
-      return '/images/Naves/NeoEclipseDigital.webp';
+      return '/images/NeoEclipseDigital.webp';
   }
 };
 
