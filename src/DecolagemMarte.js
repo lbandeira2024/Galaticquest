@@ -112,6 +112,99 @@ const TypewriterText = ({ label, value }) => {
     </div>
   );
 };
+
+// --- COMPONENTE DE RADAR DINÂMICO ---
+const DynamicRadar = ({ progress, origin, destination, sosSignal }) => {
+  // progress vai de 0 a 100.
+  // O centro do radar é x: 50, y: 50.
+
+  // Planeta de Destino (Aproxima-se: de cima (10%) para o centro (50%))
+  const destY = 10 + (progress / 100) * 40;
+  const destX = 50;
+
+  // Planeta de Origem (Fica para trás: do centro (50%) para baixo (90%))
+  const origY = 50 + (progress / 100) * 40;
+  const origX = 50;
+
+  // Asteroides/Detritos (Gerados uma vez, rolam para baixo com o progresso)
+  const asteroids = useMemo(() => {
+    return Array.from({ length: 6 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * 80 + 10,
+      startY: Math.random() * 100,
+      speed: Math.random() * 0.8 + 0.2
+    }));
+  }, []);
+
+  // MÁGICA ACONTECE AQUI:
+  // Esta função sincroniza perfeitamente o "piscar" com a passagem do feixe de luz (que dura 3s).
+  const getBlipStyle = (x, y, color, size) => {
+    const dx = x - 50;
+    const dy = y - 50;
+
+    // Calcula o ângulo em que o objeto está
+    let angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
+    if (angle < 0) angle += 360;
+
+    // Calcula o atraso exato para o brilho
+    const delay = (angle / 360) * 3;
+
+    return {
+      top: `${y}%`,
+      left: `${x}%`,
+      backgroundColor: color,
+      boxShadow: `0 0 4px ${color}, 0 0 10px ${color}`,
+      width: `${size}px`,
+      height: `${size}px`,
+      animationDelay: `${delay}s`
+    };
+  };
+
+  return (
+    <div className="space-radar-wrapper">
+      <div className="space-radar">
+        <div className="radar-grid"></div>
+        <div className="radar-sweep"></div>
+
+        {/* Planeta de Origem */}
+        <div
+          className="dynamic-blip"
+          style={getBlipStyle(origX, origY, '#666', 4)}
+          title={`Origem: ${origin?.nome || 'Terra'}`}
+        ></div>
+
+        {/* Planeta de Destino */}
+        <div
+          className="dynamic-blip"
+          style={getBlipStyle(destX, destY, '#0f0', 5)}
+          title={`Destino: ${destination?.nome || 'Desconhecido'}`}
+        ></div>
+
+        {/* Sinal de S.O.S (se existir, aparece no ângulo correto recebido do backend/state) */}
+        {sosSignal && (
+          <div
+            className="dynamic-blip sos-blink"
+            style={getBlipStyle(
+              50 + Math.cos(sosSignal.angle * Math.PI / 180) * 35,
+              50 + Math.sin(sosSignal.angle * Math.PI / 180) * 35,
+              '#f00', 6
+            )}
+            title="SINAL S.O.S DETETADO!"
+          ></div>
+        )}
+
+        {/* Asteroides/Objetos Próximos */}
+        {asteroids.map(ast => {
+          let currentY = ast.startY + (progress * ast.speed);
+          if (currentY > 100) currentY = currentY % 100; // Efeito de loop contínuo infinito
+          return (
+            <div key={ast.id} className="dynamic-blip" style={getBlipStyle(ast.x, currentY, '#0bf', 2)}></div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 // --- COMPONENTES OTIMIZADOS (React.memo com Custom Comparators) ---
 
 // 1. Painel Esquerdo
@@ -2046,16 +2139,13 @@ const DecolagemMarte = () => {
             {/* === SEGUNDA BARRA DIVISÓRIA === */}
             <div className="ship-status-divider"></div>
 
-            {/* === RADAR ESPACIAL === */}
-            <div className="space-radar-wrapper">
-              <div className="space-radar">
-                <div className="radar-grid"></div>
-                <div className="radar-sweep"></div>
-                <div className="radar-blip blip-1"></div>
-                <div className="radar-blip blip-2"></div>
-                <div className="radar-blip blip-3"></div>
-              </div>
-            </div>
+            {/* === RADAR ESPACIAL DINÂMICO === */}
+            <DynamicRadar
+              progress={progress}
+              origin={originPlanet}
+              destination={selectedPlanet}
+              sosSignal={(distanceKm > 0 || isForcedMapEdit) ? activeSosSignal : null}
+            />
             {/* ========================================= */}
           </div>
         )}

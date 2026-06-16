@@ -1878,35 +1878,49 @@
   }
 }
 
-/* Pontos de contacto (Objetos/Naves Detetadas) */
-.radar-blip {
+/* Pontos de contacto Dinâmicos (Calculados via React) */
+.dynamic-blip {
   position: absolute;
-  width: 4px;
-  height: 4px;
-  background-color: #0f0;
   border-radius: 50%;
-  box-shadow: 0 0 4px #0f0, 0 0 8px #0f0;
   z-index: 3;
   opacity: 0;
+  transform: translate(-50%, -50%);
+  /* Garante que o centro do blip fica na coordenada exata */
+  animation: blip-fade 3s infinite;
 }
 
-/* Os tempos (0.4s, 1.8s, 1.1s) estão sincronizados para piscar quando o feixe passa por eles */
-.blip-1 {
-  top: 25%;
-  left: 65%;
-  animation: blip-fade 3s infinite 0.4s;
+/* Alerta especial quando surge um S.O.S */
+.sos-blink {
+  animation: blip-fade 3s infinite, sos-alert 0.5s infinite alternate !important;
 }
 
-.blip-2 {
-  top: 60%;
-  left: 30%;
-  animation: blip-fade 3s infinite 1.8s;
+@keyframes sos-alert {
+  from {
+    filter: brightness(1);
+  }
+
+  to {
+    filter: brightness(2) drop-shadow(0 0 10px red);
+  }
 }
 
-.blip-3 {
-  top: 75%;
-  left: 70%;
-  animation: blip-fade 3s infinite 1.1s;
+@keyframes blip-fade {
+
+  0%,
+  5% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+
+  30% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%);
+  }
 }
 
 @keyframes blip-fade {
