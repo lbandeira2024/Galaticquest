@@ -138,17 +138,10 @@ const DynamicRadar = ({ progress, origin, destination, sosSignal }) => {
 
   // MÁGICA ACONTECE AQUI:
   // Esta função sincroniza perfeitamente o "piscar" com a passagem do feixe de luz (que dura 3s).
+  // --- DENTRO DO COMPONENTE DynamicRadar ---
   const getBlipStyle = (x, y, color, size) => {
-    const dx = x - 50;
-    const dy = y - 50;
-
-    // Calcula o ângulo em que o objeto está
-    let angle = Math.atan2(dy, dx) * (180 / Math.PI) + 90;
-    if (angle < 0) angle += 360;
-
-    // Calcula o atraso exato para o brilho
-    const delay = (angle / 360) * 3;
-
+    // Como agora é retangular, não precisamos de atan2, 
+    // apenas posicionamos o blip nas coordenadas X e Y calculadas
     return {
       top: `${y}%`,
       left: `${x}%`,
@@ -156,7 +149,8 @@ const DynamicRadar = ({ progress, origin, destination, sosSignal }) => {
       boxShadow: `0 0 4px ${color}, 0 0 10px ${color}`,
       width: `${size}px`,
       height: `${size}px`,
-      animationDelay: `${delay}s`
+      // O atraso é baseado na posição X (da esquerda para a direita)
+      animationDelay: `${(x / 100) * 3}s`
     };
   };
 
