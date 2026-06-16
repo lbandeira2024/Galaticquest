@@ -48,13 +48,9 @@
    ========================================================== */
 .ship-status-display {
   position: absolute;
-
-
-  top: calc(64vh + 5px);
-  /* Mantém colado ao ecrã principal */
-
+  /* Subimos o painel alterando o top para 58vh */
+  top: calc(58vh + 5px);
   bottom: calc(21vh + 5px);
-  /* Estica para baixo na medida certa */
 
   left: 50%;
   transform: translateX(-50%) translateZ(150px);
@@ -69,6 +65,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  /* Garante alinhamento vertical */
   padding: 0 clamp(15px, 2vw, 30px);
 
   z-index: 50;
@@ -76,6 +73,18 @@
   font-family: 'Courier New', monospace;
   will-change: transform;
   overflow: hidden;
+}
+
+/* Fixar o radar no canto direito para não mover */
+.space-radar-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  /* Empurra o radar para o extremo direito do flexbox */
+  padding-left: 20px;
+  flex-shrink: 0;
+  /* Impede que o radar encolha ou mude de tamanho */
 }
 
 .ship-status-image {

@@ -2114,33 +2114,26 @@ const DecolagemMarte = () => {
 
         {chosenShip && (
           <div className="ship-status-display">
-            <img
-              src={getShipImage(chosenShip)}
-              alt={`Esquema da Nave ${chosenShip}`}
-              className="ship-status-image"
-            />
+            <img src={getShipImage(chosenShip)} className="ship-status-image" />
             <div className="ship-status-name">{chosenShip}</div>
 
-            {/* === PRIMEIRA BARRA DIVISÓRIA E ESTATÍSTICAS === */}
             <div className="ship-status-divider"></div>
 
-            <div className="ship-info-stats">
+            {/* Container de largura fixa para o texto não empurrar o radar */}
+            <div className="ship-info-stats" style={{ flex: 1, minWidth: '200px' }}>
               <TypewriterText label="Planetas visitados" value={routeIndex.toString().padStart(2, '0')} />
               <TypewriterText label="Virtus" value="0,0 %" />
               <TypewriterText label="Distancia percorrida (Km)" value={distanceKm.toLocaleString('pt-BR')} />
             </div>
 
-            {/* === SEGUNDA BARRA DIVISÓRIA === */}
             <div className="ship-status-divider"></div>
 
-            {/* === RADAR ESPACIAL DINÂMICO === */}
             <DynamicRadar
               progress={progress}
               origin={originPlanet}
               destination={selectedPlanet}
               sosSignal={(distanceKm > 0 || isForcedMapEdit) ? activeSosSignal : null}
             />
-            {/* ========================================= */}
           </div>
         )}
 
