@@ -49,11 +49,11 @@
 .ship-status-display {
   position: absolute;
 
-  /* Define a âncora do topo (borda inferior do main display) + 5px de gap */
-  top: calc(64vh + 5px);
+  /* Diminua o valor de vh para subir o topo do HUD (Ex: mudando de 64vh para 59vh) */
+  top: calc(59vh + 5px);
 
-  /* Estica o painel para baixo alterando a âncora inferior */
-  bottom: calc(18vh + 5px);
+  /* Aumente o valor de vh para subir a base do HUD, afastando do painel (Ex: de 18vh para 25vh) */
+  bottom: calc(25vh + 5px);
 
   /* A MÁGICA ACONTECE AQUI: 
      A propriedade height foi removida. O painel estica sozinho entre o top e o bottom */
@@ -63,8 +63,10 @@
   width: clamp(50%, 54vw, 58%);
   box-sizing: border-box;
 
+  /* Restante das propriedades de estilo (cores, flex, etc) permanecem iguais... */
   background-color: rgba(0, 15, 0, 0.85);
   border: 1px solid rgba(0, 255, 0, 0.4);
+
   box-shadow: 0 0 15px rgba(0, 255, 0, 0.2), inset 0 0 10px rgba(0, 255, 0, 0.1);
   border-radius: 8px;
 
