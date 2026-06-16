@@ -2034,13 +2034,27 @@ const DecolagemMarte = () => {
             />
             <div className="ship-status-name">{chosenShip}</div>
 
-            {/* === NOVA BARRA DIVISÓRIA E ESTATÍSTICAS === */}
+            {/* === PRIMEIRA BARRA DIVISÓRIA E ESTATÍSTICAS === */}
             <div className="ship-status-divider"></div>
 
             <div className="ship-info-stats">
               <TypewriterText label="Planetas visitados" value={routeIndex.toString().padStart(2, '0')} />
               <TypewriterText label="Virtus" value="0,0 %" />
               <TypewriterText label="Distancia percorrida (Km)" value={distanceKm.toLocaleString('pt-BR')} />
+            </div>
+
+            {/* === SEGUNDA BARRA DIVISÓRIA === */}
+            <div className="ship-status-divider"></div>
+
+            {/* === RADAR ESPACIAL === */}
+            <div className="space-radar-wrapper">
+              <div className="space-radar">
+                <div className="radar-grid"></div>
+                <div className="radar-sweep"></div>
+                <div className="radar-blip blip-1"></div>
+                <div className="radar-blip blip-2"></div>
+                <div className="radar-blip blip-3"></div>
+              </div>
             </div>
             {/* ========================================= */}
           </div>
