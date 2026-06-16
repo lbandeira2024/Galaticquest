@@ -49,40 +49,31 @@
 .ship-status-display {
   position: absolute;
 
-  /* Diminua o valor de vh para subir o topo do HUD (Ex: mudando de 64vh para 59vh) */
-  top: calc(59vh + 5px);
+  /* Volta para o valor original (ou um pouco mais) para não invadir o main-display acima */
+  top: calc(64vh + 5px);
 
-  /* Aumente o valor de vh para subir a base do HUD, afastando do painel (Ex: de 18vh para 25vh) */
+  /* Aumente apenas o bottom para afastar do painel de baixo (ex: de 18vh para 25vh ou 28vh) */
   bottom: calc(25vh + 5px);
-
-  /* A MÁGICA ACONTECE AQUI: 
-     A propriedade height foi removida. O painel estica sozinho entre o top e o bottom */
 
   left: 50%;
   transform: translateX(-50%) translateZ(150px);
   width: clamp(50%, 54vw, 58%);
   box-sizing: border-box;
 
-  /* Restante das propriedades de estilo (cores, flex, etc) permanecem iguais... */
   background-color: rgba(0, 15, 0, 0.85);
   border: 1px solid rgba(0, 255, 0, 0.4);
-
   box-shadow: 0 0 15px rgba(0, 255, 0, 0.2), inset 0 0 10px rgba(0, 255, 0, 0.1);
   border-radius: 8px;
 
   display: flex;
   justify-content: flex-start;
-  /* Alinha os itens à esquerda */
   align-items: center;
   padding: 0 clamp(15px, 2vw, 30px);
-  /* Espaçamento interno lateral */
 
   z-index: 50;
   color: #0f0;
   font-family: 'Courier New', monospace;
   will-change: transform;
-
-  /* CORTA O QUE PASSAR DA BORDA */
   overflow: hidden;
 }
 
