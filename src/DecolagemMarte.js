@@ -2119,8 +2119,7 @@ const DecolagemMarte = () => {
 
             <div className="ship-status-divider"></div>
 
-            {/* Container de largura fixa para o texto não empurrar o radar */}
-            <div className="ship-info-stats" style={{ flex: 1, minWidth: '200px' }}>
+            <div className="ship-info-stats" style={{ flex: 1 }}>
               <TypewriterText label="Planetas visitados" value={routeIndex.toString().padStart(2, '0')} />
               <TypewriterText label="Virtus" value="0,0 %" />
               <TypewriterText label="Distancia percorrida (Km)" value={distanceKm.toLocaleString('pt-BR')} />
@@ -2128,12 +2127,15 @@ const DecolagemMarte = () => {
 
             <div className="ship-status-divider"></div>
 
-            <DynamicRadar
-              progress={progress}
-              origin={originPlanet}
-              destination={selectedPlanet}
-              sosSignal={(distanceKm > 0 || isForcedMapEdit) ? activeSosSignal : null}
-            />
+            {/* Área que ocupa exatamente o espaço do radar */}
+            <div className="radar-container">
+              <DynamicRadar
+                progress={progress}
+                origin={originPlanet}
+                destination={selectedPlanet}
+                sosSignal={(distanceKm > 0 || isForcedMapEdit) ? activeSosSignal : null}
+              />
+            </div>
           </div>
         )}
 

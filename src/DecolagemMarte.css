@@ -46,32 +46,50 @@
 /* ==========================================================
    ====== DISPLAY DE IDENTIFICAÇÃO DA NAVE (MEIO) ===========
    ========================================================== */
+/* ==========================================================
+   ====== DISPLAY DE IDENTIFICAÇÃO DA NAVE (MEIO) ===========
+   ========================================================== */
 .ship-status-display {
   position: absolute;
-  /* Subimos o painel alterando o top para 58vh */
-  top: calc(58vh + 5px);
-  bottom: calc(21vh + 5px);
+  top: 70vh;
+  /* Ajustado para não subir sobre o Main Display */
+  bottom: 18vh;
+  /* Ajustado para não descer sobre a telemetria */
 
   left: 50%;
-  transform: translateX(-50%) translateZ(150px);
-  width: clamp(50%, 54vw, 58%);
-  box-sizing: border-box;
-
-  background-color: rgba(0, 15, 0, 0.85);
-  border: 1px solid rgba(0, 255, 0, 0.4);
-  box-shadow: 0 0 15px rgba(0, 255, 0, 0.2), inset 0 0 10px rgba(0, 255, 0, 0.1);
-  border-radius: 8px;
+  transform: translateX(-50%);
+  width: 58%;
+  /* Largura que respeita a área visual */
 
   display: flex;
-  justify-content: flex-start;
   align-items: center;
-  /* Garante alinhamento vertical */
-  padding: 0 clamp(15px, 2vw, 30px);
-
+  padding: 0 20px;
+  background-color: rgba(0, 15, 0, 0.85);
+  border: 1px solid rgba(0, 255, 0, 0.4);
+  border-radius: 8px;
   z-index: 50;
-  color: #0f0;
-  font-family: 'Courier New', monospace;
-  will-change: transform;
+  overflow: hidden;
+}
+
+/* Área do Radar delimitada */
+.radar-container {
+  width: 150px;
+  /* Largura da área vermelha */
+  height: 60px;
+  /* Altura da área vermelha */
+  margin-left: auto;
+  border: 1px solid rgba(0, 255, 0, 0.3);
+  background: rgba(0, 10, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.space-radar {
+  width: 100%;
+  height: 100%;
+  position: relative;
   overflow: hidden;
 }
 
