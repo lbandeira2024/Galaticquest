@@ -49,12 +49,12 @@
 .ship-status-display {
   position: absolute;
 
-  /* Mantém a distância atual do main-display (topo) */
-  top: calc(64vh + 5px);
 
-  /* Diminua este valor para a caixa esticar para baixo. 
-     (Se estava 25vh, mude para 21vh. Se ainda ficar longe, tente 19vh) */
+  top: calc(64vh + 5px);
+  /* Mantém colado ao ecrã principal */
+
   bottom: calc(21vh + 5px);
+  /* Estica para baixo na medida certa */
 
   left: 50%;
   transform: translateX(-50%) translateZ(150px);
@@ -101,6 +101,51 @@
   text-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
   white-space: nowrap;
   /* Evita que nomes longos quebrem para a linha de baixo */
+}
+
+/* ==========================================================
+   ====== ESTATÍSTICAS DO HUD (LINHA E TEXTO DIGITADO) ======
+   ========================================================== */
+.ship-status-divider {
+  width: 2px;
+  height: 60%;
+  background-color: #0f0;
+  margin: 0 25px;
+  /* Espaço entre o nome da nave e os textos */
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
+  border-radius: 2px;
+}
+
+.ship-info-stats {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  font-size: clamp(0.75rem, 1vw, 0.95rem);
+  color: #0f0;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+  line-height: 1.5;
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* Animação do cursor de terminal */
+.blinking-cursor {
+  animation: blink-cursor 1s step-end infinite;
+  color: #0f0;
+  margin-left: 3px;
+  font-weight: bold;
+}
+
+@keyframes blink-cursor {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
 }
 
 /* ======================= NOVA CLASSE ADICIONADA ======================= */

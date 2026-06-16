@@ -58,7 +58,60 @@ const getShipImage = (shipName) => {
       return '/images/NeoEclipseDigital.webp';
   }
 };
+// --- COMPONENTE DE TEXTO DIGITADO (HUD) ---
+const TypewriterText = ({ label, value }) => {
+  const [displayedValue, setDisplayedValue] = useState('');
+  const [isTyping, setIsTyping] = useState(true);
+  const valueRef = useRef(value);
 
+  // Mantém o valor sempre atualizado
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  useEffect(() => {
+    let isMounted = true;
+    let index = 0;
+    let typingInterval;
+    let cycleTimeout;
+
+    const startTyping = () => {
+      setIsTyping(true);
+      setDisplayedValue('');
+      index = 0;
+      const currentTargetString = valueRef.current != null ? String(valueRef.current) : '';
+
+      typingInterval = setInterval(() => {
+        if (index < currentTargetString.length) {
+          setDisplayedValue(currentTargetString.substring(0, index + 1));
+          index++;
+        } else {
+          clearInterval(typingInterval);
+          if (isMounted) setIsTyping(false);
+
+          // Aguarda 10 segundos e reinicia o ciclo
+          cycleTimeout = setTimeout(() => {
+            if (isMounted) startTyping();
+          }, 10000);
+        }
+      }, 60); // Velocidade de digitação
+    };
+
+    startTyping();
+
+    return () => {
+      isMounted = false;
+      clearInterval(typingInterval);
+      clearTimeout(cycleTimeout);
+    };
+  }, []);
+
+  return (
+    <div style={{ marginBottom: '4px' }}>
+      {label}: {isTyping ? displayedValue : value}<span className="blinking-cursor">_</span>
+    </div>
+  );
+};
 // --- COMPONENTES OTIMIZADOS (React.memo com Custom Comparators) ---
 
 // 1. Painel Esquerdo
@@ -1980,6 +2033,16 @@ const DecolagemMarte = () => {
               className="ship-status-image"
             />
             <div className="ship-status-name">{chosenShip}</div>
+
+            {/* === NOVA BARRA DIVISÓRIA E ESTATÍSTICAS === */}
+            <div className="ship-status-divider"></div>
+
+            <div className="ship-info-stats">
+              <TypewriterText label="Planetas visitados" value={routeIndex.toString().padStart(2, '0')} />
+              <TypewriterText label="Virtus" value="0,0 %" />
+              <TypewriterText label="Distancia percorrida (Km)" value={distanceKm.toLocaleString('pt-BR')} />
+            </div>
+            {/* ========================================= */}
           </div>
         )}
 
