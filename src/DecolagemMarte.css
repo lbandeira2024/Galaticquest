@@ -49,11 +49,12 @@
 .ship-status-display {
   position: absolute;
 
-  /* Volta para o valor original (ou um pouco mais) para não invadir o main-display acima */
+  /* Mantém a distância atual do main-display (topo) */
   top: calc(64vh + 5px);
 
-  /* Aumente apenas o bottom para afastar do painel de baixo (ex: de 18vh para 25vh ou 28vh) */
-  bottom: calc(25vh + 5px);
+  /* Diminua este valor para a caixa esticar para baixo. 
+     (Se estava 25vh, mude para 21vh. Se ainda ficar longe, tente 19vh) */
+  bottom: calc(21vh + 5px);
 
   left: 50%;
   transform: translateX(-50%) translateZ(150px);
