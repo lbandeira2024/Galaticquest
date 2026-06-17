@@ -50,15 +50,12 @@
 .ship-status-display {
   position: absolute;
 
-  /* Centralização Exata entre o Main Display e a Telemetria */
-  top: 78%;
+  /* Ajuste fino: Reduzimos de 78% para 73% para subir o painel */
+  top: 73%;
   bottom: auto;
-  /* Remove a limitação conflitante de baixo */
   left: 50%;
   transform: translate(-50%, -50%);
-  /* Centraliza nos eixos X e Y */
 
-  /* Largura acompanha o display principal e altura controlada */
   width: clamp(50%, 54vw, 58%);
   height: clamp(60px, 10vh, 90px);
 
@@ -66,7 +63,6 @@
   align-items: center;
   padding: 0 20px;
 
-  /* Identidade Visual Verde Sci-Fi */
   background-color: rgba(0, 20, 0, 0.85);
   border: 1px solid rgba(0, 255, 0, 0.6);
   box-shadow: inset 0 0 15px rgba(0, 255, 0, 0.15), 0 0 15px rgba(0, 255, 0, 0.3);
