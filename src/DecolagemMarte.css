@@ -43,29 +43,33 @@
   justify-content: center;
 }
 
-/* ==========================================================
-   ====== DISPLAY DE IDENTIFICAÇÃO DA NAVE (MEIO) ===========
-   ========================================================== */
+
 /* ==========================================================
    ====== DISPLAY DE IDENTIFICAÇÃO DA NAVE (MEIO) ===========
    ========================================================== */
 .ship-status-display {
   position: absolute;
-  top: 70vh;
-  /* Ajustado para não subir sobre o Main Display */
-  bottom: 18vh;
-  /* Ajustado para não descer sobre a telemetria */
 
+  /* Centralização Exata entre o Main Display e a Telemetria */
+  top: 78%;
+  bottom: auto;
+  /* Remove a limitação conflitante de baixo */
   left: 50%;
-  transform: translateX(-50%);
-  width: 58%;
-  /* Largura que respeita a área visual */
+  transform: translate(-50%, -50%);
+  /* Centraliza nos eixos X e Y */
+
+  /* Largura acompanha o display principal e altura controlada */
+  width: clamp(50%, 54vw, 58%);
+  height: clamp(60px, 10vh, 90px);
 
   display: flex;
   align-items: center;
   padding: 0 20px;
-  background-color: rgba(0, 15, 0, 0.85);
-  border: 1px solid rgba(0, 255, 0, 0.4);
+
+  /* Identidade Visual Verde Sci-Fi */
+  background-color: rgba(0, 20, 0, 0.85);
+  border: 1px solid rgba(0, 255, 0, 0.6);
+  box-shadow: inset 0 0 15px rgba(0, 255, 0, 0.15), 0 0 15px rgba(0, 255, 0, 0.3);
   border-radius: 8px;
   z-index: 50;
   overflow: hidden;
@@ -74,12 +78,14 @@
 /* Área do Radar delimitada */
 .radar-container {
   width: 150px;
-  /* Largura da área vermelha */
   height: 60px;
-  /* Altura da área vermelha */
   margin-left: auto;
-  border: 1px solid rgba(0, 255, 0, 0.3);
-  background: rgba(0, 10, 0, 0.5);
+  border: 1px solid rgba(0, 255, 0, 0.5);
+  background: rgba(0, 20, 0, 0.6);
+  box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.3);
+  /* Adiciona brilho interno */
+  border-radius: 4px;
+  /* Suaviza as pontas */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1820,9 +1826,11 @@
   .ship-status-display {
     position: relative;
     width: 95%;
-    height: 35px;
-    margin: 5px auto;
+    height: auto;
+    min-height: 50px;
+    margin: 15px auto;
     transform: none;
+    /* Muito importante manter isso */
     left: auto;
     top: auto;
     order: 0;
