@@ -50,20 +50,19 @@
 .ship-status-display {
   position: absolute;
 
-  /* O meio exato para ter o mesmo respiro em cima e embaixo */
-  top: 75.5%;
+  /* Ajuste milimétrico para o exato centro do "respiro" */
+  top: 74%;
   bottom: auto;
   left: 50%;
   transform: translate(-50%, -50%);
 
-  /* HUD MAIOR: Aumentamos a largura e a altura mínima/máxima */
+  /* Mantém o HUD largo, mas controla um pouco a altura para não encostar em nada */
   width: clamp(54%, 58vw, 62%);
-  height: clamp(80px, 13vh, 110px);
+  height: clamp(70px, 11vh, 95px);
 
   display: flex;
   align-items: center;
   padding: 0 25px;
-  /* Um pouco mais de espaço nas bordas internas */
 
   background-color: rgba(0, 20, 0, 0.85);
   border: 1px solid rgba(0, 255, 0, 0.6);
