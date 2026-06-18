@@ -167,10 +167,10 @@ const DynamicRadar = ({ progress, origin, destination, sosSignal }) => {
           title={`Origem: ${origin?.nome || 'Terra'}`}
         ></div>
 
-        {/* Planeta de Destino */}
+        {/* Planeta de Destino - Marcador alterado para harmonizar com a UI ciano */}
         <div
           className="dynamic-blip"
-          style={getBlipStyle(destX, destY, '#0f0', 5)}
+          style={getBlipStyle(destX, destY, '#0bf', 5)}
           title={`Destino: ${destination?.nome || 'Desconhecido'}`}
         ></div>
 

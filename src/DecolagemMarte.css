@@ -56,17 +56,18 @@
   left: 50%;
   transform: translate(-50%, -50%);
 
-  /* Mantém o HUD largo, mas controla um pouco a altura para não encostar em nada */
-  width: clamp(54%, 58vw, 62%);
+  /* 1. LARGURA IGUAL AO MAIN DISPLAY */
+  width: clamp(50%, 54vw, 58%);
   height: clamp(70px, 11vh, 95px);
 
   display: flex;
   align-items: center;
   padding: 0 25px;
 
-  background-color: rgba(0, 20, 0, 0.85);
-  border: 1px solid rgba(0, 255, 0, 0.6);
-  box-shadow: inset 0 0 15px rgba(0, 255, 0, 0.15), 0 0 15px rgba(0, 255, 0, 0.3);
+  /* 2. IDENTIDADE VISUAL HARMONIZADA (Azul/Ciano) */
+  background-color: rgba(0, 20, 40, 0.85);
+  border: 1px solid rgba(0, 180, 255, 0.4);
+  box-shadow: inset 0 0 15px rgba(0, 80, 150, 0.4), 0 0 20px rgba(0, 150, 255, 0.2);
   border-radius: 8px;
   z-index: 50;
   overflow: hidden;
@@ -76,13 +77,11 @@
 .radar-container {
   /* Radar maior para acompanhar o painel */
   width: 170px;
-  /* Era 150px */
   height: 75px;
-  /* Era 60px */
   margin-left: auto;
-  border: 1px solid rgba(0, 255, 0, 0.5);
-  background: rgba(0, 20, 0, 0.6);
-  box-shadow: inset 0 0 10px rgba(0, 255, 0, 0.3);
+  border: 1px solid rgba(0, 180, 255, 0.3);
+  background: rgba(0, 20, 40, 0.6);
+  box-shadow: inset 0 0 10px rgba(0, 80, 150, 0.4);
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -95,10 +94,10 @@
   /* Aumentando o radar interno */
   width: clamp(120px, 18vh, 170px);
   height: clamp(60px, 10vh, 85px);
-  border: 2px solid rgba(0, 255, 0, 0.5);
-  background-color: rgba(0, 15, 0, 0.85);
+  border: 2px solid rgba(0, 180, 255, 0.4);
+  background-color: rgba(0, 15, 30, 0.85);
   overflow: hidden;
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.2), inset 0 0 15px rgba(0, 255, 0, 0.4);
+  box-shadow: 0 0 10px rgba(0, 150, 255, 0.2), inset 0 0 15px rgba(0, 180, 255, 0.3);
 }
 
 /* Fixar o radar no canto direito para não mover */
@@ -121,7 +120,7 @@
   width: auto;
   object-fit: contain;
   margin-right: 25px;
-  filter: drop-shadow(0 0 8px rgba(0, 255, 0, 0.8));
+  filter: drop-shadow(0 0 8px rgba(0, 180, 255, 0.8));
 }
 
 .ship-status-name {
@@ -129,7 +128,8 @@
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 3px;
-  text-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
+  color: #0bf;
+  text-shadow: 0 0 8px rgba(0, 180, 255, 0.8);
   white-space: nowrap;
   /* Evita que nomes longos quebrem para a linha de baixo */
 }
@@ -140,10 +140,10 @@
 .ship-status-divider {
   width: 2px;
   height: 60%;
-  background-color: #0f0;
+  background-color: rgba(0, 180, 255, 0.6);
   margin: 0 25px;
   /* Espaço entre o nome da nave e os textos */
-  box-shadow: 0 0 8px rgba(0, 255, 0, 0.8);
+  box-shadow: 0 0 8px rgba(0, 180, 255, 0.8);
   border-radius: 2px;
 }
 
@@ -153,8 +153,8 @@
   justify-content: center;
   /* Fonte ligeiramente maior para preencher o espaço */
   font-size: clamp(0.85rem, 1.1vw, 1.1rem);
-  color: #0f0;
-  text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+  color: #0bf;
+  text-shadow: 0 0 5px rgba(0, 180, 255, 0.5);
   line-height: 1.6;
   /* Mais respiro entre as linhas de texto */
   font-weight: bold;
@@ -164,7 +164,7 @@
 /* Animação do cursor de terminal */
 .blinking-cursor {
   animation: blink-cursor 1s step-end infinite;
-  color: #0f0;
+  color: #0bf;
   margin-left: 3px;
   font-weight: bold;
 }
@@ -1853,10 +1853,10 @@
   /* Dobro do tamanho original e formato retangular */
   width: clamp(100px, 16vh, 150px);
   height: clamp(50px, 8vh, 75px);
-  border: 2px solid rgba(0, 255, 0, 0.5);
-  background-color: rgba(0, 15, 0, 0.85);
+  border: 2px solid rgba(0, 180, 255, 0.4);
+  background-color: rgba(0, 15, 30, 0.85);
   overflow: hidden;
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.2), inset 0 0 15px rgba(0, 255, 0, 0.4);
+  box-shadow: 0 0 10px rgba(0, 150, 255, 0.2), inset 0 0 15px rgba(0, 180, 255, 0.3);
 }
 
 /* Grade adaptada para retângulo */
@@ -1867,8 +1867,8 @@
   width: 100%;
   height: 100%;
   background:
-    linear-gradient(rgba(0, 255, 0, 0.2) 1px, transparent 1px) 0 0 / 20px 20px,
-    linear-gradient(90deg, rgba(0, 255, 0, 0.2) 1px, transparent 1px) 0 0 / 20px 20px;
+    linear-gradient(rgba(0, 180, 255, 0.2) 1px, transparent 1px) 0 0 / 20px 20px,
+    linear-gradient(90deg, rgba(0, 180, 255, 0.2) 1px, transparent 1px) 0 0 / 20px 20px;
   z-index: 1;
 }
 
@@ -1879,7 +1879,7 @@
   left: -20%;
   width: 20%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.4));
+  background: linear-gradient(90deg, transparent, rgba(0, 180, 255, 0.4));
   animation: radar-slide 3s linear infinite;
   z-index: 2;
 }
@@ -1929,7 +1929,7 @@
   height: 100%;
   border-radius: 50%;
   /* Cria o efeito do rasto de luz verde */
-  background: conic-gradient(from 0deg, transparent 70%, rgba(0, 255, 0, 0.1) 90%, rgba(0, 255, 0, 0.8) 100%);
+  background: conic-gradient(from 0deg, transparent 70%, rgba(0, 180, 255, 0.1) 90%, rgba(0, 180, 255, 0.8) 100%);
   animation: radar-spin 3s linear infinite;
   z-index: 2;
 }
