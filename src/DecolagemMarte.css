@@ -50,15 +50,15 @@
 .ship-status-display {
   position: absolute;
 
-  /* Ajuste milimétrico para o exato centro do "respiro" */
-  top: 74%;
+  /* Ajuste para o exato centro do "respiro" sem encostar na telemetria */
+  top: 69%;
   bottom: auto;
   left: 50%;
   transform: translate(-50%, -50%);
 
   /* 1. LARGURA IGUAL AO MAIN DISPLAY */
   width: clamp(50%, 54vw, 58%);
-  height: clamp(70px, 11vh, 95px);
+  height: clamp(60px, 9vh, 85px);
 
   display: flex;
   align-items: center;
@@ -76,8 +76,8 @@
 /* Área do Radar delimitada */
 .radar-container {
   /* Radar maior para acompanhar o painel */
-  width: 170px;
-  height: 75px;
+  width: clamp(140px, 15vw, 170px);
+  height: clamp(50px, 7vh, 75px);
   margin-left: auto;
   border: 1px solid rgba(0, 180, 255, 0.3);
   background: rgba(0, 20, 40, 0.6);
@@ -92,8 +92,8 @@
 .space-radar {
   position: relative;
   /* Aumentando o radar interno */
-  width: clamp(120px, 18vh, 170px);
-  height: clamp(60px, 10vh, 85px);
+  width: clamp(120px, 13vw, 150px);
+  height: clamp(40px, 6vh, 65px);
   border: 2px solid rgba(0, 180, 255, 0.4);
   background-color: rgba(0, 15, 30, 0.85);
   overflow: hidden;
@@ -114,12 +114,12 @@
 
 .ship-status-image {
   height: 100%;
-  /* Aumentamos a altura máxima da nave de 75px para 90px */
-  max-height: 90px;
-  max-width: 180px;
+  /* Aumentamos a altura máxima da nave */
+  max-height: clamp(50px, 7vh, 80px);
+  max-width: 160px;
   width: auto;
   object-fit: contain;
-  margin-right: 25px;
+  margin-right: 20px;
   filter: drop-shadow(0 0 8px rgba(0, 180, 255, 0.8));
 }
 
