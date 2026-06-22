@@ -50,21 +50,26 @@
 .ship-status-display {
   position: absolute;
 
-  /* Ajuste para o exato centro do "respiro" sem encostar na telemetria */
-  top: 69%;
+  /* Ajuste para descer um pouco e dar espaço ao Main Display (que vai até ~66.5%), 
+     mas sem bater na telemetria lá embaixo */
+  top: 72%;
   bottom: auto;
   left: 50%;
   transform: translate(-50%, -50%);
 
-  /* 1. LARGURA IGUAL AO MAIN DISPLAY */
+  /* Mesma largura do Main Display */
   width: clamp(50%, 54vw, 58%);
-  height: clamp(60px, 9vh, 85px);
+
+  /* 1. AUMENTO DA ALTURA DO HUD */
+  height: clamp(85px, 11vh, 110px);
 
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  /* Distribui os blocos perfeitamente da esquerda pra direita */
   padding: 0 25px;
 
-  /* 2. IDENTIDADE VISUAL HARMONIZADA (Azul/Ciano) */
+  /* Identidade visual (Azul/Ciano) */
   background-color: rgba(0, 20, 40, 0.85);
   border: 1px solid rgba(0, 180, 255, 0.4);
   box-shadow: inset 0 0 15px rgba(0, 80, 150, 0.4), 0 0 20px rgba(0, 150, 255, 0.2);
@@ -73,12 +78,94 @@
   overflow: hidden;
 }
 
-/* Área do Radar delimitada */
+.ship-status-image {
+  height: 100%;
+  /* Acompanha o novo tamanho do HUD */
+  max-height: clamp(60px, 9vh, 90px);
+  max-width: 160px;
+  width: auto;
+  object-fit: contain;
+  margin-right: 15px;
+  filter: drop-shadow(0 0 8px rgba(0, 180, 255, 0.8));
+}
+
+.ship-status-name {
+  font-size: clamp(0.9rem, 1.2vw, 1.2rem);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #0bf;
+  text-shadow: 0 0 8px rgba(0, 180, 255, 0.8);
+  white-space: nowrap;
+  flex-shrink: 0;
+  /* Impede que o nome seja espremido */
+}
+
+/* ==========================================================
+   ====== ESTATÍSTICAS DO HUD (LINHA E TEXTO DIGITADO) ======
+   ========================================================== */
+.ship-status-divider {
+  width: 2px;
+  height: 65%;
+  /* Proporcional à nova altura */
+  background-color: rgba(0, 180, 255, 0.6);
+  margin: 0 20px;
+  /* Margem simétrica de respiro */
+  box-shadow: 0 0 8px rgba(0, 180, 255, 0.8);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.ship-info-stats {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  /* Alinha o texto bonitinho à esquerda */
+  flex: 1;
+  /* Preenche todo o espaço que sobrar no meio */
+
+  font-size: clamp(0.85rem, 1.1vw, 1.1rem);
+  color: #0bf;
+  text-shadow: 0 0 5px rgba(0, 180, 255, 0.5);
+
+  /* 2. MAIS RESPIRO ENTRE AS LINHAS DE TEXTO */
+  line-height: 1.8;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  /* Evita que o texto quebre o layout */
+}
+
+/* Animação do cursor de terminal */
+.blinking-cursor {
+  animation: blink-cursor 1s step-end infinite;
+  color: #0bf;
+  margin-left: 3px;
+  font-weight: bold;
+}
+
+@keyframes blink-cursor {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ==========================================================
+   ====== ÁREA DO RADAR NO HUD ==============================
+   ========================================================== */
 .radar-container {
-  /* Radar maior para acompanhar o painel */
-  width: clamp(140px, 15vw, 170px);
-  height: clamp(50px, 7vh, 75px);
-  margin-left: auto;
+  /* 3. RADAR AUMENTADO PARA ACOMPANHAR A NOVA ALTURA */
+  width: clamp(140px, 15vw, 180px);
+  height: clamp(65px, 8vh, 85px);
+
+  margin-left: 0;
   border: 1px solid rgba(0, 180, 255, 0.3);
   background: rgba(0, 20, 40, 0.6);
   box-shadow: inset 0 0 10px rgba(0, 80, 150, 0.4);
@@ -89,27 +176,22 @@
   flex-shrink: 0;
 }
 
-.space-radar {
-  position: relative;
-  /* Aumentando o radar interno */
-  width: clamp(120px, 13vw, 150px);
-  height: clamp(40px, 6vh, 65px);
-  border: 2px solid rgba(0, 180, 255, 0.4);
-  background-color: rgba(0, 15, 30, 0.85);
-  overflow: hidden;
-  box-shadow: 0 0 10px rgba(0, 150, 255, 0.2), inset 0 0 15px rgba(0, 180, 255, 0.3);
-}
-
-/* Fixar o radar no canto direito para não mover */
 .space-radar-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-left: auto;
-  /* Empurra o radar para o extremo direito do flexbox */
-  padding-left: 20px;
-  flex-shrink: 0;
-  /* Impede que o radar encolha ou mude de tamanho */
+  height: 100%;
+}
+
+.space-radar {
+  position: relative;
+  /* Radar interno ligeiramente maior */
+  width: clamp(120px, 13vw, 160px);
+  height: clamp(50px, 7vh, 75px);
+  border: 2px solid rgba(0, 180, 255, 0.4);
+  background-color: rgba(0, 15, 30, 0.85);
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 150, 255, 0.2), inset 0 0 15px rgba(0, 180, 255, 0.3);
 }
 
 .ship-status-image {
