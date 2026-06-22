@@ -50,23 +50,24 @@
 .ship-status-display {
   position: absolute;
 
-  /* Ajuste para descer um pouco e dar espaço ao Main Display (que vai até ~66.5%), 
-     mas sem bater na telemetria lá embaixo */
-  top: 72%;
+  /* 1. ESPAÇO PARA CIMA: Subimos de 72% para 69% para colar mais no Main Display sem sobrepor */
+  top: 69%;
   bottom: auto;
   left: 50%;
-  transform: translate(-50%, -50%);
 
-  /* Mesma largura do Main Display */
+  /* 2. LARGURA EXATA: O translateZ(100px) coloca o HUD no mesmo plano 3D do Main Display */
+  transform: translate(-50%, -50%) translateZ(100px);
+
+  /* Largura e Altura */
   width: clamp(50%, 54vw, 58%);
-
-  /* 1. AUMENTO DA ALTURA DO HUD */
   height: clamp(85px, 11vh, 110px);
+
+  /* 3. BOX-SIZING: Impede que o padding interno deixe o HUD mais largo que o Main Display */
+  box-sizing: border-box;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* Distribui os blocos perfeitamente da esquerda pra direita */
   padding: 0 25px;
 
   /* Identidade visual (Azul/Ciano) */
