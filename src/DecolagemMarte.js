@@ -1751,8 +1751,11 @@ const DecolagemMarte = () => {
             if (distanceToDecrease < (2500 * distanceScale)) distanceToDecrease = (2500 * distanceScale);
           }
 
-          // LÓGICA DE ACÚMULO DE DISTÂNCIA
-          accumulatedDistanceKmRef.current += distanceToDecrease;
+          // LÓGICA DE ACÚMULO DE DISTÂNCIA - CORRIGIDA
+          if (distanceKmRef.current > 0 && !arrivedAtMarsRef.current) {
+            const actualTraveled = Math.min(distanceToDecrease, distanceKmRef.current);
+            accumulatedDistanceKmRef.current += actualTraveled;
+          }
 
           const newDistance = Math.max(0, distanceKmRef.current - distanceToDecrease);
           distanceKmRef.current = newDistance;
