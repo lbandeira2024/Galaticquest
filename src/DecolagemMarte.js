@@ -114,45 +114,25 @@ const TypewriterText = ({ label, value }) => {
 };
 
 // --- COMPONENTE DE RADAR DINÂMICO ---
+// --- COMPONENTE DE RADAR DINÂMICO (AJUSTADO) ---
 const DynamicRadar = ({ progress, origin, destination, sosSignal }) => {
-  // progress vai de 0 a 100.
-  // O centro do radar é x: 50, y: 50.
-
-  // Planeta de Destino (Aproxima-se: de cima (10%) para o centro (50%))
+  // Planeta de Destino (Destacado em ciano)
   const destY = 10 + (progress / 100) * 40;
   const destX = 50;
 
-  // Planeta de Origem (Fica para trás: do centro (50%) para baixo (90%))
+  // Planeta de Origem (Destacado em uma cor neutra/clara)
   const origY = 50 + (progress / 100) * 40;
   const origX = 50;
 
-  // Asteroides/Detritos (Gerados uma vez, rolam para baixo com o progresso)
-  const asteroids = useMemo(() => {
-    return Array.from({ length: 6 }).map((_, i) => ({
-      id: i,
-      x: Math.random() * 80 + 10,
-      startY: Math.random() * 100,
-      speed: Math.random() * 0.8 + 0.2
-    }));
-  }, []);
-
-  // MÁGICA ACONTECE AQUI:
-  // Esta função sincroniza perfeitamente o "piscar" com a passagem do feixe de luz (que dura 3s).
-  // --- DENTRO DO COMPONENTE DynamicRadar ---
-  const getBlipStyle = (x, y, color, size) => {
-    // Como agora é retangular, não precisamos de atan2, 
-    // apenas posicionamos o blip nas coordenadas X e Y calculadas
-    return {
-      top: `${y}%`,
-      left: `${x}%`,
-      backgroundColor: color,
-      boxShadow: `0 0 4px ${color}, 0 0 10px ${color}`,
-      width: `${size}px`,
-      height: `${size}px`,
-      // O atraso é baseado na posição X (da esquerda para a direita)
-      animationDelay: `${(x / 100) * 3}s`
-    };
-  };
+  const getBlipStyle = (x, y, color, size) => ({
+    top: `${y}%`,
+    left: `${x}%`,
+    backgroundColor: color,
+    boxShadow: `0 0 4px ${color}, 0 0 10px ${color}`,
+    width: `${size}px`,
+    height: `${size}px`,
+    animationDelay: `${(x / 100) * 3}s`
+  });
 
   return (
     <div className="space-radar-wrapper">
@@ -160,21 +140,21 @@ const DynamicRadar = ({ progress, origin, destination, sosSignal }) => {
         <div className="radar-grid"></div>
         <div className="radar-sweep"></div>
 
-        {/* Planeta de Origem */}
+        {/* Planeta de Origem - Cor de destaque branca ou cinza claro */}
         <div
           className="dynamic-blip"
-          style={getBlipStyle(origX, origY, '#666', 4)}
+          style={getBlipStyle(origX, origY, '#ffffff', 5)}
           title={`Origem: ${origin?.nome || 'Terra'}`}
         ></div>
 
-        {/* Planeta de Destino - Marcador alterado para harmonizar com a UI ciano */}
+        {/* Planeta de Destino - Cor de destaque ciano */}
         <div
           className="dynamic-blip"
-          style={getBlipStyle(destX, destY, '#0bf', 5)}
+          style={getBlipStyle(destX, destY, '#0bf', 6)}
           title={`Destino: ${destination?.nome || 'Desconhecido'}`}
         ></div>
 
-        {/* Sinal de S.O.S (se existir, aparece no ângulo correto recebido do backend/state) */}
+        {/* Sinal de S.O.S (Mantido caso precise de alerta) */}
         {sosSignal && (
           <div
             className="dynamic-blip sos-blink"
@@ -187,14 +167,7 @@ const DynamicRadar = ({ progress, origin, destination, sosSignal }) => {
           ></div>
         )}
 
-        {/* Asteroides/Objetos Próximos */}
-        {asteroids.map(ast => {
-          let currentY = ast.startY + (progress * ast.speed);
-          if (currentY > 100) currentY = currentY % 100; // Efeito de loop contínuo infinito
-          return (
-            <div key={ast.id} className="dynamic-blip" style={getBlipStyle(ast.x, currentY, '#0bf', 2)}></div>
-          );
-        })}
+        {/* A seção de renderização de asteroides foi removida */}
       </div>
     </div>
   );
