@@ -113,7 +113,6 @@ const TypewriterText = ({ label, value }) => {
   );
 };
 
-// --- COMPONENTE DE RADAR DINÂMICO ---
 // --- COMPONENTE DE RADAR DINÂMICO (AJUSTADO) ---
 const DynamicRadar = ({ progress, origin, destination, sosSignal }) => {
   // Planeta de Destino (Destacado em ciano)
@@ -166,12 +165,11 @@ const DynamicRadar = ({ progress, origin, destination, sosSignal }) => {
             title="SINAL S.O.S DETETADO!"
           ></div>
         )}
-
-        {/* A seção de renderização de asteroides foi removida */}
       </div>
     </div>
   );
 };
+
 // --- COMPONENTES OTIMIZADOS (React.memo com Custom Comparators) ---
 
 // 1. Painel Esquerdo
@@ -791,6 +789,10 @@ const DecolagemMarte = () => {
 
   const [distanceKm, setDistanceKm] = useState(0);
   const distanceKmRef = useRef(distanceKm);
+
+  // Novo estado para o acumulador de distância
+  const [accumulatedDistanceKm, setAccumulatedDistanceKm] = useState(0);
+  const accumulatedDistanceKmRef = useRef(0);
 
   const [originPlanet, setOriginPlanet] = useState({ nome: 'Terra' });
   const [isLoadingRoute, setIsLoadingRoute] = useState(true);
@@ -1749,11 +1751,15 @@ const DecolagemMarte = () => {
             if (distanceToDecrease < (2500 * distanceScale)) distanceToDecrease = (2500 * distanceScale);
           }
 
+          // LÓGICA DE ACÚMULO DE DISTÂNCIA
+          accumulatedDistanceKmRef.current += distanceToDecrease;
+
           const newDistance = Math.max(0, distanceKmRef.current - distanceToDecrease);
           distanceKmRef.current = newDistance;
 
           if (timestamp - lastDistanceRenderTime.current > 80) {
             setDistanceKm(Math.round(newDistance));
+            setAccumulatedDistanceKm(accumulatedDistanceKmRef.current);
             lastDistanceRenderTime.current = timestamp;
           }
 
@@ -2095,13 +2101,18 @@ const DecolagemMarte = () => {
             <div className="ship-info-stats" style={{ flex: 1 }}>
               <TypewriterText label="Planetas visitados" value={routeIndex.toString().padStart(2, '0')} />
               <TypewriterText label="Virtus" value="0,0 %" />
-              <TypewriterText label="Distancia percorrida (Km)" value={distanceKm.toLocaleString('pt-BR')} />
+
+              {/* === EXIBIÇÃO DA DISTÂNCIA EM UA COM CSS RESTRITIVO === */}
+              <div className="telemetry-distance-display" title={`${(accumulatedDistanceKm / 149597870).toFixed(8)} UA`}>
+                Dist.(UA): {(accumulatedDistanceKm / 149597870).toFixed(8)}
+              </div>
             </div>
 
             <div className="ship-status-divider"></div>
 
-            {/* Área que ocupa exatamente o espaço do radar */}
-            <div className="radar-container">
+            {/* === RADAR OCULTO === */}
+            {/* O Radar dinâmico e seus detritos foram comentados para liberar o espaço */}
+            {/* <div className="radar-container">
               <DynamicRadar
                 progress={progress}
                 origin={originPlanet}
@@ -2109,6 +2120,7 @@ const DecolagemMarte = () => {
                 sosSignal={(distanceKm > 0 || isForcedMapEdit) ? activeSosSignal : null}
               />
             </div>
+            */}
           </div>
         )}
 

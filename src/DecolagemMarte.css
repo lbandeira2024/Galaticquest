@@ -2089,3 +2089,29 @@
     opacity: 0;
   }
 }
+
+/* ============================================================================
+   ESTILOS DE TELEMETRIA E CONTENÇÃO DA DISTÂNCIA
+   ============================================================================ */
+
+.telemetry-distance-display {
+  width: 100%;
+  max-width: 100%;
+  padding-top: 4px;
+
+  /* Controles rigorosos de quebra e excesso de texto */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  /* Adiciona "..." se o número ficar grande demais para caber */
+
+  /* Tipografia do Cockpit */
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  color: #0bf;
+  text-align: left;
+
+  /* Ajuste Dinâmico de Fonte para caber no limite */
+  font-size: clamp(0.8rem, 1.1vw, 1.1rem);
+  text-shadow: 0 0 5px rgba(0, 180, 255, 0.5);
+}
