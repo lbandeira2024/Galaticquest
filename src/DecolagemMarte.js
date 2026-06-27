@@ -869,6 +869,23 @@ const DecolagemMarte = () => {
   const { isPaused, togglePause } = usePause();
   const isPausedRef = useRef(isPaused);
 
+  // --- NOVA LÓGICA DE CONTAGEM DE CORPOS CELESTES ---
+  const countCorposCelestes = useMemo(() => {
+    if (!plannedRoute || plannedRoute.length === 0) return 0;
+    let count = 0;
+    for (let i = 0; i <= routeIndex; i++) {
+      if (plannedRoute[i] && plannedRoute[i].name) {
+        const stepName = normalizeName(plannedRoute[i].name);
+        const isStation = STATION_NAMES.some(s => stepName.includes(s));
+        if (!isStation) count++;
+      }
+    }
+    return count;
+  }, [plannedRoute, routeIndex]);
+
+  const countCorposCelestesRef = useRef(countCorposCelestes);
+  useEffect(() => { countCorposCelestesRef.current = countCorposCelestes; }, [countCorposCelestes]);
+
   const teamData = useMemo(() => {
     const teamCode = user?.teamCode || "E1";
     return TEAMS_DATA.find(t => t.code === teamCode) || TEAMS_DATA[0];
@@ -976,7 +993,9 @@ const DecolagemMarte = () => {
         productivity: telemetryRef.current.productivity,
         interdependence: telemetryRef.current.interdependence,
         engagement: telemetryRef.current.engagement
-      }
+      },
+      distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+      corposCelestesVisitados: countCorposCelestesRef.current
     };
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
@@ -992,7 +1011,11 @@ const DecolagemMarte = () => {
     if (!userId || !API_BASE_URL) return;
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ routeIndex: currentIndex }),
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+          routeIndex: currentIndex,
+          distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+          corposCelestesVisitados: countCorposCelestesRef.current
+        }),
       });
     } catch (error) { console.error("ERRO: Falha ao salvar progresso:", error); }
   }, [userId, API_BASE_URL]);
@@ -1002,7 +1025,12 @@ const DecolagemMarte = () => {
 
   const saveNewRouteAndProgress = useCallback(async (currentIndex, newRouteArray) => {
     if (!userId || !API_BASE_URL) return;
-    const dataToSave = { routeIndex: currentIndex, rotaPlanejada: newRouteArray };
+    const dataToSave = {
+      routeIndex: currentIndex,
+      rotaPlanejada: newRouteArray,
+      distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+      corposCelestesVisitados: countCorposCelestesRef.current
+    };
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSave),
@@ -1316,7 +1344,9 @@ const DecolagemMarte = () => {
             productivity: telemetryRef.current.productivity,
             interdependence: telemetryRef.current.interdependence,
             engagement: telemetryRef.current.engagement
-          }
+          },
+          distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+          corposCelestesVisitados: countCorposCelestesRef.current
         }),
       });
       setProcessadorO2(0);
@@ -1440,7 +1470,11 @@ const DecolagemMarte = () => {
         await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ routeIndex: currentIndex }),
+          body: JSON.stringify({
+            routeIndex: currentIndex,
+            distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+            corposCelestesVisitados: countCorposCelestesRef.current
+          }),
         });
       } catch (error) { console.error("ERRO: Falha ao salvar correção de rota:", error); }
     };
@@ -1456,6 +1490,11 @@ const DecolagemMarte = () => {
           if (data.naveEscolhida) setChosenShip(data.naveEscolhida);
           if (data.spaceCoins !== undefined) syncSpaceCoinsRef.current(data.spaceCoins);
           if (data.processadorO2 !== undefined) setProcessadorO2(data.processadorO2);
+
+          if (data.distanciaPercorridaKm !== undefined) {
+            setAccumulatedDistanceKm(data.distanciaPercorridaKm);
+            accumulatedDistanceKmRef.current = data.distanciaPercorridaKm;
+          }
 
           if (data.sosHistory) {
             setUsedSosIds(data.sosHistory);
@@ -1894,6 +1933,8 @@ const DecolagemMarte = () => {
                 const bodyData = {
                   routeIndex: newRouteIndex,
                   processadorO2: newProcessadorO2Value,
+                  distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+                  corposCelestesVisitados: countCorposCelestesRef.current,
                   telemetryState: {
                     oxygen: telemetryRef.current.atmosphere.o2,
                     nuclearPropulsion: telemetryRef.current.propulsion.powerOutput,
@@ -2102,16 +2143,16 @@ const DecolagemMarte = () => {
             <div className="ship-status-divider"></div>
 
             <div className="ship-info-stats" style={{ flex: 1 }}>
-              <TypewriterText label="Planetas visitados" value={routeIndex.toString().padStart(2, '0')} />
+              <TypewriterText label="Corpos celestes visitados" value={countCorposCelestes.toString().padStart(2, '0')} />
               <TypewriterText label="Virtus" value="0,0 %" />
 
-              {/* === EXIBIÇÃO DA DISTÂNCIA EM UA COM CSS RESTRITIVO === */}
+              {/* === EXIBIÇÃO DA DISTÂNCIA EM UA === */}
               <div className="telemetry-distance-display" title={`${(accumulatedDistanceKm / 149597870).toFixed(8)} UA`}>
-                Dist.(UA): {(accumulatedDistanceKm / 149597870).toFixed(8)}
+                Dist. Percorrida (UA): {(accumulatedDistanceKm / 149597870).toFixed(8)}
               </div>
             </div>
 
-            <div className="ship-status-divider"></div>
+            {/* A SEGUNDA DIV 'ship-status-divider' FOI REMOVIDA DAQUI PARA TIRAR A BARRA INFERIOR */}
 
             {/* === RADAR OCULTO === */}
             {/* O Radar dinâmico e seus detritos foram comentados para liberar o espaço */}
