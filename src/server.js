@@ -66,7 +66,8 @@ const UsuarioSchema = new mongoose.Schema({
   administrador: { type: Boolean, default: false },
   dataInicio: { type: Date, default: new Date('2025-06-30') },
   grupo: { type: mongoose.Schema.Types.ObjectId, ref: 'Grupo' },
-  gameNumber: { type: Number }
+  gameNumber: { type: Number },
+  betatester: { type: Boolean, default: false } // <--- CAMPO BETATESTER ADICIONADO AQUI
 }, { timestamps: true });
 
 const Usuario = mongoose.model("Usuario", UsuarioSchema);
@@ -104,9 +105,10 @@ const GrupoSchema = new mongoose.Schema({
   rotaPlanejada: [{ name: String, distance: Number, fuel: Number, from: String }],
   routeIndex: { type: Number, default: 0 },
   processadorO2: { type: Number, default: 0, min: 0 },
-  // --- NOVOS CAMPOS PARA REGISTRO DE PROGRESSO GLOBAL ---
+  // --- REGISTRO DE PROGRESSO GLOBAL ---
   corposCelestesVisitados: { type: Number, default: 0 },
   distanciaPercorridaKm: { type: Number, default: 0 },
+  distanciaRestanteKm: { type: Number }, // <--- CAMPO DISTÂNCIA RESTANTE ADICIONADO AQUI
   // -----------------------------------------------------
   sosHistory: { type: [Number], default: [] },
   loginon: { type: Number, default: 0 },

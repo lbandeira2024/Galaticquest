@@ -262,7 +262,7 @@ const CadastroForm = () => {
     }
   };
 
-  // --- FUNÇÃO DE REDIRECIONAMENTO CORRIGIDA ---
+  // --- NOVA FUNÇÃO DE REDIRECIONAMENTO COM TRAVA DE BETATESTER ---
   const redirectToNextStep = (user) => {
     console.log("🔍 Verificando redirecionamento para:", user.email);
 
@@ -270,7 +270,6 @@ const CadastroForm = () => {
     if (!user.grupo) { navigate("/BoasVindas"); return; }
 
     // Verifica APENAS se o grupo está trancado
-    // Tenta 'isLocked' (padrão Mongoose) ou 'locked'
     const isLocked = user.grupo.isLocked === true || user.grupo.locked === true;
 
     console.log("🔒 Status de bloqueio do grupo:", isLocked);
@@ -282,13 +281,20 @@ const CadastroForm = () => {
       return;
     }
 
-    // Se estiver trancado, PULA o lobby e verifica as próximas etapas
-    console.log("✅ Grupo trancado: Avançando para próximas etapas.");
+    // Se estiver trancado, verifica se é BETATESTER
+    console.log("✅ Grupo trancado: Avaliando perfil do usuário.");
 
-    if (!user.grupo.naveEscolhida) { navigate("/SelecaoNave"); return; }
-    if (!user.grupo.equipeEscolhida) { navigate("/SelecaoEquipe"); return; }
-
-    navigate("/CompraDeMaterial");
+    if (user.betatester === true) {
+      console.log("🛠️ Usuário é betatester. Avançando para etapas de preparação.");
+      if (!user.grupo.naveEscolhida) { navigate("/SelecaoNave"); return; }
+      if (!user.grupo.equipeEscolhida) { navigate("/SelecaoEquipe"); return; }
+      navigate("/CompraDeMaterial");
+      return;
+    } else {
+      console.log("🚀 Usuário padrão. Retornando direto para o voo no espaço.");
+      navigate("/DecolagemMarte");
+      return;
+    }
   };
 
   const enterFullScreen = () => {
