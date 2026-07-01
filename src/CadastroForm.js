@@ -292,7 +292,8 @@ const CadastroForm = () => {
       return;
     } else {
       console.log("🚀 Usuário padrão. Retornando direto para o voo no espaço.");
-      navigate("/DecolagemMarte");
+      // MUDANÇA AQUI: agora a rota bate com a rota do App.js em letras minúsculas
+      navigate("/decolagem-marte");
       return;
     }
   };
