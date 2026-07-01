@@ -43,6 +43,227 @@
   justify-content: center;
 }
 
+
+/* ==========================================================
+   ====== DISPLAY DE IDENTIFICAÇÃO DA NAVE (MEIO) ===========
+   ========================================================== */
+.ship-status-display {
+  position: absolute;
+
+  /* 1. ESPAÇO PARA CIMA: Subimos de 72% para 69% para colar mais no Main Display sem sobrepor */
+  top: 69%;
+  bottom: auto;
+  left: 50%;
+
+  /* 2. LARGURA EXATA: O translateZ(100px) coloca o HUD no mesmo plano 3D do Main Display */
+  transform: translate(-50%, -50%) translateZ(100px);
+
+  /* Largura e Altura */
+  width: clamp(50%, 54vw, 58%);
+  height: clamp(85px, 11vh, 110px);
+
+  /* 3. BOX-SIZING: Impede que o padding interno deixe o HUD mais largo que o Main Display */
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 25px;
+
+  /* Identidade visual (Azul/Ciano) */
+  background-color: rgba(0, 20, 40, 0.85);
+  border: 1px solid rgba(0, 180, 255, 0.4);
+  box-shadow: inset 0 0 15px rgba(0, 80, 150, 0.4), 0 0 20px rgba(0, 150, 255, 0.2);
+  border-radius: 8px;
+  z-index: 50;
+  overflow: hidden;
+}
+
+.ship-status-image {
+  height: 100%;
+  /* Acompanha o novo tamanho do HUD */
+  max-height: clamp(60px, 9vh, 90px);
+  max-width: 160px;
+  width: auto;
+  object-fit: contain;
+  margin-right: 15px;
+  filter: drop-shadow(0 0 8px rgba(0, 180, 255, 0.8));
+}
+
+.ship-status-name {
+  font-size: clamp(0.9rem, 1.2vw, 1.2rem);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #0bf;
+  text-shadow: 0 0 8px rgba(0, 180, 255, 0.8);
+  white-space: nowrap;
+  flex-shrink: 0;
+  /* Impede que o nome seja espremido */
+}
+
+/* ==========================================================
+   ====== ESTATÍSTICAS DO HUD (LINHA E TEXTO DIGITADO) ======
+   ========================================================== */
+.ship-status-divider {
+  width: 2px;
+  height: 65%;
+  /* Proporcional à nova altura */
+  background-color: rgba(0, 180, 255, 0.6);
+  margin: 0 20px;
+  /* Margem simétrica de respiro */
+  box-shadow: 0 0 8px rgba(0, 180, 255, 0.8);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.ship-info-stats {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  /* Alinha o texto bonitinho à esquerda */
+  flex: 1;
+  /* Preenche todo o espaço que sobrar no meio */
+
+  font-size: clamp(0.85rem, 1.1vw, 1.1rem);
+  color: #0bf;
+  text-shadow: 0 0 5px rgba(0, 180, 255, 0.5);
+
+  /* 2. MAIS RESPIRO ENTRE AS LINHAS DE TEXTO */
+  line-height: 1.8;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  /* Evita que o texto quebre o layout */
+}
+
+/* Animação do cursor de terminal */
+.blinking-cursor {
+  animation: blink-cursor 1s step-end infinite;
+  color: #0bf;
+  margin-left: 3px;
+  font-weight: bold;
+}
+
+@keyframes blink-cursor {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ==========================================================
+   ====== ÁREA DO RADAR NO HUD ==============================
+   ========================================================== */
+.radar-container {
+  /* 3. RADAR AUMENTADO PARA ACOMPANHAR A NOVA ALTURA */
+  width: clamp(140px, 15vw, 180px);
+  height: clamp(65px, 8vh, 85px);
+
+  margin-left: 0;
+  border: 1px solid rgba(0, 180, 255, 0.3);
+  background: rgba(0, 20, 40, 0.6);
+  box-shadow: inset 0 0 10px rgba(0, 80, 150, 0.4);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.space-radar-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.space-radar {
+  position: relative;
+  /* Radar interno ligeiramente maior */
+  width: clamp(120px, 13vw, 160px);
+  height: clamp(50px, 7vh, 75px);
+  border: 2px solid rgba(0, 180, 255, 0.4);
+  background-color: rgba(0, 15, 30, 0.85);
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 150, 255, 0.2), inset 0 0 15px rgba(0, 180, 255, 0.3);
+}
+
+.ship-status-image {
+  height: 100%;
+  /* Aumentamos a altura máxima da nave */
+  max-height: clamp(50px, 7vh, 80px);
+  max-width: 160px;
+  width: auto;
+  object-fit: contain;
+  margin-right: 20px;
+  filter: drop-shadow(0 0 8px rgba(0, 180, 255, 0.8));
+}
+
+.ship-status-name {
+  font-size: clamp(0.9rem, 1.2vw, 1.2rem);
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #0bf;
+  text-shadow: 0 0 8px rgba(0, 180, 255, 0.8);
+  white-space: nowrap;
+  /* Evita que nomes longos quebrem para a linha de baixo */
+}
+
+/* ==========================================================
+   ====== ESTATÍSTICAS DO HUD (LINHA E TEXTO DIGITADO) ======
+   ========================================================== */
+.ship-status-divider {
+  width: 2px;
+  height: 60%;
+  background-color: rgba(0, 180, 255, 0.6);
+  margin: 0 25px;
+  /* Espaço entre o nome da nave e os textos */
+  box-shadow: 0 0 8px rgba(0, 180, 255, 0.8);
+  border-radius: 2px;
+}
+
+.ship-info-stats {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* Fonte ligeiramente maior para preencher o espaço */
+  font-size: clamp(0.85rem, 1.1vw, 1.1rem);
+  color: #0bf;
+  text-shadow: 0 0 5px rgba(0, 180, 255, 0.5);
+  line-height: 1.6;
+  /* Mais respiro entre as linhas de texto */
+  font-weight: bold;
+  white-space: nowrap;
+}
+
+/* Animação do cursor de terminal */
+.blinking-cursor {
+  animation: blink-cursor 1s step-end infinite;
+  color: #0bf;
+  margin-left: 3px;
+  font-weight: bold;
+}
+
+@keyframes blink-cursor {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
 /* ======================= NOVA CLASSE ADICIONADA ======================= */
 .cloud-animation-video {
   width: 100%;
@@ -1684,4 +1905,213 @@
   .dobra-btn-wrapper {
     width: 100%;
   }
+
+  .ship-status-display {
+    position: relative;
+    width: 95%;
+    height: auto;
+    min-height: 50px;
+    margin: 15px auto;
+    transform: none;
+    /* Muito importante manter isso */
+    left: auto;
+    top: auto;
+    order: 0;
+  }
+}
+
+/* ==========================================================
+   ====== RADAR ESPACIAL (HUD) ==============================
+   ========================================================== */
+.space-radar-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin-left: 10px;
+}
+
+.space-radar {
+  position: relative;
+  /* Dobro do tamanho original e formato retangular */
+  width: clamp(100px, 16vh, 150px);
+  height: clamp(50px, 8vh, 75px);
+  border: 2px solid rgba(0, 180, 255, 0.4);
+  background-color: rgba(0, 15, 30, 0.85);
+  overflow: hidden;
+  box-shadow: 0 0 10px rgba(0, 150, 255, 0.2), inset 0 0 15px rgba(0, 180, 255, 0.3);
+}
+
+/* Grade adaptada para retângulo */
+.radar-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    linear-gradient(rgba(0, 180, 255, 0.2) 1px, transparent 1px) 0 0 / 20px 20px,
+    linear-gradient(90deg, rgba(0, 180, 255, 0.2) 1px, transparent 1px) 0 0 / 20px 20px;
+  z-index: 1;
+}
+
+/* Varredura Retangular (Barra que corre da esquerda para a direita) */
+.radar-sweep {
+  position: absolute;
+  top: 0;
+  left: -20%;
+  width: 20%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 180, 255, 0.4));
+  animation: radar-slide 3s linear infinite;
+  z-index: 2;
+}
+
+@keyframes radar-slide {
+  0% {
+    left: -20%;
+  }
+
+  100% {
+    left: 100%;
+  }
+}
+
+.dynamic-blip {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 3;
+  opacity: 0;
+  animation: blip-fade 3s infinite;
+}
+
+@keyframes blip-fade {
+
+  0%,
+  5% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+
+  30% {
+    opacity: 0;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Varredura Animada (Feixe de Luz do Radar) */
+.radar-sweep {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  /* Cria o efeito do rasto de luz verde */
+  background: conic-gradient(from 0deg, transparent 70%, rgba(0, 180, 255, 0.1) 90%, rgba(0, 180, 255, 0.8) 100%);
+  animation: radar-spin 3s linear infinite;
+  z-index: 2;
+}
+
+@keyframes radar-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Pontos de contacto Dinâmicos (Calculados via React) */
+.dynamic-blip {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 3;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  /* Garante que o centro do blip fica na coordenada exata */
+  animation: blip-fade 3s infinite;
+}
+
+/* Alerta especial quando surge um S.O.S */
+.sos-blink {
+  animation: blip-fade 3s infinite, sos-alert 0.5s infinite alternate !important;
+}
+
+@keyframes sos-alert {
+  from {
+    filter: brightness(1);
+  }
+
+  to {
+    filter: brightness(2) drop-shadow(0 0 10px red);
+  }
+}
+
+@keyframes blip-fade {
+
+  0%,
+  5% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+
+  30% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%);
+  }
+}
+
+@keyframes blip-fade {
+
+  0%,
+  5% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+
+  30% {
+    opacity: 0;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+/* ============================================================================
+   ESTILOS DE TELEMETRIA E CONTENÇÃO DA DISTÂNCIA
+   ============================================================================ */
+
+.telemetry-distance-display {
+  width: 100%;
+  max-width: 100%;
+  padding-top: 4px;
+
+  /* Controles rigorosos de quebra e excesso de texto */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  /* Adiciona "..." se o número ficar grande demais para caber */
+
+  /* Tipografia do Cockpit */
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  color: #0bf;
+  text-align: left;
+
+  /* Ajuste Dinâmico de Fonte para caber no limite */
+  font-size: clamp(0.8rem, 1.1vw, 1.1rem);
+  text-shadow: 0 0 5px rgba(0, 180, 255, 0.5);
 }

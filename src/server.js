@@ -104,9 +104,11 @@ const GrupoSchema = new mongoose.Schema({
   rotaPlanejada: [{ name: String, distance: Number, fuel: Number, from: String }],
   routeIndex: { type: Number, default: 0 },
   processadorO2: { type: Number, default: 0, min: 0 },
-  // --- ATUALIZAÇÃO S.O.S ---
+  // --- NOVOS CAMPOS PARA REGISTRO DE PROGRESSO GLOBAL ---
+  corposCelestesVisitados: { type: Number, default: 0 },
+  distanciaPercorridaKm: { type: Number, default: 0 },
+  // -----------------------------------------------------
   sosHistory: { type: [Number], default: [] },
-  // -------------------------
   loginon: { type: Number, default: 0 },
   lastHeartbeat: { type: Date, default: Date.now },
   telemetryState: {
@@ -230,7 +232,6 @@ app.post("/:userId/update-gamedata", async (req, res) => {
   } catch (error) { res.status(500).json({ success: false }); }
 });
 
-// --- ROTA EXCLUSIVA PARA GRAVAR S.O.S ---
 app.post("/:userId/record-sos-history", async (req, res) => {
   try {
     const { sosId } = req.body;
@@ -246,7 +247,6 @@ app.post("/:userId/record-sos-history", async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 });
-// ----------------------------------------
 
 app.get("/:userId/game-data", async (req, res) => {
   try {

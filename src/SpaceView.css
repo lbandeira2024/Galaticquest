@@ -6,12 +6,12 @@
   left: 0;
   overflow: hidden;
   z-index: 1;
-  /* NOVO: Fundo universo mais realista usando um gradiente linear em ângulo para simular a luz de galáxias distantes */
-  background: linear-gradient(135deg, #05070a 0%, #000000 40%, #010208 100%);
+  /* ATUALIZADO: Fundo universo baseado na imagem, com tons muito escuros de azul meia-noite e preto */
+  background: linear-gradient(135deg, #02040a 0%, #000000 40%, #030814 100%);
   will-change: transform;
 }
 
-/* === EFEITO VIA LÁCTEA (NEBULOSA) MODO REALISTA SUTIL === */
+/* === EFEITO VIA LÁCTEA (NEBULOSA) INSPIRADO NA IMAGEM === */
 .galactic-nebula {
   position: absolute;
   width: 200%;
@@ -20,15 +20,16 @@
   left: -50%;
   z-index: 0;
   pointer-events: none;
-  /* NOVO: Adicionado um toque violeta/esverdeado muito sutil (última linha) para simular poeira cósmica profunda */
+  /* ATUALIZADO: Tons de ciano e azul profundo para recriar a nuvem estelar da imagem */
   background:
-    radial-gradient(ellipse at 50% 50%, rgba(15, 20, 45, 0.3) 0%, transparent 45%),
-    radial-gradient(ellipse at 40% 60%, rgba(10, 15, 30, 0.2) 0%, transparent 40%),
-    radial-gradient(ellipse at 60% 40%, rgba(20, 10, 30, 0.2) 0%, transparent 40%),
-    radial-gradient(ellipse at 30% 30%, rgba(20, 5, 30, 0.05) 0%, transparent 50%);
-  filter: blur(40px);
-  transform: rotate(-15deg);
-  opacity: 0.6;
+    radial-gradient(ellipse at 50% 50%, rgba(15, 45, 75, 0.25) 0%, transparent 45%),
+    radial-gradient(ellipse at 40% 60%, rgba(10, 30, 60, 0.2) 0%, transparent 40%),
+    radial-gradient(ellipse at 60% 40%, rgba(25, 60, 90, 0.15) 0%, transparent 40%),
+    radial-gradient(ellipse at 30% 30%, rgba(5, 20, 40, 0.3) 0%, transparent 50%);
+  filter: blur(45px);
+  transform: rotate(-35deg);
+  /* Ajustado para a inclinação da imagem */
+  opacity: 0.75;
   mix-blend-mode: screen;
 }
 
@@ -87,16 +88,15 @@
 }
 
 .space-view-container.warp-active {
-  /* NOVO: Deixando o warp ligeiramente mais imersivo sem clarear demais o preto */
-  background: radial-gradient(ellipse at center, #020215 0%, #000000 100%);
+  background: radial-gradient(ellipse at center, #020412 0%, #000000 100%);
 }
 
 .space-view-container.warp-active .galactic-nebula {
-  opacity: 0.2 !important;
+  opacity: 0.15 !important;
   transition: opacity 1s ease;
 }
 
-/* === A MÁGICA DA OTIMIZAÇÃO === */
+/* === A MÁGICA DA OTIMIZAÇÃO (MANTIDO INTACTO) === */
 .warp-overlay-container {
   position: absolute;
   width: 100%;

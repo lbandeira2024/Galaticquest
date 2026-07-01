@@ -23,7 +23,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 // --- CONSTANTES DE DADOS DA TRIPULAÇÃO ---
 const TEAMS_DATA = [
   { id: 1, code: "E1", description: "Equipe especializada em exploração", missions: 12, achievements: ["Primeira equipe a mapear o Cinturão de Asteroides X-47", "Desenvolveu sistema de navegação em ambientes de alta gravidade", "Recorde de permanência em ambientes hostis: 487 dias"], members: [{ role: "Coordenador Espacial", name: "Sisifo", experience: "45 anos", details: "Engenheiro Aeroespacial", country: "Espanha" }, { role: "Cientista", name: "Neo", experience: "39 anos", details: "Cientista de Recursos Naturais Raros e Astrobotânica", country: "Americano" }, { role: "Engenheira", name: "Tamara", experience: "32 anos", details: "Física e Engenheira Aero Espacial", country: "Americana" }, { role: "Engenheira", name: "Ares", experience: "39 anos", details: "Engenheira Aeronáutico, PhD em Sist. de Oxigenação sob condições adversas", country: "Espanha" }, { role: "Engenheira", name: "Mae", experience: "37 anos", details: "Engenheira Química, PhD", country: "Americana" }] },
-  { id: 2, code: "E2", description: "Equipe especializada em diplomacia", missions: 18, achievements: ["Mediou conflito intercolonial em Marte (2147)", "Equipe com maior índice de resolução pacífica de incidentes", "Desenvolveu protocolos de comunicação intercultural"], members: [{ role: "Coordenadora Espacial", name: "Aletheia", experience: "40 anos", details: "Engenharia Aeronáutica", country: "Romena" }, { role: "Capitão", name: "Kirk", experience: "30 anos", details: "Ergo. Químico, PhD em Matemática e Pepito Espacial", country: "Americano" }, { role: "Cientista", name: "Maureen", experience: "43 anos", details: "Ergo. Astrofísica, PhD em Geometria Espacial", country: "Canadense" }, { role: "Piloto", name: "Hazza Ali", experience: "37 anos", details: "Piloto Militar", country: "Árabe" }, { role: "Engenheiro", name: "Ilia Ramon", experience: "49 anos", details: "Ergo. Aeronáutico e Piloto de Caça", country: "Israelense" }] },
+  { id: 2, code: "E2", description: "Equipe especializada em diplomacia", missions: 18, achievements: ["Mediou conflito intercolonial em Marte (2147)", "Equipe com maior índice de resolução pacífica de incidentes", "Desenvolveu protocols de comunicação intercultural"], members: [{ role: "Coordenadora Espacial", name: "Aletheia", experience: "40 anos", details: "Engenharia Aeronáutica", country: "Romena" }, { role: "Capitão", name: "Kirk", experience: "30 anos", details: "Ergo. Químico, PhD em Matemática e Pepito Espacial", country: "Americano" }, { role: "Cientista", name: "Maureen", experience: "43 anos", details: "Ergo. Astrofísica, PhD em Geometria Espacial", country: "Canadense" }, { role: "Piloto", name: "Hazza Ali", experience: "37 anos", details: "Piloto Militar", country: "Árabe" }, { role: "Engenheiro", name: "Ilia Ramon", experience: "49 anos", details: "Ergo. Aeronáutico e Piloto de Caça", country: "Israelense" }] },
   { id: 3, code: "E3", description: "Equipe especializada em combate", missions: 24, achievements: ["Defesa bem-sucedida da Base Lunar Alpha contra ataque de 2149", "Treinou 87% dos pilotos de combate ativos", "Desenvolveu táticas de defesa em gravidade zero"], members: [{ role: "Coordenador Espacial", name: "Kopenawa", experience: "55 anos", details: "Astrofísico e Engenheiro Espacial", country: "Mexicano" }, { role: "Médico", name: "Marek", experience: "47 anos", details: "Psiquiatra Psicanalista, PhD em Doenças Pós-Espaciais", country: "Tcheco" }, { role: "Nutricionista", name: "Farna", experience: "34 anos", details: "Nutricionista Espacial", country: "Polonesa" }, { role: "Biólogo", name: "Zachary", experience: "42 anos", details: "Biólogo e Infectologista, PhD", country: "Americano" }, { role: "Engenheiro", name: "Iuri", experience: "30 anos", details: "Ergo. Aeronáutico e músico", country: "Ítalo-russo" }, { role: "Tripulante convidada", name: "Zahy", experience: "35 anos", details: "Indígena brasileira", country: "Brasileira" }] },
   { id: 4, code: "E4", description: "Equipe especializada em pesquisa", missions: 15, achievements: ["Descoberta de 3 novos elementos em asteroides", "Desenvolveu sistema de análise de solo planetário em tempo real", "Publicou 47 artigos científicos em revistas de prestígio"], members: [{ role: "Coordenadora Espacial", name: "Deméter", experience: "42 anos", details: "Geóloga espacial, PhD", country: "Canadense" }, { role: "Engenheiro", name: "Semolek", experience: "40 anos", details: "Ergo. Especialista em Sist. de Sensores Espaciais e Aéreos", country: "Russo" }, { role: "Engenheira", name: "Nora", experience: "27 anos", details: "Engenheira Mecânica Especialista em Eventos Espaciais Atípicos", country: "Árabe" }, { role: "Física", name: "Liu", experience: "43 anos", details: "Física Nuclear", country: "Chinesa" }, { role: "Engenheiro", name: "Pétros", experience: "34 anos", details: "Engenheiro de Sistemas", country: "Grego" }] },
   { id: 5, code: "E5", description: "Equipe especializada em engenharia", missions: 21, achievements: ["Projetou o sistema de propulsão usado em 78% das naves atuais", "Recorde de reparos em órbita: 147 em missão única", "Desenvolveu materiais autoregenerativos para cascos de nave"], members: [{ role: "Coordenador Espacial", name: "Aguiles", experience: "35 anos", details: "Ergo. Mecânico Aero Espacial", country: "Italiano" }, { role: "Engenheiro", name: "Noguchi", experience: "38 anos", details: "Engenheiro Aeronáutico", country: "Japonês" }, { role: "Médica", name: "Chiaki", experience: "46 anos", details: "Médica, PhD em doenças espaciais", country: "Japonesa" }, { role: "Engenheiro", name: "Gorjah", experience: "32 anos", details: "Eng. Elétrico PhD em Logística Espacial", country: "Americano" }, { role: "Astrobiólogo", name: "Atena", experience: "38 anos", details: "Astrobiólogo, PhD", country: "Russa" }] }
@@ -40,7 +40,137 @@ const getMemberImage = (teamCode, index) => {
   }
 };
 
-// --- COMPONENTES OTIMIZADOS (React.memo) ---
+const getShipImage = (shipName) => {
+  if (!shipName) return '/images/NeoEclipseDigital.webp'; // Fallback
+
+  switch (shipName.toUpperCase()) {
+    case 'ARTEMIS1':
+      return '/images/Artemis1Digital.webp';
+    case 'OBERONX':
+      return '/images/OberonXDigital.webp';
+    case 'GAIANOVA':
+      return '/images/GaiaNovaDigital.webp';
+    case 'STRATUSV':
+      return '/images/StrausVDigital.webp';
+    case 'NEOECLIPSE':
+      return '/images/NeoEclipseDigital.webp';
+    default:
+      return '/images/NeoEclipseDigital.webp';
+  }
+};
+// --- COMPONENTE DE TEXTO DIGITADO (HUD) ---
+const TypewriterText = ({ label, value }) => {
+  const [displayedValue, setDisplayedValue] = useState('');
+  const [isTyping, setIsTyping] = useState(true);
+  const valueRef = useRef(value);
+
+  // Mantém o valor sempre atualizado
+  useEffect(() => {
+    valueRef.current = value;
+  }, [value]);
+
+  useEffect(() => {
+    let isMounted = true;
+    let index = 0;
+    let typingInterval;
+    let cycleTimeout;
+
+    const startTyping = () => {
+      setIsTyping(true);
+      setDisplayedValue('');
+      index = 0;
+      const currentTargetString = valueRef.current != null ? String(valueRef.current) : '';
+
+      typingInterval = setInterval(() => {
+        if (index < currentTargetString.length) {
+          setDisplayedValue(currentTargetString.substring(0, index + 1));
+          index++;
+        } else {
+          clearInterval(typingInterval);
+          if (isMounted) setIsTyping(false);
+
+          // Aguarda 10 segundos e reinicia o ciclo
+          cycleTimeout = setTimeout(() => {
+            if (isMounted) startTyping();
+          }, 10000);
+        }
+      }, 60); // Velocidade de digitação
+    };
+
+    startTyping();
+
+    return () => {
+      isMounted = false;
+      clearInterval(typingInterval);
+      clearTimeout(cycleTimeout);
+    };
+  }, []);
+
+  return (
+    <div style={{ marginBottom: '4px' }}>
+      {label}: {isTyping ? displayedValue : value}<span className="blinking-cursor">_</span>
+    </div>
+  );
+};
+
+// --- COMPONENTE DE RADAR DINÂMICO (AJUSTADO) ---
+const DynamicRadar = ({ progress, origin, destination, sosSignal }) => {
+  // Planeta de Destino (Destacado em ciano)
+  const destY = 10 + (progress / 100) * 40;
+  const destX = 50;
+
+  // Planeta de Origem (Destacado em uma cor neutra/clara)
+  const origY = 50 + (progress / 100) * 40;
+  const origX = 50;
+
+  const getBlipStyle = (x, y, color, size) => ({
+    top: `${y}%`,
+    left: `${x}%`,
+    backgroundColor: color,
+    boxShadow: `0 0 4px ${color}, 0 0 10px ${color}`,
+    width: `${size}px`,
+    height: `${size}px`,
+    animationDelay: `${(x / 100) * 3}s`
+  });
+
+  return (
+    <div className="space-radar-wrapper">
+      <div className="space-radar">
+        <div className="radar-grid"></div>
+        <div className="radar-sweep"></div>
+
+        {/* Planeta de Origem - Cor de destaque branca ou cinza claro */}
+        <div
+          className="dynamic-blip"
+          style={getBlipStyle(origX, origY, '#ffffff', 5)}
+          title={`Origem: ${origin?.nome || 'Terra'}`}
+        ></div>
+
+        {/* Planeta de Destino - Cor de destaque ciano */}
+        <div
+          className="dynamic-blip"
+          style={getBlipStyle(destX, destY, '#0bf', 6)}
+          title={`Destino: ${destination?.nome || 'Desconhecido'}`}
+        ></div>
+
+        {/* Sinal de S.O.S (Mantido caso precise de alerta) */}
+        {sosSignal && (
+          <div
+            className="dynamic-blip sos-blink"
+            style={getBlipStyle(
+              50 + Math.cos(sosSignal.angle * Math.PI / 180) * 35,
+              50 + Math.sin(sosSignal.angle * Math.PI / 180) * 35,
+              '#f00', 6
+            )}
+            title="SINAL S.O.S DETETADO!"
+          ></div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// --- COMPONENTES OTIMIZADOS (React.memo com Custom Comparators) ---
 
 // 1. Painel Esquerdo
 const LeftControlPanel = React.memo(({
@@ -119,6 +249,24 @@ const LeftControlPanel = React.memo(({
       </div>
     </div>
   );
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.distanceKm === nextProps.distanceKm &&
+    prevProps.progress === nextProps.progress &&
+    prevProps.isDobraAtivada === nextProps.isDobraAtivada &&
+    prevProps.isDobraEnabled === nextProps.isDobraEnabled &&
+    prevProps.isPaused === nextProps.isPaused &&
+    prevProps.originPlanet === nextProps.originPlanet &&
+    prevProps.destinationPlanet === nextProps.destinationPlanet &&
+    prevProps.maxSpeed === nextProps.maxSpeed &&
+    prevProps.isBoosting === nextProps.isBoosting &&
+    prevProps.minervaImage === nextProps.minervaImage &&
+    prevProps.isMinervaHighlighted === nextProps.isMinervaHighlighted &&
+    prevProps.processadorO2 === nextProps.processadorO2 &&
+    prevProps.isO2TransferDisabled === nextProps.isO2TransferDisabled &&
+    prevProps.mainDisplayState === nextProps.mainDisplayState &&
+    prevProps.telemetry.velocity.kmh === nextProps.telemetry.velocity.kmh
+  );
 });
 
 // 2. Painel Direito
@@ -171,7 +319,6 @@ const RightMonitorPanel = React.memo(({
               ) : (
                 <>
                   {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
-                  {/* OTIMIZAÇÃO: Sem state randômico em JS, flicker feito via CSS (.staticFlicker) */}
                   {monitorState === 'static' && <img src="/images/No_Signal.png" alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
                 </>
               )}
@@ -191,7 +338,6 @@ const RightMonitorPanel = React.memo(({
           ) : (
             <>
               {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
-              {/* OTIMIZAÇÃO: Sem state randômico em JS, flicker feito via CSS */}
               {monitorState === 'static' && <img src="/images/No_Signal.png" alt="Ecrã do Monitor" className="monitor-image" style={{ filter: 'brightness(1.2) contrast(1.5)', animation: 'staticFlicker 0.1s infinite alternate' }} />}
             </>
           )}
@@ -257,6 +403,26 @@ const RightMonitorPanel = React.memo(({
         <img src="/images/HVS-21.png" alt="HVS-21" className="hvs-logo" onError={(e) => { e.target.style.display = 'none'; }} />
       </div>
     </div>
+  );
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.isPaused === nextProps.isPaused &&
+    prevProps.isTransmissionStarting === nextProps.isTransmissionStarting &&
+    prevProps.isDialogueFinished === nextProps.isDialogueFinished &&
+    prevProps.monitorState === nextProps.monitorState &&
+    prevProps.showMinervaOnMonitor === nextProps.showMinervaOnMonitor &&
+    prevProps.showCriticalWarpFail === nextProps.showCriticalWarpFail &&
+    prevProps.showWarpDisabledMessage === nextProps.showWarpDisabledMessage &&
+    prevProps.isForcedMapEdit === nextProps.isForcedMapEdit &&
+    prevProps.isSosMinervaActive === nextProps.isSosMinervaActive &&
+    prevProps.isDeparting === nextProps.isDeparting &&
+    prevProps.currentCharacterData === nextProps.currentCharacterData &&
+    prevProps.currentDialogueStep === nextProps.currentDialogueStep &&
+    prevProps.teamPhotoUrl === nextProps.teamPhotoUrl &&
+    prevProps.isSOSActive === nextProps.isSOSActive &&
+    prevProps.hasFundsForSOS === nextProps.hasFundsForSOS &&
+    prevProps.isRestoringSOS === nextProps.isRestoringSOS &&
+    prevProps.isPauseButtonDisabled === nextProps.isPauseButtonDisabled
   );
 });
 
@@ -411,14 +577,31 @@ const MainDisplayWindow = React.memo(({
           event={sosSurpriseEvent}
           onMudarRota={handleMudarRota}
           onSeguirPlano={handleSeguirPlano}
+          hasRoute={plannedRoute && (routeIndex + 1) < plannedRoute.length}
         />
       )}
     </div>
   );
+}, (prevProps, nextProps) => {
+  return (
+    prevProps.mainDisplayState === nextProps.mainDisplayState &&
+    prevProps.isDobraAtivada === nextProps.isDobraAtivada &&
+    prevProps.distanceKm === nextProps.distanceKm &&
+    prevProps.arrivedAtMars === nextProps.arrivedAtMars &&
+    prevProps.isPaused === nextProps.isPaused &&
+    prevProps.selectedPlanet?.nome === nextProps.selectedPlanet?.nome &&
+    prevProps.isDeparting === nextProps.isDeparting &&
+    prevProps.showStoreModal === nextProps.showStoreModal &&
+    prevProps.showSosSurprise === nextProps.showSosSurprise &&
+    prevProps.sosSurpriseEvent === nextProps.sosSurpriseEvent &&
+    prevProps.routeIndex === nextProps.routeIndex &&
+    prevProps.plannedRoute === nextProps.plannedRoute &&
+    prevProps.telemetry.velocity.kmh === nextProps.telemetry.velocity.kmh
+  );
 });
 
 // --- UTILS & MODALS ---
-const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano }) => {
+const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano, hasRoute }) => {
   if (!event) return null;
   const getRiskColor = (id) => {
     switch (id) {
@@ -449,7 +632,9 @@ const SosSurpriseModal = ({ event, onClose, onMudarRota, onSeguirPlano }) => {
         </div>
         <div className="store-action-buttons" style={{ position: 'relative', justifyContent: 'center', marginTop: '20px', bottom: 'auto', right: 'auto' }}>
           <button type="button" className="buy-button action-button-mudar" onClick={(e) => { e.preventDefault(); onMudarRota(); }} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>MUDAR ROTA</button>
-          <button type="button" className="buy-button action-button-seguir" onClick={(e) => { e.preventDefault(); onSeguirPlano(); }} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>SEGUIR PLANO</button>
+          {hasRoute && (
+            <button type="button" className="buy-button action-button-seguir" onClick={(e) => { e.preventDefault(); onSeguirPlano(); }} style={{ padding: '15px 30px', fontSize: '1.1rem' }}>SEGUIR PLANO</button>
+          )}
         </div>
       </div>
     </div>
@@ -605,6 +790,10 @@ const DecolagemMarte = () => {
   const [distanceKm, setDistanceKm] = useState(0);
   const distanceKmRef = useRef(distanceKm);
 
+  // Novo estado para o acumulador de distância
+  const [accumulatedDistanceKm, setAccumulatedDistanceKm] = useState(0);
+  const accumulatedDistanceKmRef = useRef(0);
+
   const [originPlanet, setOriginPlanet] = useState({ nome: 'Terra' });
   const [isLoadingRoute, setIsLoadingRoute] = useState(true);
 
@@ -661,6 +850,7 @@ const DecolagemMarte = () => {
   const sosSurpriseEventRef = useRef(sosSurpriseEvent);
 
   const [showSosSurprise, setShowSosSurprise] = useState(false);
+  const [playingSosVideo, setPlayingSosVideo] = useState(false);
 
   const minervaEventTriggered = useRef(false);
   const hideMinervaTimerRef = useRef(null);
@@ -675,16 +865,32 @@ const DecolagemMarte = () => {
 
   const canDecreaseDistanceRef = useRef(false);
 
-  const { playTrack, playSound, stopAllAudio, unlockAudio } = useAudio();
+  const { playTrack, playSound, stopAllAudio, unlockAudio, fadeOutAudio } = useAudio();
   const { isPaused, togglePause } = usePause();
   const isPausedRef = useRef(isPaused);
+
+  // --- NOVA LÓGICA DE CONTAGEM DE CORPOS CELESTES ---
+  const countCorposCelestes = useMemo(() => {
+    if (!plannedRoute || plannedRoute.length === 0) return 0;
+    let count = 0;
+    for (let i = 0; i <= routeIndex; i++) {
+      if (plannedRoute[i] && plannedRoute[i].name) {
+        const stepName = normalizeName(plannedRoute[i].name);
+        const isStation = STATION_NAMES.some(s => stepName.includes(s));
+        if (!isStation) count++;
+      }
+    }
+    return count;
+  }, [plannedRoute, routeIndex]);
+
+  const countCorposCelestesRef = useRef(countCorposCelestes);
+  useEffect(() => { countCorposCelestesRef.current = countCorposCelestes; }, [countCorposCelestes]);
 
   const teamData = useMemo(() => {
     const teamCode = user?.teamCode || "E1";
     return TEAMS_DATA.find(t => t.code === teamCode) || TEAMS_DATA[0];
   }, [user]);
 
-  useEffect(() => { telemetryRef.current = telemetry; }, [telemetry]);
   useEffect(() => { spaceCoinsRef.current = spaceCoins; }, [spaceCoins]);
   useEffect(() => { travelStartedRef.current = travelStarted; }, [travelStarted]);
   useEffect(() => { arrivedAtMarsRef.current = arrivedAtMars; }, [arrivedAtMars]);
@@ -787,7 +993,9 @@ const DecolagemMarte = () => {
         productivity: telemetryRef.current.productivity,
         interdependence: telemetryRef.current.interdependence,
         engagement: telemetryRef.current.engagement
-      }
+      },
+      distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+      corposCelestesVisitados: countCorposCelestesRef.current
     };
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
@@ -803,7 +1011,11 @@ const DecolagemMarte = () => {
     if (!userId || !API_BASE_URL) return;
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ routeIndex: currentIndex }),
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+          routeIndex: currentIndex,
+          distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+          corposCelestesVisitados: countCorposCelestesRef.current
+        }),
       });
     } catch (error) { console.error("ERRO: Falha ao salvar progresso:", error); }
   }, [userId, API_BASE_URL]);
@@ -813,7 +1025,12 @@ const DecolagemMarte = () => {
 
   const saveNewRouteAndProgress = useCallback(async (currentIndex, newRouteArray) => {
     if (!userId || !API_BASE_URL) return;
-    const dataToSave = { routeIndex: currentIndex, rotaPlanejada: newRouteArray };
+    const dataToSave = {
+      routeIndex: currentIndex,
+      rotaPlanejada: newRouteArray,
+      distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+      corposCelestesVisitados: countCorposCelestesRef.current
+    };
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(dataToSave),
@@ -871,15 +1088,17 @@ const DecolagemMarte = () => {
   useEffect(() => { handleChallengeEndRef.current = handleChallengeEnd; }, [handleChallengeEnd]);
 
   const handleMudarRota = useCallback(() => {
+    playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
     setShowSosSurprise(false);
     setSosSurpriseEvent(null);
     setIsForcedMapEdit(true);
     setShowStellarMap(true);
-  }, []);
+  }, [playTrack]);
 
   const handleSeguirPlano = useCallback(() => {
+    if (fadeOutAudio) fadeOutAudio(2000); else stopAllAudio();
     if (dobraTimerRef.current) clearTimeout(dobraTimerRef.current);
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
@@ -917,14 +1136,17 @@ const DecolagemMarte = () => {
       setProcessadorO2(0);
       setIsDobraEnabled(false);
       setIsDeparting(false);
+
+      playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
     }, 4000);
-  }, [playSFX, triggerMinervaInterplanetarySpeed]);
+  }, [playSFX, triggerMinervaInterplanetarySpeed, stopAllAudio, fadeOutAudio, playTrack]);
 
   const handleRouteChanged = useCallback((newRouteData) => {
     if (!newRouteData || !newRouteData.newPlannedRoute || newRouteData.newRouteIndex === undefined) {
       if (!isForcedMapEdit) { setShowStellarMap(false); }
       return;
     }
+
     setIsForcedMapEdit(false);
     setShowStellarMap(false);
     setShowSosSurprise(false);
@@ -951,6 +1173,8 @@ const DecolagemMarte = () => {
 
       setTimeout(() => { routeChangeLockRef.current = false; }, 500);
     } else {
+      if (fadeOutAudio) fadeOutAudio(2000); else stopAllAudio();
+
       playSFX('/sounds/empuxo.wav');
       setIsDeparting(true);
       setShowStoreModal(false);
@@ -984,9 +1208,11 @@ const DecolagemMarte = () => {
         setIsDobraEnabled(false);
         setRefetchTrigger(prev => prev + 1);
         setIsDeparting(false);
+
+        playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
       }, 4000);
     }
-  }, [saveNewRouteAndProgress, playSFX, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit, triggerMinervaInterplanetarySpeed]);
+  }, [saveNewRouteAndProgress, playSFX, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit, triggerMinervaInterplanetarySpeed, stopAllAudio, fadeOutAudio, playTrack]);
 
   const handleEscolha = async (opcao, desafioId, impactos) => {
     setIsTransmissionStarting(false); setIsDialogueFinished(false);
@@ -1118,7 +1344,9 @@ const DecolagemMarte = () => {
             productivity: telemetryRef.current.productivity,
             interdependence: telemetryRef.current.interdependence,
             engagement: telemetryRef.current.engagement
-          }
+          },
+          distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+          corposCelestesVisitados: countCorposCelestesRef.current
         }),
       });
       setProcessadorO2(0);
@@ -1174,11 +1402,18 @@ const DecolagemMarte = () => {
       }, 13000);
 
       setTimeout(() => {
-        if (isMounted.current) { setMainDisplayState('static'); setMonitorState('static'); }
+        if (isMounted.current) {
+          setMainDisplayState('static');
+          setMonitorState('static');
+        }
       }, 23000);
 
       setTimeout(() => {
-        if (isMounted.current) { stopAllAudio(); setMainDisplayState('stars'); setMonitorState('on'); }
+        if (isMounted.current) {
+          stopAllAudio();
+          setMainDisplayState('stars');
+          setMonitorState('on');
+        }
       }, 45000);
     }
   }, [isLoadingRoute, routeIndex, unlockAudio, playTrack, stopAllAudio]);
@@ -1235,7 +1470,11 @@ const DecolagemMarte = () => {
         await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ routeIndex: currentIndex }),
+          body: JSON.stringify({
+            routeIndex: currentIndex,
+            distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+            corposCelestesVisitados: countCorposCelestesRef.current
+          }),
         });
       } catch (error) { console.error("ERRO: Falha ao salvar correção de rota:", error); }
     };
@@ -1252,12 +1491,15 @@ const DecolagemMarte = () => {
           if (data.spaceCoins !== undefined) syncSpaceCoinsRef.current(data.spaceCoins);
           if (data.processadorO2 !== undefined) setProcessadorO2(data.processadorO2);
 
-          // --- CARREGAR HISTÓRICO DE S.O.S ---
+          if (data.distanciaPercorridaKm !== undefined) {
+            setAccumulatedDistanceKm(data.distanciaPercorridaKm);
+            accumulatedDistanceKmRef.current = data.distanciaPercorridaKm;
+          }
+
           if (data.sosHistory) {
             setUsedSosIds(data.sosHistory);
             usedSosIdsRef.current = data.sosHistory;
           }
-          // ------------------------------------
 
           let photo = data.photoUrl;
           if (!photo && gameNumberRef.current && data.teamName) {
@@ -1467,7 +1709,6 @@ const DecolagemMarte = () => {
 
   // ========================================================
   // OTIMIZAÇÃO CRÍTICA: GAME LOOP REFATORADO
-  // O objeto NÃO é mais clonado a cada 10ms. Alterado de forma limpa.
   // ========================================================
   useEffect(() => {
     const gameLoop = (timestamp) => {
@@ -1515,7 +1756,6 @@ const DecolagemMarte = () => {
           if (travelStartedRef.current) {
             const SPEED_OF_LIGHT_KMH = 1079252848.8;
 
-            // ATUALIZAÇÃO REFINADA - Evita criar um novo objeto a cada ciclo do requestAnimationFrame
             if (timestamp - lastRenderTime.current > 100) {
               telemetryRef.current = {
                 ...telemetryRef.current,
@@ -1550,11 +1790,18 @@ const DecolagemMarte = () => {
             if (distanceToDecrease < (2500 * distanceScale)) distanceToDecrease = (2500 * distanceScale);
           }
 
+          // LÓGICA DE ACÚMULO DE DISTÂNCIA - CORRIGIDA
+          if (distanceKmRef.current > 0 && !arrivedAtMarsRef.current) {
+            const actualTraveled = Math.min(distanceToDecrease, distanceKmRef.current);
+            accumulatedDistanceKmRef.current += actualTraveled;
+          }
+
           const newDistance = Math.max(0, distanceKmRef.current - distanceToDecrease);
           distanceKmRef.current = newDistance;
 
           if (timestamp - lastDistanceRenderTime.current > 80) {
             setDistanceKm(Math.round(newDistance));
+            setAccumulatedDistanceKm(accumulatedDistanceKmRef.current);
             lastDistanceRenderTime.current = timestamp;
           }
 
@@ -1564,7 +1811,6 @@ const DecolagemMarte = () => {
           if (isSosDestination && !isForcedMapEditRef.current) {
             if (newDistance <= 1000 && newDistance > 0 && !sosSurpriseEventRef.current) {
 
-              // --- FILTRO ANTI-REPETIÇÃO ---
               const availableEvents = SOS_EVENTS_LIST.filter(ev => !usedSosIdsRef.current.includes(ev.id));
 
               if (availableEvents.length > 0) {
@@ -1584,11 +1830,12 @@ const DecolagemMarte = () => {
               } else {
                 console.log("Todos os eventos S.O.S. já foram explorados.");
               }
-              // -------------------------------------------------------------
             }
 
             if (newDistance <= 0 && !arrivedAtMarsRef.current) {
               setArrivedAtMars(true); setSpeed(0);
+
+              playTrack('/sounds/nick/nick.mp3', { loop: true, isPrimary: true });
 
               if (!sosSurpriseEventRef.current) {
                 const availableEvents = SOS_EVENTS_LIST.filter(ev => !usedSosIdsRef.current.includes(ev.id));
@@ -1613,7 +1860,7 @@ const DecolagemMarte = () => {
               setRouteIndex(newRouteIndex);
               saveCurrentProgressRef.current(newRouteIndex);
 
-              setShowSosSurprise(true);
+              setPlayingSosVideo(true);
             }
           }
 
@@ -1686,6 +1933,8 @@ const DecolagemMarte = () => {
                 const bodyData = {
                   routeIndex: newRouteIndex,
                   processadorO2: newProcessadorO2Value,
+                  distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+                  corposCelestesVisitados: countCorposCelestesRef.current,
                   telemetryState: {
                     oxygen: telemetryRef.current.atmosphere.o2,
                     nuclearPropulsion: telemetryRef.current.propulsion.powerOutput,
@@ -1727,7 +1976,7 @@ const DecolagemMarte = () => {
 
     animationFrameId.current = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animationFrameId.current);
-  }, [API_BASE_URL, userId, playSFX]);
+  }, [API_BASE_URL, userId, playSFX, playTrack]);
 
   const currentMaxSpeed = useMemo(() => {
     if (isDobraAtivada) return 100000000;
@@ -1799,43 +2048,41 @@ const DecolagemMarte = () => {
     setShowStellarMap(show);
   }, [distanceKm, isForcedMapEdit, playSound]);
 
-  // --- INÍCIO: CENTRAL DE ATALHOS (TECLADO E STREAM DECK) ---
+  // --- CENTRAL DE ATALHOS ---
   useEffect(() => {
     const handleGlobalHotkeys = (e) => {
-      // Ignora os atalhos se o jogador estiver digitando em um campo de texto
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
 
       const key = e.key.toLowerCase();
 
       switch (key) {
-        case ' ': // Barra de espaço (Dobra)
+        case ' ':
           e.preventDefault();
           if (!isDobraEnabled || isDobraAtivada || isPaused) return;
           handleDobraEspacial();
           break;
 
-        case 'p': // Pausar jogo
+        case 'p':
           e.preventDefault();
           if (!isPauseButtonDisabled && !isRestoringSOS) togglePause();
           break;
 
-        case 's': // Ativar S.O.S
+        case 's':
           e.preventDefault();
           if (isSOSActive) handleSOS();
           break;
 
-        case 'i': // Inventário
+        case 'i':
           e.preventDefault();
-          // Inventário liberado para abrir em qualquer momento, assim como a Minerva
           handleInventory();
           break;
 
-        case 'g': // Glossário
+        case 'g':
           e.preventDefault();
           if (!isPaused) setShowGlossary(true);
           break;
 
-        case 'm': // Mapa Estelar
+        case 'm':
           e.preventDefault();
           if (isPaused) return;
 
@@ -1844,7 +2091,6 @@ const DecolagemMarte = () => {
             break;
           }
 
-          // TRAVA DO MAPA: Não abre em voo se estiver na Dobra ou < 60.000 km/h (Aproximação/Decolagem)
           if (distanceKmRef.current > 0 && (isDobraAtivadaRef.current || telemetryRef.current.velocity.kmh < 60000)) {
             console.log("❌ Mapa bloqueado pelas regras de voo.");
             return;
@@ -1853,12 +2099,12 @@ const DecolagemMarte = () => {
           handleToggleMap(true);
           break;
 
-        case 'a': // Minerva
+        case 'a':
           e.preventDefault();
           handleMinervaClick();
           break;
 
-        case 'o': // Processador O2 (letra 'o')
+        case 'o':
           e.preventDefault();
           if (!isO2TransferDisabled) handleOpenO2Modal();
           break;
@@ -1869,7 +2115,6 @@ const DecolagemMarte = () => {
     };
 
     window.addEventListener('keydown', handleGlobalHotkeys);
-
     return () => {
       window.removeEventListener('keydown', handleGlobalHotkeys);
     };
@@ -1883,13 +2128,46 @@ const DecolagemMarte = () => {
     handleMinervaClick,
     handleOpenO2Modal, isO2TransferDisabled
   ]);
-  // --- FIM: CENTRAL DE ATALHOS ---
 
   if (isLoadingRoute) return <div className="tela-decolagem" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5em', color: '#00aaff', textShadow: '0 0 10px #00aaff' }}>Buscando dados da missão...</div>;
 
   return (
     <div className={`tela-decolagem ${isShaking ? 'shaking' : ''}`}>
       <div ref={cockpitRef} className="cockpit-container">
+
+        {chosenShip && (
+          <div className="ship-status-display">
+            <img src={getShipImage(chosenShip)} className="ship-status-image" />
+            <div className="ship-status-name">{chosenShip}</div>
+
+            <div className="ship-status-divider"></div>
+
+            <div className="ship-info-stats" style={{ flex: 1 }}>
+              <TypewriterText label="Corpos celestes visitados" value={countCorposCelestes.toString().padStart(2, '0')} />
+              <TypewriterText label="Virtus" value="0,0 %" />
+
+              {/* === EXIBIÇÃO DA DISTÂNCIA EM UA === */}
+              <div className="telemetry-distance-display" title={`${(accumulatedDistanceKm / 149597870).toFixed(8)} UA`}>
+                Dist. Percorrida (UA): {(accumulatedDistanceKm / 149597870).toFixed(8)}
+              </div>
+            </div>
+
+            {/* A SEGUNDA DIV 'ship-status-divider' FOI REMOVIDA DAQUI PARA TIRAR A BARRA INFERIOR */}
+
+            {/* === RADAR OCULTO === */}
+            {/* O Radar dinâmico e seus detritos foram comentados para liberar o espaço */}
+            {/* <div className="radar-container">
+              <DynamicRadar
+                progress={progress}
+                origin={originPlanet}
+                destination={selectedPlanet}
+                sosSignal={(distanceKm > 0 || isForcedMapEdit) ? activeSosSignal : null}
+              />
+            </div>
+            */}
+          </div>
+        )}
+
         <LeftControlPanel
           telemetry={telemetry}
           distanceKm={distanceKm}
@@ -2046,6 +2324,32 @@ const DecolagemMarte = () => {
               ))}
             </div>
           </div>
+        </div>
+      )}
+
+      {/* OVERLAY DO VÍDEO DE S.O.S FULLSCREEN */}
+      {playingSosVideo && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          zIndex: 99999,
+          backgroundColor: '#000',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <video
+            src="/images/SOS/nick.webm"
+            autoPlay
+            style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+            onEnded={() => {
+              setPlayingSosVideo(false);
+              setShowSosSurprise(true);
+            }}
+          />
         </div>
       )}
     </div>

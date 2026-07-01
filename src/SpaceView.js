@@ -83,8 +83,9 @@ const PLANET_MUSIC_CONFIG = {
   proteu: { src: '/sounds/proteu/tritao.mp3', volume: 0.5 }
 };
 
-const STAR_HUES = [210, 120, 30, 0, 60];
-const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 80%)`);
+/* ATUALIZADO: Foco em tons frios da imagem (Azul, Ciano, Azul Escuro) e um raro amarelo estelar */
+const STAR_HUES = [210, 180, 240, 200, 45];
+const STAR_COLORS_HSL = STAR_HUES.map(hue => `hsl(${hue}, 100%, 85%)`);
 
 const getPlanetScale = (planetName) => {
   const giants = ['jupiter', 'saturno', 'netuno'];
@@ -98,31 +99,43 @@ const getPlanetScale = (planetName) => {
   return 1.0;
 };
 
-// OTIMIZAÇÃO: Recicla a estrela mutando as suas propriedades para não usar o Garbage Collector
 const resetStar = (star, width, height, isWarping) => {
   star.x = (Math.random() - 0.5) * width;
   const yBias = Math.random() - 0.5;
   star.y = (yBias * yBias * yBias) * height * 1.0;
-
-  // CORREÇÃO 1: Em vez de nascerem todas examente em 'width', elas nascem espalhadas mais ao fundo
   star.z = width + (Math.random() * (width * 0.5));
 
   const isDeepSpace = Math.random() > 0.3;
-  star.size = (Math.random() * 2 + 0.8) * (isDeepSpace ? 0.6 : 1);
+  /* ATUALIZADO: Leve ajuste no tamanho base para dar mais dinamismo a estrelas de fundo */
+  star.size = (Math.random() * 2.2 + 0.5) * (isDeepSpace ? 0.6 : 1);
   star.hueIndex = Math.floor(Math.random() * 5);
   star.twinkleSpeed = Math.random() * 0.05 + 0.01;
   star.twinklePhase = Math.random() * Math.PI * 2;
-  star.baseAlpha = isDeepSpace ? (Math.random() * 0.3 + 0.1) : (Math.random() * 0.6 + 0.4);
-
-  // CORREÇÃO 2: Dá a cada estrela uma velocidade individual ligeiramente diferente (de 1 a 15)
+  star.baseAlpha = isDeepSpace ? (Math.random() * 0.3 + 0.1) : (Math.random() * 0.7 + 0.3);
   star.baseSpeed = Math.random() * 15 + 1;
+  star.isFastStar = false;
 };
 
-const generateStar = (width, height, isWarping) => {
-  const star = {}; // Removemos a velocidade engessada daqui
-  resetStar(star, width, height, isWarping);
-  // O z inicial deve ser aleatório para preencher o ecrã na primeira carga
+const resetFastStar = (star, width, height) => {
+  star.x = (Math.random() - 0.5) * width;
+  star.y = (Math.random() - 0.5) * height;
   star.z = Math.random() * width;
+  star.size = Math.random() * 2 + 1.5;
+  star.hueIndex = Math.floor(Math.random() * 5);
+  star.baseAlpha = Math.random() * 0.7 + 0.2;
+  star.dirX = (Math.random() - 0.5) * 4;
+  star.dirY = (Math.random() - 0.5) * 4;
+  star.isFastStar = true;
+};
+
+const generateStar = (width, height, isWarping, isFast = false) => {
+  const star = {};
+  if (isFast) {
+    resetFastStar(star, width, height);
+  } else {
+    resetStar(star, width, height, isWarping);
+    star.z = Math.random() * width;
+  }
   return star;
 };
 
@@ -151,6 +164,8 @@ const SpaceView = ({
   const isWarpActiveRef = useRef(isWarpActive);
   const currentVisualDistanceRef = useRef(distance);
 
+  const isPageVisibleRef = useRef(true);
+
   const [planetImageLoaded, setPlanetImageLoaded] = useState(false);
   const [planetImage, setPlanetImage] = useState('');
   const [planetName, setPlanetName] = useState('marte');
@@ -160,7 +175,9 @@ const SpaceView = ({
 
   const velocity = useRef({ x: 0, y: 0 });
   const position = useRef({ x: 0, y: 0 });
+
   const starsRef = useRef([]);
+  const fastStarsRef = useRef([]);
 
   const { playTrack } = useAudio();
   const currentTrackRef = useRef(null);
@@ -175,34 +192,27 @@ const SpaceView = ({
   }, [isWarpActive]);
 
   useEffect(() => {
-    if (starsRef.current.length === 0) {
-      starsRef.current = Array.from({ length: 800 }, () => generateStar(window.innerWidth, window.innerHeight, false));
-    }
+    const handleVisibilityChange = () => {
+      isPageVisibleRef.current = document.visibilityState === 'visible';
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  const fastStars = useMemo(() => {
-    const starClasses = ['star-blue', 'star-green', 'star-orange', 'star-red', 'star-yellow'];
-    return Array.from({ length: 30 }, (_, i) => ({
-      id: `fast-star-${i}`,
-      top: `${Math.random() * 100}%`,
-      left: `${Math.random() * 100}%`,
-      size: `${Math.random() * 2 + 1.5}px`,
-      delay: `${Math.random() * 2}s`,
-      duration: `${Math.random() * 0.5 + 0.4}s`,
-      dirX: (Math.random() - 0.5) * 2,
-      dirY: (Math.random() - 0.5) * 2,
-      opacity: Math.random() * 0.7 + 0.2,
-      colorClass: starClasses[Math.floor(Math.random() * starClasses.length)]
-    }));
+  useEffect(() => {
+    if (starsRef.current.length === 0) {
+      /* ATUALIZADO: Quantidade de estrelas aumentada para 1500 simulando a densidade da imagem */
+      starsRef.current = Array.from({ length: 1500 }, () => generateStar(window.innerWidth, window.innerHeight, false));
+      fastStarsRef.current = Array.from({ length: 40 }, () => generateStar(window.innerWidth, window.innerHeight, false, true));
+    }
   }, []);
 
   const isNearPlanet = distance <= 1000;
 
-  // LÓGICA CENTRAL DE ÁUDIO CINEMÁTICO (Fade Automático)
   useEffect(() => {
     if (!isActive) return;
 
-    let targetAudioSrc = '/sounds/02.Navigating-Flying.mp3'; // Música Padrão de Voo Atualizada
+    let targetAudioSrc = '/sounds/02.Navigating-Flying.mp3';
     let targetVolume = 1.0;
 
     if (isWarpActive) {
@@ -214,12 +224,7 @@ const SpaceView = ({
     }
 
     if (currentTrackRef.current !== targetAudioSrc) {
-      playTrack(targetAudioSrc, {
-        loop: true,
-        isPrimary: true,
-        volume: targetVolume,
-        fade: true // Permite o crossfade suave entre as diferentes faixas
-      });
+      playTrack(targetAudioSrc, { loop: true, isPrimary: true, volume: targetVolume, fade: true });
       currentTrackRef.current = targetAudioSrc;
     }
   }, [isWarpActive, isNearPlanet, planetName, playTrack, isActive]);
@@ -228,11 +233,9 @@ const SpaceView = ({
     let planetNameFromProps = selectedPlanet?.nome || 'marte';
     const planetNameNormalized = planetNameFromProps.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
     setPlanetName(planetNameNormalized);
-
     currentVisualDistanceRef.current = distanceRef.current;
 
     let imagePath = planetImageMap[planetNameNormalized] || '/images/Planets/Marte-Rotacionando.gif';
-
     setPlanetImageLoaded(false);
     setPlanetImage(imagePath);
 
@@ -251,42 +254,44 @@ const SpaceView = ({
   }, [selectedPlanet?.nome]);
 
   useEffect(() => {
-    if (isPaused || !isActive) {
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-      return;
-    }
-
     const canvas = canvasRef.current;
     if (!canvas) return;
-
-    // Desativar canal alpha do contexto otimiza renderizações pesadas do navegador
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
 
+    let resizeTimeout;
     const resizeCanvas = () => {
-      if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+        }
+      }, 200);
     };
 
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
-
     lastTimeRef.current = performance.now();
-    const typeScale = getPlanetScale(planetName);
 
-    // OTIMIZAÇÃO: Pré-cálculo da matemática de rotação fora do loop (só muda 1 vez, nunca varia)
+    const typeScale = getPlanetScale(planetName);
     const angleRotation = -15 * (Math.PI / 180);
     const cosAngle = Math.cos(angleRotation);
     const sinAngle = Math.sin(angleRotation);
 
-    const animate = (timestamp) => {
-      const now = timestamp || performance.now();
+    let currentCtxAlpha = 1.0;
 
+    const animate = (timestamp) => {
+      if (isPaused || !isActive || !isPageVisibleRef.current) {
+        lastTimeRef.current = timestamp || performance.now();
+        animationFrameRef.current = requestAnimationFrame(animate);
+        return;
+      }
+
+      const now = timestamp || performance.now();
       let dt = (now - lastTimeRef.current) / 1000;
       lastTimeRef.current = now;
-      dt = Math.min(dt, 0.02); // Limita saltos gigantes (max 50fps gap)
+      dt = Math.min(dt, 0.02);
 
       const diff = targetStarSpeedRef.current - currentStarSpeedRef.current;
       if (Math.abs(diff) < 0.1) currentStarSpeedRef.current = targetStarSpeedRef.current;
@@ -315,80 +320,50 @@ const SpaceView = ({
         currentVisualDistanceRef.current += (targetDist - currentVisualDistanceRef.current) * 0.1;
       }
 
-      if (Math.abs(targetDist - currentVisualDistanceRef.current) < 100) {
-        currentVisualDistanceRef.current = targetDist;
-      }
-
       if (scaleWrapperRef.current && planetImageLoaded && !isWarping) {
         const visualDist = currentVisualDistanceRef.current;
         const force = forceLargeRef.current;
         const departing = isDepartingRef.current;
 
-        let opacity = 0;
-        if (departing) {
-          opacity = 1;
-        } else {
-          const FADE_START_DIST = 100000000;
-          if (visualDist <= 0) {
-            opacity = 1;
-          } else {
-            opacity = Math.max(0, Math.min(1, 1 - (visualDist / FADE_START_DIST)));
-          }
-        }
+        let opacity = departing ? 1 : (visualDist <= 0 ? 1 : Math.max(0, Math.min(1, 1 - (visualDist / 100000000))));
         scaleWrapperRef.current.style.opacity = opacity;
 
         let scale = 1.0;
         if (force) {
           scale = 2.8 * typeScale;
         } else {
-          if (departing) {
-            scale = Math.max(0.05, (2.5 * typeScale) / (1 + (visualDist / 100000)));
-          } else {
-            const MAX_SCALE = 2.8 * typeScale;
-            const MIN_SCALE = 0.05;
-            const OPTICAL_FACTOR = 1500000;
-            scale = MAX_SCALE / (1 + (visualDist / OPTICAL_FACTOR));
-            scale = Math.max(MIN_SCALE, scale);
-          }
+          scale = departing
+            ? Math.max(0.05, (2.5 * typeScale) / (1 + (visualDist / 100000)))
+            : Math.max(0.05, (2.8 * typeScale) / (1 + (visualDist / 1500000)));
         }
 
         let transformStr = `scale(${scale})`;
         if (planetName === 'proximacentaurib') {
           const offsetFactor = Math.max(0, 1 - (visualDist / 1000000));
-          const translateX = 25 * offsetFactor;
-          const translateY = 20 * offsetFactor;
-          transformStr = `translate(${translateX}%, ${translateY}%) scale(${scale})`;
+          transformStr = `translate(${25 * offsetFactor}%, ${20 * offsetFactor}%) scale(${scale})`;
         }
-
         scaleWrapperRef.current.style.transform = transformStr;
       }
 
-      // Preparação das variáveis pesadas para o loop
       const width = canvas.width;
       const height = canvas.height;
       const centerX = width / 2;
       const centerY = height / 2;
       const starArray = starsRef.current;
+      const fastStarArray = fastStarsRef.current;
       const velX = velocity.current.x * 0.1;
       const velY = velocity.current.y * 0.1;
 
-      // Limpeza eficiente
-      ctx.fillStyle = '#000000';
-      ctx.fillRect(0, 0, width, height);
+      if (currentCtxAlpha !== 1.0) { ctx.globalAlpha = 1.0; currentCtxAlpha = 1.0; }
+      /* ATUALIZADO: Limpeza do canvas mantendo compatibilidade com o fundo gradiente via opacidade */
+      ctx.clearRect(0, 0, width, height);
 
-      // OTIMIZAÇÃO: Loop redesenhado para evitar GC e concatenação de strings
       for (let i = 0; i < starArray.length; i++) {
         const star = starArray[i];
-
         star.z -= (speedFactor + star.baseSpeed) * dt;
         star.twinklePhase += star.twinkleSpeed;
 
-        const twinkleAlpha = star.baseAlpha * (0.4 + Math.abs(Math.sin(star.twinklePhase)) * 0.6);
-
-        if (star.z <= 0) {
-          // Utiliza a função resetStar para evitar despejo de objetos na memória (Garbage Collector)
-          resetStar(star, width, height, isWarping);
-        }
+        if (star.z <= 0) resetStar(star, width, height, isWarping);
 
         const scale = 400 / (star.z + 1);
         let drawX = star.x;
@@ -397,7 +372,6 @@ const SpaceView = ({
         if (!isWarping) {
           drawX += velX;
           drawY += velY;
-          // Usa trigonometria pré-calculada para evitar 800 Math.cos por frame
           const rotatedX = drawX * cosAngle - drawY * sinAngle;
           const rotatedY = drawX * sinAngle + drawY * cosAngle;
           drawX = rotatedX;
@@ -410,21 +384,53 @@ const SpaceView = ({
         if (x < 0 || x > width || y < 0 || y > height) continue;
 
         const size = scale * star.size * 0.3;
+        const twinkleAlpha = star.baseAlpha * (0.4 + Math.abs(Math.sin(star.twinklePhase)) * 0.6);
+        const targetAlpha = Math.min(1.0, scale * 1.5) * (isWarping ? 1 : twinkleAlpha);
 
-        // Define transparência global (MUITO mais rápido que parsear string rgba/hsla)
-        ctx.globalAlpha = Math.min(1.0, scale * 1.5) * (isWarping ? 1 : twinkleAlpha);
+        if (currentCtxAlpha !== targetAlpha) {
+          ctx.globalAlpha = targetAlpha;
+          currentCtxAlpha = targetAlpha;
+        }
 
-        if (starSpeedHigh) {
+        /* ATUALIZADO: Algumas estrelas recebem cor HSL, outras branco/azul claro para misturar como na foto */
+        if (starSpeedHigh || star.hueIndex < 3) {
           ctx.fillStyle = STAR_COLORS_HSL[star.hueIndex];
           ctx.fillRect(x, y, size * 1.5, size * 1.5);
         } else {
-          ctx.fillStyle = '#ffffff';
+          ctx.fillStyle = '#f0f8ff';
           ctx.fillRect(x, y, size, size);
         }
       }
 
-      // Restaura o alpha ao fim do ciclo
-      ctx.globalAlpha = 1.0;
+      if (isWarping) {
+        for (let i = 0; i < fastStarArray.length; i++) {
+          const star = fastStarArray[i];
+
+          star.x += star.dirX * WARP_SPEED * 0.5 * dt;
+          star.y += star.dirY * WARP_SPEED * 0.5 * dt;
+
+          const x = centerX + star.x;
+          const y = centerY + star.y;
+
+          if (x < 0 || x > width || y < 0 || y > height) {
+            resetFastStar(star, width, height);
+            continue;
+          }
+
+          if (currentCtxAlpha !== star.baseAlpha) {
+            ctx.globalAlpha = star.baseAlpha;
+            currentCtxAlpha = star.baseAlpha;
+          }
+
+          ctx.fillStyle = STAR_COLORS_HSL[star.hueIndex];
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.lineTo(x - (star.dirX * 15), y - (star.dirY * 15));
+          ctx.lineWidth = star.size;
+          ctx.strokeStyle = STAR_COLORS_HSL[star.hueIndex];
+          ctx.stroke();
+        }
+      }
 
       animationFrameRef.current = requestAnimationFrame(animate);
     };
@@ -434,6 +440,7 @@ const SpaceView = ({
     return () => {
       cancelAnimationFrame(animationFrameRef.current);
       window.removeEventListener('resize', resizeCanvas);
+      clearTimeout(resizeTimeout);
     };
   }, [isPaused, isActive, planetImageLoaded, planetName]);
 
@@ -449,16 +456,8 @@ const SpaceView = ({
         <div className="warp-horizon-constant"></div>
         <div className="warp-horizon-pulse"></div>
         <img src="/images/Vluz-Dobra.gif" alt="Dobra Espacial" className="warp-light-effect" />
-        {fastStars.map(star => (
-          <div key={star.id} className={`fast-star ${star.colorClass}`} style={{
-            top: star.top, left: star.left,
-            width: star.size, height: star.size,
-            animationDelay: star.delay, animationDuration: star.duration,
-            '--dir-x': star.dirX, '--dir-y': star.dirY,
-            opacity: star.opacity
-          }} />
-        ))}
       </div>
+
       <canvas ref={canvasRef} className="stars"></canvas>
 
       <div
@@ -474,74 +473,35 @@ const SpaceView = ({
         <div
           ref={scaleWrapperRef}
           style={{
-            position: 'relative',
-            width: baseSize,
-            height: baseSize,
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            willChange: 'transform, opacity',
+            position: 'relative', width: baseSize, height: baseSize, display: 'flex',
+            justifyContent: 'center', alignItems: 'center', willChange: 'transform, opacity',
             transformStyle: 'preserve-3d'
           }}
         >
           {planetName === 'proximacentaurib' && (
-            <video
-              src="/images/Planets/solProximaB.webm"
-              autoPlay
-              loop
-              muted
-              playsInline
+            <video src="/images/Planets/solProximaB.webm" autoPlay loop muted playsInline
               style={{
-                position: 'absolute',
-                width: '180%',
-                height: '180%',
-                top: '-60%',
-                left: '-70%',
-                opacity: 1,
-                zIndex: 5,
-                transform: 'translateZ(-20px)',
-                filter: 'drop-shadow(0 0 80px rgba(255, 160, 50, 0.9))',
-                mixBlendMode: 'screen',
-                pointerEvents: 'none'
+                position: 'absolute', width: '180%', height: '180%', top: '-60%', left: '-70%', opacity: 1, zIndex: 5,
+                transform: 'translateZ(-20px)', filter: 'drop-shadow(0 0 80px rgba(255, 160, 50, 0.9))',
+                mixBlendMode: 'screen', pointerEvents: 'none'
               }}
             />
           )}
 
           {planetImage && planetImage.endsWith('.webm') ? (
-            <video
-              key={planetName}
-              ref={planetImageRef}
-              src={planetImage}
+            <video key={planetName} ref={planetImageRef} src={planetImage}
               className={`planet-image ${planetName}-planet ${isStation ? 'is-station' : ''}`}
-              autoPlay
-              loop
-              muted
-              playsInline
+              autoPlay loop muted playsInline
               onLoadedData={() => {
                 setPlanetImageLoaded(true);
                 if (scaleWrapperRef.current) scaleWrapperRef.current.style.opacity = 0;
               }}
-              style={{
-                width: '100%',
-                height: '100%',
-                zIndex: forceLarge ? 1000 : 10,
-                objectFit: 'contain',
-                transformOrigin: 'center center'
-              }}
+              style={{ width: '100%', height: '100%', zIndex: forceLarge ? 1000 : 10, objectFit: 'contain', transformOrigin: 'center center' }}
             />
           ) : (
-            <img
-              key={planetName}
-              ref={planetImageRef}
-              src={planetImage}
-              alt={`Planet ${planetName}`}
+            <img key={planetName} ref={planetImageRef} src={planetImage} alt={`Planet ${planetName}`}
               className={`planet-image ${planetName}-planet ${isStation ? 'is-station' : ''}`}
-              style={{
-                width: '100%',
-                height: '100%',
-                zIndex: forceLarge ? 1000 : 10,
-                transformOrigin: 'center center'
-              }}
+              style={{ width: '100%', height: '100%', zIndex: forceLarge ? 1000 : 10, transformOrigin: 'center center' }}
             />
           )}
         </div>
