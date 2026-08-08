@@ -997,7 +997,8 @@ const DecolagemMarte = () => {
         engagement: telemetryRef.current.engagement
       },
       distanciaPercorridaKm: accumulatedDistanceKmRef.current,
-      corposCelestesVisitados: countCorposCelestesRef.current
+      corposCelestesVisitados: countCorposCelestesRef.current,
+      distanciaRestanteKm: distanceKmRef.current // <-- ADICIONE ESTA LINHA
     };
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
@@ -1016,7 +1017,8 @@ const DecolagemMarte = () => {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
           routeIndex: currentIndex,
           distanciaPercorridaKm: accumulatedDistanceKmRef.current,
-          corposCelestesVisitados: countCorposCelestesRef.current
+          corposCelestesVisitados: countCorposCelestesRef.current,
+          distanciaRestanteKm: distanceKmRef.current // <-- ADICIONE ESTA LINHA
         }),
       });
     } catch (error) { console.error("ERRO: Falha ao salvar progresso:", error); }
@@ -1031,7 +1033,8 @@ const DecolagemMarte = () => {
       routeIndex: currentIndex,
       rotaPlanejada: newRouteArray,
       distanciaPercorridaKm: accumulatedDistanceKmRef.current,
-      corposCelestesVisitados: countCorposCelestesRef.current
+      corposCelestesVisitados: countCorposCelestesRef.current,
+      distanciaRestanteKm: distanceKmRef.current // <-- ADICIONE ESTA LINHA
     };
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
@@ -1524,7 +1527,8 @@ const DecolagemMarte = () => {
             setOriginPlanet({ nome: originStep.name });
             setSelectedPlanet({ nome: nextStep.name });
 
-            const distFromDB = nextStep.distance || 0;
+            // LÊ A DISTÂNCIA RESTANTE EXATA DO BANCO DE DADOS
+            const distFromDB = data.distanciaRestanteKm !== undefined ? data.distanciaRestanteKm : (nextStep.distance || 0);
             setDistanceKm(distFromDB);
             distanceKmRef.current = distFromDB;
 
@@ -1979,6 +1983,34 @@ const DecolagemMarte = () => {
     animationFrameId.current = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animationFrameId.current);
   }, [API_BASE_URL, userId, playSFX, playTrack]);
+
+  // ========================================================
+  // AUTO-SAVE DA DISTÂNCIA PERCORRIDA E RESTANTE (15 seg)
+  // ========================================================
+  useEffect(() => {
+    // Se o jogo estiver pausado ou a viagem não começou, não faz nada
+    if (isPaused || !travelStarted) return;
+
+    const autoSaveInterval = setInterval(() => {
+      if (!userId || !API_BASE_URL) return;
+
+      // Só salva se a distância acumulada já for maior que zero
+      if (accumulatedDistanceKmRef.current > 0) {
+        fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+            corposCelestesVisitados: countCorposCelestesRef.current,
+            distanciaRestanteKm: distanceKmRef.current // Salva o ponto exato da viagem
+          }),
+        }).catch(err => console.error("Erro no auto-save de distância:", err));
+      }
+    }, 15000);
+
+    // Limpa o cronômetro se o componente for desmontado ou pausado
+    return () => clearInterval(autoSaveInterval);
+  }, [isPaused, travelStarted, userId, API_BASE_URL]);
 
   const currentMaxSpeed = useMemo(() => {
     if (isDobraAtivada) return 100000000;
