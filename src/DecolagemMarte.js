@@ -869,11 +869,13 @@ const DecolagemMarte = () => {
   const { isPaused, togglePause } = usePause();
   const isPausedRef = useRef(isPaused);
 
+
   // --- NOVA LÓGICA DE CONTAGEM DE CORPOS CELESTES ---
   const countCorposCelestes = useMemo(() => {
     if (!plannedRoute || plannedRoute.length === 0) return 0;
     let count = 0;
-    for (let i = 0; i <= routeIndex; i++) {
+    // Alterado de i = 0 para i = 1 para ignorar o planeta de origem (Terra)
+    for (let i = 1; i <= routeIndex; i++) {
       if (plannedRoute[i] && plannedRoute[i].name) {
         const stepName = normalizeName(plannedRoute[i].name);
         const isStation = STATION_NAMES.some(s => stepName.includes(s));
@@ -1088,7 +1090,7 @@ const DecolagemMarte = () => {
   useEffect(() => { handleChallengeEndRef.current = handleChallengeEnd; }, [handleChallengeEnd]);
 
   const handleMudarRota = useCallback(() => {
-    playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
+    //playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
     setShowSosSurprise(false);
@@ -1137,7 +1139,7 @@ const DecolagemMarte = () => {
       setIsDobraEnabled(false);
       setIsDeparting(false);
 
-      playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
+      //playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
     }, 4000);
   }, [playSFX, triggerMinervaInterplanetarySpeed, stopAllAudio, fadeOutAudio, playTrack]);
 
@@ -1209,7 +1211,7 @@ const DecolagemMarte = () => {
         setRefetchTrigger(prev => prev + 1);
         setIsDeparting(false);
 
-        playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
+        //playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
       }, 4000);
     }
   }, [saveNewRouteAndProgress, playSFX, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit, triggerMinervaInterplanetarySpeed, stopAllAudio, fadeOutAudio, playTrack]);
@@ -2355,5 +2357,6 @@ const DecolagemMarte = () => {
     </div>
   );
 };
+
 
 export default DecolagemMarte;
