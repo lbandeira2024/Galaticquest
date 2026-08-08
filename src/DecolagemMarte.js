@@ -1496,9 +1496,10 @@ const DecolagemMarte = () => {
           if (data.spaceCoins !== undefined) syncSpaceCoinsRef.current(data.spaceCoins);
           if (data.processadorO2 !== undefined) setProcessadorO2(data.processadorO2);
 
-          if (data.distanciaPercorridaKm !== undefined) {
-            setAccumulatedDistanceKm(data.distanciaPercorridaKm);
-            accumulatedDistanceKmRef.current = data.distanciaPercorridaKm;
+          if (data.distanciaPercorridaKm != null) {
+            const safeDistance = Number(data.distanciaPercorridaKm) || 0;
+            setAccumulatedDistanceKm(safeDistance);
+            accumulatedDistanceKmRef.current = safeDistance;
           }
 
           if (data.sosHistory) {
@@ -1531,6 +1532,13 @@ const DecolagemMarte = () => {
             const distFromDB = data.distanciaRestanteKm !== undefined ? data.distanciaRestanteKm : (nextStep.distance || 0);
             setDistanceKm(distFromDB);
             distanceKmRef.current = distFromDB;
+
+            // --- ADICIONE ESTAS 4 LINHAS PARA CORRIGIR O ROUTE MONITOR ---
+            const initialDistanceForLeg = nextStep.distance || 1;
+            const distanceTraveled = initialDistanceForLeg - distFromDB;
+            const progressPercentage = Math.max(0, Math.min(Math.floor((distanceTraveled / initialDistanceForLeg) * 100), 100));
+            setProgress(progressPercentage);
+            // -------------------------------------------------------------
 
           } else {
             setSelectedPlanet({ nome: "Erro de Rota" });
