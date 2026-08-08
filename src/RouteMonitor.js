@@ -111,14 +111,12 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
     return () => clearTimeout(timer);
   }, [mainDisplayState]);
 
-  // Garante que a distância real mostre de cara, mesmo com o monitor "travado" no início
-  const displayDistance = (isTrackingActive || progress > 0) ? distanceKm : initialDistance;
-  const displayProgress = (isTrackingActive || progress > 0) ? progress : 0;
-  const discreteProgress = Math.floor(displayProgress / 10) * 10;
+  // Removemos as travas de tempo e arredondamentos. Agora reflete a distância e progresso reais imediatamente.
+  const displayDistance = distanceKm;
 
-  const visualProgress = isDobraAtivada && isTrackingActive
-    ? discreteProgress + (currentSpeed / 1000000)
-    : discreteProgress;
+  const visualProgress = isDobraAtivada
+    ? progress + (currentSpeed / 1000000)
+    : progress;
 
   const clampedProgress = Math.min(visualProgress, 100);
 
