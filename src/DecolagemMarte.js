@@ -1508,6 +1508,18 @@ const DecolagemMarte = () => {
       try {
         const response = await fetch(`${API_BASE_URL}/${userId}/game-data?t=${Date.now()}`);
         const data = await response.json();
+
+        // --- DIAGNÓSTICO TEMPORÁRIO: RETOMADA DE ROTA ---
+        // Mostra exatamente o que o servidor devolveu pra decidir se retoma
+        // ou reinicia. Pode remover depois de confirmar o comportamento.
+        console.log("[RETOMADA] Resposta de /game-data:", {
+          routeIndex: data.routeIndex,
+          distanciaRestanteKm: data.distanciaRestanteKm,
+          distanciaPercorridaKm: data.distanciaPercorridaKm,
+          rotaPlanejadaLength: data.rotaPlanejada?.length,
+        });
+        // --------------------------------------------------
+
         if (data.success) {
           if (data._id) setGroupId(data._id);
           if (data.naveEscolhida) setChosenShip(data.naveEscolhida);
@@ -1557,6 +1569,15 @@ const DecolagemMarte = () => {
             const progressPercentage = Math.max(0, Math.min((distanceTraveled / initialDistanceForLeg) * 100, 100));
             setProgress(progressPercentage);
             // -------------------------------------------------------------
+
+            console.log("[RETOMADA] Calculado para o RouteMonitor:", {
+              currentRouteIndex,
+              origem: originStep.name,
+              destino: nextStep.name,
+              distFromDB,
+              initialDistanceForLeg,
+              progressPercentage
+            });
 
           } else {
             setSelectedPlanet({ nome: "Erro de Rota" });
@@ -2022,6 +2043,11 @@ const DecolagemMarte = () => {
 
       // Só salva se a distância acumulada já for maior que zero
       if (accumulatedDistanceKmRef.current > 0) {
+        console.log("[RETOMADA] Auto-save (15s) disparando com:", {
+          routeIndex: routeIndexRef.current,
+          distanciaRestanteKm: distanceKmRef.current,
+          distanciaPercorridaKm: accumulatedDistanceKmRef.current
+        });
         fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -2030,6 +2056,8 @@ const DecolagemMarte = () => {
             corposCelestesVisitados: countCorposCelestesRef.current,
             distanciaRestanteKm: distanceKmRef.current // Salva o ponto exato da viagem
           }),
+        }).then(res => res.json()).then(json => {
+          console.log("[RETOMADA] Auto-save (15s) resposta do servidor:", json);
         }).catch(err => console.error("Erro no auto-save de distância:", err));
       }
     }, 15000);
@@ -2048,6 +2076,7 @@ const DecolagemMarte = () => {
   // ========================================================
   useEffect(() => {
     const flushProgressOnExit = () => {
+      console.log("[RETOMADA] flushProgressOnExit chamado. travelStarted?", travelStartedRef.current, "distanceKm atual:", distanceKmRef.current);
       if (!userId || !API_BASE_URL || !travelStartedRef.current) return;
 
       const payload = {
