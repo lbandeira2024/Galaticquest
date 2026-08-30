@@ -841,6 +841,10 @@ const DecolagemMarte = () => {
   const [processadorO2, setProcessadorO2] = useState(0);
   const processadorO2Ref = useRef(processadorO2);
 
+  // [VIRTUS] Índice das Virtudes (0 a 1), calculado no servidor e recebido
+  // via /game-data. Exibido no painel como porcentagem.
+  const [virtusIndex, setVirtusIndex] = useState(0);
+
   const [travelTime, setTravelTime] = useState(0);
   const [teamPhotoUrl, setTeamPhotoUrl] = useState(null);
   const [isSosMinervaActive, setIsSosMinervaActive] = useState(false);
@@ -1525,6 +1529,7 @@ const DecolagemMarte = () => {
           if (data.naveEscolhida) setChosenShip(data.naveEscolhida);
           if (data.spaceCoins !== undefined) syncSpaceCoinsRef.current(data.spaceCoins);
           if (data.processadorO2 !== undefined) setProcessadorO2(data.processadorO2);
+          if (data.virtusIndex !== undefined) setVirtusIndex(data.virtusIndex);
 
           if (data.distanciaPercorridaKm != null) {
             const safeDistance = Number(data.distanciaPercorridaKm) || 0;
@@ -2307,7 +2312,7 @@ const DecolagemMarte = () => {
 
             <div className="ship-info-stats" style={{ flex: 1 }}>
               <TypewriterText label="Corpos celestes visitados" value={countCorposCelestes.toString().padStart(2, '0')} />
-              <TypewriterText label="Virtus" value="0,0 %" />
+              <TypewriterText label="Virtus" value={`${(virtusIndex * 100).toFixed(1).replace('.', ',')}`} />
 
               {/* === EXIBIÇÃO DA DISTÂNCIA EM UA === */}
               <div className="telemetry-distance-display" title={`${(accumulatedDistanceKm / 149597870).toFixed(8)} UA`}>
