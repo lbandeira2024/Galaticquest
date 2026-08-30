@@ -764,6 +764,7 @@ const DecolagemMarte = () => {
   const travelStartedRef = useRef(travelStarted);
 
   const [progress, setProgress] = useState(0);
+  const progressRef = useRef(progress);
 
   const [arrivedAtMars, setArrivedAtMars] = useState(false);
   const arrivedAtMarsRef = useRef(arrivedAtMars);
@@ -900,6 +901,7 @@ const DecolagemMarte = () => {
   useEffect(() => { monitorStateRef.current = monitorState; }, [monitorState]);
   useEffect(() => { plannedRouteRef.current = plannedRoute; }, [plannedRoute]);
   useEffect(() => { routeIndexRef.current = routeIndex; }, [routeIndex]);
+  useEffect(() => { progressRef.current = progress; }, [progress]);
   useEffect(() => { selectedPlanetRef.current = selectedPlanet; }, [selectedPlanet]);
   useEffect(() => { distanceKmRef.current = distanceKm; }, [distanceKm]);
   useEffect(() => { chosenShipRef.current = chosenShip; }, [chosenShip]);
@@ -937,7 +939,12 @@ const DecolagemMarte = () => {
   useEffect(() => {
     let timer;
     if (mainDisplayState === 'stars') {
-      if (routeIndex > 0) {
+      // Mesmo critério do efeito de retomada acima: routeIndex > 0 (já
+      // concluiu etapa) OU progress > 0 (retomando no meio da 1ª etapa)
+      // usam o delay curto, já que não há cutscene de decolagem pra esperar.
+      // Usa progressRef (não o state) para não re-disparar este efeito a
+      // cada tick de progresso durante o voo.
+      if (routeIndex > 0 || progressRef.current > 0) {
         timer = setTimeout(() => { canDecreaseDistanceRef.current = true; }, 4500);
       } else {
         timer = setTimeout(() => { canDecreaseDistanceRef.current = true; }, 20000);
@@ -1386,7 +1393,18 @@ const DecolagemMarte = () => {
   useEffect(() => {
     if (isLoadingRoute) return;
 
-    if (routeIndex > 0) {
+    // Retomar em pleno voo: além de routeIndex > 0 (já concluiu alguma etapa),
+    // também conta progress > 0 — o jogador pode ter deslogado/fechado o
+    // navegador ainda na PRIMEIRA etapa (Terra -> 1º destino), caso em que
+    // routeIndex continua 0 mas ele já percorreu parte do trajeto. Sem essa
+    // checagem, a cutscene inteira de decolagem (~45s) tocava de novo do
+    // zero, dando a impressão de que a rota tinha reiniciado.
+    // Usa progressRef (não o state) para este efeito não re-disparar a
+    // cada tick de progresso durante o voo — só nos importa o valor no
+    // momento em que isLoadingRoute/routeIndex muda.
+    const isResumingMidFlight = routeIndex > 0 || progressRef.current > 0;
+
+    if (isResumingMidFlight) {
       if (!sequenceStarted.current) {
         sequenceStarted.current = true;
         setMainDisplayState('stars');
