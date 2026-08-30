@@ -2057,7 +2057,12 @@ const DecolagemMarte = () => {
             distanciaRestanteKm: distanceKmRef.current // Salva o ponto exato da viagem
           }),
         }).then(res => res.json()).then(json => {
-          console.log("[RETOMADA] Auto-save (15s) resposta do servidor:", json);
+          console.log("[RETOMADA] Auto-save (15s) resposta do servidor (grupo gravado):", {
+            success: json.success,
+            routeIndex: json.user?.grupo?.routeIndex,
+            distanciaRestanteKm: json.user?.grupo?.distanciaRestanteKm,
+            distanciaPercorridaKm: json.user?.grupo?.distanciaPercorridaKm,
+          });
         }).catch(err => console.error("Erro no auto-save de distância:", err));
       }
     }, 15000);
