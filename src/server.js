@@ -228,10 +228,30 @@ app.post("/:userId/update-gamedata", async (req, res) => {
   try {
     const groupId = await getGroupId(req.params.userId);
     const updateData = { ...req.body, lastHeartbeat: new Date(), loginon: 1 };
-    await Grupo.findByIdAndUpdate(groupId, { $set: updateData }, { new: true });
+    // [RETOMADA-SERVER] diagnóstico temporário: confirmar groupId usado e payload recebido
+    console.log("[RETOMADA-SERVER] POST update-gamedata userId=%s groupId=%s payload=%o",
+      req.params.userId, groupId?.toString(),
+      {
+        routeIndex: updateData.routeIndex,
+        distanciaRestanteKm: updateData.distanciaRestanteKm,
+        distanciaPercorridaKm: updateData.distanciaPercorridaKm,
+      }
+    );
+    const updated = await Grupo.findByIdAndUpdate(groupId, { $set: updateData }, { new: true });
+    // [RETOMADA-SERVER] diagnóstico temporário: confirmar o que realmente ficou gravado no documento
+    console.log("[RETOMADA-SERVER] POST update-gamedata GRAVADO no Grupo _id=%s ->", updated?._id?.toString(),
+      {
+        routeIndex: updated?.routeIndex,
+        distanciaRestanteKm: updated?.distanciaRestanteKm,
+        distanciaPercorridaKm: updated?.distanciaPercorridaKm,
+      }
+    );
     const user = await Usuario.findById(req.params.userId).populate('grupo');
     res.json({ success: true, user });
-  } catch (error) { res.status(500).json({ success: false }); }
+  } catch (error) {
+    console.error("[RETOMADA-SERVER] ERRO update-gamedata:", error);
+    res.status(500).json({ success: false });
+  }
 });
 
 app.post("/:userId/record-sos-history", async (req, res) => {
@@ -263,8 +283,19 @@ app.get("/:userId/game-data", async (req, res) => {
     }
 
     if (!usuario.grupo) {
+      // [RETOMADA-SERVER] diagnóstico temporário
+      console.log("[RETOMADA-SERVER] GET game-data userId=%s -> usuario SEM grupo!", req.params.userId);
       return res.json({ success: true, isPaused, group: null, noGroup: true });
     }
+
+    // [RETOMADA-SERVER] diagnóstico temporário: confirmar groupId usado na leitura e valores lidos
+    console.log("[RETOMADA-SERVER] GET game-data userId=%s groupId=%s ->", req.params.userId, usuario.grupo._id?.toString(),
+      {
+        routeIndex: usuario.grupo.routeIndex,
+        distanciaRestanteKm: usuario.grupo.distanciaRestanteKm,
+        distanciaPercorridaKm: usuario.grupo.distanciaPercorridaKm,
+      }
+    );
 
     res.json({ success: true, ...usuario.grupo.toObject(), isPaused });
   } catch (error) {
