@@ -109,6 +109,7 @@ const GrupoSchema = new mongoose.Schema({
   corposCelestesVisitados: { type: Number, default: 0 },
   distanciaPercorridaKm: { type: Number, default: 0 },
   distanciaRestanteKm: { type: Number }, // <--- CAMPO DISTÂNCIA RESTANTE ADICIONADO AQUI
+  missionTimeLeft: { type: Number, default: 12 * 60 * 60 }, // <--- TEMPO DE MISSÃO (segundos restantes) ADICIONADO AQUI
   // -----------------------------------------------------
   sosHistory: { type: [Number], default: [] },
   loginon: { type: Number, default: 0 },
@@ -713,7 +714,6 @@ app.get("/games/:gameNumber/groups-details", async (req, res) => {
     const groups = await Grupo.find({ membros: { $in: userIds } }).populate('membros');
     res.json({ success: true, groups: groups });
   } catch (error) { res.status(500).json({ success: false }); }
-
 });
 
 
