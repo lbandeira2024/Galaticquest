@@ -1536,7 +1536,7 @@ const DecolagemMarte = () => {
             // --- ADICIONE ESTAS 4 LINHAS PARA CORRIGIR O ROUTE MONITOR ---
             const initialDistanceForLeg = nextStep.distance || 1;
             const distanceTraveled = initialDistanceForLeg - distFromDB;
-            const progressPercentage = Math.max(0, Math.min(Math.floor((distanceTraveled / initialDistanceForLeg) * 100), 100));
+            const progressPercentage = Math.max(0, Math.min((distanceTraveled / initialDistanceForLeg) * 100, 100));
             setProgress(progressPercentage);
             // -------------------------------------------------------------
 
@@ -1978,7 +1978,7 @@ const DecolagemMarte = () => {
           const destinationStepIndex = routeIndexRef.current + 1;
           const initialDistanceForLeg = (plannedRouteRef.current && plannedRouteRef.current[destinationStepIndex] ? plannedRouteRef.current[destinationStepIndex].distance : null) || newDistance || 1;
           const distanceTraveled = initialDistanceForLeg - newDistance;
-          const progressPercentage = Math.min(Math.floor((distanceTraveled / initialDistanceForLeg) * 100), 100);
+          const progressPercentage = Math.min((distanceTraveled / initialDistanceForLeg) * 100, 100);
           setProgress(progressPercentage);
         }
       } catch (fatalError) {
@@ -2019,6 +2019,75 @@ const DecolagemMarte = () => {
     // Limpa o cronômetro se o componente for desmontado ou pausado
     return () => clearInterval(autoSaveInterval);
   }, [isPaused, travelStarted, userId, API_BASE_URL]);
+
+  // ========================================================
+  // SALVAMENTO GARANTIDO AO FECHAR A ABA/NAVEGADOR
+  // (não existe botão de "Sair" — o jogador simplesmente fecha o
+  // navegador, então isso funciona como o "logout" do jogo.
+  // Sem isso, até 15s de progresso do auto-save acima podem se
+  // perder. O RouteMonitor lê distanceKm/progress derivados
+  // exatamente destes campos no próximo login, via fetchGameData.)
+  // ========================================================
+  useEffect(() => {
+    const flushProgressOnExit = () => {
+      if (!userId || !API_BASE_URL || !travelStartedRef.current) return;
+
+      const payload = {
+        routeIndex: routeIndexRef.current,
+        distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+        distanciaRestanteKm: distanceKmRef.current, // ponto exato da viagem (usado pelo RouteMonitor ao retomar)
+        corposCelestesVisitados: countCorposCelestesRef.current,
+        telemetryState: {
+          oxygen: telemetryRef.current.atmosphere.o2,
+          nuclearPropulsion: telemetryRef.current.propulsion.powerOutput,
+          direction: telemetryRef.current.direction,
+          stability: telemetryRef.current.stability,
+          productivity: telemetryRef.current.productivity,
+          interdependence: telemetryRef.current.interdependence,
+          engagement: telemetryRef.current.engagement
+        }
+      };
+
+      const url = `${API_BASE_URL}/${userId}/update-gamedata`;
+
+      try {
+        if (navigator.sendBeacon) {
+          // sendBeacon é assíncrono e sobrevive ao fechamento da aba,
+          // diferente de fetch/axios que podem ser abortados pelo navegador.
+          const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+          navigator.sendBeacon(url, blob);
+        } else {
+          // Fallback para navegadores sem suporte a sendBeacon
+          fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            keepalive: true
+          }).catch(() => { });
+        }
+      } catch (e) {
+        console.error("Erro ao salvar progresso final antes de sair:", e);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') flushProgressOnExit();
+    };
+
+    // pagehide cobre fechamento de aba/navegador (inclusive mobile);
+    // beforeunload cobre navegação/recarregamento em desktop;
+    // visibilitychange é uma rede de segurança extra para quando
+    // nenhum dos dois eventos dispara a tempo (comum em mobile).
+    window.addEventListener('pagehide', flushProgressOnExit);
+    window.addEventListener('beforeunload', flushProgressOnExit);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('pagehide', flushProgressOnExit);
+      window.removeEventListener('beforeunload', flushProgressOnExit);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [userId, API_BASE_URL]);
 
   const currentMaxSpeed = useMemo(() => {
     if (isDobraAtivada) return 100000000;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import './RouteMonitor.css';
 
 // --- DICIONÁRIO DE NOMES PARA EXIBIÇÃO (VISUAL APENAS) ---
@@ -31,100 +31,29 @@ const getEntityIcon = (name) => {
   if (name.includes("S.O.S")) return "🆘";
 
   const icons = {
-    // Estrela e Planetas Principais (Representação Esférica)
-    "Sol": "☀️",
-    "Mercurio": "🌑",
-    "Venus": "🟡",
-    "Terra": "🌍",
-    "Marte": "🔴",
-    "Jupiter": "🟠",
-    "Saturno": "🪐",
-    "Urano": "🔵", // Retornado para a forma redonda
-    "Netuno": "🔵",
-
-    // Luas (Representadas como esferas ou globos lunares)
-    "Lua": "🌕",
-    "Fobos": "🌑",
-    "Deimos": "🌑",
-    "Io": "🟡",
-    "Europa": "⚪",
-    "Ganímedes": "🌖",
-    "Calisto": "🌑",
-    "Titã": "🟠",
-    "Encelado": "⚪",
-    "Mimas": "🌑",
-    "Titania": "🌑",
-    "Oberon": "🌑",
-    "Tritao": "🔵",
-    "Proteu": "🌑",
-    "Caronte": "🌑",
-
-    // Planetas Anões e Corpos Menores
-    "Ceres": "⚪",
-    "Plutao": "🟤", // Cor real bege/marrom
-    "Haumea": "🥚",
-    "Makemake": "🔴",
-    "Eris": "⚪",
-    "Vesta": "🌑",
-    "Pallas": "🌑",
-    "Cinturão": "☄️",
-    "Kuiper": "☄️",
-
-    // Exoplanetas (Representação esférica com cores diferenciadas)
-    "Proxima Centauri b": "🟣",
-    "Trappist1e": "🟢",
-    "Kepler186f": "🟢", // Alinhado com a cor #2ecc71 do mapa
-
-    // ESTAÇÕES ESPACIAIS (As exceções mecânicas)
-    "ACEE": "🛰️",
-    "Salyut": "🛰️",
-    "Delfos": "🛰️",
-    "Mol": "🛰️",
-    "Skylab": "🛰️",
-    "Almaz": "🛰️",
-    "Tiangong": "🛰️",
-    "Boctok": "🛰️"
+    "Sol": "☀️", "Mercurio": "🌑", "Venus": "🟡", "Terra": "🌍", "Marte": "🔴",
+    "Jupiter": "🟠", "Saturno": "🪐", "Urano": "🔵", "Netuno": "🔵",
+    "Lua": "🌕", "Fobos": "🌑", "Deimos": "🌑", "Io": "🟡", "Europa": "⚪",
+    "Ganímedes": "🌖", "Calisto": "🌑", "Titã": "🟠", "Encelado": "⚪",
+    "Mimas": "🌑", "Titania": "🌑", "Oberon": "🌑", "Tritao": "🔵",
+    "Proteu": "🌑", "Caronte": "🌑", "Ceres": "⚪", "Plutao": "🟤",
+    "Haumea": "🥚", "Makemake": "🔴", "Eris": "⚪", "Vesta": "🌑",
+    "Pallas": "🌑", "Cinturão": "☄️", "Kuiper": "☄️",
+    "Proxima Centauri b": "🟣", "Trappist1e": "🟢", "Kepler186f": "🟢",
+    "ACEE": "🛰️", "Salyut": "🛰️", "Delfos": "🛰️", "Mol": "🛰️",
+    "Skylab": "🛰️", "Almaz": "🛰️", "Tiangong": "🛰️", "Boctok": "🛰️"
   };
-
   return icons[name] || "🛸";
 };
 
-const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, originPlanet, destinationPlanet, mainDisplayState = 'stars' }) => {
-  const [initialDistance, setInitialDistance] = useState(distanceKm);
-  const [isTrackingActive, setIsTrackingActive] = useState(false);
-
-  useEffect(() => {
-    if (distanceKm > initialDistance || mainDisplayState === 'acee') {
-      setInitialDistance(distanceKm);
-    }
-  }, [distanceKm, mainDisplayState, initialDistance]);
-
-  useEffect(() => {
-    let timer;
-    if (mainDisplayState === 'stars') {
-      timer = setTimeout(() => {
-        setIsTrackingActive(true);
-      }, 20000);
-    } else {
-      setIsTrackingActive(false);
-    }
-    return () => clearTimeout(timer);
-  }, [mainDisplayState]);
-
-  // Removemos as travas de tempo e arredondamentos. Agora reflete a distância e progresso reais imediatamente.
-  const displayDistance = distanceKm;
-
-  const visualProgress = isDobraAtivada
-    ? progress + (currentSpeed / 1000000)
-    : progress;
-
-  const clampedProgress = Math.min(visualProgress, 100);
+const RouteMonitor = ({ distanceKm, progress, isDobraAtivada, originPlanet, destinationPlanet }) => {
+  // Mantém a precisão decimal, removendo arredondamentos bruscos
+  const clampedProgress = Math.min(Math.max(progress, 0), 100);
 
   return (
     <div className="route-monitor">
       <h4>Rota Atual</h4>
       <div className="route-box">
-
         {/* PONTO DE ORIGEM */}
         <div className="planet origin">
           <div className="planet-icon">{getEntityIcon(originPlanet)}</div>
@@ -137,15 +66,14 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
             className="current-position"
             style={{
               left: `${clampedProgress}%`,
-              transition: isDobraAtivada ? 'left 0.2s linear' : 'left 0.5s ease-out',
-              opacity: isTrackingActive ? 1 : 0.6
+              transition: isDobraAtivada ? 'left 0.2s linear' : 'left 0.5s ease-out'
             }}
           >
             <span>Atual</span>
-            <div className={`pulse-dot ${!isTrackingActive ? 'pulse-fast' : ''}`}></div>
+            <div className="pulse-dot"></div>
           </div>
           <div className="distance-readout">
-            {Math.max(0, displayDistance).toLocaleString()} km
+            {Math.max(0, distanceKm).toLocaleString('pt-BR')} km
           </div>
         </div>
 
@@ -154,7 +82,6 @@ const RouteMonitor = ({ distanceKm, progress, currentSpeed, isDobraAtivada, orig
           <div className="planet-icon">{getEntityIcon(destinationPlanet)}</div>
           <span>{getDisplayName(destinationPlanet) || "Destino"}</span>
         </div>
-
       </div>
     </div>
   );
