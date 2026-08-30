@@ -713,6 +713,7 @@ app.get("/games/:gameNumber/groups-details", async (req, res) => {
     const groups = await Grupo.find({ membros: { $in: userIds } }).populate('membros');
     res.json({ success: true, groups: groups });
   } catch (error) { res.status(500).json({ success: false }); }
+
 });
 
 
