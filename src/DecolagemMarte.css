@@ -79,84 +79,11 @@
   overflow: hidden;
 }
 
-.ship-status-image {
-  height: 100%;
-  /* Acompanha o novo tamanho do HUD */
-  max-height: clamp(60px, 9vh, 90px);
-  max-width: 160px;
-  width: auto;
-  object-fit: contain;
-  margin-right: 15px;
-  filter: drop-shadow(0 0 8px rgba(0, 180, 255, 0.8));
-}
-
-.ship-status-name {
-  font-size: clamp(0.9rem, 1.2vw, 1.2rem);
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 3px;
-  color: #0bf;
-  text-shadow: 0 0 8px rgba(0, 180, 255, 0.8);
-  white-space: nowrap;
-  flex-shrink: 0;
-  /* Impede que o nome seja espremido */
-}
-
-/* ==========================================================
-   ====== ESTATÍSTICAS DO HUD (LINHA E TEXTO DIGITADO) ======
-   ========================================================== */
-.ship-status-divider {
-  width: 2px;
-  height: 65%;
-  /* Proporcional à nova altura */
-  background-color: rgba(0, 180, 255, 0.6);
-  margin: 0 20px;
-  /* Margem simétrica de respiro */
-  box-shadow: 0 0 8px rgba(0, 180, 255, 0.8);
-  border-radius: 2px;
-  flex-shrink: 0;
-}
-
-.ship-info-stats {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  /* Alinha o texto bonitinho à esquerda */
-  flex: 1;
-  /* Preenche todo o espaço que sobrar no meio */
-
-  font-size: clamp(0.85rem, 1.1vw, 1.1rem);
-  color: #0bf;
-  text-shadow: 0 0 5px rgba(0, 180, 255, 0.5);
-
-  /* 2. MAIS RESPIRO ENTRE AS LINHAS DE TEXTO */
-  line-height: 1.8;
-  font-weight: bold;
-  white-space: nowrap;
-  overflow: hidden;
-  /* Evita que o texto quebre o layout */
-}
-
-/* Animação do cursor de terminal */
-.blinking-cursor {
-  animation: blink-cursor 1s step-end infinite;
-  color: #0bf;
-  margin-left: 3px;
-  font-weight: bold;
-}
-
-@keyframes blink-cursor {
-
-  0%,
-  100% {
-    opacity: 1;
-  }
-
-  50% {
-    opacity: 0;
-  }
-}
+/* NOTA: .ship-status-image, .ship-status-name, .ship-status-divider,
+   .ship-info-stats, .blinking-cursor e @keyframes blink-cursor tinham uma
+   segunda definição mais abaixo (seção "ESTATÍSTICAS DO HUD"), que é a que
+   sempre venceu na cascata do CSS. A definição duplicada que existia aqui
+   foi removida; a versão realmente usada continua íntegra logo à frente. */
 
 /* ==========================================================
    ====== ÁREA DO RADAR NO HUD ==============================
@@ -177,23 +104,10 @@
   flex-shrink: 0;
 }
 
-.space-radar-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
-
-.space-radar {
-  position: relative;
-  /* Radar interno ligeiramente maior */
-  width: clamp(120px, 13vw, 160px);
-  height: clamp(50px, 7vh, 75px);
-  border: 2px solid rgba(0, 180, 255, 0.4);
-  background-color: rgba(0, 15, 30, 0.85);
-  overflow: hidden;
-  box-shadow: 0 0 10px rgba(0, 150, 255, 0.2), inset 0 0 15px rgba(0, 180, 255, 0.3);
-}
+/* NOTA: .space-radar-wrapper e .space-radar tinham uma segunda definição na
+   seção "RADAR ESPACIAL (HUD)" mais abaixo, com valores diferentes — era ela
+   quem sempre venceu na cascata do CSS. A duplicata que existia aqui foi
+   removida; a versão realmente usada continua íntegra logo à frente. */
 
 .ship-status-image {
   height: 100%;
@@ -583,29 +497,12 @@
   font-family: 'Courier New', monospace;
 }
 
-.space-coins-panel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 15px;
-  background: rgba(0, 30, 60, 0.7);
-  border: 1px solid rgba(0, 180, 255, 0.3);
-  border-radius: 8px;
-}
-
-.space-coins-title {
-  font-size: 1.1em;
-  color: #ff0;
-  text-shadow: 0 0 5px rgba(255, 255, 0, 0.5);
-}
-
-.space-coins-value {
-  font-size: 1.3em;
-  color: #0f0;
-  text-shadow: 0 0 5px rgba(0, 255, 0, 0.7);
-  font-family: 'Courier New', monospace;
-  letter-spacing: 1px;
-}
+/* NOTA: .space-coins-panel/.space-coins-title/.space-coins-value foram
+   removidos daqui — este arquivo não renderiza mais nenhum elemento com
+   essas classes (o painel de Space Coins é do TelemetryDisplay.js, que já
+   tem sua própria definição dessas classes em TelemetryDisplay.css). Manter
+   as duas cópias era um duplicado entre arquivos que dependia da ordem de
+   import para decidir qual valia. */
 
 /* Button Container Styles */
 .dobra-buttons-container {
@@ -1031,7 +928,11 @@
 
 .team-photo-img {
   width: 100%;
-  height: clamp(80px, 12vh, 140px);
+  /* Havia uma segunda declaração de .team-photo-img só com "height" mais
+     abaixo (clamp(100px, 15vh, 180px)), que sempre vencia esta aqui na
+     cascata do CSS. Consolidado num único lugar com o valor que já estava
+     em vigor — nenhuma mudança visual. */
+  height: clamp(100px, 15vh, 180px);
   object-fit: cover;
   display: block;
   filter: sepia(20%) contrast(1.1) brightness(0.9);
@@ -1357,51 +1258,24 @@
 /* ======== RESPONSIVIDADE PARA MONITORES (LAPTOPS, 1080P, 1440P, 4K) ======= */
 /* ========================================================================== */
 
-/* Torna a largura dos painéis laterais dinâmica com limites */
-.left-panel-3d,
-.right-panel-3d {
-  width: clamp(260px, 22vw, 450px);
-  /* Permite scroll invisível caso a tela do monitor seja muito baixa */
-  overflow-y: auto;
-  scrollbar-width: none;
-  /* Firefox */
-}
-
-.left-panel-3d::-webkit-scrollbar,
-.right-panel-3d::-webkit-scrollbar {
-  display: none;
-  /* Chrome/Safari */
-}
+/* NOTA: uma regra ".left-panel-3d, .right-panel-3d" repetia aqui, sem
+   necessidade, exatamente os mesmos valores (width/overflow-y/scrollbar-
+   width) já definidos lá em cima, em "3D Panels" — removida.
+   As regras abaixo (.left-panel-3d::-webkit-scrollbar/.right-panel-3d::
+   -webkit-scrollbar, .route-monitor h4, .route-box, .monitor-screen e
+   .team-photo-img) restatiam, sem necessidade, exatamente os mesmos valores
+   já definidos mais acima — removidas por serem puro código repetido. Os
+   valores efetivos não mudam. */
 
 /* O Display Principal agora se adapta à altura e largura disponíveis */
 
 
 /* Ajuste dinâmico de textos e botões usando clamp() */
-.mission-timer h2 {
-  font-size: clamp(1.5rem, 2.5vw, 3rem);
-}
-
-.route-monitor h4 {
-  font-size: clamp(0.9rem, 1.2vw, 1.3rem);
-}
-
 .ativar-de-btn,
 .inventory-btn {
   font-size: clamp(0.75rem, 1vw, 1.1rem);
   min-height: clamp(45px, 6vh, 70px);
   height: auto;
-}
-
-.route-box {
-  height: clamp(100px, 15vh, 160px);
-}
-
-.monitor-screen {
-  height: clamp(120px, 18vh, 200px);
-}
-
-.team-photo-img {
-  height: clamp(100px, 15vh, 180px);
 }
 
 /* --- MONITORES PEQUENOS / NOTEBOOKS (Ex: 1366x768) --- */
@@ -1591,128 +1465,12 @@
   transform: scale(1.02);
 }
 
-/* Shaders and Sweep Shine FX */
-.glossary-button::after,
-.shine-effect::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -150%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%);
-  transform: skewX(-25deg);
-  animation: sweep-shine 3s infinite;
-  pointer-events: none;
-  z-index: 1;
-}
-
-@keyframes sweep-shine {
-  0% {
-    left: -150%;
-  }
-
-  20% {
-    left: 200%;
-  }
-
-  100% {
-    left: 200%;
-  }
-}
-
-.shine-effect {
-  position: relative;
-  overflow: hidden;
-}
-
-/* Minerva Warp Active Glow */
-.minerva-image.minerva-rainbow-glow {
-  animation: minervaRainbowPulse 1.5s infinite linear;
-  border-radius: 50%;
-  position: relative;
-  z-index: 2;
-}
-
-@keyframes minervaRainbowPulse {
-  0% {
-    filter: drop-shadow(0 0 15px #ff0000) brightness(1.2);
-  }
-
-  15% {
-    filter: drop-shadow(0 0 15px #ff8000) brightness(1.2);
-  }
-
-  30% {
-    filter: drop-shadow(0 0 15px #ffff00) brightness(1.2);
-  }
-
-  45% {
-    filter: drop-shadow(0 0 15px #00ff00) brightness(1.2);
-  }
-
-  60% {
-    filter: drop-shadow(0 0 15px #00ffff) brightness(1.2);
-  }
-
-  75% {
-    filter: drop-shadow(0 0 15px #0000ff) brightness(1.2);
-  }
-
-  90% {
-    filter: drop-shadow(0 0 15px #ff00ff) brightness(1.2);
-  }
-
-  100% {
-    filter: drop-shadow(0 0 15px #ff0000) brightness(1.2);
-  }
-}
-
-.minerva-title.highlighted {
-  animation: minervaTitleRainbow 3s infinite linear;
-}
-
-@keyframes minervaTitleRainbow {
-  0% {
-    color: #ff0000;
-    text-shadow: 0 0 10px #ff0000;
-  }
-
-  15% {
-    color: #ff8000;
-    text-shadow: 0 0 10px #ff8000;
-  }
-
-  30% {
-    color: #ffff00;
-    text-shadow: 0 0 10px #ffff00;
-  }
-
-  45% {
-    color: #00ff00;
-    text-shadow: 0 0 10px #00ff00;
-  }
-
-  60% {
-    color: #00ffff;
-    text-shadow: 0 0 10px #00ffff;
-  }
-
-  75% {
-    color: #0000ff;
-    text-shadow: 0 0 10px #0000ff;
-  }
-
-  90% {
-    color: #ff00ff;
-    text-shadow: 0 0 10px #ff00ff;
-  }
-
-  100% {
-    color: #ff0000;
-    text-shadow: 0 0 10px #ff0000;
-  }
-}
+/* NOTA: .shine-effect::after/.shine-effect, @keyframes sweep-shine,
+   .minerva-image.minerva-rainbow-glow + @keyframes minervaRainbowPulse e
+   .minerva-title.highlighted + @keyframes minervaTitleRainbow estavam
+   repetidos aqui, palavra por palavra, com a seção "EFEITO DE BRILHO
+   DIAGONAL" / "EFEITO DE BRILHO DA MINERVA I.A." lá em cima — removida a
+   cópia duplicada, mantendo só a de cima. */
 
 .speed-gauge-fill.is-dobra-active {
   background: linear-gradient(90deg, #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff00ff, #ff0000);
@@ -1942,6 +1700,13 @@
   box-shadow: 0 0 10px rgba(0, 150, 255, 0.2), inset 0 0 15px rgba(0, 180, 255, 0.3);
 }
 
+/* NOTA: esta seção tinha .radar-sweep, .dynamic-blip e @keyframes blip-fade
+   definidos 2-3 vezes cada (sobras de edições sucessivas), sempre valendo
+   apenas a última ocorrência. Consolidado numa única definição de cada,
+   mantendo exatamente os valores que já estavam em vigor: .radar-sweep no
+   formato circular (radar-spin), e o blip-fade com a versão que já
+   preservava a centralização (translate(-50%, -50%)) do .dynamic-blip. */
+
 /* Grade adaptada para retângulo */
 .radar-grid {
   position: absolute;
@@ -1953,54 +1718,6 @@
     linear-gradient(rgba(0, 180, 255, 0.2) 1px, transparent 1px) 0 0 / 20px 20px,
     linear-gradient(90deg, rgba(0, 180, 255, 0.2) 1px, transparent 1px) 0 0 / 20px 20px;
   z-index: 1;
-}
-
-/* Varredura Retangular (Barra que corre da esquerda para a direita) */
-.radar-sweep {
-  position: absolute;
-  top: 0;
-  left: -20%;
-  width: 20%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(0, 180, 255, 0.4));
-  animation: radar-slide 3s linear infinite;
-  z-index: 2;
-}
-
-@keyframes radar-slide {
-  0% {
-    left: -20%;
-  }
-
-  100% {
-    left: 100%;
-  }
-}
-
-.dynamic-blip {
-  position: absolute;
-  border-radius: 50%;
-  z-index: 3;
-  opacity: 0;
-  animation: blip-fade 3s infinite;
-}
-
-@keyframes blip-fade {
-
-  0%,
-  5% {
-    opacity: 1;
-    transform: scale(1.5);
-  }
-
-  30% {
-    opacity: 0;
-    transform: scale(1);
-  }
-
-  100% {
-    opacity: 0;
-  }
 }
 
 /* Varredura Animada (Feixe de Luz do Radar) */
@@ -2069,24 +1786,6 @@
   100% {
     opacity: 0;
     transform: translate(-50%, -50%);
-  }
-}
-
-@keyframes blip-fade {
-
-  0%,
-  5% {
-    opacity: 1;
-    transform: scale(1.5);
-  }
-
-  30% {
-    opacity: 0;
-    transform: scale(1);
-  }
-
-  100% {
-    opacity: 0;
   }
 }
 
