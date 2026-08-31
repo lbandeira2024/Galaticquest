@@ -349,4 +349,52 @@ const TelemetryDisplay = ({
   );
 };
 
-export default TelemetryDisplay;
+// OTIMIZAÇÃO: o game loop atualiza `telemetry` (prop `data`) a cada ~100ms e
+// `distanceKm` a cada ~80ms mesmo quando nada que este componente exibe
+// mudou de verdade (ex.: velocidade, que não aparece aqui). Sem memo, isso
+// forçava o TelemetryDisplay inteiro (7 barras de progresso, grid, portal do
+// mapa) a re-renderizar 10-12x por segundo durante o voo. O comparador
+// abaixo só deixa passar um re-render quando um valor que o componente
+// realmente usa muda.
+const areTelemetryPropsEqual = (prevProps, nextProps) => {
+  const prevData = prevProps.data || {};
+  const nextData = nextProps.data || {};
+
+  const telemetryFieldsEqual =
+    prevData.propulsion?.powerOutput === nextData.propulsion?.powerOutput &&
+    prevData.direction === nextData.direction &&
+    prevData.stability === nextData.stability &&
+    prevData.productivity === nextData.productivity &&
+    prevData.interdependence === nextData.interdependence &&
+    prevData.engagement === nextData.engagement &&
+    prevData.atmosphere?.o2 === nextData.atmosphere?.o2;
+
+  if (!telemetryFieldsEqual) return false;
+
+  // distanceKm e velocity.kmh mudam a cada tick, mas só importam aqui para
+  // decidir se o botão do Mapa Estelar fica desabilitado. Comparamos o
+  // resultado dessa conta, não os números crus.
+  const prevMapDisabled = prevProps.isPaused || prevProps.isDobraAtivada ||
+    (!prevProps.isForcedMapEdit && (prevProps.distanceKm <= 0 || (prevData.velocity?.kmh ?? 0) < 60000));
+  const nextMapDisabled = nextProps.isPaused || nextProps.isDobraAtivada ||
+    (!nextProps.isForcedMapEdit && (nextProps.distanceKm <= 0 || (nextData.velocity?.kmh ?? 0) < 60000));
+
+  if (prevMapDisabled !== nextMapDisabled) return false;
+
+  return (
+    prevProps.isPaused === nextProps.isPaused &&
+    prevProps.showStellarMap === nextProps.showStellarMap &&
+    prevProps.isDobraAtivada === nextProps.isDobraAtivada &&
+    prevProps.plannedRoute === nextProps.plannedRoute &&
+    prevProps.routeIndex === nextProps.routeIndex &&
+    prevProps.isOxygenRefilled === nextProps.isOxygenRefilled &&
+    prevProps.lastImpactTimestamp === nextProps.lastImpactTimestamp &&
+    prevProps.isForcedMapEdit === nextProps.isForcedMapEdit &&
+    prevProps.sosSignalData === nextProps.sosSignalData &&
+    prevProps.onRouteChanged === nextProps.onRouteChanged &&
+    prevProps.setShowStellarMap === nextProps.setShowStellarMap &&
+    prevProps.onSosDetected === nextProps.onSosDetected
+  );
+};
+
+export default React.memo(TelemetryDisplay, areTelemetryPropsEqual);

@@ -1228,7 +1228,15 @@ const DecolagemMarte = () => {
         //playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
       }, 4000);
     }
-  }, [saveNewRouteAndProgress, playSFX, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit, triggerMinervaInterplanetarySpeed, stopAllAudio, fadeOutAudio, playTrack]);
+    // OTIMIZAÇÃO: `distanceKm`, `routeIndex` e `plannedRoute` estavam nesta
+    // lista mas não são lidos em nenhum lugar do corpo da função (o código
+    // usa `newRouteData.newPlannedRoute`/`newRouteData.newRouteIndex`, que
+    // vêm do argumento, e refs onde precisa do valor atual). Como
+    // `distanceKm` muda a cada ~80ms durante o voo, mantê-lo aqui recriava
+    // esta função o tempo todo e quebrava a memoização do TelemetryDisplay
+    // (que recebe esta função via prop `onRouteChanged`). Removidos por
+    // serem, de fato, dependências não usadas.
+  }, [saveNewRouteAndProgress, playSFX, arrivedAtMars, travelStarted, isForcedMapEdit, triggerMinervaInterplanetarySpeed, stopAllAudio, fadeOutAudio, playTrack]);
 
   const handleEscolha = async (opcao, desafioId, impactos) => {
     setIsTransmissionStarting(false); setIsDialogueFinished(false);
@@ -1734,10 +1742,26 @@ const DecolagemMarte = () => {
   useEffect(() => {
     const isCritical = (telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20) && !isRestoringSOS;
     alarmAudio.loop = true;
-    if (isCritical && !isPaused) { alarmAudio.play().catch(e => console.log("Erro ao tocar alarme:", e)); }
+    if (isCritical && !isPaused) { if (alarmAudio.paused) alarmAudio.play().catch(e => console.log("Erro ao tocar alarme:", e)); }
     else { alarmAudio.pause(); alarmAudio.currentTime = 0; }
     return () => { alarmAudio.pause(); };
-  }, [telemetry, isPaused, isRestoringSOS, alarmAudio]);
+    // OTIMIZAÇÃO: dependíamos do objeto `telemetry` inteiro, que ganha uma
+    // referência nova a cada ~100ms durante o voo (inclusive quando só a
+    // velocidade muda, o que não afeta este efeito). Isso disparava
+    // play()/pause() no áudio do alarme 10x por segundo. Agora dependemos só
+    // dos campos que realmente decidem se o alarme toca.
+  }, [
+    telemetry.atmosphere.o2,
+    telemetry.propulsion.powerOutput,
+    telemetry.direction,
+    telemetry.stability,
+    telemetry.productivity,
+    telemetry.interdependence,
+    telemetry.engagement,
+    isPaused,
+    isRestoringSOS,
+    alarmAudio
+  ]);
 
   useEffect(() => {
     if (isRestoringSOS && !isPaused) {
@@ -2209,12 +2233,17 @@ const DecolagemMarte = () => {
     return () => clearTimeout(timer);
   }, [dialogueIndex, isTransmissionStarting, activeChallengeData, handleNextDialogue]);
 
+  // OTIMIZAÇÃO: usava `distanceKm` (state) na dependência, que muda a cada
+  // ~80ms durante o voo — isso recriava esta função a cada tick e, por
+  // consequência, quebrava a memoização do TelemetryDisplay (que recebe
+  // esta função via prop `setShowStellarMap`). Trocamos para os refs, que
+  // sempre têm o valor atual sem precisar recriar a função.
   const handleToggleMap = useCallback((show) => {
     if (show) {
-      if (distanceKm <= 0 && !isForcedMapEdit) { playSound('/sounds/error.mp3'); return; }
+      if (distanceKmRef.current <= 0 && !isForcedMapEditRef.current) { playSound('/sounds/error.mp3'); return; }
     }
     setShowStellarMap(show);
-  }, [distanceKm, isForcedMapEdit, playSound]);
+  }, [playSound]);
 
   // --- CENTRAL DE ATALHOS ---
   useEffect(() => {
