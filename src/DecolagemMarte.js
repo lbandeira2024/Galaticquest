@@ -2325,7 +2325,7 @@ const DecolagemMarte = () => {
 
             <div className="ship-info-stats" style={{ flex: 1 }}>
               <TypewriterText label="Corpos celestes visitados" value={countCorposCelestes.toString().padStart(2, '0')} />
-              <TypewriterText label="Virtus" value={`${(virtusIndex * 100).toFixed(1).replace('.', ',')}`} />
+              <TypewriterText label="Virtus" value={`${virtusIndex.toFixed(3).replace('.', ',')}`} />
 
               {/* === EXIBIÇÃO DA DISTÂNCIA EM UA === */}
               <div className="telemetry-distance-display" title={`${(accumulatedDistanceKm / 149597870).toFixed(8)} UA`}>
