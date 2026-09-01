@@ -391,7 +391,7 @@ const CadastroForm = () => {
         <img src="/images/flags/italy.png" alt="Italiano" className={`flag ${selectedLanguage === 'italy' ? 'active' : ''}`} onClick={() => handleLanguageChange('it', 'italy')} />
       </div>
 
-      <img src="/images/logogalaticQuest.png" className="game-logo" alt="Galactic Quest" />
+      <img src="/images/logogalaticQuest.webp" className="game-logo" alt="Galactic Quest" />
       <div className="solar-system">
         {/* IMAGEM DA TERRA COM PRIORIDADE MÁXIMA DE FETCH */}
         <img src="/images/Terra.png" className="planet earth" alt="Terra" fetchPriority="high" loading="eager" />
