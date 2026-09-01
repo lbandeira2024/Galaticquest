@@ -790,6 +790,9 @@
   width: 100%;
   margin-top: 25px;
   position: relative;
+  /* Ordem fixa dentro do flex column do .left-panel-3d: garante que a
+     Minerva sempre venha ANTES do Processador O2, em qualquer breakpoint. */
+  order: 10;
 }
 
 .minerva-title {
@@ -966,6 +969,11 @@
   text-align: center;
   position: relative;
   z-index: 999;
+  /* Ordem fixa dentro do flex column do .left-panel-3d: garante que o
+     Processador O2 sempre venha DEPOIS (visualmente abaixo) da Minerva,
+     em qualquer breakpoint responsivo (mobile, notebook, 4K etc.),
+     independente de qualquer alteração futura na ordem do JSX. */
+  order: 20;
 }
 
 .o2-processor-label {
