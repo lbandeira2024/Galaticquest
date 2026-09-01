@@ -36,7 +36,13 @@ const ProgressBar = ({ value: targetValue }) => {
     const end = targetValue;
     const diff = end - start;
     const duration = 1500;
-    const frameRate = 20;
+    // OTIMIZAÇÃO: 20ms = 50 atualizações de estado por segundo POR barra.
+    // Com até 7 barras (propulsão, direção, estabilidade, produtividade,
+    // interdependência, engajamento, oxigênio) animando ao mesmo tempo depois
+    // de um impacto, isso podia gerar até ~350 re-renders/s só desta parte da
+    // tela. 40ms (25fps) ainda é suave a olho nu numa barra de progresso e
+    // corta esse custo pela metade.
+    const frameRate = 40;
     const totalFrames = duration / frameRate;
     const step = diff / totalFrames;
 
@@ -139,22 +145,30 @@ const TelemetryDisplay = ({
   };
 
   useEffect(() => {
-    const executeHeartbeatCycle = async () => {
+    // OTIMIZAÇÃO: as 3 chamadas eram sequenciais (await uma de cada vez), então
+    // cada ciclo de 5 em 5s esperava a SOMA das 3 latências de rede antes de
+    // liberar o próximo. Como as três são independentes entre si, disparamos
+    // em paralelo — o ciclo passa a levar o tempo da mais lenta das três, não
+    // a soma delas, sem mudar nenhum dos comportamentos (mesmos dados, mesmo
+    // tratamento silencioso de erro por chamada).
+    const executeHeartbeatCycle = () => {
       const currentUser = userRef.current;
       const currentUrl = baseUrlRef.current;
       if (!currentUser?._id || !currentUser?.gameNumber || !currentUrl) return;
 
-      try { await axios.post(`${currentUrl}/heartbeat`, { userId: currentUser._id }); } catch (e) { }
-      try {
-        const response = await axios.get(`${currentUrl}/games/${currentUser.gameNumber}/online-ships`);
-        if (response.data.success) setOnlineShips(response.data.onlineShips);
-      } catch (error) { }
-      try {
-        const myDataResponse = await axios.get(`${currentUrl}/${currentUser._id}/game-data`);
-        if (myDataResponse.data.success && myDataResponse.data.spaceCoins !== undefined) {
-          if (syncSpaceCoinsRef.current) syncSpaceCoinsRef.current(myDataResponse.data.spaceCoins);
-        }
-      } catch (error) { }
+      axios.post(`${currentUrl}/heartbeat`, { userId: currentUser._id }).catch(() => { });
+
+      axios.get(`${currentUrl}/games/${currentUser.gameNumber}/online-ships`)
+        .then((response) => { if (response.data.success) setOnlineShips(response.data.onlineShips); })
+        .catch(() => { });
+
+      axios.get(`${currentUrl}/${currentUser._id}/game-data`)
+        .then((myDataResponse) => {
+          if (myDataResponse.data.success && myDataResponse.data.spaceCoins !== undefined) {
+            if (syncSpaceCoinsRef.current) syncSpaceCoinsRef.current(myDataResponse.data.spaceCoins);
+          }
+        })
+        .catch(() => { });
     };
 
     executeHeartbeatCycle();

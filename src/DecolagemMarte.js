@@ -1745,11 +1745,16 @@ const DecolagemMarte = () => {
 
   useEffect(() => {
     if (isRestoringSOS && !isPaused) {
+      // OTIMIZAÇÃO: era um setInterval de 50ms (20 renders/s) — de longe o
+      // timer mais agressivo do jogo, bem mais frequente que o game loop
+      // (throttled a ~10-12/s). Trocado para 150ms/+6, que restaura na
+      // MESMA velocidade total (2 a cada 50ms = 6 a cada 150ms), só que com
+      // 1/3 dos renders enquanto o S.O.S. está ativo.
       restoreIntervalRef.current = setInterval(() => {
         let anyChanged = false;
         let allFull = true;
         const restoreValue = (currentVal) => {
-          if (currentVal < 100) { anyChanged = true; allFull = false; return Math.min(100, currentVal + 2); }
+          if (currentVal < 100) { anyChanged = true; allFull = false; return Math.min(100, currentVal + 6); }
           return currentVal;
         };
 
@@ -1764,7 +1769,7 @@ const DecolagemMarte = () => {
         if (anyChanged) setTelemetry({ ...telemetryRef.current });
 
         if (allFull) { clearInterval(restoreIntervalRef.current); setIsRestoringSOS(false); saveTelemetryData(); }
-      }, 50);
+      }, 150);
     } else if (isPaused && restoreIntervalRef.current) { clearInterval(restoreIntervalRef.current); }
     return () => { if (restoreIntervalRef.current) clearInterval(restoreIntervalRef.current); };
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
@@ -1861,7 +1866,20 @@ const DecolagemMarte = () => {
           const newDistance = Math.max(0, distanceKmRef.current - distanceToDecrease);
           distanceKmRef.current = newDistance;
 
-          if (timestamp - lastDistanceRenderTime.current > 80) {
+          // OTIMIZAÇÃO: este bloco inteiro (a partir do `if
+          // (travelStartedRef.current...` acima) roda em TODO frame do game
+          // loop, ou seja, a até 60x por segundo — ele não é protegido pelo
+          // throttle de `telemetryInterval` (100ms) usado para velocidade.
+          // `shouldRenderDistanceUpdate` guarda essa decisão de ~80ms (already
+          // usada para `setDistanceKm`) para reaproveitar mais abaixo no
+          // `setProgress`, que antes era chamado sem nenhum throttle e forçava
+          // o componente `DecolagemMarte` inteiro (painéis, telemetria, mapa)
+          // a re-renderizar 60x/s durante todo o voo — mesmo com os filhos
+          // memoizados, o próprio render do componente pai já custava caro
+          // rodando nessa frequência. A barra de progresso não perde suavidade
+          // visível atualizando ~12.5x/s em vez de 60x/s.
+          const shouldRenderDistanceUpdate = timestamp - lastDistanceRenderTime.current > 80;
+          if (shouldRenderDistanceUpdate) {
             setDistanceKm(Math.round(newDistance));
             setAccumulatedDistanceKm(accumulatedDistanceKmRef.current);
             lastDistanceRenderTime.current = timestamp;
@@ -2021,11 +2039,13 @@ const DecolagemMarte = () => {
             })();
           }
 
-          const destinationStepIndex = routeIndexRef.current + 1;
-          const initialDistanceForLeg = (plannedRouteRef.current && plannedRouteRef.current[destinationStepIndex] ? plannedRouteRef.current[destinationStepIndex].distance : null) || newDistance || 1;
-          const distanceTraveled = initialDistanceForLeg - newDistance;
-          const progressPercentage = Math.min((distanceTraveled / initialDistanceForLeg) * 100, 100);
-          setProgress(progressPercentage);
+          if (shouldRenderDistanceUpdate) {
+            const destinationStepIndex = routeIndexRef.current + 1;
+            const initialDistanceForLeg = (plannedRouteRef.current && plannedRouteRef.current[destinationStepIndex] ? plannedRouteRef.current[destinationStepIndex].distance : null) || newDistance || 1;
+            const distanceTraveled = initialDistanceForLeg - newDistance;
+            const progressPercentage = Math.min((distanceTraveled / initialDistanceForLeg) * 100, 100);
+            setProgress(progressPercentage);
+          }
         }
       } catch (fatalError) {
         console.error("Game Loop Anti-Crash ativado.", fatalError);
