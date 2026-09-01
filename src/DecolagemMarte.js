@@ -703,6 +703,7 @@ const highlightKeywords = (text, keywords) => {
 
 const DecolagemMarte = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { apiBaseUrl } = useConfig();
   const API_BASE_URL = apiBaseUrl;
   const { spaceCoins, setSpaceCoins, syncSpaceCoins } = useSpaceCoins();
@@ -1522,6 +1523,18 @@ const DecolagemMarte = () => {
         const data = await response.json();
 
         if (data.success) {
+          // GUARDA: sem nave escolhida, o jogador nunca deveria ter chegado
+          // até a tela de decolagem — ele saiu do jogo antes de terminar a
+          // Seleção de Astronave (etapa 1). Antes disto, a tela renderizava
+          // normalmente com chosenShip=null e, mais abaixo, sem rota
+          // planejada, caía no "Erro de Rota". Agora manda de volta para a
+          // etapa correta em vez de deixar o jogador preso numa tela de voo
+          // com estado incompleto.
+          if (!data.naveEscolhida) {
+            navigate('/selecaonave', { replace: true });
+            return;
+          }
+
           if (data._id) setGroupId(data._id);
           if (data.naveEscolhida) setChosenShip(data.naveEscolhida);
           if (data.spaceCoins !== undefined) syncSpaceCoinsRef.current(data.spaceCoins);
@@ -1573,7 +1586,12 @@ const DecolagemMarte = () => {
             // -------------------------------------------------------------
 
           } else {
-            setSelectedPlanet({ nome: "Erro de Rota" });
+            // Nave escolhida, mas rota planejada nunca foi definida (saiu do
+            // jogo antes de terminar a Seleção de Rota Estelar, etapa 4).
+            // Mesma lógica do guard acima: manda de volta pra etapa certa em
+            // vez de mostrar a tela de voo travada em "Erro de Rota".
+            navigate('/SelecaoRota', { replace: true });
+            return;
           }
           if (data.telemetryState) {
             telemetryRef.current = { ...telemetryRef.current, ...data.telemetryState, atmosphere: { ...telemetryRef.current.atmosphere, o2: data.telemetryState.oxygen ?? 100 }, propulsion: { ...telemetryRef.current.propulsion, powerOutput: data.telemetryState.nuclearPropulsion ?? 100 } };
