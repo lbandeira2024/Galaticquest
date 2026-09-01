@@ -36,7 +36,13 @@ const ProgressBar = ({ value: targetValue }) => {
     const end = targetValue;
     const diff = end - start;
     const duration = 1500;
-    const frameRate = 20;
+    // OTIMIZAÇÃO: 20ms = 50 atualizações de estado por segundo POR barra.
+    // Com até 7 barras (propulsão, direção, estabilidade, produtividade,
+    // interdependência, engajamento, oxigênio) animando ao mesmo tempo depois
+    // de um impacto, isso podia gerar até ~350 re-renders/s só desta parte da
+    // tela. 40ms (25fps) ainda é suave a olho nu numa barra de progresso e
+    // corta esse custo pela metade.
+    const frameRate = 40;
     const totalFrames = duration / frameRate;
     const step = diff / totalFrames;
 
@@ -139,22 +145,30 @@ const TelemetryDisplay = ({
   };
 
   useEffect(() => {
-    const executeHeartbeatCycle = async () => {
+    // OTIMIZAÇÃO: as 3 chamadas eram sequenciais (await uma de cada vez), então
+    // cada ciclo de 5 em 5s esperava a SOMA das 3 latências de rede antes de
+    // liberar o próximo. Como as três são independentes entre si, disparamos
+    // em paralelo — o ciclo passa a levar o tempo da mais lenta das três, não
+    // a soma delas, sem mudar nenhum dos comportamentos (mesmos dados, mesmo
+    // tratamento silencioso de erro por chamada).
+    const executeHeartbeatCycle = () => {
       const currentUser = userRef.current;
       const currentUrl = baseUrlRef.current;
       if (!currentUser?._id || !currentUser?.gameNumber || !currentUrl) return;
 
-      try { await axios.post(`${currentUrl}/heartbeat`, { userId: currentUser._id }); } catch (e) { }
-      try {
-        const response = await axios.get(`${currentUrl}/games/${currentUser.gameNumber}/online-ships`);
-        if (response.data.success) setOnlineShips(response.data.onlineShips);
-      } catch (error) { }
-      try {
-        const myDataResponse = await axios.get(`${currentUrl}/${currentUser._id}/game-data`);
-        if (myDataResponse.data.success && myDataResponse.data.spaceCoins !== undefined) {
-          if (syncSpaceCoinsRef.current) syncSpaceCoinsRef.current(myDataResponse.data.spaceCoins);
-        }
-      } catch (error) { }
+      axios.post(`${currentUrl}/heartbeat`, { userId: currentUser._id }).catch(() => { });
+
+      axios.get(`${currentUrl}/games/${currentUser.gameNumber}/online-ships`)
+        .then((response) => { if (response.data.success) setOnlineShips(response.data.onlineShips); })
+        .catch(() => { });
+
+      axios.get(`${currentUrl}/${currentUser._id}/game-data`)
+        .then((myDataResponse) => {
+          if (myDataResponse.data.success && myDataResponse.data.spaceCoins !== undefined) {
+            if (syncSpaceCoinsRef.current) syncSpaceCoinsRef.current(myDataResponse.data.spaceCoins);
+          }
+        })
+        .catch(() => { });
     };
 
     executeHeartbeatCycle();
@@ -349,4 +363,52 @@ const TelemetryDisplay = ({
   );
 };
 
-export default TelemetryDisplay;
+// OTIMIZAÇÃO: o game loop atualiza `telemetry` (prop `data`) a cada ~100ms e
+// `distanceKm` a cada ~80ms mesmo quando nada que este componente exibe
+// mudou de verdade (ex.: velocidade, que não aparece aqui). Sem memo, isso
+// forçava o TelemetryDisplay inteiro (7 barras de progresso, grid, portal do
+// mapa) a re-renderizar 10-12x por segundo durante o voo. O comparador
+// abaixo só deixa passar um re-render quando um valor que o componente
+// realmente usa muda.
+const areTelemetryPropsEqual = (prevProps, nextProps) => {
+  const prevData = prevProps.data || {};
+  const nextData = nextProps.data || {};
+
+  const telemetryFieldsEqual =
+    prevData.propulsion?.powerOutput === nextData.propulsion?.powerOutput &&
+    prevData.direction === nextData.direction &&
+    prevData.stability === nextData.stability &&
+    prevData.productivity === nextData.productivity &&
+    prevData.interdependence === nextData.interdependence &&
+    prevData.engagement === nextData.engagement &&
+    prevData.atmosphere?.o2 === nextData.atmosphere?.o2;
+
+  if (!telemetryFieldsEqual) return false;
+
+  // distanceKm e velocity.kmh mudam a cada tick, mas só importam aqui para
+  // decidir se o botão do Mapa Estelar fica desabilitado. Comparamos o
+  // resultado dessa conta, não os números crus.
+  const prevMapDisabled = prevProps.isPaused || prevProps.isDobraAtivada ||
+    (!prevProps.isForcedMapEdit && (prevProps.distanceKm <= 0 || (prevData.velocity?.kmh ?? 0) < 60000));
+  const nextMapDisabled = nextProps.isPaused || nextProps.isDobraAtivada ||
+    (!nextProps.isForcedMapEdit && (nextProps.distanceKm <= 0 || (nextData.velocity?.kmh ?? 0) < 60000));
+
+  if (prevMapDisabled !== nextMapDisabled) return false;
+
+  return (
+    prevProps.isPaused === nextProps.isPaused &&
+    prevProps.showStellarMap === nextProps.showStellarMap &&
+    prevProps.isDobraAtivada === nextProps.isDobraAtivada &&
+    prevProps.plannedRoute === nextProps.plannedRoute &&
+    prevProps.routeIndex === nextProps.routeIndex &&
+    prevProps.isOxygenRefilled === nextProps.isOxygenRefilled &&
+    prevProps.lastImpactTimestamp === nextProps.lastImpactTimestamp &&
+    prevProps.isForcedMapEdit === nextProps.isForcedMapEdit &&
+    prevProps.sosSignalData === nextProps.sosSignalData &&
+    prevProps.onRouteChanged === nextProps.onRouteChanged &&
+    prevProps.setShowStellarMap === nextProps.setShowStellarMap &&
+    prevProps.onSosDetected === nextProps.onSosDetected
+  );
+};
+
+export default React.memo(TelemetryDisplay, areTelemetryPropsEqual);

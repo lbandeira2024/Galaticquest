@@ -178,6 +178,10 @@ const SpaceView = ({
 
   const starsRef = useRef([]);
   const fastStarsRef = useRef([]);
+  // OTIMIZAÇÃO: buckets reutilizados para agrupar o desenho das estrelas por
+  // cor (fillStyle) em vez de trocar o estado do canvas a cada estrela.
+  // Isso evita até ~1500 trocas de fillStyle por frame, deixando só 6.
+  const starBucketsRef = useRef(null);
 
   const { playTrack } = useAudio();
   const currentTrackRef = useRef(null);
@@ -204,6 +208,18 @@ const SpaceView = ({
       /* ATUALIZADO: Quantidade de estrelas aumentada para 1500 simulando a densidade da imagem */
       starsRef.current = Array.from({ length: 1500 }, () => generateStar(window.innerWidth, window.innerHeight, false));
       fastStarsRef.current = Array.from({ length: 40 }, () => generateStar(window.innerWidth, window.innerHeight, false, true));
+
+      // 6 buckets: índices 0-4 = cor HSL (hueIndex), índice 5 = branco/azul claro.
+      // Pré-alocados uma única vez com o tamanho máximo possível para não gerar
+      // lixo de memória (GC) a cada frame.
+      const maxStars = starsRef.current.length;
+      starBucketsRef.current = Array.from({ length: 6 }, () => ({
+        xs: new Float32Array(maxStars),
+        ys: new Float32Array(maxStars),
+        sizes: new Float32Array(maxStars),
+        alphas: new Float32Array(maxStars),
+        count: 0
+      }));
     }
   }, []);
 
@@ -358,6 +374,15 @@ const SpaceView = ({
       /* ATUALIZADO: Limpeza do canvas mantendo compatibilidade com o fundo gradiente via opacidade */
       ctx.clearRect(0, 0, width, height);
 
+      // ------------------------------------------------------------
+      // PASSO 1: física + cálculo de posição/tamanho/alpha de cada estrela.
+      // Em vez de desenhar aqui (o que forçava até 1500 trocas de
+      // ctx.fillStyle por frame), guardamos cada estrela no bucket da sua
+      // cor. O desenho de verdade acontece no PASSO 2, agrupado por cor.
+      // ------------------------------------------------------------
+      const buckets = starBucketsRef.current;
+      for (let b = 0; b < buckets.length; b++) buckets[b].count = 0;
+
       for (let i = 0; i < starArray.length; i++) {
         const star = starArray[i];
         star.z -= (speedFactor + star.baseSpeed) * dt;
@@ -383,26 +408,42 @@ const SpaceView = ({
 
         if (x < 0 || x > width || y < 0 || y > height) continue;
 
-        const size = scale * star.size * 0.3;
+        const rawSize = scale * star.size * 0.3;
         const twinkleAlpha = star.baseAlpha * (0.4 + Math.abs(Math.sin(star.twinklePhase)) * 0.6);
         const targetAlpha = Math.min(1.0, scale * 1.5) * (isWarping ? 1 : twinkleAlpha);
 
-        if (currentCtxAlpha !== targetAlpha) {
-          ctx.globalAlpha = targetAlpha;
-          currentCtxAlpha = targetAlpha;
-        }
-
         /* ATUALIZADO: Algumas estrelas recebem cor HSL, outras branco/azul claro para misturar como na foto */
-        if (starSpeedHigh || star.hueIndex < 3) {
-          ctx.fillStyle = STAR_COLORS_HSL[star.hueIndex];
-          ctx.fillRect(x, y, size * 1.5, size * 1.5);
-        } else {
-          ctx.fillStyle = '#f0f8ff';
-          ctx.fillRect(x, y, size, size);
+        const isColored = starSpeedHigh || star.hueIndex < 3;
+        const bucket = buckets[isColored ? star.hueIndex : 5];
+        const idx = bucket.count;
+        bucket.xs[idx] = x;
+        bucket.ys[idx] = y;
+        bucket.sizes[idx] = isColored ? rawSize * 1.5 : rawSize;
+        bucket.alphas[idx] = targetAlpha;
+        bucket.count = idx + 1;
+      }
+
+      // PASSO 2: desenha bucket por bucket — no máximo 6 trocas de
+      // fillStyle por frame, em vez de uma por estrela.
+      for (let b = 0; b < buckets.length; b++) {
+        const bucket = buckets[b];
+        if (bucket.count === 0) continue;
+
+        ctx.fillStyle = b < 5 ? STAR_COLORS_HSL[b] : '#f0f8ff';
+
+        for (let k = 0; k < bucket.count; k++) {
+          const a = bucket.alphas[k];
+          if (currentCtxAlpha !== a) {
+            ctx.globalAlpha = a;
+            currentCtxAlpha = a;
+          }
+          const s = bucket.sizes[k];
+          ctx.fillRect(bucket.xs[k], bucket.ys[k], s, s);
         }
       }
 
       if (isWarping) {
+        let currentFastFillStyle = null;
         for (let i = 0; i < fastStarArray.length; i++) {
           const star = fastStarArray[i];
 
@@ -422,12 +463,18 @@ const SpaceView = ({
             currentCtxAlpha = star.baseAlpha;
           }
 
-          ctx.fillStyle = STAR_COLORS_HSL[star.hueIndex];
+          // Evita reatribuir fillStyle/strokeStyle quando a estrela seguinte
+          // tem a mesma cor da anterior (só 5 cores possíveis no total).
+          const starColor = STAR_COLORS_HSL[star.hueIndex];
+          if (currentFastFillStyle !== starColor) {
+            ctx.fillStyle = starColor;
+            ctx.strokeStyle = starColor;
+            currentFastFillStyle = starColor;
+          }
           ctx.beginPath();
           ctx.moveTo(x, y);
           ctx.lineTo(x - (star.dirX * 15), y - (star.dirY * 15));
           ctx.lineWidth = star.size;
-          ctx.strokeStyle = STAR_COLORS_HSL[star.hueIndex];
           ctx.stroke();
         }
       }

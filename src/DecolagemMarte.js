@@ -452,7 +452,7 @@ const MainDisplayWindow = React.memo(({
           dobraVideoRef.current.currentTime = 0;
         }
       } catch (e) {
-        console.log("Warm-up interrompido pelo navegador (normal):", e);
+        // Navegador bloqueou o autoplay do warm-up; comportamento esperado, ignora.
       }
     };
     warmUpVideos();
@@ -462,7 +462,7 @@ const MainDisplayWindow = React.memo(({
     let timeout;
     if (mainDisplayState === 'clouds' && cloudsVideoRef.current) {
       setTimeout(() => {
-        if (cloudsVideoRef.current) cloudsVideoRef.current.play().catch(e => console.log(e));
+        if (cloudsVideoRef.current) cloudsVideoRef.current.play().catch(() => { });
       }, 50);
     } else if (cloudsVideoRef.current) {
       timeout = setTimeout(() => {
@@ -480,7 +480,7 @@ const MainDisplayWindow = React.memo(({
     if (isDobraAtivada && dobraVideoRef.current) {
       setTimeout(() => {
         if (dobraVideoRef.current) {
-          dobraVideoRef.current.play().catch(e => console.log(e));
+          dobraVideoRef.current.play().catch(() => { });
         }
       }, 50);
     } else if (dobraVideoRef.current) {
@@ -718,7 +718,7 @@ const DecolagemMarte = () => {
       const audio = new Audio(url);
       audio.play().catch(err => console.warn(`Erro ao forçar SFX ${url}:`, err));
     } catch (e) {
-      console.log(e);
+      console.warn(`Erro ao criar áudio ${url}:`, e);
     }
   }, []);
 
@@ -764,6 +764,7 @@ const DecolagemMarte = () => {
   const travelStartedRef = useRef(travelStarted);
 
   const [progress, setProgress] = useState(0);
+  const progressRef = useRef(progress);
 
   const [arrivedAtMars, setArrivedAtMars] = useState(false);
   const arrivedAtMarsRef = useRef(arrivedAtMars);
@@ -840,6 +841,10 @@ const DecolagemMarte = () => {
   const [processadorO2, setProcessadorO2] = useState(0);
   const processadorO2Ref = useRef(processadorO2);
 
+  // [VIRTUS] Índice das Virtudes (0 a 1), calculado no servidor e recebido
+  // via /game-data. Exibido no painel como porcentagem.
+  const [virtusIndex, setVirtusIndex] = useState(0);
+
   const [travelTime, setTravelTime] = useState(0);
   const [teamPhotoUrl, setTeamPhotoUrl] = useState(null);
   const [isSosMinervaActive, setIsSosMinervaActive] = useState(false);
@@ -869,11 +874,13 @@ const DecolagemMarte = () => {
   const { isPaused, togglePause } = usePause();
   const isPausedRef = useRef(isPaused);
 
+
   // --- NOVA LÓGICA DE CONTAGEM DE CORPOS CELESTES ---
   const countCorposCelestes = useMemo(() => {
     if (!plannedRoute || plannedRoute.length === 0) return 0;
     let count = 0;
-    for (let i = 0; i <= routeIndex; i++) {
+    // Alterado de i = 0 para i = 1 para ignorar o planeta de origem (Terra)
+    for (let i = 1; i <= routeIndex; i++) {
       if (plannedRoute[i] && plannedRoute[i].name) {
         const stepName = normalizeName(plannedRoute[i].name);
         const isStation = STATION_NAMES.some(s => stepName.includes(s));
@@ -898,6 +905,7 @@ const DecolagemMarte = () => {
   useEffect(() => { monitorStateRef.current = monitorState; }, [monitorState]);
   useEffect(() => { plannedRouteRef.current = plannedRoute; }, [plannedRoute]);
   useEffect(() => { routeIndexRef.current = routeIndex; }, [routeIndex]);
+  useEffect(() => { progressRef.current = progress; }, [progress]);
   useEffect(() => { selectedPlanetRef.current = selectedPlanet; }, [selectedPlanet]);
   useEffect(() => { distanceKmRef.current = distanceKm; }, [distanceKm]);
   useEffect(() => { chosenShipRef.current = chosenShip; }, [chosenShip]);
@@ -935,7 +943,12 @@ const DecolagemMarte = () => {
   useEffect(() => {
     let timer;
     if (mainDisplayState === 'stars') {
-      if (routeIndex > 0) {
+      // Mesmo critério do efeito de retomada acima: routeIndex > 0 (já
+      // concluiu etapa) OU progress > 0 (retomando no meio da 1ª etapa)
+      // usam o delay curto, já que não há cutscene de decolagem pra esperar.
+      // Usa progressRef (não o state) para não re-disparar este efeito a
+      // cada tick de progresso durante o voo.
+      if (routeIndex > 0 || progressRef.current > 0) {
         timer = setTimeout(() => { canDecreaseDistanceRef.current = true; }, 4500);
       } else {
         timer = setTimeout(() => { canDecreaseDistanceRef.current = true; }, 20000);
@@ -995,7 +1008,8 @@ const DecolagemMarte = () => {
         engagement: telemetryRef.current.engagement
       },
       distanciaPercorridaKm: accumulatedDistanceKmRef.current,
-      corposCelestesVisitados: countCorposCelestesRef.current
+      corposCelestesVisitados: countCorposCelestesRef.current,
+      distanciaRestanteKm: distanceKmRef.current // <-- ADICIONE ESTA LINHA
     };
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
@@ -1014,7 +1028,8 @@ const DecolagemMarte = () => {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
           routeIndex: currentIndex,
           distanciaPercorridaKm: accumulatedDistanceKmRef.current,
-          corposCelestesVisitados: countCorposCelestesRef.current
+          corposCelestesVisitados: countCorposCelestesRef.current,
+          distanciaRestanteKm: distanceKmRef.current // <-- ADICIONE ESTA LINHA
         }),
       });
     } catch (error) { console.error("ERRO: Falha ao salvar progresso:", error); }
@@ -1029,7 +1044,8 @@ const DecolagemMarte = () => {
       routeIndex: currentIndex,
       rotaPlanejada: newRouteArray,
       distanciaPercorridaKm: accumulatedDistanceKmRef.current,
-      corposCelestesVisitados: countCorposCelestesRef.current
+      corposCelestesVisitados: countCorposCelestesRef.current,
+      distanciaRestanteKm: distanceKmRef.current // <-- ADICIONE ESTA LINHA
     };
     try {
       await fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
@@ -1088,7 +1104,7 @@ const DecolagemMarte = () => {
   useEffect(() => { handleChallengeEndRef.current = handleChallengeEnd; }, [handleChallengeEnd]);
 
   const handleMudarRota = useCallback(() => {
-    playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
+    //playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
     setShowConfirmacaoModal(false);
     setShowStoreModal(false);
     setShowSosSurprise(false);
@@ -1137,7 +1153,7 @@ const DecolagemMarte = () => {
       setIsDobraEnabled(false);
       setIsDeparting(false);
 
-      playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
+      //playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
     }, 4000);
   }, [playSFX, triggerMinervaInterplanetarySpeed, stopAllAudio, fadeOutAudio, playTrack]);
 
@@ -1209,10 +1225,18 @@ const DecolagemMarte = () => {
         setRefetchTrigger(prev => prev + 1);
         setIsDeparting(false);
 
-        playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
+        //playTrack('/sounds/SUA_MUSICA_PADRAO.mp3', { loop: true, isPrimary: true });
       }, 4000);
     }
-  }, [saveNewRouteAndProgress, playSFX, arrivedAtMars, travelStarted, routeIndex, plannedRoute, distanceKm, isForcedMapEdit, triggerMinervaInterplanetarySpeed, stopAllAudio, fadeOutAudio, playTrack]);
+    // OTIMIZAÇÃO: `distanceKm`, `routeIndex` e `plannedRoute` estavam nesta
+    // lista mas não são lidos em nenhum lugar do corpo da função (o código
+    // usa `newRouteData.newPlannedRoute`/`newRouteData.newRouteIndex`, que
+    // vêm do argumento, e refs onde precisa do valor atual). Como
+    // `distanceKm` muda a cada ~80ms durante o voo, mantê-lo aqui recriava
+    // esta função o tempo todo e quebrava a memoização do TelemetryDisplay
+    // (que recebe esta função via prop `onRouteChanged`). Removidos por
+    // serem, de fato, dependências não usadas.
+  }, [saveNewRouteAndProgress, playSFX, arrivedAtMars, travelStarted, isForcedMapEdit, triggerMinervaInterplanetarySpeed, stopAllAudio, fadeOutAudio, playTrack]);
 
   const handleEscolha = async (opcao, desafioId, impactos) => {
     setIsTransmissionStarting(false); setIsDialogueFinished(false);
@@ -1381,7 +1405,18 @@ const DecolagemMarte = () => {
   useEffect(() => {
     if (isLoadingRoute) return;
 
-    if (routeIndex > 0) {
+    // Retomar em pleno voo: além de routeIndex > 0 (já concluiu alguma etapa),
+    // também conta progress > 0 — o jogador pode ter deslogado/fechado o
+    // navegador ainda na PRIMEIRA etapa (Terra -> 1º destino), caso em que
+    // routeIndex continua 0 mas ele já percorreu parte do trajeto. Sem essa
+    // checagem, a cutscene inteira de decolagem (~45s) tocava de novo do
+    // zero, dando a impressão de que a rota tinha reiniciado.
+    // Usa progressRef (não o state) para este efeito não re-disparar a
+    // cada tick de progresso durante o voo — só nos importa o valor no
+    // momento em que isLoadingRoute/routeIndex muda.
+    const isResumingMidFlight = routeIndex > 0 || progressRef.current > 0;
+
+    if (isResumingMidFlight) {
       if (!sequenceStarted.current) {
         sequenceStarted.current = true;
         setMainDisplayState('stars');
@@ -1485,15 +1520,18 @@ const DecolagemMarte = () => {
       try {
         const response = await fetch(`${API_BASE_URL}/${userId}/game-data?t=${Date.now()}`);
         const data = await response.json();
+
         if (data.success) {
           if (data._id) setGroupId(data._id);
           if (data.naveEscolhida) setChosenShip(data.naveEscolhida);
           if (data.spaceCoins !== undefined) syncSpaceCoinsRef.current(data.spaceCoins);
           if (data.processadorO2 !== undefined) setProcessadorO2(data.processadorO2);
+          if (data.virtusIndex !== undefined) setVirtusIndex(data.virtusIndex);
 
-          if (data.distanciaPercorridaKm !== undefined) {
-            setAccumulatedDistanceKm(data.distanciaPercorridaKm);
-            accumulatedDistanceKmRef.current = data.distanciaPercorridaKm;
+          if (data.distanciaPercorridaKm != null) {
+            const safeDistance = Number(data.distanciaPercorridaKm) || 0;
+            setAccumulatedDistanceKm(safeDistance);
+            accumulatedDistanceKmRef.current = safeDistance;
           }
 
           if (data.sosHistory) {
@@ -1522,9 +1560,17 @@ const DecolagemMarte = () => {
             setOriginPlanet({ nome: originStep.name });
             setSelectedPlanet({ nome: nextStep.name });
 
-            const distFromDB = nextStep.distance || 0;
+            // LÊ A DISTÂNCIA RESTANTE EXATA DO BANCO DE DADOS
+            const distFromDB = data.distanciaRestanteKm !== undefined ? data.distanciaRestanteKm : (nextStep.distance || 0);
             setDistanceKm(distFromDB);
             distanceKmRef.current = distFromDB;
+
+            // --- ADICIONE ESTAS 4 LINHAS PARA CORRIGIR O ROUTE MONITOR ---
+            const initialDistanceForLeg = nextStep.distance || 1;
+            const distanceTraveled = initialDistanceForLeg - distFromDB;
+            const progressPercentage = Math.max(0, Math.min((distanceTraveled / initialDistanceForLeg) * 100, 100));
+            setProgress(progressPercentage);
+            // -------------------------------------------------------------
 
           } else {
             setSelectedPlanet({ nome: "Erro de Rota" });
@@ -1676,18 +1722,39 @@ const DecolagemMarte = () => {
   useEffect(() => {
     const isCritical = (telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20) && !isRestoringSOS;
     alarmAudio.loop = true;
-    if (isCritical && !isPaused) { alarmAudio.play().catch(e => console.log("Erro ao tocar alarme:", e)); }
+    if (isCritical && !isPaused) { if (alarmAudio.paused) alarmAudio.play().catch(e => console.warn("Erro ao tocar alarme:", e)); }
     else { alarmAudio.pause(); alarmAudio.currentTime = 0; }
     return () => { alarmAudio.pause(); };
-  }, [telemetry, isPaused, isRestoringSOS, alarmAudio]);
+    // OTIMIZAÇÃO: dependíamos do objeto `telemetry` inteiro, que ganha uma
+    // referência nova a cada ~100ms durante o voo (inclusive quando só a
+    // velocidade muda, o que não afeta este efeito). Isso disparava
+    // play()/pause() no áudio do alarme 10x por segundo. Agora dependemos só
+    // dos campos que realmente decidem se o alarme toca.
+  }, [
+    telemetry.atmosphere.o2,
+    telemetry.propulsion.powerOutput,
+    telemetry.direction,
+    telemetry.stability,
+    telemetry.productivity,
+    telemetry.interdependence,
+    telemetry.engagement,
+    isPaused,
+    isRestoringSOS,
+    alarmAudio
+  ]);
 
   useEffect(() => {
     if (isRestoringSOS && !isPaused) {
+      // OTIMIZAÇÃO: era um setInterval de 50ms (20 renders/s) — de longe o
+      // timer mais agressivo do jogo, bem mais frequente que o game loop
+      // (throttled a ~10-12/s). Trocado para 150ms/+6, que restaura na
+      // MESMA velocidade total (2 a cada 50ms = 6 a cada 150ms), só que com
+      // 1/3 dos renders enquanto o S.O.S. está ativo.
       restoreIntervalRef.current = setInterval(() => {
         let anyChanged = false;
         let allFull = true;
         const restoreValue = (currentVal) => {
-          if (currentVal < 100) { anyChanged = true; allFull = false; return Math.min(100, currentVal + 2); }
+          if (currentVal < 100) { anyChanged = true; allFull = false; return Math.min(100, currentVal + 6); }
           return currentVal;
         };
 
@@ -1702,7 +1769,7 @@ const DecolagemMarte = () => {
         if (anyChanged) setTelemetry({ ...telemetryRef.current });
 
         if (allFull) { clearInterval(restoreIntervalRef.current); setIsRestoringSOS(false); saveTelemetryData(); }
-      }, 50);
+      }, 150);
     } else if (isPaused && restoreIntervalRef.current) { clearInterval(restoreIntervalRef.current); }
     return () => { if (restoreIntervalRef.current) clearInterval(restoreIntervalRef.current); };
   }, [isRestoringSOS, isPaused, saveTelemetryData]);
@@ -1799,7 +1866,20 @@ const DecolagemMarte = () => {
           const newDistance = Math.max(0, distanceKmRef.current - distanceToDecrease);
           distanceKmRef.current = newDistance;
 
-          if (timestamp - lastDistanceRenderTime.current > 80) {
+          // OTIMIZAÇÃO: este bloco inteiro (a partir do `if
+          // (travelStartedRef.current...` acima) roda em TODO frame do game
+          // loop, ou seja, a até 60x por segundo — ele não é protegido pelo
+          // throttle de `telemetryInterval` (100ms) usado para velocidade.
+          // `shouldRenderDistanceUpdate` guarda essa decisão de ~80ms (already
+          // usada para `setDistanceKm`) para reaproveitar mais abaixo no
+          // `setProgress`, que antes era chamado sem nenhum throttle e forçava
+          // o componente `DecolagemMarte` inteiro (painéis, telemetria, mapa)
+          // a re-renderizar 60x/s durante todo o voo — mesmo com os filhos
+          // memoizados, o próprio render do componente pai já custava caro
+          // rodando nessa frequência. A barra de progresso não perde suavidade
+          // visível atualizando ~12.5x/s em vez de 60x/s.
+          const shouldRenderDistanceUpdate = timestamp - lastDistanceRenderTime.current > 80;
+          if (shouldRenderDistanceUpdate) {
             setDistanceKm(Math.round(newDistance));
             setAccumulatedDistanceKm(accumulatedDistanceKmRef.current);
             lastDistanceRenderTime.current = timestamp;
@@ -1827,8 +1907,6 @@ const DecolagemMarte = () => {
                 }).catch(err => console.error("Erro ao salvar S.O.S no histórico:", err));
 
                 setUsedSosIds(prev => [...prev, selectedEvent.id]);
-              } else {
-                console.log("Todos os eventos S.O.S. já foram explorados.");
               }
             }
 
@@ -1961,11 +2039,13 @@ const DecolagemMarte = () => {
             })();
           }
 
-          const destinationStepIndex = routeIndexRef.current + 1;
-          const initialDistanceForLeg = (plannedRouteRef.current && plannedRouteRef.current[destinationStepIndex] ? plannedRouteRef.current[destinationStepIndex].distance : null) || newDistance || 1;
-          const distanceTraveled = initialDistanceForLeg - newDistance;
-          const progressPercentage = Math.min(Math.floor((distanceTraveled / initialDistanceForLeg) * 100), 100);
-          setProgress(progressPercentage);
+          if (shouldRenderDistanceUpdate) {
+            const destinationStepIndex = routeIndexRef.current + 1;
+            const initialDistanceForLeg = (plannedRouteRef.current && plannedRouteRef.current[destinationStepIndex] ? plannedRouteRef.current[destinationStepIndex].distance : null) || newDistance || 1;
+            const distanceTraveled = initialDistanceForLeg - newDistance;
+            const progressPercentage = Math.min((distanceTraveled / initialDistanceForLeg) * 100, 100);
+            setProgress(progressPercentage);
+          }
         }
       } catch (fatalError) {
         console.error("Game Loop Anti-Crash ativado.", fatalError);
@@ -1977,6 +2057,103 @@ const DecolagemMarte = () => {
     animationFrameId.current = requestAnimationFrame(gameLoop);
     return () => cancelAnimationFrame(animationFrameId.current);
   }, [API_BASE_URL, userId, playSFX, playTrack]);
+
+  // ========================================================
+  // AUTO-SAVE DA DISTÂNCIA PERCORRIDA E RESTANTE (15 seg)
+  // ========================================================
+  useEffect(() => {
+    // Se o jogo estiver pausado ou a viagem não começou, não faz nada
+    if (isPaused || !travelStarted) return;
+
+    const autoSaveInterval = setInterval(() => {
+      if (!userId || !API_BASE_URL) return;
+
+      // Só salva se a distância acumulada já for maior que zero
+      if (accumulatedDistanceKmRef.current > 0) {
+        fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+            corposCelestesVisitados: countCorposCelestesRef.current,
+            distanciaRestanteKm: distanceKmRef.current // Salva o ponto exato da viagem
+          }),
+        }).catch(err => console.error("Erro no auto-save de distância:", err));
+      }
+    }, 15000);
+
+    // Limpa o cronômetro se o componente for desmontado ou pausado
+    return () => clearInterval(autoSaveInterval);
+  }, [isPaused, travelStarted, userId, API_BASE_URL]);
+
+  // ========================================================
+  // SALVAMENTO GARANTIDO AO FECHAR A ABA/NAVEGADOR
+  // (não existe botão de "Sair" — o jogador simplesmente fecha o
+  // navegador, então isso funciona como o "logout" do jogo.
+  // Sem isso, até 15s de progresso do auto-save acima podem se
+  // perder. O RouteMonitor lê distanceKm/progress derivados
+  // exatamente destes campos no próximo login, via fetchGameData.)
+  // ========================================================
+  useEffect(() => {
+    const flushProgressOnExit = () => {
+      if (!userId || !API_BASE_URL || !travelStartedRef.current) return;
+
+      const payload = {
+        routeIndex: routeIndexRef.current,
+        distanciaPercorridaKm: accumulatedDistanceKmRef.current,
+        distanciaRestanteKm: distanceKmRef.current, // ponto exato da viagem (usado pelo RouteMonitor ao retomar)
+        corposCelestesVisitados: countCorposCelestesRef.current,
+        telemetryState: {
+          oxygen: telemetryRef.current.atmosphere.o2,
+          nuclearPropulsion: telemetryRef.current.propulsion.powerOutput,
+          direction: telemetryRef.current.direction,
+          stability: telemetryRef.current.stability,
+          productivity: telemetryRef.current.productivity,
+          interdependence: telemetryRef.current.interdependence,
+          engagement: telemetryRef.current.engagement
+        }
+      };
+
+      const url = `${API_BASE_URL}/${userId}/update-gamedata`;
+
+      try {
+        if (navigator.sendBeacon) {
+          // sendBeacon é assíncrono e sobrevive ao fechamento da aba,
+          // diferente de fetch/axios que podem ser abortados pelo navegador.
+          const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+          navigator.sendBeacon(url, blob);
+        } else {
+          // Fallback para navegadores sem suporte a sendBeacon
+          fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            keepalive: true
+          }).catch(() => { });
+        }
+      } catch (e) {
+        console.error("Erro ao salvar progresso final antes de sair:", e);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') flushProgressOnExit();
+    };
+
+    // pagehide cobre fechamento de aba/navegador (inclusive mobile);
+    // beforeunload cobre navegação/recarregamento em desktop;
+    // visibilitychange é uma rede de segurança extra para quando
+    // nenhum dos dois eventos dispara a tempo (comum em mobile).
+    window.addEventListener('pagehide', flushProgressOnExit);
+    window.addEventListener('beforeunload', flushProgressOnExit);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('pagehide', flushProgressOnExit);
+      window.removeEventListener('beforeunload', flushProgressOnExit);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [userId, API_BASE_URL]);
 
   const currentMaxSpeed = useMemo(() => {
     if (isDobraAtivada) return 100000000;
@@ -2041,12 +2218,17 @@ const DecolagemMarte = () => {
     return () => clearTimeout(timer);
   }, [dialogueIndex, isTransmissionStarting, activeChallengeData, handleNextDialogue]);
 
+  // OTIMIZAÇÃO: usava `distanceKm` (state) na dependência, que muda a cada
+  // ~80ms durante o voo — isso recriava esta função a cada tick e, por
+  // consequência, quebrava a memoização do TelemetryDisplay (que recebe
+  // esta função via prop `setShowStellarMap`). Trocamos para os refs, que
+  // sempre têm o valor atual sem precisar recriar a função.
   const handleToggleMap = useCallback((show) => {
     if (show) {
-      if (distanceKm <= 0 && !isForcedMapEdit) { playSound('/sounds/error.mp3'); return; }
+      if (distanceKmRef.current <= 0 && !isForcedMapEditRef.current) { playSound('/sounds/error.mp3'); return; }
     }
     setShowStellarMap(show);
-  }, [distanceKm, isForcedMapEdit, playSound]);
+  }, [playSound]);
 
   // --- CENTRAL DE ATALHOS ---
   useEffect(() => {
@@ -2092,7 +2274,6 @@ const DecolagemMarte = () => {
           }
 
           if (distanceKmRef.current > 0 && (isDobraAtivadaRef.current || telemetryRef.current.velocity.kmh < 60000)) {
-            console.log("❌ Mapa bloqueado pelas regras de voo.");
             return;
           }
 
@@ -2144,7 +2325,7 @@ const DecolagemMarte = () => {
 
             <div className="ship-info-stats" style={{ flex: 1 }}>
               <TypewriterText label="Corpos celestes visitados" value={countCorposCelestes.toString().padStart(2, '0')} />
-              <TypewriterText label="Virtus" value="0,0 %" />
+              <TypewriterText label="Virtus" value={`${virtusIndex.toFixed(3).replace('.', ',')}`} />
 
               {/* === EXIBIÇÃO DA DISTÂNCIA EM UA === */}
               <div className="telemetry-distance-display" title={`${(accumulatedDistanceKm / 149597870).toFixed(8)} UA`}>
@@ -2355,5 +2536,6 @@ const DecolagemMarte = () => {
     </div>
   );
 };
+
 
 export default DecolagemMarte;
