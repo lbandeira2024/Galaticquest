@@ -1574,7 +1574,25 @@ const DecolagemMarte = () => {
             setSelectedPlanet({ nome: nextStep.name });
 
             // LÊ A DISTÂNCIA RESTANTE EXATA DO BANCO DE DADOS
-            const distFromDB = data.distanciaRestanteKm !== undefined ? data.distanciaRestanteKm : (nextStep.distance || 0);
+            // BUGFIX: `distanciaRestanteKm` vem do servidor como 0 (não
+            // `undefined`) tanto para uma perna que o jogador JÁ completou
+            // quanto para uma rota recém-planejada que ele nunca chegou a
+            // voar (o schema/documento no Mongo inicializa esse campo em 0
+            // em vez de deixá-lo ausente). Antes, `!== undefined` tratava
+            // esse 0 "de fábrica" como "restam 0km", ou seja: a perna já
+            // nascia com distância zerada. Isso fazia o loop de jogo (que
+            // considera newDistance <= 0 como chegada) marcar o jogador
+            // como "chegado" no planeta de destino sem ele ter voado nada,
+            // avançar o routeIndex e salvar de volta distanciaRestanteKm=0
+            // para a PRÓXIMA perna — repetindo o problema a cada novo login
+            // e fazendo o jogador "pular" de planeta em planeta na rota. Um
+            // valor <= 0 (ou ausente/inválido) agora é tratado como "esta
+            // perna ainda não foi percorrida" e cai para a distância cheia
+            // do trecho; só um valor > 0 salvo é considerado progresso real.
+            const storedRemainingKm = Number(data.distanciaRestanteKm);
+            const distFromDB = Number.isFinite(storedRemainingKm) && storedRemainingKm > 0
+              ? storedRemainingKm
+              : (nextStep.distance || 0);
             setDistanceKm(distFromDB);
             distanceKmRef.current = distFromDB;
 
