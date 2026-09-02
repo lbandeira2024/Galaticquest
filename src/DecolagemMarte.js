@@ -2564,7 +2564,24 @@ const DecolagemMarte = () => {
             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
             onEnded={() => {
               setPlayingSosVideo(false);
-              setShowSosSurprise(true);
+              // BUGFIX: quando o grupo já usou as 4 histórias de
+              // SOS_EVENTS_LIST, sosSurpriseEvent fica null (nenhuma
+              // sobrou pra sortear na chegada) e o SosSurpriseModal nunca
+              // renderiza — o JSX dele exige `showSosSurprise &&
+              // sosSurpriseEvent` ao mesmo tempo. Sem este fallback, o
+              // vídeo do Nick terminava e o jogador ficava travado: nave
+              // parada, sem modal, sem nenhum botão que chame
+              // handleSeguirPlano/handleMudarRota pra retomar a viagem.
+              // Quando não sobrou história, reaproveita o mesmo modal
+              // genérico já usado na chegada normal sem desafio
+              // encontrado (ModalConfirmacaoViagem), que sabe continuar
+              // no plano ou mudar de rota.
+              if (sosSurpriseEvent) {
+                setShowSosSurprise(true);
+              } else {
+                setActiveChallengeData(null);
+                setShowConfirmacaoModal(true);
+              }
             }}
           />
         </div>
