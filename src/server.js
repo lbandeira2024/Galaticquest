@@ -797,6 +797,16 @@ function calcularScoreClimaVirtus(telemetryState) {
 
 async function calcularVirtusIndex(grupo) {
   if (!grupo) return 0;
+
+  // O componente de "clima" (engajamento/interdependência) usa os valores de
+  // telemetryState, que começam em 100/100 por padrão (medidores cheios,
+  // igual O2/propulsão/etc. no HUD). Sem essa checagem, uma equipe que ainda
+  // não respondeu nenhum CSD já começaria com Virtus = 0,100 em vez de
+  // 0,000, só por causa desse valor padrão. Por isso só contamos o clima
+  // (e o índice como um todo) depois que a equipe respondeu pelo menos 1 CSD.
+  const respostas = await CDS.countDocuments({ grupo: grupo._id });
+  if (respostas === 0) return 0;
+
   const scoreCSD = await calcularScoreCSDVirtus(grupo._id);
   const scoreDist = calcularScoreDistanciaVirtus(grupo.rotaPlanejada, grupo.routeIndex);
   const scoreClima = calcularScoreClimaVirtus(grupo.telemetryState);
