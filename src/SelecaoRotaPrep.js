@@ -24,6 +24,30 @@ const SelecaoRotaPrep = () => {
     const { apiBaseUrl } = useConfig();
     const API_BASE_URL = apiBaseUrl;
 
+    // GUARDA: esta tela (Passo 4 — Planejamento de Rota) nunca verificava
+    // se o jogador já tinha escolhido uma nave. Antes, dava pra chegar
+    // aqui sem nave (ex.: via login.js, que mandava todo mundo direto pra
+    // cá) e ainda planejar uma rota e "Iniciar Missão" sem nave nenhuma
+    // selecionada. Redireciona pra Seleção de Nave se faltar esse passo,
+    // não importa como o jogador chegou até aqui.
+    useEffect(() => {
+        let cancelled = false;
+        const checkNaveEscolhida = async () => {
+            if (!user?._id || !API_BASE_URL) return;
+            try {
+                const response = await fetch(`${API_BASE_URL}/${user._id}/game-data`);
+                const data = await response.json();
+                if (!cancelled && (!data.success || !data.naveEscolhida)) {
+                    navigate('/selecaonave', { replace: true });
+                }
+            } catch (error) {
+                console.error("Erro ao verificar nave escolhida:", error);
+            }
+        };
+        checkNaveEscolhida();
+        return () => { cancelled = true; };
+    }, [user, API_BASE_URL, navigate]);
+
     useEffect(() => {
         const currentMusic = "/sounds/trilha_galatica_v1.mp3";
         playTrack(currentMusic, { loop: true, isPrimary: false, volume: 0.5 });

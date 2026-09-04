@@ -790,6 +790,9 @@
   width: 100%;
   margin-top: 25px;
   position: relative;
+  /* Ordem fixa dentro do flex column do .left-panel-3d: garante que a
+     Minerva sempre venha ANTES do Processador O2, em qualquer breakpoint. */
+  order: 10;
 }
 
 .minerva-title {
@@ -953,7 +956,13 @@
 /* O2 Processor Display */
 .o2-processor-display {
   width: 100%;
-  margin-top: auto;
+  /* Antes: "margin-top: auto;". Num flex column isso empurra o elemento
+     para o FUNDO do .left-panel-3d (consome todo o espaço livre acima
+     dele), o que o afasta da Minerva e cria o vão vazio visto entre a
+     imagem da Minerva e o Processador O2. Trocado por uma margem fixa
+     para o bloco ficar colado logo abaixo da Minerva, em qualquer altura
+     de painel/tela. */
+  margin-top: clamp(10px, 2vh, 20px);
   margin-bottom: clamp(5px, 2vh, 15px);
   padding: clamp(4px, 1vh, 8px);
   background: rgba(0, 20, 40, 0.6);
@@ -966,6 +975,11 @@
   text-align: center;
   position: relative;
   z-index: 999;
+  /* Ordem fixa dentro do flex column do .left-panel-3d: garante que o
+     Processador O2 sempre venha DEPOIS (visualmente abaixo) da Minerva,
+     em qualquer breakpoint responsivo (mobile, notebook, 4K etc.),
+     independente de qualquer alteração futura na ordem do JSX. */
+  order: 20;
 }
 
 .o2-processor-label {

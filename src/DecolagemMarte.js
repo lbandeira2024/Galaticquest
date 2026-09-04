@@ -703,6 +703,7 @@ const highlightKeywords = (text, keywords) => {
 
 const DecolagemMarte = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const { apiBaseUrl } = useConfig();
   const API_BASE_URL = apiBaseUrl;
   const { spaceCoins, setSpaceCoins, syncSpaceCoins } = useSpaceCoins();
@@ -1275,9 +1276,15 @@ const DecolagemMarte = () => {
 
     if (!userId || !desafioId || !API_BASE_URL) return;
     try {
-      await fetch(`${API_BASE_URL}/record-choice`, {
+      const response = await fetch(`${API_BASE_URL}/record-choice`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, desafioId, escolha: opcao, impactos: impactos, newBalance: newBalance }),
       });
+      const result = await response.json();
+      // [VIRTUS] Atualiza o indicador na hora com o valor já recalculado
+      // pelo servidor nesta mesma resposta, em vez de esperar o próximo
+      // fetchGameData (que só roda no mount ou na troca de rota). É isso
+      // que faz o Virtus reagir "ao vivo" a cada CSD respondido.
+      if (result && result.virtusIndex !== undefined) setVirtusIndex(result.virtusIndex);
     } catch (error) { console.error("ERRO: Falha ao registrar escolha:", error); }
 
     setIsMinervaHighlighted(true);
@@ -1522,6 +1529,18 @@ const DecolagemMarte = () => {
         const data = await response.json();
 
         if (data.success) {
+          // GUARDA: sem nave escolhida, o jogador nunca deveria ter chegado
+          // até a tela de decolagem — ele saiu do jogo antes de terminar a
+          // Seleção de Astronave (etapa 1). Antes disto, a tela renderizava
+          // normalmente com chosenShip=null e, mais abaixo, sem rota
+          // planejada, caía no "Erro de Rota". Agora manda de volta para a
+          // etapa correta em vez de deixar o jogador preso numa tela de voo
+          // com estado incompleto.
+          if (!data.naveEscolhida) {
+            navigate('/selecaonave', { replace: true });
+            return;
+          }
+
           if (data._id) setGroupId(data._id);
           if (data.naveEscolhida) setChosenShip(data.naveEscolhida);
           if (data.spaceCoins !== undefined) syncSpaceCoinsRef.current(data.spaceCoins);
@@ -1561,7 +1580,25 @@ const DecolagemMarte = () => {
             setSelectedPlanet({ nome: nextStep.name });
 
             // LÊ A DISTÂNCIA RESTANTE EXATA DO BANCO DE DADOS
-            const distFromDB = data.distanciaRestanteKm !== undefined ? data.distanciaRestanteKm : (nextStep.distance || 0);
+            // BUGFIX: `distanciaRestanteKm` vem do servidor como 0 (não
+            // `undefined`) tanto para uma perna que o jogador JÁ completou
+            // quanto para uma rota recém-planejada que ele nunca chegou a
+            // voar (o schema/documento no Mongo inicializa esse campo em 0
+            // em vez de deixá-lo ausente). Antes, `!== undefined` tratava
+            // esse 0 "de fábrica" como "restam 0km", ou seja: a perna já
+            // nascia com distância zerada. Isso fazia o loop de jogo (que
+            // considera newDistance <= 0 como chegada) marcar o jogador
+            // como "chegado" no planeta de destino sem ele ter voado nada,
+            // avançar o routeIndex e salvar de volta distanciaRestanteKm=0
+            // para a PRÓXIMA perna — repetindo o problema a cada novo login
+            // e fazendo o jogador "pular" de planeta em planeta na rota. Um
+            // valor <= 0 (ou ausente/inválido) agora é tratado como "esta
+            // perna ainda não foi percorrida" e cai para a distância cheia
+            // do trecho; só um valor > 0 salvo é considerado progresso real.
+            const storedRemainingKm = Number(data.distanciaRestanteKm);
+            const distFromDB = Number.isFinite(storedRemainingKm) && storedRemainingKm > 0
+              ? storedRemainingKm
+              : (nextStep.distance || 0);
             setDistanceKm(distFromDB);
             distanceKmRef.current = distFromDB;
 
@@ -1573,7 +1610,12 @@ const DecolagemMarte = () => {
             // -------------------------------------------------------------
 
           } else {
-            setSelectedPlanet({ nome: "Erro de Rota" });
+            // Nave escolhida, mas rota planejada nunca foi definida (saiu do
+            // jogo antes de terminar a Seleção de Rota Estelar, etapa 4).
+            // Mesma lógica do guard acima: manda de volta pra etapa certa em
+            // vez de mostrar a tela de voo travada em "Erro de Rota".
+            navigate('/SelecaoRota', { replace: true });
+            return;
           }
           if (data.telemetryState) {
             telemetryRef.current = { ...telemetryRef.current, ...data.telemetryState, atmosphere: { ...telemetryRef.current.atmosphere, o2: data.telemetryState.oxygen ?? 100 }, propulsion: { ...telemetryRef.current.propulsion, powerOutput: data.telemetryState.nuclearPropulsion ?? 100 } };
@@ -2528,7 +2570,24 @@ const DecolagemMarte = () => {
             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
             onEnded={() => {
               setPlayingSosVideo(false);
-              setShowSosSurprise(true);
+              // BUGFIX: quando o grupo já usou as 4 histórias de
+              // SOS_EVENTS_LIST, sosSurpriseEvent fica null (nenhuma
+              // sobrou pra sortear na chegada) e o SosSurpriseModal nunca
+              // renderiza — o JSX dele exige `showSosSurprise &&
+              // sosSurpriseEvent` ao mesmo tempo. Sem este fallback, o
+              // vídeo do Nick terminava e o jogador ficava travado: nave
+              // parada, sem modal, sem nenhum botão que chame
+              // handleSeguirPlano/handleMudarRota pra retomar a viagem.
+              // Quando não sobrou história, reaproveita o mesmo modal
+              // genérico já usado na chegada normal sem desafio
+              // encontrado (ModalConfirmacaoViagem), que sabe continuar
+              // no plano ou mudar de rota.
+              if (sosSurpriseEvent) {
+                setShowSosSurprise(true);
+              } else {
+                setActiveChallengeData(null);
+                setShowConfirmacaoModal(true);
+              }
             }}
           />
         </div>

@@ -185,18 +185,58 @@ function normalizeVirtusName(str) {
     .replace(/[^a-z0-9]/g, '');
 }
 
-// Os 9 corpos que contam pro componente de 20% (distância), nos 3 grupos
-// definidos na especificação, com o peso de cada grupo dentro do índice
-// total (10% + 5% + 5% = 20%). "Distância" aqui é medida pelo próprio
-// avanço da equipe na SUA rota planejada (rotaPlanejada) — cada corpo só
-// conta se ele estiver na rota da equipe E já tiver sido alcançado
-// (routeIndex já passou daquele trecho). Não depende de nenhuma distância
-// "real" em UA fixa, porque a distância de cada trecho já é definida pela
-// própria rota do jogo (rotaPlanejada[i].distance).
+// Corpos que contam pro componente de 20% (distância), em 3 grupos com
+// peso diferente dentro do índice total (10% + 5% + 5% = 20%). "Distância"
+// aqui é medida pelo próprio avanço da equipe na SUA rota planejada
+// (rotaPlanejada) — cada corpo só conta se ele estiver na rota da equipe E
+// já tiver sido alcançado (routeIndex já passou daquele trecho). Não
+// depende de nenhuma distância "real" em UA fixa, porque a distância de
+// cada trecho já é definida pela própria rota do jogo
+// (rotaPlanejada[i].distance).
+//
+// ATUALIZADO em 2026-09-04 (3x):
+// 1) Lista original tinha só 9 corpos (todos do sistema solar externo/
+//    exoplanetas); rotas pelo sistema solar interno nunca pontuavam aqui
+//    (bug reportado por jogador — ver PTT de 04/09).
+// 2) Restrita a só planetas e luas (sem estações, sem anões/asteroides).
+// 3) Por instrução do Wagner: passa a incluir também asteroides e
+//    planetas-anões — mas SÓ os corpos que têm CSD explícito em
+//    `desafios.json` (front-end). Conferido 1:1 contra os 25 `planeta` de
+//    `desafios.json` nesta data: os 25 CSDs cobrem exatamente 25 corpos
+//    distintos, então a lista abaixo passou a ser literalmente essa lista
+//    de 25, reorganizada em 3 grupos por região. Isso tira da lista
+//    Calisto, Encélado e Titânia (que estavam na versão "só planetas e
+//    luas" mas não têm CSD nenhum) e acrescenta Fobos, Deimos (luas de
+//    Marte), Ceres, Vesta, Pallas (cinturão de asteroides) e Plutão,
+//    Haumea, Makemake, Eris (planetas-anões) — todos com CSD.
+//    IMPORTANTE: se `desafios.json` ganhar/perder um CSD (ou trocar o
+//    `planeta` de algum), esta lista precisa ser atualizada manualmente
+//    em conjunto — não há sincronização automática entre os dois arquivos.
 const VIRTUS_GRUPOS_DISTANCIA = [
-  { peso: 0.10, corpos: ['proximacentaurib', 'trappist1e', 'kepler186f'] }, // maior peso
-  { peso: 0.05, corpos: ['netuno', 'urano', 'plutao'] },                    // segundo maior peso
-  { peso: 0.05, corpos: ['eris', 'makemake', 'haumea'] },                   // menor peso
+  {
+    peso: 0.10, // sistema solar interno: planetas, luas de Marte e cinturão de asteroides
+    corpos: [
+      'mercurio', 'venus', 'lua', 'marte',
+      'fobos', 'deimos',
+      'ceres', 'vesta', 'pallas',
+    ],
+  },
+  {
+    peso: 0.05, // gigantes gasosos/gelados e suas luas com CSD
+    corpos: [
+      'jupiter', 'europa', 'ganimedes',
+      'saturno', 'tita',
+      'urano', 'oberon',
+      'netuno', 'tritao',
+    ],
+  },
+  {
+    peso: 0.05, // planetas-anões do cinturão de Kuiper + exoplanetas
+    corpos: [
+      'plutao', 'haumea', 'makemake', 'eris',
+      'trappist1e', 'kepler186f', 'proximacentaurib',
+    ],
+  },
 ];
 
 function calcularScoreDistanciaVirtus(rotaPlanejada, routeIndex) {
@@ -797,6 +837,16 @@ function calcularScoreClimaVirtus(telemetryState) {
 
 async function calcularVirtusIndex(grupo) {
   if (!grupo) return 0;
+
+  // O componente de "clima" (engajamento/interdependência) usa os valores de
+  // telemetryState, que começam em 100/100 por padrão (medidores cheios,
+  // igual O2/propulsão/etc. no HUD). Sem essa checagem, uma equipe que ainda
+  // não respondeu nenhum CSD já começaria com Virtus = 0,100 em vez de
+  // 0,000, só por causa desse valor padrão. Por isso só contamos o clima
+  // (e o índice como um todo) depois que a equipe respondeu pelo menos 1 CSD.
+  const respostas = await CDS.countDocuments({ grupo: grupo._id });
+  if (respostas === 0) return 0;
+
   const scoreCSD = await calcularScoreCSDVirtus(grupo._id);
   const scoreDist = calcularScoreDistanciaVirtus(grupo.rotaPlanejada, grupo.routeIndex);
   const scoreClima = calcularScoreClimaVirtus(grupo.telemetryState);
@@ -1168,7 +1218,17 @@ app.post("/record-choice", async (req, res) => {
     const novaEscolha = new CDS({ grupo: user.grupo, usuario: user._id, desafioId, escolha: { id: escolha.id, texto: escolha.texto }, impactos });
     await novaEscolha.save();
     if (newBalance !== undefined) await Grupo.findByIdAndUpdate(user.grupo, { spaceCoins: newBalance });
-    res.status(201).json({ success: true, data: novaEscolha });
+
+    // [VIRTUS] Recalcula e devolve o índice já atualizado nesta mesma
+    // resposta, para o front poder refletir o impacto da escolha na hora
+    // (sem esperar o próximo fetch de game-data). Busca o grupo de novo
+    // depois do update de spaceCoins/impactos acima para pegar o estado
+    // mais recente (telemetryState pode já ter sido salvo por outra
+    // chamada em paralelo, ex.: saveTelemetryData).
+    const grupoAtualizado = await Grupo.findById(user.grupo);
+    const virtusIndex = await calcularVirtusIndex(grupoAtualizado);
+
+    res.status(201).json({ success: true, data: novaEscolha, virtusIndex });
   } catch (error) { res.status(500).json({ success: false }); }
 });
 
