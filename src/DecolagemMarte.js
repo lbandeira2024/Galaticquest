@@ -1276,9 +1276,15 @@ const DecolagemMarte = () => {
 
     if (!userId || !desafioId || !API_BASE_URL) return;
     try {
-      await fetch(`${API_BASE_URL}/record-choice`, {
+      const response = await fetch(`${API_BASE_URL}/record-choice`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ userId, desafioId, escolha: opcao, impactos: impactos, newBalance: newBalance }),
       });
+      const result = await response.json();
+      // [VIRTUS] Atualiza o indicador na hora com o valor já recalculado
+      // pelo servidor nesta mesma resposta, em vez de esperar o próximo
+      // fetchGameData (que só roda no mount ou na troca de rota). É isso
+      // que faz o Virtus reagir "ao vivo" a cada CSD respondido.
+      if (result && result.virtusIndex !== undefined) setVirtusIndex(result.virtusIndex);
     } catch (error) { console.error("ERRO: Falha ao registrar escolha:", error); }
 
     setIsMinervaHighlighted(true);
