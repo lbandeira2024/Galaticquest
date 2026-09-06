@@ -32,6 +32,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
+    
     // Log completo no console — é isso que faltava pra "ver o erro" em vez
     // de só a tela branca. Copie esse stack e me manda se acontecer de novo.
     console.error('[ERROR BOUNDARY] Crash capturado no render:', error);
