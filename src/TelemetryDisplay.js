@@ -328,7 +328,15 @@ const TelemetryDisplay = ({
         <button className="botao-transferir" disabled={isPaused} onClick={() => !isPaused && setShowTransferModal(true)}>Transferir</button>
       </div>
 
-      {showTransferModal && (
+      {/* FIX: a tela de transferência precisa ocupar o main-display por
+          inteiro (antes ficava com position:fixed solto no meio da tela,
+          sem relação com o main-display, e o conteúdo mais alto que o
+          espaço disponível estourava pra fora sem scroll, escondendo a
+          parte de baixo). Igual ao mapa estelar acima, usamos um portal —
+          mas em vez de document.body, miramos o próprio nó .main-display,
+          que já é position:absolute (funciona como containing block), pra
+          o modal preencher exatamente a área da tela principal. */}
+      {showTransferModal && createPortal(
         <div className="transfer-modal">
           <button className="close-transfer-button" onClick={() => { setShowTransferModal(false); setTransferError(''); }}>×</button>
           <h2 className="transfer-title">TRANSFERÊNCIA DE VALORES</h2>
@@ -357,7 +365,8 @@ const TelemetryDisplay = ({
             <button className="transfer-button cancel-button" onClick={() => setShowTransferModal(false)}>Cancelar</button>
             <button className="transfer-button" onClick={handleTransfer}>Confirmar Transferência</button>
           </div>
-        </div>
+        </div>,
+        document.querySelector('.main-display') || document.body
       )}
     </div>
   );
