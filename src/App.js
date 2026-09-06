@@ -8,6 +8,7 @@ import CadastroForm from "./CadastroForm";
 import Login from "./login";
 import TelaPlaneta from "./TelaPlaneta";
 import DecolagemMarte from "./DecolagemMarte";
+import ErrorBoundary from "./ErrorBoundary";
 // import StellarMap from './stellar-map/StellarMap'; // <--- (COMENTADO PARA CORRIGIR ERRO)
 import SelecaoNave from "./SelecaoNave";
 import SelecaoEquipe from "./SelecaoEquipe";
@@ -182,7 +183,14 @@ function AppContent() {
         <Route path="/" element={<CadastroForm />} />
         <Route path="/login" element={<Login />} />
         <Route path="/telaplaneta" element={<TelaPlaneta />} />
-        <Route path="/decolagem-marte" element={<DecolagemMarte />} />
+        <Route
+          path="/decolagem-marte"
+          element={
+            <ErrorBoundary>
+              <DecolagemMarte />
+            </ErrorBoundary>
+          }
+        />
         <Route path="*" element={<div>Página não encontrada</div>} />
       </Routes>
 

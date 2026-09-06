@@ -2206,9 +2206,30 @@ const DecolagemMarte = () => {
 
   const isPauseButtonDisabled = telemetry.velocity.kmh < 60000 || isDobraAtivada || distanceKm <= 0;
 
+  // GUARDA (diagnóstico tela-branca): valores usados direto no JSX (fora do
+  // try/catch do game loop) precisam ser sempre número, senão .toFixed()
+  // quebra o render inteiro e o React desmonta a árvore sem aviso nenhum
+  // (tela branca). Se o warn abaixo aparecer no console, achamos a origem
+  // exata do valor inválido — antes disso, o app só "sumia" sem log nenhum.
+  if (!Number.isFinite(virtusIndex)) {
+    console.warn('[GUARDA TELA-BRANCA] virtusIndex inválido no render:', virtusIndex);
+  }
+  const safeVirtusIndex = Number.isFinite(virtusIndex) ? virtusIndex : 0;
+
+  if (!Number.isFinite(accumulatedDistanceKm)) {
+    console.warn('[GUARDA TELA-BRANCA] accumulatedDistanceKm inválido no render:', accumulatedDistanceKm);
+  }
+  const safeAccumulatedDistanceKm = Number.isFinite(accumulatedDistanceKm) ? accumulatedDistanceKm : 0;
+
   const currentDialogueStep = activeChallengeData?.dialogo?.[dialogueIndex];
   const currentCharacterId = currentDialogueStep?.personagemId;
-  const currentCharacterData = currentCharacterId ? desafiosData.personagens[currentCharacterId] : null;
+  let currentCharacterData = null;
+  if (currentCharacterId) {
+    if (!desafiosData.personagens || !desafiosData.personagens[currentCharacterId]) {
+      console.warn('[GUARDA TELA-BRANCA] personagem não encontrado em desafios.json:', currentCharacterId);
+    }
+    currentCharacterData = desafiosData.personagens?.[currentCharacterId] || null;
+  }
 
   const handleCloseEscolhaModal = useCallback(() => { setShowEscolhaModal(false); }, []);
 
@@ -2367,11 +2388,11 @@ const DecolagemMarte = () => {
 
             <div className="ship-info-stats" style={{ flex: 1 }}>
               <TypewriterText label="Corpos celestes visitados" value={countCorposCelestes.toString().padStart(2, '0')} />
-              <TypewriterText label="Virtus" value={`${virtusIndex.toFixed(3).replace('.', ',')}`} />
+              <TypewriterText label="Virtus" value={`${safeVirtusIndex.toFixed(3).replace('.', ',')}`} />
 
               {/* === EXIBIÇÃO DA DISTÂNCIA EM UA === */}
-              <div className="telemetry-distance-display" title={`${(accumulatedDistanceKm / 149597870).toFixed(8)} UA`}>
-                Dist. Percorrida (UA): {(accumulatedDistanceKm / 149597870).toFixed(8)}
+              <div className="telemetry-distance-display" title={`${(safeAccumulatedDistanceKm / 149597870).toFixed(8)} UA`}>
+                Dist. Percorrida (UA): {(safeAccumulatedDistanceKm / 149597870).toFixed(8)}
               </div>
             </div>
 
@@ -2399,7 +2420,7 @@ const DecolagemMarte = () => {
           isDobraEnabled={isDobraEnabled}
           isPaused={isPaused}
           originPlanet={originPlanet.nome}
-          destinationPlanet={selectedPlanet.nome}
+          destinationPlanet={selectedPlanet?.nome}
           maxSpeed={currentMaxSpeed}
           isBoosting={isBoostingTo60k}
           handleDobraEspacial={handleDobraEspacial}
