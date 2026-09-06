@@ -22,6 +22,7 @@ import React from 'react';
 // só a tela de voo quebrar.
 
 class ErrorBoundary extends React.Component {
+  
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null, errorInfo: null };
@@ -32,7 +33,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    
+
     // Log completo no console — é isso que faltava pra "ver o erro" em vez
     // de só a tela branca. Copie esse stack e me manda se acontecer de novo.
     console.error('[ERROR BOUNDARY] Crash capturado no render:', error);
