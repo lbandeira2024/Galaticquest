@@ -85,7 +85,13 @@ const PlayersTable = ({ players, onDelete, onCopyLink, setPlayerMessage }) => {
                 <tbody>
                     {players.map((player) => (
                         <tr key={player.email}>
-                            <td className="column-nome-data">{player.nome}</td>
+                            <td className="column-nome-data">
+                                <span className="player-name-text" title={player.nome}>{player.nome}</span>
+                                <span className={`player-status-badge ${player.online ? 'online' : 'offline'}`}>
+                                    <span className="status-dot"></span>
+                                    {player.online ? 'Online' : 'Offline'}
+                                </span>
+                            </td>
                             <td>{player.email}</td>
                             <td>{player.setor}</td>
                             <td>{player.regional}</td>
@@ -344,6 +350,18 @@ const GameConfig = () => {
         fetchClients();
         fetchGames();
     }, [fetchClients]);
+
+    // Atualiza o status online/offline dos jogadores periodicamente. O backend
+    // calcula "online" a partir do heartbeat de 5s enviado pela tela de jogo
+    // (TelemetryDisplay.js), então repetimos essa busca com folga (8s) para a
+    // bolinha da tabela de JOGADORES acompanhar sem precisar recarregar a página.
+    useEffect(() => {
+        if (!currentClientName) return;
+        const statusIntervalId = setInterval(() => {
+            fetchPlayers(currentClientName);
+        }, 8000);
+        return () => clearInterval(statusIntervalId);
+    }, [currentClientName, fetchPlayers]);
 
     useEffect(() => {
         if (!user || !user.administrador) {
@@ -733,7 +751,8 @@ const GameConfig = () => {
                 cargo: newUser.cargo,
                 tempoLideranca: newUser.tempoLideranca,
                 empresa: currentClientName,
-                gameNumber: newUser.gameNumber // Importante para consistência local
+                gameNumber: newUser.gameNumber, // Importante para consistência local
+                online: false // Recém-cadastrado: ainda não entrou no jogo
             };
             setPlayersList(prevList => [...prevList, playerToAdd]);
             setPlayerMessage({

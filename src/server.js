@@ -67,7 +67,8 @@ const UsuarioSchema = new mongoose.Schema({
   dataInicio: { type: Date, default: new Date('2025-06-30') },
   grupo: { type: mongoose.Schema.Types.ObjectId, ref: 'Grupo' },
   gameNumber: { type: Number },
-  betatester: { type: Boolean, default: false } // <--- CAMPO BETATESTER ADICIONADO AQUI
+  betatester: { type: Boolean, default: false }, // <--- CAMPO BETATESTER ADICIONADO AQUI
+  lastHeartbeat: { type: Date } // <--- Última vez que o jogador enviou heartbeat (tela de jogo ativa); usado para status online/offline no admin
 }, { timestamps: true });
 
 const Usuario = mongoose.model("Usuario", UsuarioSchema);
@@ -859,11 +860,20 @@ async function calcularVirtusIndex(grupo) {
 //                  ROTAS
 // ==========================================
 
+// Janela de tempo para considerar um jogador (individualmente) "online" na
+// tabela de JOGADORES do admin. O heartbeat da tela de jogo dispara a cada
+// 5s (ver TelemetryDisplay.js), então 15s tolera 1-2 batidas perdidas por
+// latência de rede sem deixar o status "grudado" em online por muito tempo
+// depois que o jogador sai da tela de jogo. Independente do online-ships
+// (que é por equipe/nave, não por jogador individual).
+const ONLINE_THRESHOLD_MS = 15000;
+
 app.post("/login", normalizeEmail, async (req, res) => {
   try {
     const { email, senha } = req.body;
     const usuario = await Usuario.findOne({ email }).populate('grupo');
     if (!usuario || usuario.senha !== senha) return res.status(401).json({ success: false });
+    await Usuario.findByIdAndUpdate(usuario._id, { lastHeartbeat: new Date() });
     if (usuario.grupo) await Grupo.findByIdAndUpdate(usuario.grupo._id, { loginon: 1, lastHeartbeat: new Date() });
     res.json({ success: true, usuario });
   } catch (error) { res.status(500).json({ success: false }); }
@@ -873,7 +883,7 @@ app.post("/heartbeat", async (req, res) => {
   try {
     const { userId } = req.body;
     if (userId) {
-      const usuario = await Usuario.findById(userId);
+      const usuario = await Usuario.findByIdAndUpdate(userId, { lastHeartbeat: new Date() });
       if (usuario?.grupo) await Grupo.findByIdAndUpdate(usuario.grupo, { lastHeartbeat: new Date(), loginon: 1 });
     }
     res.json({ success: true });
@@ -1318,8 +1328,13 @@ app.get("/users/by-company", async (req, res) => {
   try {
     const { company } = req.query;
     if (!company) return res.status(400).json({ success: false, message: "Empresa obrigatória." });
-    const users = await Usuario.find({ empresa: company }, 'nome email setor regional cargo tempoLideranca gameNumber numeroLiderados').lean();
-    res.json({ success: true, users });
+    const users = await Usuario.find({ empresa: company }, 'nome email setor regional cargo tempoLideranca gameNumber numeroLiderados lastHeartbeat').lean();
+    const onlineThreshold = Date.now() - ONLINE_THRESHOLD_MS;
+    const usersWithStatus = users.map(({ lastHeartbeat, ...user }) => ({
+      ...user,
+      online: !!(lastHeartbeat && new Date(lastHeartbeat).getTime() > onlineThreshold)
+    }));
+    res.json({ success: true, users: usersWithStatus });
   } catch (error) { res.status(500).json({ success: false }); }
 });
 

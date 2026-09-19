@@ -941,11 +941,56 @@
 .player-table .column-nome-data {
     max-width: 200px;
     /* Garante que o conteúdo não ultrapasse o cabeçalho */
-    white-space: nowrap;
-    /* Impede quebras de linha longas */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Nome do jogador dentro da célula: recebe o truncamento com '...' que antes
+   ficava na td inteira, agora que a td também abriga o selo de status. */
+.player-name-text {
     overflow: hidden;
     text-overflow: ellipsis;
-    /* Adiciona '...' se o nome for muito longo */
+    white-space: nowrap;
+    min-width: 0;
+}
+
+/* --- ESTILOS PARA O SELO DE STATUS ONLINE/OFFLINE (ao lado do nome) --- */
+.player-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.player-status-badge .status-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: inline-block;
+}
+
+.player-status-badge.online {
+    color: #4CAF50;
+}
+
+.player-status-badge.online .status-dot {
+    background-color: #4CAF50;
+    box-shadow: 0 0 6px rgba(76, 175, 80, 0.8);
+}
+
+.player-status-badge.offline {
+    color: #999;
+}
+
+.player-status-badge.offline .status-dot {
+    background-color: #999;
 }
 
 
