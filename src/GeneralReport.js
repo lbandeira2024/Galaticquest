@@ -5,9 +5,6 @@ import { useAudio } from './AudioManager';
 import { useConfig } from './ConfigContext';
 import './GeneralReport.css';
 
-// --- LISTA DE ESTAÇÕES (Baseada no seu SpaceView.js) ---
-const STATIONS_LIST = ['acee', 'almaz', 'mol', 'tiangong', 'skylab', 'salyut', 'delfos', 'boctok'];
-
 const GeneralReport = () => {
     const { gameNumber } = useParams();
     const navigate = useNavigate();
@@ -126,63 +123,17 @@ const GeneralReport = () => {
         return `${(coins / 1000000).toFixed(1)} MM`;
     };
 
-    // --- NOVA FUNÇÃO: Calcula corpos celestes em comum e prepara o tooltip ---
-    const getCommonCelestialBodiesData = () => {
-        if (!groups || groups.length === 0) {
-            return { countStr: "00", tooltip: "Nenhum corpo celeste comum visitado." };
-        }
+    // Número de corpos celestes conquistados pela própria equipe (contador
+    // já mantido pelo backend em corposCelestesVisitados)
+    const getTeamVisitedBodies = (index) => {
+        const count = groups[index]?.corposCelestesVisitados || 0;
+        return String(count).padStart(2, '0');
+    };
 
-        // Mapeamento para guardar o nome original (ex: "Marte" em vez de "marte")
-        const originalNamesMap = {};
-
-        // Extrai o histórico deduzido para cada grupo
-        const allGroupsVisited = groups.map(g => {
-            const rota = g.rotaPlanejada || [];
-            const indexAtual = g.routeIndex || 0;
-
-            // Pega os locais desde o início da rota até o ponto atual
-            const locaisVisitados = rota.slice(0, indexAtual + 1);
-
-            return locaisVisitados
-                .map(local => {
-                    const rawName = local.name || '';
-                    const nomeLimpo = rawName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '');
-
-                    // Salva o nome original caso ainda não exista no mapa
-                    if (nomeLimpo && !originalNamesMap[nomeLimpo]) {
-                        originalNamesMap[nomeLimpo] = rawName;
-                    }
-                    return nomeLimpo;
-                })
-                .filter(nomeLimpo => {
-                    // Ignora estações, vazio e também a TERRA
-                    return nomeLimpo !== '' && nomeLimpo !== 'terra' && !STATIONS_LIST.includes(nomeLimpo);
-                });
-        });
-
-        // Verificação de segurança: se algum grupo não visitou nada (ou a lista ficou vazia)
-        if (allGroupsVisited.length === 0 || allGroupsVisited.some(arr => arr.length === 0)) {
-            return { countStr: "00", tooltip: "Nenhum corpo celeste comum visitado." };
-        }
-
-        // Achar a intersecção: nomes que aparecem na rota percorrida de TODOS os grupos
-        const commonOnes = allGroupsVisited.reduce((acc, currentList) => {
-            return acc.filter(nome => currentList.includes(nome));
-        });
-
-        // Garante que não conte planetas repetidos
-        const uniqueCommonOnes = [...new Set(commonOnes)];
-
-        // Formata as saídas
-        const countStr = uniqueCommonOnes.length.toString().padStart(2, '0');
-
-        // Monta a string do Tooltip pegando os nomes originais de volta
-        const namesList = uniqueCommonOnes.map(limpo => originalNamesMap[limpo]).join(', ');
-        const tooltip = uniqueCommonOnes.length > 0
-            ? `Corpos Visitados: ${namesList}`
-            : "Nenhum corpo celeste comum visitado.";
-
-        return { countStr, tooltip };
+    // Índice Virtus atual da equipe (0,0 a 1,0), calculado no backend
+    const getTeamVirtus = (index) => {
+        const virtus = groups[index]?.virtusIndex;
+        return typeof virtus === 'number' ? virtus.toFixed(2).replace('.', ',') : '0,00';
     };
 
     // --- ANIMAÇÃO DE FUNDO ---
@@ -224,9 +175,6 @@ const GeneralReport = () => {
             cancelAnimationFrame(animationFrameId);
         };
     }, []);
-
-    // Chama a função uma vez por renderização para usar na tabela
-    const commonBodiesData = getCommonCelestialBodiesData();
 
     return (
         <div className="report-body">
@@ -298,43 +246,16 @@ const GeneralReport = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {/* Bloco I: Número de Corpos Celestes Conquistados com Custom Tooltip Cyber/Neon */}
+                                            {/* Bloco I: Número de Corpos Celestes Conquistados por equipe */}
                                             <tr className="row-green">
                                                 <td className="row-header">
                                                     <strong>I- Número de Corpos<br />Celestes<br />Conquistados</strong>
-                                                    <div className="red-dot"></div>
-                                                    <small>Cases comuns<br />aos subgrupos</small>
                                                 </td>
-                                                <td style={highlightedStyle}>
-                                                    <div className="cyber-tooltip-container">
-                                                        {commonBodiesData.countStr}
-                                                        <span className="cyber-tooltip-text">{commonBodiesData.tooltip}</span>
-                                                    </div>
-                                                </td>
-                                                <td style={highlightedStyle}>
-                                                    <div className="cyber-tooltip-container">
-                                                        {commonBodiesData.countStr}
-                                                        <span className="cyber-tooltip-text">{commonBodiesData.tooltip}</span>
-                                                    </div>
-                                                </td>
-                                                <td style={highlightedStyle}>
-                                                    <div className="cyber-tooltip-container">
-                                                        {commonBodiesData.countStr}
-                                                        <span className="cyber-tooltip-text">{commonBodiesData.tooltip}</span>
-                                                    </div>
-                                                </td>
-                                                <td style={highlightedStyle}>
-                                                    <div className="cyber-tooltip-container">
-                                                        {commonBodiesData.countStr}
-                                                        <span className="cyber-tooltip-text">{commonBodiesData.tooltip}</span>
-                                                    </div>
-                                                </td>
-                                                <td style={highlightedStyle}>
-                                                    <div className="cyber-tooltip-container">
-                                                        {commonBodiesData.countStr}
-                                                        <span className="cyber-tooltip-text">{commonBodiesData.tooltip}</span>
-                                                    </div>
-                                                </td>
+                                                <td style={highlightedStyle}>{getTeamVisitedBodies(0)}</td>
+                                                <td style={highlightedStyle}>{getTeamVisitedBodies(1)}</td>
+                                                <td style={highlightedStyle}>{getTeamVisitedBodies(2)}</td>
+                                                <td style={highlightedStyle}>{getTeamVisitedBodies(3)}</td>
+                                                <td style={highlightedStyle}>{getTeamVisitedBodies(4)}</td>
                                             </tr>
 
                                             {/* Bloco II: Fluxo de Caixa */}
@@ -349,17 +270,18 @@ const GeneralReport = () => {
                                                 <td style={highlightedStyle}>{getTeamCoins(4)}</td>
                                             </tr>
 
-                                            {/* Bloco III: Virtus */}
-                                            <tr className="row-yellow">
-                                                <td rowSpan="4" className="row-header">
+                                            {/* Bloco III: Virtus (índice atual da equipe, uma linha só) */}
+                                            <tr className="row-yellow bold-row">
+                                                <td className="row-header">
                                                     <strong>III- Virtus – Índice de<br />Virtudes Humanas<br />Aplicado à Liderança<br /></strong>
                                                     <small>(Variação: 0,0 a 1,0)</small>
                                                 </td>
-                                                <td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td>
+                                                <td>{getTeamVirtus(0)}</td>
+                                                <td>{getTeamVirtus(1)}</td>
+                                                <td>{getTeamVirtus(2)}</td>
+                                                <td>{getTeamVirtus(3)}</td>
+                                                <td>{getTeamVirtus(4)}</td>
                                             </tr>
-                                            <tr className="row-yellow"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
-                                            <tr className="row-yellow"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
-                                            <tr className="row-yellow bold-row"><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td><td>0,0</td></tr>
                                         </tbody>
                                     </table>
                                 </div>

@@ -1429,7 +1429,13 @@ app.get("/games/:gameNumber/groups-details", async (req, res) => {
     const usersInGame = await Usuario.find({ gameNumber: parseInt(gameNumber) }).select('_id');
     const userIds = usersInGame.map(u => u._id);
     const groups = await Grupo.find({ membros: { $in: userIds } }).populate('membros');
-    res.json({ success: true, groups: groups });
+    // Calcula o Virtus atual de cada equipe (mesma fórmula usada no jogo,
+    // ver calcularVirtusIndex) para exibir no Relatório Geral do admin.
+    const groupsWithVirtus = await Promise.all(groups.map(async (g) => {
+      const virtusIndex = await calcularVirtusIndex(g);
+      return { ...g.toObject(), virtusIndex };
+    }));
+    res.json({ success: true, groups: groupsWithVirtus });
   } catch (error) { res.status(500).json({ success: false }); }
 });
 
