@@ -2319,16 +2319,25 @@ const DecolagemMarte = () => {
 
         case 'i':
           e.preventDefault();
+          // Mesma tecla abre e fecha (útil no Stream Deck: 1 botão = abre/fecha)
+          if (showInventory) { setShowInventory(false); break; }
           handleInventory();
           break;
 
         case 'g':
           e.preventDefault();
+          if (showGlossary) { setShowGlossary(false); break; }
           if (!isPaused) setShowGlossary(true);
           break;
 
         case 'm':
           e.preventDefault();
+          // Fecha o mapa se já estiver aberto — exceto no modo de edição
+          // obrigatória (o jogador PRECISA mudar a rota para sair dele).
+          if (showStellarMap) {
+            if (!isForcedMapEditRef.current) handleToggleMap(false);
+            break;
+          }
           if (isPaused) return;
 
           if (isForcedMapEditRef.current) {
@@ -2345,11 +2354,13 @@ const DecolagemMarte = () => {
 
         case 'a':
           e.preventDefault();
+          if (showMandala) { setShowMandala(false); break; }
           handleMinervaClick();
           break;
 
         case 'o':
           e.preventDefault();
+          if (showO2Modal) { setShowO2Modal(false); break; }
           if (!isO2TransferDisabled) handleOpenO2Modal();
           break;
 
@@ -2370,7 +2381,8 @@ const DecolagemMarte = () => {
     setShowGlossary,
     handleToggleMap,
     handleMinervaClick,
-    handleOpenO2Modal, isO2TransferDisabled
+    handleOpenO2Modal, isO2TransferDisabled,
+    showInventory, showGlossary, showStellarMap, showMandala, showO2Modal
   ]);
 
   if (isLoadingRoute) return <div className="tela-decolagem" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '1.5em', color: '#00aaff', textShadow: '0 0 10px #00aaff' }}>Buscando dados da missão...</div>;
