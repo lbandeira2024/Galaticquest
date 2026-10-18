@@ -188,7 +188,7 @@ const SelecaoEquipe = () => {
           <div className={`team-photo-container_equipe ${hoveredTeam ? 'visible_equipe' : ''}`}>
             {hoveredTeam && (
               <>
-                <img src={`/images/Astronautas/E${hoveredTeam.id}/Equipe${hoveredTeam.id}.gif`} alt={`Equipe ${hoveredTeam.code}`} className="team-photo_equipe" />
+                <video key={hoveredTeam.id} src={`/images/Astronautas/E${hoveredTeam.id}/Equipe${hoveredTeam.id}.webm`} className="team-photo_equipe" autoPlay loop muted playsInline aria-label={`Equipe ${hoveredTeam.code}`} />
                 <div className="team-photo-caption_equipe">Equipe {hoveredTeam.code}</div>
               </>
             )}

@@ -74,7 +74,7 @@
         },
         "mae": {
             "nome": "Mae",
-            "imagem": "/images/Astronautas/E1/Mae_video.gif"
+            "imagem": "/images/Astronautas/E1/Mae_video.webm"
         },
         "marek": {
             "nome": "Marek",
@@ -86,7 +86,7 @@
         },
         "neo": {
             "nome": "Neo",
-            "imagem": "/images/Astronautas/E1/Neo_video.gif"
+            "imagem": "/images/Astronautas/E1/Neo_video.webm"
         },
         "noguchi": {
             "nome": "Noguchi",
@@ -110,7 +110,7 @@
         },
         "tamara": {
             "nome": "Tamara",
-            "imagem": "/images/Astronautas/E1/Tamara_video.gif"
+            "imagem": "/images/Astronautas/E1/Tamara_video.webm"
         },
         "zahy": {
             "nome": "Zahy",

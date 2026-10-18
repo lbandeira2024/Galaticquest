@@ -721,7 +721,7 @@ const MandalaVirtudes = ({ onClose, groupId }) => {
 
                     {showCupertinoImage && (
                         <div style={{ position: 'absolute', bottom: '20px', right: '20px', zIndex: 1006 }}>
-                            <img src="../images/ST CUPERTINO/st_cupertino_comemorando.gif" alt="St Cupertino Comemorando" style={{ maxWidth: '300px', height: '210px' }} />
+                            <video src="/images/ST CUPERTINO/st_cupertino_comemorando.webm" autoPlay loop muted playsInline aria-label="St Cupertino Comemorando" style={{ maxWidth: '300px', height: '210px' }} />
                         </div>
                     )}
                 </div>

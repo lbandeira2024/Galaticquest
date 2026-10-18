@@ -15,7 +15,7 @@ const planetImageMap = {
   eris: '/images/Planets/eris-rotacionando.webm',
   fobos: '/images/Planets/fobos-rotacionando.webm',
   haumea: '/images/Planets/haumea-rotacionando.webm',
-  kaapa: '/images/Planets/kaapa-rotacionando.gif',
+  kaapa: '/images/Planets/kappa-rotacionando.webm',
   saturno: '/images/Planets/saturno-rotacionando.webm',
   urano: '/images/Planets/urano-rotacionando.webm',
   netuno: '/images/Planets/Netuno-rotacionando.webm',
@@ -23,25 +23,25 @@ const planetImageMap = {
   vesta: '/images/Planets/vesta-rotacionando.webm',
   io: '/images/Planets/io-rotacionando.webm',
   europa: '/images/Planets/europa-rotacionando.webm',
-  calisto: '/images/Planets/calisto-rotacionando.gif',
-  encelado: '/images/Planets/encelado-rotacionando.gif',
+  calisto: '/images/Planets/calisto-rotacionando.webm',
+  encelado: '/images/Planets/encelado-rotacionando.webm',
   ganimedes: '/images/Planets/ganimedes-rotacionando.webm',
   pallas: '/images/Planets/pallas-rotacionando.webm',
   kepler186f: '/images/Planets/kepler-rotacionando.webm',
-  mimas: '/images/Planets/mimas-rotacionando.gif',
-  tita: '/images/Planets/tita-rotacionando.gif',
-  titania: '/images/Planets/titania-rotacionando.gif',
+  mimas: '/images/Planets/mimas-rotacionando.webm',
+  tita: '/images/Planets/tita-rotacionando.webm',
+  titania: '/images/Planets/titania-rotacionando.webm',
   oberon: '/images/Planets/oberon-rotacionando.webm',
-  tritao: '/images/Planets/tritao-rotacionando.gif',
+  tritao: '/images/Planets/tritao-rotacionando.webm',
   caronte: '/images/Planets/caronte-rotacionando.webm',
   trappist1e: '/images/Planets/trappist-rotacionando.webm',
-  acee: '/images/stations/ACEE-Rotacionando.gif',
-  almaz: '/images/stations/ALMAZ-Rotacionando.gif',
-  mol: '/images/stations/MOL-Rotacionando.gif',
-  tiangong: '/images/stations/TIANGONG-Rotacionando.gif',
-  skylab: '/images/stations/SKYLAB-Rotacionando.gif',
+  acee: '/images/stations/ACEE-Rotacionando.webm',
+  almaz: '/images/stations/ALMAZ-Rotacionando.webm',
+  mol: '/images/stations/MOL-Rotacionando.webm',
+  tiangong: '/images/stations/TIANGONG-Rotacionando.webm',
+  skylab: '/images/stations/SKYLAB-Rotacionando.webm',
   salyut: '/images/stations/SALYUT-Rotacionando.webm',
-  delfos: '/images/stations/DELFOS-Rotacionando.gif',
+  delfos: '/images/stations/DELFOS-Rotacionando.webm',
   boctok: '/images/stations/BOCTOK-Rotacionando.webm',
   proteu: '/images/Planets/proteu-rotacionando.webm',
   // ENCERRAMENTO DA MISSÃO: órbita da Terra. Se o .webm ainda não estiver em
@@ -271,7 +271,7 @@ const SpaceView = ({
     setPlanetName(planetNameNormalized);
     currentVisualDistanceRef.current = distanceRef.current;
 
-    let imagePath = planetImageMap[planetNameNormalized] || '/images/Planets/Marte-Rotacionando.gif';
+    let imagePath = planetImageMap[planetNameNormalized] || '/images/Planets/Marte-Rotacionando.webm';
     setPlanetImageLoaded(false);
     setPlanetImage(imagePath);
 
@@ -283,7 +283,7 @@ const SpaceView = ({
         if (scaleWrapperRef.current) scaleWrapperRef.current.style.opacity = 0;
       };
       img.onerror = () => {
-        setPlanetImage('/images/Planets/Marte-Rotacionando.gif');
+        setPlanetImage('/images/Planets/Marte.png');
         setPlanetImageLoaded(true);
       };
     }
@@ -516,7 +516,6 @@ const SpaceView = ({
 
   return (
     <div className={`space-view-container ${isWarpActive ? 'warp-active' : ''} ${isPaused ? 'paused' : ''}`}>
-      <div className="galactic-nebula"></div>
 
       {showWarpOverlay && (
         <div className={`warp-overlay-container ${isWarpActive && !isPaused ? 'active' : ''}`}>

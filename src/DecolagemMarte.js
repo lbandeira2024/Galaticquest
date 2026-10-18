@@ -300,7 +300,7 @@ const RightMonitorPanel = React.memo(({
         </div>
         <div className="monitor-screen">
           {isSosMinervaActive && !isDeparting && !isForcedMapEdit ? (
-            <img src="/images/Minerva/Minerva-Informando-velocidade.gif" alt="Alerta S.O.S Minerva" className="monitor-image" />
+            <video src="/images/Minerva/Minerva-Informando-velocidade.webm" className="monitor-image" autoPlay loop muted playsInline aria-label="Alerta S.O.S Minerva" />
           ) : showCriticalWarpFail ? (
             <div className="monitor-text-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', backgroundColor: 'rgba(30, 0, 0, 0.9)', flexDirection: 'column', padding: '10px' }}>
               <h3 style={{ color: '#ff3333', margin: '0 0 10px 0', textShadow: '0 0 10px red', fontSize: '1.1rem', textAlign: 'center' }}>⚠ FALHA CRÍTICA ⚠</h3>
@@ -311,13 +311,17 @@ const RightMonitorPanel = React.memo(({
               <p style={{ color: '#ffcc00', textAlign: 'center', fontWeight: 'bold', textShadow: '0 0 5px red' }}>⚠ ATENÇÃO ⚠<br /><br />Edite o Mapa Estelar e mude a rota para fechar.</p>
             </div>
           ) : isTransmissionStarting && currentCharacterData?.imagem ? (
-            <img src={currentCharacterData.imagem} alt={currentCharacterData.nome} className="monitor-image" />
+            String(currentCharacterData.imagem).toLowerCase().endsWith('.webm') ? (
+              <video key={currentCharacterData.imagem} src={currentCharacterData.imagem} className="monitor-image" autoPlay loop muted playsInline aria-label={currentCharacterData.nome} />
+            ) : (
+              <img src={currentCharacterData.imagem} alt={currentCharacterData.nome} className="monitor-image" />
+            )
           ) : (
             <>
               {showWarpDisabledMessage ? (
                 <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: '#ff0', textAlign: 'center', padding: '10px', fontSize: '0.9em', textShadow: '0 0 5px rgba(255, 255, 0, 0.7)' }}>Distancia Orbital máxima alcançada.<br />Dobra desativada!</div>
               ) : showMinervaOnMonitor ? (
-                <img src="/images/Minerva/Minerva-Informando-velocidade.gif" alt="Aviso de Velocidade" className="monitor-image" />
+                <video src="/images/Minerva/Minerva-Informando-velocidade.webm" className="monitor-image" autoPlay loop muted playsInline aria-label="Aviso de Velocidade" />
               ) : (
                 <>
                   {monitorState === 'on' && <img src="/images/ACEE.png" alt="Ecrã do Monitor" className="monitor-image" />}
@@ -1701,32 +1705,50 @@ const DecolagemMarte = () => {
   }, [userId, API_BASE_URL, refetchTrigger]);
 
 
+  // ========================================================
+  // DEGRADAÇÃO DOS ATRIBUTOS COM O TEMPO
+  // Cada atributo perde 1 ponto a cada N minutos de voo (N vem de
+  // degradationRates, por nave). Antes eram 7 setIntervals separados com um
+  // bug de índice (gravavam em refPath["0"]/["1"] em vez do campo certo), então
+  // na prática nada degradava. Agora: 1 único timer de 1s que acumula o tempo
+  // de voo por atributo. O acumulado fica num ref, então pausar, entrar em
+  // dobra ou recarregar o efeito não "zera" o progresso até a próxima queda.
+  // ========================================================
+  const degradationElapsedRef = useRef({});
   useEffect(() => {
     if (isPaused || !chosenShip || isDobraAtivada || missionEndPhase) return;
     const rates = degradationRates[chosenShip] || degradationRates.default;
-    const intervals = [];
-    const createInterval = (key, telemetryPath, rateInMinutes) => {
-      const intervalId = setInterval(() => {
-        let currentValue = telemetryPath.split('.').reduce((o, i) => o[i], telemetryRef.current);
-        const newValue = Math.max(0, currentValue - 1);
-        let refPath = telemetryRef.current;
-        const pathParts = telemetryPath.split('.');
-        for (let i = 0; i < pathParts.length - 1; i++) {
-          refPath = refPath[pathParts[i]];
+    const ATTRS = [
+      ['nuclearPropulsion', 'propulsion', 'powerOutput'],
+      ['oxygen', 'atmosphere', 'o2'],
+      ['direction', null, 'direction'],
+      ['stability', null, 'stability'],
+      ['productivity', null, 'productivity'],
+      ['interdependence', null, 'interdependence'],
+      ['engagement', null, 'engagement'],
+    ];
+    const intervalId = setInterval(() => {
+      const elapsed = degradationElapsedRef.current;
+      let next = null;
+      for (const [rateKey, group, field] of ATTRS) {
+        const periodSec = (rates[rateKey] || 0) * 60;
+        if (periodSec <= 0) continue;
+        elapsed[rateKey] = (elapsed[rateKey] || 0) + 1;
+        if (elapsed[rateKey] < periodSec) continue;
+        elapsed[rateKey] = 0;
+        if (!next) next = { ...telemetryRef.current };
+        if (group) {
+          next[group] = { ...next[group], [field]: Math.max(0, (next[group]?.[field] ?? 0) - 1) };
+        } else {
+          next[field] = Math.max(0, (next[field] ?? 0) - 1);
         }
-        refPath[pathParts.length - 1] = newValue;
-        setTelemetry(prev => ({ ...prev, ...telemetryRef.current }));
-      }, rateInMinutes * 60 * 1000);
-      intervals.push(intervalId);
-    };
-    createInterval('nuclearPropulsion', 'propulsion.powerOutput', rates.nuclearPropulsion);
-    createInterval('oxygen', 'atmosphere.o2', rates.oxygen);
-    createInterval('direction', 'direction', rates.direction);
-    createInterval('stability', 'stability', rates.stability);
-    createInterval('productivity', 'productivity', rates.productivity);
-    createInterval('interdependence', 'interdependence', rates.interdependence);
-    createInterval('engagement', 'engagement', rates.engagement);
-    return () => intervals.forEach(clearInterval);
+      }
+      if (next) {
+        telemetryRef.current = next;
+        setTelemetry(next);
+      }
+    }, 1000);
+    return () => clearInterval(intervalId);
   }, [isPaused, chosenShip, isDobraAtivada, missionEndPhase]);
 
   useEffect(() => {

@@ -1150,23 +1150,27 @@
       rgba(255, 255, 255, 0) 0%,
       rgba(255, 255, 255, 0.4) 50%,
       rgba(255, 255, 255, 0) 100%);
-  transform: skewX(-25deg);
+  transform: translateX(0) skewX(-25deg);
+  will-change: transform;
   animation: sweep-shine 3s infinite;
   pointer-events: none;
   z-index: 1;
 }
 
+/* Otimização: antes animava `left`, o que recalcula o layout a cada quadro.
+   Agora move com transform (mesmo percurso: de -150% a 200% da largura do
+   botão = 700% da largura do brilho), que roda direto na GPU. */
 @keyframes sweep-shine {
   0% {
-    left: -150%;
+    transform: translateX(0) skewX(-25deg);
   }
 
   20% {
-    left: 200%;
+    transform: translateX(700%) skewX(-25deg);
   }
 
   100% {
-    left: 200%;
+    transform: translateX(700%) skewX(-25deg);
   }
 }
 
