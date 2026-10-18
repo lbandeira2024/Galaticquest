@@ -159,7 +159,14 @@ const SpaceView = ({
   isPaused = false,
   selectedPlanet = { nome: 'marte' },
   isDeparting = false,
-  isActive = true
+  isActive = true,
+  // O overlay interno de dobra (GIF de ~87 MB + 3 camadas com blur animado)
+  // fica DESLIGADO por padrão: no cockpit, quem mostra a dobra é o vídeo
+  // Vluz-Dobra.webm da tela principal, que cobre esta vista inteira. Manter o
+  // overlay aqui só custava memória/GPU (o GIF era decodificado e as animações
+  // com blur rodavam o tempo todo, mesmo invisíveis) e causava travadas no
+  // início da dobra.
+  showWarpOverlay = false
 }) => {
   const NORMAL_SPEED = 1.0;
   const WARP_SPEED = 80.0;
@@ -511,12 +518,14 @@ const SpaceView = ({
     <div className={`space-view-container ${isWarpActive ? 'warp-active' : ''} ${isPaused ? 'paused' : ''}`}>
       <div className="galactic-nebula"></div>
 
-      <div className={`warp-overlay-container ${isWarpActive && !isPaused ? 'active' : ''}`}>
-        <div className="tunnel-effect"></div>
-        <div className="warp-horizon-constant"></div>
-        <div className="warp-horizon-pulse"></div>
-        <img src="/images/Vluz-Dobra.gif" alt="Dobra Espacial" className="warp-light-effect" />
-      </div>
+      {showWarpOverlay && (
+        <div className={`warp-overlay-container ${isWarpActive && !isPaused ? 'active' : ''}`}>
+          <div className="tunnel-effect"></div>
+          <div className="warp-horizon-constant"></div>
+          <div className="warp-horizon-pulse"></div>
+          <img src="/images/Vluz-Dobra.gif" alt="Dobra Espacial" className="warp-light-effect" />
+        </div>
+      )}
 
       <canvas ref={canvasRef} className="stars"></canvas>
 
@@ -588,6 +597,7 @@ export default React.memo(SpaceView, (prevProps, nextProps) => {
     prevProps.forceLarge === nextProps.forceLarge &&
     prevProps.isDeparting === nextProps.isDeparting &&
     prevProps.distance === nextProps.distance &&
-    prevProps.isActive === nextProps.isActive
+    prevProps.isActive === nextProps.isActive &&
+    prevProps.showWarpOverlay === nextProps.showWarpOverlay
   );
 });

@@ -718,6 +718,10 @@ const takeoffDegradation = {
 // com a mensagem "FIM DA MISSÃO".
 // ========================================================
 const END_WARP_DURATION_MS = 30 * 1000; // duração da dobra de retorno
+// A Terra só é carregada na vista (escondida atrás do vídeo da dobra) alguns
+// segundos depois do início, para não disputar CPU/rede com o arranque da
+// dobra (vídeo + música). Assim o Terra.webm já está pronto na chegada.
+const END_EARTH_PRELOAD_DELAY_MS = 8 * 1000;
 const EARTH_PLANET = { nome: 'Terra' }; // objeto fixo (não quebra o memo do SpaceView)
 const MISSION_END_REASON_TEXT = {
   tempo: 'Tempo de missão esgotado',
@@ -921,6 +925,7 @@ const DecolagemMarte = () => {
   const [serverGameEnded, setServerGameEnded] = useState(false); // admin já tinha encerrado
   const missionEndedRef = useRef(false);
   const endWarpTimerRef = useRef(null);
+  const [isEarthLoaded, setIsEarthLoaded] = useState(false); // Terra já trocada na vista
 
 
   // --- NOVA LÓGICA DE CONTAGEM DE CORPOS CELESTES ---
@@ -2375,6 +2380,14 @@ const DecolagemMarte = () => {
     goToEarthOrbit(restoredMissionEnd, false);
   }, [isLoadingRoute, restoredMissionEnd, missionEndPhase, goToEarthOrbit]);
 
+  // Troca a vista para a Terra com a dobra já em andamento (ou direto, na órbita)
+  useEffect(() => {
+    if (missionEndPhase === 'orbit') { setIsEarthLoaded(true); return; }
+    if (missionEndPhase !== 'warp') return;
+    const t = setTimeout(() => setIsEarthLoaded(true), END_EARTH_PRELOAD_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [missionEndPhase]);
+
   // Nave andando no Route Monitor durante a dobra de retorno
   useEffect(() => {
     if (missionEndPhase !== 'warp') return;
@@ -2698,7 +2711,7 @@ const DecolagemMarte = () => {
           distanceKm={isMissionEnding ? 0 : distanceKm}
           arrivedAtMars={missionEndPhase === 'orbit' || (!isMissionEnding && arrivedAtMars)}
           isPaused={isPaused}
-          selectedPlanet={isMissionEnding ? EARTH_PLANET : selectedPlanet}
+          selectedPlanet={isMissionEnding && isEarthLoaded ? EARTH_PLANET : selectedPlanet}
           handleChallengeEnd={handleChallengeEnd}
           isDeparting={!isMissionEnding && isDeparting}
           showStoreModal={!isMissionEnding && showStoreModal}
