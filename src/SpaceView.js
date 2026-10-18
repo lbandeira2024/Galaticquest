@@ -53,6 +53,12 @@ const PLANET_VIDEO_FALLBACK = {
   terra: '/images/Planets/Terra.png'
 };
 
+// Velocidade de rotação por corpo celeste (1 = velocidade original do vídeo).
+// Terra: metade da velocidade, para a cena final ficar mais contemplativa.
+const PLANET_PLAYBACK_RATE = {
+  terra: 0.5
+};
+
 const PLANET_MUSIC_CONFIG = {
   mercurio: { src: '/sounds/mercurio/mercurio.mp3', volume: 0.4 },
   marte: { src: '/sounds/marte/Marte.mp3', volume: 0.5 },
@@ -546,7 +552,9 @@ const SpaceView = ({
             <video key={planetName} ref={planetImageRef} src={planetImage}
               className={`planet-image ${planetName}-planet ${isStation ? 'is-station' : ''}`}
               autoPlay loop muted playsInline
-              onLoadedData={() => {
+              onLoadedData={(e) => {
+                const rate = PLANET_PLAYBACK_RATE[planetName];
+                if (rate) e.currentTarget.playbackRate = rate;
                 setPlanetImageLoaded(true);
                 if (scaleWrapperRef.current) scaleWrapperRef.current.style.opacity = 0;
               }}
