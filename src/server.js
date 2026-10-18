@@ -111,6 +111,12 @@ const GrupoSchema = new mongoose.Schema({
   distanciaPercorridaKm: { type: Number, default: 0 },
   distanciaRestanteKm: { type: Number }, // <--- CAMPO DISTÂNCIA RESTANTE ADICIONADO AQUI
   missionTimeLeft: { type: Number, default: 12 * 60 * 60 }, // <--- TEMPO DE MISSÃO (segundos restantes) ADICIONADO AQUI
+  // --- ENCERRAMENTO DA MISSÃO ---
+  // true depois que o grupo assistiu à sequência final (dobra → órbita da
+  // Terra). Ao recarregar a página, o jogo vai direto para a cena final.
+  missaoEncerrada: { type: Boolean, default: false },
+  missaoEncerradaEm: { type: Date },
+  missaoEncerradaMotivo: { type: String }, // 'tempo' (cronômetro zerou) | 'admin' (botão ENCERRAR)
   // -----------------------------------------------------
   sosHistory: { type: [Number], default: [] },
   loginon: { type: Number, default: 0 },
@@ -153,6 +159,11 @@ const GameSchema = new mongoose.Schema({
   clienteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Cliente' },
   regionalId: { type: mongoose.Schema.Types.ObjectId, ref: 'Regional' },
   isPaused: { type: Boolean, default: false },
+  // ENCERRAMENTO: acionado pelo botão ENCERRAR do painel administrativo.
+  // Todos os grupos do game recebem via polling de /pause-status e disparam
+  // a sequência final (dobra espacial → Terra → "Fim da Missão").
+  isEnded: { type: Boolean, default: false },
+  endedAt: { type: Date },
 });
 const Game = mongoose.model("Game", GameSchema);
 
@@ -977,15 +988,19 @@ app.get("/:userId/game-data", async (req, res) => {
     if (!usuario) return res.status(404).json({ success: false, message: "Usuário não encontrado" });
 
     let isPaused = false;
+    let isGameEnded = false;
     if (usuario.gameNumber) {
       const game = await Game.findOne({ gameNumber: usuario.gameNumber });
-      if (game) isPaused = game.isPaused;
+      if (game) {
+        isPaused = game.isPaused;
+        isGameEnded = !!game.isEnded;
+      }
     }
 
     if (!usuario.grupo) {
       // [RETOMADA-SERVER] diagnóstico temporário
       console.log("[RETOMADA-SERVER] GET game-data userId=%s -> usuario SEM grupo!", req.params.userId);
-      return res.json({ success: true, isPaused, group: null, noGroup: true });
+      return res.json({ success: true, isPaused, isGameEnded, group: null, noGroup: true });
     }
 
     // [RETOMADA-SERVER] diagnóstico temporário: confirmar groupId usado na leitura e valores lidos
@@ -1000,7 +1015,7 @@ app.get("/:userId/game-data", async (req, res) => {
 
     const virtusIndex = await calcularVirtusIndex(usuario.grupo);
 
-    res.json({ success: true, ...usuario.grupo.toObject(), isPaused, virtusIndex });
+    res.json({ success: true, ...usuario.grupo.toObject(), isPaused, isGameEnded, virtusIndex });
   } catch (error) {
     res.status(500).json({ success: false, message: "Erro interno" });
   }
@@ -1308,10 +1323,74 @@ app.post("/games/:gameNumber/toggle-pause", async (req, res) => {
 
 app.get("/games/:gameNumber/pause-status", async (req, res) => {
   try {
-    const game = await Game.findOne({ gameNumber: req.params.gameNumber }, 'isPaused');
+    const game = await Game.findOne({ gameNumber: req.params.gameNumber }, 'isPaused isEnded');
     if (!game) return res.status(404).json({ success: false });
-    res.json({ success: true, isPaused: game.isPaused });
+    res.json({ success: true, isPaused: game.isPaused, isEnded: !!game.isEnded });
   } catch (error) { res.status(500).json({ success: false }); }
+});
+
+// ========================================================
+// ENCERRAMENTO DO GAME (botão ENCERRAR do painel administrativo)
+// Marca o game como encerrado e tira qualquer pausa de admin, para que a
+// sequência final rode em todos os grupos (eles leem isEnded no polling de
+// 5s de /pause-status, feito pelo PauseContext).
+// ========================================================
+app.post("/games/:gameNumber/end-game", async (req, res) => {
+  try {
+    const game = await Game.findOneAndUpdate(
+      { gameNumber: req.params.gameNumber },
+      { $set: { isEnded: true, endedAt: new Date(), isPaused: false } },
+      { new: true }
+    );
+    if (!game) return res.status(404).json({ success: false, message: "Game não encontrado." });
+    console.log(`[ENCERRAMENTO] GAME ${game.gameNumber} encerrado pelo admin em ${game.endedAt.toISOString()}`);
+    res.json({ success: true, isEnded: true, endedAt: game.endedAt, message: `GAME ${game.gameNumber} encerrado. Todos os grupos iniciarão o retorno à Terra.` });
+  } catch (error) { res.status(500).json({ success: false, message: "Erro ao encerrar o game." }); }
+});
+
+// ========================================================
+// REABERTURA DO GAME (botão REABRIR do painel administrativo)
+// Desfaz o encerramento: os grupos voltam ao ponto da rota em que estavam
+// (a tela final recarrega sozinha em até ~10s). Grupos cujo cronômetro já
+// tinha zerado recebem `extraMinutes` minutos — com 0, eles encerram de novo
+// assim que entrarem.
+// ========================================================
+app.post("/games/:gameNumber/reopen-game", async (req, res) => {
+  try {
+    const gameNumber = Number(req.params.gameNumber);
+    const extraMinutes = Math.max(0, Math.floor(Number(req.body?.extraMinutes) || 0));
+
+    const game = await Game.findOneAndUpdate(
+      { gameNumber },
+      { $set: { isEnded: false, isPaused: false }, $unset: { endedAt: 1 } },
+      { new: true }
+    );
+    if (!game) return res.status(404).json({ success: false, message: "Game não encontrado." });
+
+    // Grupos do game: pelos jogadores (Usuario.gameNumber) e pelo próprio Grupo.gameNumber
+    const usersInGame = await Usuario.find({ gameNumber, grupo: { $ne: null } }, 'grupo').lean();
+    const groupIds = [...new Set(usersInGame.map(u => String(u.grupo)))];
+    const groupFilter = { $or: [{ _id: { $in: groupIds } }, { gameNumber }] };
+
+    const resetResult = await Grupo.updateMany(groupFilter, {
+      $set: { missaoEncerrada: false },
+      $unset: { missaoEncerradaEm: 1, missaoEncerradaMotivo: 1 }
+    });
+
+    let tempoRepostoCount = 0;
+    if (extraMinutes > 0) {
+      const timeResult = await Grupo.updateMany(
+        { ...groupFilter, missionTimeLeft: { $lte: 0 } },
+        { $set: { missionTimeLeft: extraMinutes * 60 } }
+      );
+      tempoRepostoCount = timeResult.modifiedCount;
+    }
+
+    console.log(`[ENCERRAMENTO] GAME ${gameNumber} reaberto. Grupos liberados: ${resetResult.modifiedCount}. Tempo reposto (${extraMinutes} min): ${tempoRepostoCount}.`);
+    let message = `GAME ${gameNumber} reaberto. Os grupos voltam ao ponto em que estavam.`;
+    if (tempoRepostoCount > 0) message += ` ${tempoRepostoCount} grupo(s) com tempo zerado receberam ${extraMinutes} min.`;
+    res.json({ success: true, isEnded: false, gruposLiberados: resetResult.modifiedCount, tempoRepostoCount, message });
+  } catch (error) { res.status(500).json({ success: false, message: "Erro ao reabrir o game." }); }
 });
 
 app.delete("/users/:email", async (req, res) => {

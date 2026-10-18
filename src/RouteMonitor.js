@@ -46,7 +46,9 @@ const getEntityIcon = (name) => {
   return icons[name] || "🛸";
 };
 
-const RouteMonitor = ({ distanceKm, progress, isDobraAtivada, originPlanet, destinationPlanet }) => {
+// distanceLabel (opcional): substitui o "X km" do leitor de distância —
+// usado no encerramento da missão ("???" durante a dobra de retorno à Terra).
+const RouteMonitor = ({ distanceKm, progress, isDobraAtivada, originPlanet, destinationPlanet, distanceLabel }) => {
   // Mantém a precisão decimal, removendo arredondamentos bruscos
   const clampedProgress = Math.min(Math.max(progress, 0), 100);
 
@@ -72,8 +74,8 @@ const RouteMonitor = ({ distanceKm, progress, isDobraAtivada, originPlanet, dest
             <span>Atual</span>
             <div className="pulse-dot"></div>
           </div>
-          <div className="distance-readout">
-            {Math.max(0, distanceKm).toLocaleString('pt-BR')} km
+          <div className={`distance-readout ${distanceLabel ? 'distance-readout-unknown' : ''}`}>
+            {distanceLabel || `${Math.max(0, distanceKm).toLocaleString('pt-BR')} km`}
           </div>
         </div>
 
@@ -87,4 +89,4 @@ const RouteMonitor = ({ distanceKm, progress, isDobraAtivada, originPlanet, dest
   );
 };
 
-export default RouteMonitor;
+export default RouteMonitor;

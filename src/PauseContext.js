@@ -25,6 +25,10 @@ export const PauseProvider = ({ children, gameNumber, apiBaseUrl, initialPauseSt
     );
     // =================== FIM DA ALTERAÇÃO (3/4) ===================
 
+    // ENCERRAMENTO: true quando o admin aperta ENCERRAR no painel. Lido
+    // pelo DecolagemMarte para disparar a sequência final da missão.
+    const [isGameEnded, setIsGameEnded] = useState(false);
+
     const pauseTimeRef = useRef(null);
     const elapsedTimeRef = useRef(0);
 
@@ -40,6 +44,12 @@ export const PauseProvider = ({ children, gameNumber, apiBaseUrl, initialPauseSt
                     setIsPaused(event.data.isPaused);
                     setPauseControllerId(event.data.controllerId);
                 }
+            }
+            // ENCERRAMENTO (mesma máquina): o admin avisa pelo mesmo canal.
+            if (event.data && event.data.isEnded === true && event.data.gameNumber == gameNumber) {
+                setIsGameEnded(true);
+                setIsPaused(false);
+                setPauseControllerId(null);
             }
         };
         channel.addEventListener('message', handleMessage);
@@ -71,6 +81,26 @@ export const PauseProvider = ({ children, gameNumber, apiBaseUrl, initialPauseSt
                 const data = await response.json();
                 const serverIsPaused = data.isPaused;
 
+                // ENCERRAMENTO: game encerrado pelo admin. Tira qualquer pausa
+                // (inclusive a do próprio jogador) para a sequência final rodar.
+                if (data.isEnded) {
+                    if (!isGameEnded) {
+                        console.log("ENCERRAMENTO (REMOTO): game encerrado pelo admin.");
+                        setIsGameEnded(true);
+                    }
+                    if (isPaused) {
+                        setIsPaused(false);
+                        setPauseControllerId(null);
+                    }
+                    return;
+                }
+
+                // REABERTURA: admin desfez o encerramento.
+                if (isGameEnded) {
+                    console.log("ENCERRAMENTO (REMOTO): game reaberto pelo admin.");
+                    setIsGameEnded(false);
+                }
+
                 // Sincroniza o estado local com o servidor
                 if (serverIsPaused && !isPaused) {
                     // O servidor foi pausado (pelo admin), mas o jogo local não está.
@@ -101,7 +131,7 @@ export const PauseProvider = ({ children, gameNumber, apiBaseUrl, initialPauseSt
         // Limpa o intervalo quando o componente for desmontado
         return () => clearInterval(intervalId);
 
-    }, [gameNumber, apiBaseUrl, isPaused, pauseControllerId]); // Re-avalia o loop se o estado local mudar
+    }, [gameNumber, apiBaseUrl, isPaused, pauseControllerId, isGameEnded]); // Re-avalia o loop se o estado local mudar
     // =================== FIM DA ALTERAÇÃO (4/4) ===================
 
 
@@ -119,6 +149,8 @@ export const PauseProvider = ({ children, gameNumber, apiBaseUrl, initialPauseSt
 
     // togglePause (Ação do JOGADOR)
     const togglePause = useCallback(() => {
+        // Com a missão encerrada não existe mais pausa.
+        if (isGameEnded) return;
         const isCurrentlyPaused = isPaused;
 
         // Impede o jogador de despausar um jogo pausado pelo admin
@@ -139,7 +171,7 @@ export const PauseProvider = ({ children, gameNumber, apiBaseUrl, initialPauseSt
             isPaused: newPauseState,
             controllerId: newControllerId
         });
-    }, [isPaused, pauseControllerId, gameNumber]);
+    }, [isPaused, pauseControllerId, gameNumber, isGameEnded]);
 
 
     const pause = useCallback(() => { if (!isPaused) togglePause(); }, [isPaused, togglePause]);
@@ -156,7 +188,8 @@ export const PauseProvider = ({ children, gameNumber, apiBaseUrl, initialPauseSt
             pause,
             resume,
             getElapsedTime,
-            setIsModalVisible
+            setIsModalVisible,
+            isGameEnded
         }}>
             {children}
             {isPaused && isModalVisible && (
@@ -184,4 +217,4 @@ export const usePause = () => {
         throw new Error('usePause must be used within a PauseProvider');
     }
     return context;
-};
+};

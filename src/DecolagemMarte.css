@@ -1828,3 +1828,108 @@
   font-size: clamp(0.8rem, 1.1vw, 1.1rem);
   text-shadow: 0 0 5px rgba(0, 180, 255, 0.5);
 }
+/* ==========================================================
+   ====== ENCERRAMENTO DA MISSÃO ============================
+   ========================================================== */
+
+/* Faixa durante a dobra de retorno à Terra */
+.mission-end-banner {
+  position: absolute;
+  top: 6%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 26px;
+  background: rgba(0, 10, 25, 0.55);
+  border: 1px solid rgba(0, 220, 255, 0.5);
+  border-radius: 6px;
+  box-shadow: 0 0 18px rgba(0, 200, 255, 0.35);
+  font-family: 'Courier New', monospace;
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: mission-end-fade-in 1.2s ease-out both;
+}
+
+.mission-end-banner-reason {
+  color: #ffc400;
+  font-weight: bold;
+  letter-spacing: 3px;
+  font-size: clamp(0.8rem, 1.1vw, 1.1rem);
+  text-shadow: 0 0 8px rgba(255, 196, 0, 0.7);
+}
+
+.mission-end-banner-route {
+  color: #0ff;
+  letter-spacing: 2px;
+  font-size: clamp(0.7rem, 0.9vw, 0.95rem);
+  text-shadow: 0 0 6px rgba(0, 255, 255, 0.7);
+  animation: blink-animation 1.6s infinite;
+}
+
+/* Mensagem final com a nave em órbita da Terra */
+.mission-end-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 7%;
+  gap: 8px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0.15) 35%, transparent 60%);
+  font-family: 'Courier New', monospace;
+  text-align: center;
+  pointer-events: none;
+  animation: mission-end-fade-in 2.5s ease-out 1.5s both;
+}
+
+.mission-end-title {
+  color: #fff;
+  font-size: clamp(1.8rem, 4vw, 4rem);
+  font-weight: 900;
+  letter-spacing: clamp(4px, 0.8vw, 12px);
+  text-shadow: 0 0 12px rgba(0, 200, 255, 0.9), 0 0 30px rgba(0, 150, 255, 0.6);
+}
+
+.mission-end-subtitle {
+  color: #0bf;
+  font-size: clamp(0.85rem, 1.3vw, 1.3rem);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(0, 180, 255, 0.8);
+}
+
+.mission-end-reason {
+  color: #ffc400;
+  font-size: clamp(0.7rem, 0.9vw, 0.95rem);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.85;
+}
+
+@keyframes mission-end-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Bloqueia cliques no cockpit depois do encerramento */
+.mission-end-input-blocker {
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  background: transparent;
+  cursor: default;
+}
+
+/* Cronômetro zerado/encerrado */
+.mission-timer.mission-timer-ended .timer-display {
+  color: #ff5050;
+  text-shadow: 0 0 10px rgba(255, 60, 60, 0.9);
+}

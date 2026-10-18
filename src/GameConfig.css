@@ -1082,3 +1082,40 @@
     box-shadow: 0 0 10px rgba(255, 51, 102, 0.8);
     /* Brilho Neon */
 }
+/* ENCERRAR: Ciber Laranja Neon (encerra o game para todos os grupos) */
+.end-game-button {
+    background-color: #FF6A00;
+    box-shadow: 0 0 15px rgba(255, 106, 0, 0.8);
+}
+
+.end-game-button:hover:not(:disabled) {
+    border-color: #FF6A00;
+    box-shadow: 0 0 20px rgba(255, 106, 0, 1);
+}
+
+.end-game-button.ended,
+.end-game-button:disabled {
+    background-color: #444;
+    color: #aaa;
+    box-shadow: none;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.8;
+}
+
+.client-message.info {
+    background-color: rgba(0, 188, 212, 0.15);
+    color: #00bcd4;
+    border: 1px solid #00bcd4;
+}
+
+/* REABRIR: Ciber Azul Neon (aparece no lugar do ENCERRAR depois do encerramento) */
+.reopen-game-button {
+    background-color: #0091EA;
+    box-shadow: 0 0 15px rgba(0, 145, 234, 0.8);
+}
+
+.reopen-game-button:hover {
+    border-color: #0091EA;
+    box-shadow: 0 0 20px rgba(0, 145, 234, 1);
+}

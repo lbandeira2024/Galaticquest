@@ -193,6 +193,8 @@ const GameConfig = () => {
     const [isMuted, setIsMuted] = useState(musicAudioRef.current ? musicAudioRef.current.muted : false);
 
     const [isPaused, setIsPaused] = useState(false);
+    // ENCERRAMENTO: game já encerrado pelo botão ENCERRAR
+    const [isGameEnded, setIsGameEnded] = useState(false);
     const pauseChannel = useRef(new BroadcastChannel('pause_channel'));
 
     const canvasRef = useRef(null);
@@ -300,9 +302,10 @@ const GameConfig = () => {
             setRegionalList(fullRegionalList);
 
             const gameConfigResponse = await axios.get(`${apiBaseUrl}/games/${gameNumber}/config`);
-            const { clienteId, regionalId, startDate, endDate, isPaused: gamePaused } = gameConfigResponse.data;
+            const { clienteId, regionalId, startDate, endDate, isPaused: gamePaused, isEnded: gameEnded } = gameConfigResponse.data;
 
             setIsPaused(gamePaused || false);
+            setIsGameEnded(!!gameEnded);
 
             let clientName = '';
             let regionalName = '';
@@ -708,6 +711,85 @@ const GameConfig = () => {
         }
     };
 
+    // ========================================================
+    // ENCERRAMENTO DO GAME
+    // Todos os grupos deste game entram em dobra rumo à Terra e terminam em
+    // órbita com "FIM DA MISSÃO", independente de onde estejam na rota.
+    // ========================================================
+    const handleEndGame = async () => {
+        if (isGameEnded) return;
+        if (!window.confirm(`Tem certeza que deseja ENCERRAR o GAME ${gameNumber}?\n\nTodos os grupos serão levados de volta à Terra e a missão será finalizada. Esta ação não pode ser desfeita.`)) {
+            return;
+        }
+        if (!apiBaseUrl) {
+            setClientMessage({ type: 'error', text: 'URL da API não configurada.' });
+            return;
+        }
+
+        setClientMessage({ type: 'info', text: 'Encerrando o jogo...' });
+
+        try {
+            const response = await axios.post(`${apiBaseUrl}/games/${gameNumber}/end-game`);
+            if (response.data.success) {
+                setIsGameEnded(true);
+                setIsPaused(false);
+                setClientMessage({ type: 'success', text: response.data.message || `GAME ${gameNumber} encerrado.` });
+
+                // Avisa abas de jogadores nesta mesma máquina na hora (as
+                // demais recebem pelo polling de 5s do PauseContext).
+                pauseChannel.current.postMessage({
+                    gameNumber: Number(gameNumber),
+                    isPaused: false,
+                    controllerId: null,
+                    isEnded: true
+                });
+            } else {
+                setClientMessage({ type: 'error', text: response.data.message || 'Erro ao encerrar o jogo.' });
+            }
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 'Erro ao encerrar o jogo.';
+            setClientMessage({ type: 'error', text: errorMessage });
+        }
+    };
+
+    // ========================================================
+    // REABERTURA DO GAME
+    // ========================================================
+    const handleReopenGame = async () => {
+        if (!isGameEnded) return;
+        if (!window.confirm(`Deseja REABRIR o GAME ${gameNumber}?\n\nOs grupos voltam ao ponto da rota em que estavam quando o jogo foi encerrado.`)) {
+            return;
+        }
+        const answer = window.prompt(
+            'Grupos cujo cronômetro de 12h já ZEROU precisam de tempo extra para continuar.\n\n' +
+            'Quantos minutos dar a esses grupos? (0 = não dar tempo; eles encerram de novo ao entrar)',
+            '60'
+        );
+        if (answer === null) return; // cancelou
+        const extraMinutes = Math.max(0, Math.floor(Number(answer.replace(',', '.')) || 0));
+
+        if (!apiBaseUrl) {
+            setClientMessage({ type: 'error', text: 'URL da API não configurada.' });
+            return;
+        }
+
+        setClientMessage({ type: 'info', text: 'Reabrindo o jogo...' });
+
+        try {
+            const response = await axios.post(`${apiBaseUrl}/games/${gameNumber}/reopen-game`, { extraMinutes });
+            if (response.data.success) {
+                setIsGameEnded(false);
+                setIsPaused(false);
+                setClientMessage({ type: 'success', text: response.data.message || `GAME ${gameNumber} reaberto.` });
+            } else {
+                setClientMessage({ type: 'error', text: response.data.message || 'Erro ao reabrir o jogo.' });
+            }
+        } catch (error) {
+            const errorMessage = error.response?.data?.message || 'Erro ao reabrir o jogo.';
+            setClientMessage({ type: 'error', text: errorMessage });
+        }
+    };
+
     const handlePlayerFormChange = (e) => {
         setNewPlayerForm({ ...newPlayerForm, [e.target.name]: e.target.value });
     };
@@ -843,7 +925,7 @@ const GameConfig = () => {
                             {isMuted ? '🔇' : '🔊'}
                         </button>
 
-                        {isGameConfigured && (
+                        {isGameConfigured && !isGameEnded && (
                             <button
                                 onClick={handlePauseToggle}
                                 className={`audio-toggle-button pause-toggle-button ${isPaused ? 'paused' : 'active'}`}
@@ -880,6 +962,26 @@ const GameConfig = () => {
                                     >
                                         REPORTS
                                     </button>
+
+                                    {isGameEnded ? (
+                                        <button
+                                            type="button"
+                                            onClick={handleReopenGame}
+                                            className="game-action-button reopen-game-button"
+                                            title="Game encerrado — reabrir e devolver os grupos ao ponto em que estavam"
+                                        >
+                                            REABRIR
+                                        </button>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={handleEndGame}
+                                            className="game-action-button end-game-button"
+                                            title="Encerrar o game e levar todos os grupos de volta à Terra"
+                                        >
+                                            ENCERRAR
+                                        </button>
+                                    )}
 
                                 </div>
                             )}

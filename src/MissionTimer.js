@@ -6,7 +6,12 @@ import { useConfig } from './ConfigContext';
 
 const DEFAULT_MISSION_TIME = 12 * 60 * 60; // 12 horas em segundos
 
-const MissionTimer = () => {
+// Props (ENCERRAMENTO):
+//  - onExpire: chamado UMA vez quando o cronômetro chega a 00:00:00 (inclusive
+//    ao abrir o jogo com o tempo já zerado no servidor).
+//  - isStopped: congela o cronômetro (missão encerrada pelo admin), sem
+//    perder o valor exibido.
+const MissionTimer = ({ onExpire, isStopped = false }) => {
   const { isPaused } = usePause();
   const { user } = useAuth();
   const { apiBaseUrl } = useConfig();
@@ -34,6 +39,24 @@ const MissionTimer = () => {
 
   useEffect(() => { timeLeftRef.current = timeLeft; }, [timeLeft]);
   useEffect(() => { isLoadedRef.current = isLoaded; }, [isLoaded]);
+
+  // ENCERRAMENTO: avisa o jogo quando o tempo acaba (uma única vez).
+  const onExpireRef = useRef(onExpire);
+  useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]);
+  const expiredFiredRef = useRef(false);
+  // Encerrado: não manda mais o tempo local ao sair da página — senão, ao
+  // recarregar depois de uma REABERTURA, o valor velho (ex.: 0) sobrescreveria
+  // o tempo extra que o admin acabou de dar.
+  const isStoppedRef = useRef(isStopped);
+  useEffect(() => { isStoppedRef.current = isStopped; }, [isStopped]);
+  useEffect(() => {
+    if (!isLoaded || expiredFiredRef.current) return;
+    if (timeLeft <= 0) {
+      expiredFiredRef.current = true;
+      console.log("[ENCERRAMENTO] MissionTimer - tempo de missão esgotado.");
+      if (onExpireRef.current) onExpireRef.current('tempo');
+    }
+  }, [timeLeft, isLoaded]);
 
   // ========================================================
   // [RETOMADA] Busca o tempo de missão salvo no Grupo (servidor) ao montar
@@ -64,8 +87,8 @@ const MissionTimer = () => {
 
   // Efeito para rodar o contador (só depois de carregar o valor salvo)
   useEffect(() => {
-    if (isPaused || !isLoaded) {
-      return; // Se estiver pausado ou ainda carregando o valor do servidor, não faz nada
+    if (isPaused || !isLoaded || isStopped) {
+      return; // Se estiver pausado, encerrado ou ainda carregando o valor do servidor, não faz nada
     }
 
     // Inicia um intervalo que diminui o tempo a cada segundo
@@ -75,7 +98,7 @@ const MissionTimer = () => {
 
     // Limpa o intervalo quando o componente é desmontado ou quando isPaused/isLoaded muda
     return () => clearInterval(interval);
-  }, [isPaused, isLoaded]);
+  }, [isPaused, isLoaded, isStopped]);
 
   // Efeito para salvar o tempo no sessionStorage sempre que ele for alterado
   // (mantido só como cache local de exibição imediata — quem manda de
@@ -91,6 +114,15 @@ const MissionTimer = () => {
   // ========================================================
   useEffect(() => {
     if (isPaused || !isLoaded || !userId || !API_BASE_URL) return;
+    // Encerrado: grava o valor final uma vez e para o auto-save.
+    if (isStopped) {
+      fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ missionTimeLeft: timeLeftRef.current }),
+      }).catch(() => { });
+      return;
+    }
 
     const autoSaveInterval = setInterval(() => {
       console.log("[RETOMADA] MissionTimer - Auto-save (15s) disparando com:", timeLeftRef.current);
@@ -107,7 +139,7 @@ const MissionTimer = () => {
     }, 15000);
 
     return () => clearInterval(autoSaveInterval);
-  }, [isPaused, isLoaded, userId, API_BASE_URL]);
+  }, [isPaused, isLoaded, isStopped, userId, API_BASE_URL]);
 
   // ========================================================
   // SALVAMENTO GARANTIDO AO FECHAR A ABA/NAVEGADOR
@@ -119,6 +151,7 @@ const MissionTimer = () => {
   useEffect(() => {
     const flushMissionTimeOnExit = () => {
       if (!userId || !API_BASE_URL || !isLoadedRef.current) return;
+      if (isStoppedRef.current) return;
       const payload = { missionTimeLeft: timeLeftRef.current };
       const url = `${API_BASE_URL}/${userId}/update-gamedata`;
       try {
@@ -161,7 +194,7 @@ const MissionTimer = () => {
   };
 
   return (
-    <div className="mission-timer">
+    <div className={`mission-timer ${timeLeft <= 0 || isStopped ? 'mission-timer-ended' : ''}`}>
       <div className="timer-label">TEMPO DE MISSÃO</div>
       <div className="timer-display">
         {formatTime(timeLeft)}
@@ -170,4 +203,4 @@ const MissionTimer = () => {
   );
 };
 
-export default MissionTimer;
+export default MissionTimer;

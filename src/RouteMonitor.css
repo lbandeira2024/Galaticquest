@@ -128,3 +128,13 @@
   color: yellow;
   text-shadow: 0 0 4px yellow;
 }
+/* ENCERRAMENTO DA MISSÃO: distância desconhecida durante a dobra de retorno */
+.distance-readout.distance-readout-unknown {
+  letter-spacing: 3px;
+  animation: distance-unknown-flicker 1.2s steps(2, end) infinite;
+}
+
+@keyframes distance-unknown-flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}

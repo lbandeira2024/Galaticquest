@@ -178,7 +178,7 @@ const LeftControlPanel = React.memo(({
   originPlanet, destinationPlanet, maxSpeed, isBoosting,
   handleDobraEspacial, handleInventory, minervaImage, handleMinervaClick,
   isMinervaHighlighted, processadorO2, isO2TransferDisabled, handleOpenO2Modal,
-  mainDisplayState
+  mainDisplayState, distanceLabel
 }) => {
   return (
     <div className="left-panel-3d">
@@ -191,6 +191,7 @@ const LeftControlPanel = React.memo(({
           originPlanet={originPlanet}
           destinationPlanet={destinationPlanet}
           mainDisplayState={mainDisplayState}
+          distanceLabel={distanceLabel}
         />
       </div>
       <div className="dobra-buttons-container">
@@ -265,6 +266,7 @@ const LeftControlPanel = React.memo(({
     prevProps.processadorO2 === nextProps.processadorO2 &&
     prevProps.isO2TransferDisabled === nextProps.isO2TransferDisabled &&
     prevProps.mainDisplayState === nextProps.mainDisplayState &&
+    prevProps.distanceLabel === nextProps.distanceLabel &&
     prevProps.telemetry.velocity.kmh === nextProps.telemetry.velocity.kmh
   );
 });
@@ -277,11 +279,11 @@ const RightMonitorPanel = React.memo(({
   isDeparting, currentCharacterData, currentDialogueStep, highlightKeywords,
   setShowGlossary, handleInventory, teamPhotoUrl, API_BASE_URL,
   isSOSActive, handleSOS, hasFundsForSOS, isRestoringSOS, togglePause, isPauseButtonDisabled,
-  setShowTeamModal
+  setShowTeamModal, onMissionTimerExpire, isMissionTimerStopped
 }) => {
   return (
     <div className="right-panel-3d" style={{ zIndex: 50 }}>
-      <MissionTimer isPaused={isPaused} />
+      <MissionTimer isPaused={isPaused} onExpire={onMissionTimerExpire} isStopped={isMissionTimerStopped} />
 
       {/* MONITOR SUPERIOR */}
       <div className="right-monitor-container">
@@ -422,7 +424,8 @@ const RightMonitorPanel = React.memo(({
     prevProps.isSOSActive === nextProps.isSOSActive &&
     prevProps.hasFundsForSOS === nextProps.hasFundsForSOS &&
     prevProps.isRestoringSOS === nextProps.isRestoringSOS &&
-    prevProps.isPauseButtonDisabled === nextProps.isPauseButtonDisabled
+    prevProps.isPauseButtonDisabled === nextProps.isPauseButtonDisabled &&
+    prevProps.isMissionTimerStopped === nextProps.isMissionTimerStopped
   );
 });
 
@@ -431,7 +434,8 @@ const MainDisplayWindow = React.memo(({
   mainDisplayState, isDobraAtivada, distanceKm, arrivedAtMars, isPaused,
   selectedPlanet, handleChallengeEnd, isDeparting, showStoreModal,
   showSosSurprise, sosSurpriseEvent, handleSeguirPlano, handleMudarRota,
-  handleStoreChallengeImpact, telemetry, plannedRoute, routeIndex
+  handleStoreChallengeImpact, telemetry, plannedRoute, routeIndex,
+  missionEndPhase, missionEndReason
 }) => {
   const cloudsVideoRef = useRef(null);
   const dobraVideoRef = useRef(null);
@@ -572,6 +576,21 @@ const MainDisplayWindow = React.memo(({
           hasRoute={plannedRoute && (routeIndex + 1) < plannedRoute.length}
         />
       )}
+      {/* === ENCERRAMENTO DA MISSÃO === */}
+      {missionEndPhase === 'warp' && (
+        <div className="mission-end-banner">
+          <span className="mission-end-banner-reason">{MISSION_END_REASON_TEXT[missionEndReason] || MISSION_END_REASON_TEXT.tempo}</span>
+          <span className="mission-end-banner-route">Dobra espacial ativada · Destino: Terra</span>
+        </div>
+      )}
+      {missionEndPhase === 'orbit' && (
+        <div className="mission-end-overlay">
+          <div className="mission-end-title">FIM DA MISSÃO</div>
+          <div className="mission-end-subtitle">Nave em órbita da Terra</div>
+          <div className="mission-end-reason">{MISSION_END_REASON_TEXT[missionEndReason] || MISSION_END_REASON_TEXT.tempo}</div>
+        </div>
+      )}
+
       {showSosSurprise && sosSurpriseEvent && (
         <SosSurpriseModal
           event={sosSurpriseEvent}
@@ -596,6 +615,8 @@ const MainDisplayWindow = React.memo(({
     prevProps.sosSurpriseEvent === nextProps.sosSurpriseEvent &&
     prevProps.routeIndex === nextProps.routeIndex &&
     prevProps.plannedRoute === nextProps.plannedRoute &&
+    prevProps.missionEndPhase === nextProps.missionEndPhase &&
+    prevProps.missionEndReason === nextProps.missionEndReason &&
     prevProps.telemetry.velocity.kmh === nextProps.telemetry.velocity.kmh
   );
 });
@@ -686,6 +707,21 @@ const takeoffDegradation = {
   GAIANOVA: { propulsion: 3, direction: 2, stability: 3 },
   ARTEMIS1: { propulsion: 2, direction: 1, stability: 2 },
   OBERONX: { propulsion: 1, direction: 0, stability: 1 },
+};
+
+// ========================================================
+// ENCERRAMENTO DA MISSÃO
+// Disparado quando o cronômetro de 12h zera (MissionTimer) ou quando o admin
+// aperta ENCERRAR no GameConfig (lido pelo PauseContext). Onde quer que o
+// grupo esteja, a nave entra em dobra rumo à Terra (Route Monitor mostra
+// "???"), toca a música/vídeo da dobra e, ao final, para na órbita da Terra
+// com a mensagem "FIM DA MISSÃO".
+// ========================================================
+const END_WARP_DURATION_MS = 30 * 1000; // duração da dobra de retorno
+const EARTH_PLANET = { nome: 'Terra' }; // objeto fixo (não quebra o memo do SpaceView)
+const MISSION_END_REASON_TEXT = {
+  tempo: 'Tempo de missão esgotado',
+  admin: 'Missão encerrada pelo Comando ACEE'
 };
 
 const normalizeName = (str) => str ? str.toString().toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/-/g, "").replace(/\s+/g, "") : "";
@@ -872,8 +908,19 @@ const DecolagemMarte = () => {
   const canDecreaseDistanceRef = useRef(false);
 
   const { playTrack, playSound, stopAllAudio, unlockAudio, fadeOutAudio } = useAudio();
-  const { isPaused, togglePause } = usePause();
+  const { isPaused, togglePause, isGameEnded } = usePause();
   const isPausedRef = useRef(isPaused);
+
+  // --- ENCERRAMENTO DA MISSÃO ---
+  // missionEndPhase: null (jogando) | 'warp' (dobra rumo à Terra) | 'orbit' (fim)
+  const [missionEndPhase, setMissionEndPhase] = useState(null);
+  const [missionEndReason, setMissionEndReason] = useState(null);
+  const [endWarpProgress, setEndWarpProgress] = useState(0);
+  // Vindos do servidor no fetchGameData:
+  const [restoredMissionEnd, setRestoredMissionEnd] = useState(null); // grupo já viu o final
+  const [serverGameEnded, setServerGameEnded] = useState(false); // admin já tinha encerrado
+  const missionEndedRef = useRef(false);
+  const endWarpTimerRef = useRef(null);
 
 
   // --- NOVA LÓGICA DE CONTAGEM DE CORPOS CELESTES ---
@@ -1411,6 +1458,8 @@ const DecolagemMarte = () => {
 
   useEffect(() => {
     if (isLoadingRoute) return;
+    // Missão já encerrada (retomada após o final): não toca a decolagem.
+    if (missionEndedRef.current) { sequenceStarted.current = true; return; }
 
     // Retomar em pleno voo: além de routeIndex > 0 (já concluiu alguma etapa),
     // também conta progress > 0 — o jogador pode ter deslogado/fechado o
@@ -1440,18 +1489,18 @@ const DecolagemMarte = () => {
       playTrack(audioUrl, { loop: false, isPrimary: true });
 
       setTimeout(() => {
-        if (isMounted.current) { setMainDisplayState('clouds'); setTravelStarted(true); }
+        if (isMounted.current && !missionEndedRef.current) { setMainDisplayState('clouds'); setTravelStarted(true); }
       }, 13000);
 
       setTimeout(() => {
-        if (isMounted.current) {
+        if (isMounted.current && !missionEndedRef.current) {
           setMainDisplayState('static');
           setMonitorState('static');
         }
       }, 23000);
 
       setTimeout(() => {
-        if (isMounted.current) {
+        if (isMounted.current && !missionEndedRef.current) {
           stopAllAudio();
           setMainDisplayState('stars');
           setMonitorState('on');
@@ -1461,15 +1510,17 @@ const DecolagemMarte = () => {
   }, [isLoadingRoute, routeIndex, unlockAudio, playTrack, stopAllAudio]);
 
   useEffect(() => {
+    if (missionEndPhase) return;
     if (telemetry.velocity.kmh >= 59500 && !isDobraEnabled && !isDobraAtivada && distanceKm > 500000 && !isWarpCooldown) {
       setIsDobraEnabled(true);
       playSFX('/sounds/05.Dobra-Active.mp3');
     }
-  }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm, isWarpCooldown, playSFX]);
+  }, [telemetry.velocity.kmh, isDobraEnabled, isDobraAtivada, distanceKm, isWarpCooldown, playSFX, missionEndPhase]);
 
   useEffect(() => {
     if (!travelStarted && routeIndex === 0) return;
     const triggerSosEvent = () => {
+      if (missionEndedRef.current) return;
       if (isDobraAtivadaRef.current) return;
       if (monitorStateRef.current !== 'on') return;
       if (distanceKmRef.current <= 0) return;
@@ -1543,6 +1594,16 @@ const DecolagemMarte = () => {
 
           if (data._id) setGroupId(data._id);
           if (data.naveEscolhida) setChosenShip(data.naveEscolhida);
+
+          // ENCERRAMENTO: grupo já assistiu ao final → volta direto à órbita
+          // da Terra. Admin encerrou mas o grupo ainda não viu → toca a
+          // sequência completa assim que a tela carregar.
+          if (data.missaoEncerrada) {
+            missionEndedRef.current = true;
+            setRestoredMissionEnd(data.missaoEncerradaMotivo || 'tempo');
+          } else if (data.isGameEnded) {
+            setServerGameEnded(true);
+          }
           if (data.spaceCoins !== undefined) syncSpaceCoinsRef.current(data.spaceCoins);
           if (data.processadorO2 !== undefined) setProcessadorO2(data.processadorO2);
           if (data.virtusIndex !== undefined) setVirtusIndex(data.virtusIndex);
@@ -1636,7 +1697,7 @@ const DecolagemMarte = () => {
 
 
   useEffect(() => {
-    if (isPaused || !chosenShip || isDobraAtivada) return;
+    if (isPaused || !chosenShip || isDobraAtivada || missionEndPhase) return;
     const rates = degradationRates[chosenShip] || degradationRates.default;
     const intervals = [];
     const createInterval = (key, telemetryPath, rateInMinutes) => {
@@ -1661,7 +1722,7 @@ const DecolagemMarte = () => {
     createInterval('interdependence', 'interdependence', rates.interdependence);
     createInterval('engagement', 'engagement', rates.engagement);
     return () => intervals.forEach(clearInterval);
-  }, [isPaused, chosenShip, isDobraAtivada]);
+  }, [isPaused, chosenShip, isDobraAtivada, missionEndPhase]);
 
   useEffect(() => {
     if (!isDobraAtivada || isPaused) return;
@@ -1709,10 +1770,10 @@ const DecolagemMarte = () => {
   }, [chosenShip, originPlanet.nome]);
 
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || missionEndPhase) return;
     const interval = setInterval(() => { if (travelStarted) setTravelTime(prev => prev + 1); }, 1000);
     return () => clearInterval(interval);
-  }, [isPaused, travelStarted]);
+  }, [isPaused, travelStarted, missionEndPhase]);
 
   useEffect(() => {
     if (isPaused || !travelStarted || minervaEventTriggered.current) return;
@@ -1722,7 +1783,7 @@ const DecolagemMarte = () => {
   }, [travelTime, travelStarted, isPaused, triggerMinervaInterplanetarySpeed]);
 
   useEffect(() => {
-    if (isPaused || isDobraAtivada || isLoadingRoute || travelTime === 0) return;
+    if (isPaused || isDobraAtivada || isLoadingRoute || travelTime === 0 || missionEndPhase) return;
     const isMoon = selectedPlanet?.nome?.toLowerCase() === 'lua';
     const approachDistanceThreshold = 800000;
 
@@ -1737,7 +1798,7 @@ const DecolagemMarte = () => {
       setIsFinalApproach(true);
       setIsBoostingTo60k(false);
     }
-  }, [distanceKm, isDobraAtivada, selectedPlanet, isPaused, isLoadingRoute, playSFX, travelTime]);
+  }, [distanceKm, isDobraAtivada, selectedPlanet, isPaused, isLoadingRoute, playSFX, travelTime, missionEndPhase]);
 
   const isSystemCritical = telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20;
   const hasFundsForSOS = (spaceCoins || 0) > 0;
@@ -1764,7 +1825,7 @@ const DecolagemMarte = () => {
   useEffect(() => {
     const isCritical = (telemetry.atmosphere.o2 <= 20 || telemetry.propulsion.powerOutput <= 20 || telemetry.direction <= 20 || telemetry.stability <= 20 || telemetry.productivity <= 20 || telemetry.interdependence <= 20 || telemetry.engagement <= 20) && !isRestoringSOS;
     alarmAudio.loop = true;
-    if (isCritical && !isPaused) { if (alarmAudio.paused) alarmAudio.play().catch(e => console.warn("Erro ao tocar alarme:", e)); }
+    if (isCritical && !isPaused && !missionEndPhase) { if (alarmAudio.paused) alarmAudio.play().catch(e => console.warn("Erro ao tocar alarme:", e)); }
     else { alarmAudio.pause(); alarmAudio.currentTime = 0; }
     return () => { alarmAudio.pause(); };
     // OTIMIZAÇÃO: dependíamos do objeto `telemetry` inteiro, que ganha uma
@@ -1782,7 +1843,8 @@ const DecolagemMarte = () => {
     telemetry.engagement,
     isPaused,
     isRestoringSOS,
-    alarmAudio
+    alarmAudio,
+    missionEndPhase
   ]);
 
   useEffect(() => {
@@ -1821,7 +1883,8 @@ const DecolagemMarte = () => {
   // ========================================================
   useEffect(() => {
     const gameLoop = (timestamp) => {
-      if (isPausedRef.current) {
+      // Missão encerrada: congela física, distância e chegadas.
+      if (isPausedRef.current || missionEndedRef.current) {
         lastUpdateTime.current = timestamp;
         animationFrameId.current = requestAnimationFrame(gameLoop);
         return;
@@ -2109,6 +2172,7 @@ const DecolagemMarte = () => {
 
     const autoSaveInterval = setInterval(() => {
       if (!userId || !API_BASE_URL) return;
+      if (missionEndedRef.current) return;
 
       // Só salva se a distância acumulada já for maior que zero
       if (accumulatedDistanceKmRef.current > 0) {
@@ -2196,6 +2260,156 @@ const DecolagemMarte = () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [userId, API_BASE_URL]);
+
+  // ========================================================
+  // ENCERRAMENTO DA MISSÃO
+  // ========================================================
+  const setShipVelocity = useCallback((kmh) => {
+    const SPEED_OF_LIGHT_KMH = 1079252848.8;
+    telemetryRef.current = {
+      ...telemetryRef.current,
+      velocity: { kmh, ms: kmh / 3.6, rel: `${(kmh / SPEED_OF_LIGHT_KMH).toFixed(7)}c` }
+    };
+    setTelemetry(telemetryRef.current);
+  }, []);
+
+  // Fase final: nave parada na órbita da Terra + "FIM DA MISSÃO".
+  const goToEarthOrbit = useCallback((reason, persist) => {
+    missionEndedRef.current = true;
+    setMissionEndReason(reason);
+    setMissionEndPhase('orbit');
+    setEndWarpProgress(100);
+    setMainDisplayState('stars');
+    setMonitorState('on');
+    setMinervaImage('/images/Minerva/Minerva_Active.gif');
+    setShipVelocity(0);
+
+    if (persist && userId && API_BASE_URL) {
+      fetch(`${API_BASE_URL}/${userId}/update-gamedata`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          missaoEncerrada: true,
+          missaoEncerradaEm: new Date().toISOString(),
+          missaoEncerradaMotivo: reason
+        }),
+      }).catch(err => console.error("[ENCERRAMENTO] Erro ao salvar fim da missão:", err));
+    }
+  }, [userId, API_BASE_URL, setShipVelocity]);
+
+  // Dispara a sequência final, de onde quer que o grupo esteja.
+  const triggerMissionEnd = useCallback((reason) => {
+    if (missionEndedRef.current) return;
+    missionEndedRef.current = true;
+    console.log(`[ENCERRAMENTO] Iniciando retorno à Terra (motivo: ${reason}).`);
+
+    // Encerra dobra/boost em andamento e timers do voo
+    [dobraTimerRef, minervaTimeoutRef, boostTimerRef, hideMinervaTimerRef].forEach(r => {
+      if (r.current) clearTimeout(r.current);
+    });
+    isDobraAtivadaRef.current = false;
+    setIsDobraAtivada(false);
+    setIsDobraEnabled(false);
+    setIsWarpCooldown(false);
+    setIsBoostingTo60k(false);
+    setIsFinalApproach(false);
+    setIsDeparting(false);
+
+    // Fecha qualquer janela/modal aberto
+    setShowEscolhaModal(false);
+    setShowDesafioModal(false);
+    setShowConfirmacaoModal(false);
+    setShowStoreModal(false);
+    setShowSosSurprise(false);
+    setPlayingSosVideo(false);
+    setShowStellarMap(false);
+    setIsForcedMapEdit(false);
+    setShowInventory(false);
+    setShowGlossary(false);
+    setShowMandala(false);
+    setShowO2Modal(false);
+    setShowSOSModal(false);
+    setShowTeamModal(false);
+    setIsTransmissionStarting(false);
+    setShowMinervaOnMonitor(false);
+    setShowWarpDisabledMessage(false);
+    setShowCriticalWarpFail(false);
+    setIsSosMinervaActive(false);
+    setActiveSosSignal(null);
+
+    // Dobra espacial rumo à Terra
+    setMainDisplayState('stars');
+    setMonitorState('on');
+    setMissionEndReason(reason);
+    setEndWarpProgress(0);
+    setMissionEndPhase('warp');
+    setMinervaImage('/images/Minerva/Minerva-Vluz.gif');
+    setShipVelocity(100000000);
+    playSFX('/sounds/05.Dobra-Active.mp3');
+    saveTelemetryDataRef.current();
+
+    if (endWarpTimerRef.current) clearTimeout(endWarpTimerRef.current);
+    endWarpTimerRef.current = setTimeout(() => {
+      playSFX('/sounds/power-down-Warp.mp3');
+      goToEarthOrbit(reason, true);
+    }, END_WARP_DURATION_MS);
+  }, [playSFX, goToEarthOrbit, setShipVelocity]);
+
+  const triggerMissionEndRef = useRef(triggerMissionEnd);
+  useEffect(() => { triggerMissionEndRef.current = triggerMissionEnd; }, [triggerMissionEnd]);
+
+  // Gatilho 1: cronômetro de 12h zerou (callback estável para o memo do painel)
+  const handleMissionTimerExpire = useCallback(() => {
+    triggerMissionEndRef.current('tempo');
+  }, []);
+
+  // Gatilho 2: botão ENCERRAR do admin (polling do PauseContext ou game-data)
+  useEffect(() => {
+    if (isLoadingRoute) return;
+    if (isGameEnded || serverGameEnded) triggerMissionEndRef.current('admin');
+  }, [isGameEnded, serverGameEnded, isLoadingRoute]);
+
+  // Retomada: grupo já tinha visto o final → direto para a órbita da Terra
+  useEffect(() => {
+    if (isLoadingRoute || !restoredMissionEnd || missionEndPhase) return;
+    goToEarthOrbit(restoredMissionEnd, false);
+  }, [isLoadingRoute, restoredMissionEnd, missionEndPhase, goToEarthOrbit]);
+
+  // Nave andando no Route Monitor durante a dobra de retorno
+  useEffect(() => {
+    if (missionEndPhase !== 'warp') return;
+    const start = Date.now();
+    const id = setInterval(() => {
+      setEndWarpProgress(Math.min(99, ((Date.now() - start) / END_WARP_DURATION_MS) * 100));
+    }, 500);
+    return () => clearInterval(id);
+  }, [missionEndPhase]);
+
+  useEffect(() => () => { if (endWarpTimerRef.current) clearTimeout(endWarpTimerRef.current); }, []);
+
+  // REABERTURA: na tela final, confere a cada 10s se o admin reabriu o game.
+  // Se reabriu (e o grupo tem tempo de missão), recarrega a página e o jogo
+  // volta exatamente ao ponto da rota em que o grupo estava.
+  useEffect(() => {
+    if (missionEndPhase !== 'orbit' || !userId || !API_BASE_URL) return;
+    const id = setInterval(async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/${userId}/game-data?t=${Date.now()}`);
+        const data = await res.json();
+        if (data.success && !data.noGroup && !data.missaoEncerrada && !data.isGameEnded && Number(data.missionTimeLeft) > 0) {
+          console.log('[ENCERRAMENTO] Game reaberto pelo admin — retomando a missão.');
+          try { sessionStorage.removeItem('missionTime'); } catch (e) { /* ignora */ }
+          window.location.reload();
+        }
+      } catch (err) { /* sem conexão: tenta de novo no próximo ciclo */ }
+    }, 10000);
+    return () => clearInterval(id);
+  }, [missionEndPhase, userId, API_BASE_URL]);
+
+  const isMissionEnding = missionEndPhase !== null;
+  const isEndWarp = missionEndPhase === 'warp';
+  const visualWarp = isDobraAtivada || isEndWarp;
+  const routeDistanceLabel = isEndWarp ? '???' : (missionEndPhase === 'orbit' ? 'EM ÓRBITA' : null);
 
   const currentMaxSpeed = useMemo(() => {
     if (isDobraAtivada) return 100000000;
@@ -2297,6 +2511,7 @@ const DecolagemMarte = () => {
   useEffect(() => {
     const handleGlobalHotkeys = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (missionEndedRef.current) { e.preventDefault(); return; }
 
       const key = e.key.toLowerCase();
 
@@ -2427,13 +2642,14 @@ const DecolagemMarte = () => {
         <LeftControlPanel
           telemetry={telemetry}
           distanceKm={distanceKm}
-          progress={progress}
-          isDobraAtivada={isDobraAtivada}
-          isDobraEnabled={isDobraEnabled}
+          progress={isMissionEnding ? endWarpProgress : progress}
+          distanceLabel={routeDistanceLabel}
+          isDobraAtivada={visualWarp}
+          isDobraEnabled={isDobraEnabled && !isMissionEnding}
           isPaused={isPaused}
           originPlanet={originPlanet.nome}
-          destinationPlanet={selectedPlanet?.nome}
-          maxSpeed={currentMaxSpeed}
+          destinationPlanet={isMissionEnding ? EARTH_PLANET.nome : selectedPlanet?.nome}
+          maxSpeed={isEndWarp ? 100000000 : currentMaxSpeed}
           isBoosting={isBoostingTo60k}
           handleDobraEspacial={handleDobraEspacial}
           handleInventory={handleInventory}
@@ -2466,25 +2682,27 @@ const DecolagemMarte = () => {
           handleInventory={handleInventory}
           teamPhotoUrl={teamPhotoUrl}
           API_BASE_URL={API_BASE_URL}
-          isSOSActive={isSOSActive}
+          isSOSActive={isSOSActive && !isMissionEnding}
           handleSOS={handleSOS}
           hasFundsForSOS={hasFundsForSOS}
           isRestoringSOS={isRestoringSOS}
           togglePause={togglePause}
-          isPauseButtonDisabled={isPauseButtonDisabled}
+          isPauseButtonDisabled={isPauseButtonDisabled || isMissionEnding}
+          onMissionTimerExpire={handleMissionTimerExpire}
+          isMissionTimerStopped={isMissionEnding}
         />
         <div className="cockpit-overlay"></div>
         <MainDisplayWindow
-          mainDisplayState={mainDisplayState}
-          isDobraAtivada={isDobraAtivada}
-          distanceKm={distanceKm}
-          arrivedAtMars={arrivedAtMars}
+          mainDisplayState={isMissionEnding ? 'stars' : mainDisplayState}
+          isDobraAtivada={visualWarp}
+          distanceKm={isMissionEnding ? 0 : distanceKm}
+          arrivedAtMars={missionEndPhase === 'orbit' || (!isMissionEnding && arrivedAtMars)}
           isPaused={isPaused}
-          selectedPlanet={selectedPlanet}
+          selectedPlanet={isMissionEnding ? EARTH_PLANET : selectedPlanet}
           handleChallengeEnd={handleChallengeEnd}
-          isDeparting={isDeparting}
-          showStoreModal={showStoreModal}
-          showSosSurprise={showSosSurprise}
+          isDeparting={!isMissionEnding && isDeparting}
+          showStoreModal={!isMissionEnding && showStoreModal}
+          showSosSurprise={!isMissionEnding && showSosSurprise}
           sosSurpriseEvent={sosSurpriseEvent}
           handleSeguirPlano={handleSeguirPlano}
           handleMudarRota={handleMudarRota}
@@ -2492,30 +2710,34 @@ const DecolagemMarte = () => {
           telemetry={telemetry}
           plannedRoute={plannedRoute}
           routeIndex={routeIndex}
+          missionEndPhase={missionEndPhase}
+          missionEndReason={missionEndReason}
         />
         <TelemetryDisplay
           data={telemetry}
           isPaused={isPaused}
-          showStellarMap={showStellarMap}
+          showStellarMap={!isMissionEnding && showStellarMap}
           setShowStellarMap={handleToggleMap}
           onRouteChanged={handleRouteChanged}
-          isDobraAtivada={isDobraAtivada}
+          isDobraAtivada={visualWarp}
           plannedRoute={plannedRoute}
           routeIndex={routeIndex}
           isOxygenRefilled={isOxygenRefilled}
           lastImpactTimestamp={lastImpactTimestamp}
-          isForcedMapEdit={isForcedMapEdit}
+          isForcedMapEdit={!isMissionEnding && isForcedMapEdit}
           onSosDetected={handleSosDetected}
           distanceKm={distanceKm}
-          sosSignalData={(distanceKm > 0 || isForcedMapEdit) ? activeSosSignal : null}
+          sosSignalData={!isMissionEnding && (distanceKm > 0 || isForcedMapEdit) ? activeSosSignal : null}
         />
       </div>
-      {showMandala && (<div className="modal-overlay"><div className="modal-content"><MandalaVirtudes onClose={() => setShowMandala(false)} groupId={groupId} /></div></div>)}
-      {showGlossary && (<div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}><div className="modal-content" style={{ backgroundColor: 'rgba(0, 30, 60, 0.97)', padding: '20px', borderRadius: '8px', maxWidth: '800px', width: '90%', maxHeight: '80vh', overflow: 'auto', position: 'relative' }}><Suspense fallback={<div>Carregando...</div>}><GalacticVirtudesPage onClose={() => setShowGlossary(false)} /></Suspense></div></div>)}
-      {showInventory && <Inventario onClose={() => setShowInventory(false)} onUpdateTelemetry={handleInventoryTelemetryUpdate} currentTelemetry={telemetry} />}
-      {showDesafioModal && activeChallengeData && <ModalDesafio desafio={activeChallengeData} onClose={() => { setShowDesafioModal(false); setIsTransmissionStarting(true); }} className="main-display-modal" showTimer={true} />}
-      {showEscolhaModal && activeChallengeData && <ModalEscolha key={modalEscolhaKey} desafio={activeChallengeData} onClose={handleCloseEscolhaModal} onEscolha={handleEscolha} missionTime={travelTime} onSpendCoins={handleSpendCoins} showTimer={!isReviewing} />}
-      {showConfirmacaoModal && (
+      {/* ENCERRAMENTO: bloqueia cliques no cockpit durante e depois da sequência final */}
+      {isMissionEnding && <div className="mission-end-input-blocker" aria-hidden="true"></div>}
+      {!isMissionEnding && showMandala && (<div className="modal-overlay"><div className="modal-content"><MandalaVirtudes onClose={() => setShowMandala(false)} groupId={groupId} /></div></div>)}
+      {!isMissionEnding && showGlossary && (<div className="modal-overlay" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', justifyContent: 'center', alignItems: 'center' }}><div className="modal-content" style={{ backgroundColor: 'rgba(0, 30, 60, 0.97)', padding: '20px', borderRadius: '8px', maxWidth: '800px', width: '90%', maxHeight: '80vh', overflow: 'auto', position: 'relative' }}><Suspense fallback={<div>Carregando...</div>}><GalacticVirtudesPage onClose={() => setShowGlossary(false)} /></Suspense></div></div>)}
+      {!isMissionEnding && showInventory && <Inventario onClose={() => setShowInventory(false)} onUpdateTelemetry={handleInventoryTelemetryUpdate} currentTelemetry={telemetry} />}
+      {!isMissionEnding && showDesafioModal && activeChallengeData && <ModalDesafio desafio={activeChallengeData} onClose={() => { setShowDesafioModal(false); setIsTransmissionStarting(true); }} className="main-display-modal" showTimer={true} />}
+      {!isMissionEnding && showEscolhaModal && activeChallengeData && <ModalEscolha key={modalEscolhaKey} desafio={activeChallengeData} onClose={handleCloseEscolhaModal} onEscolha={handleEscolha} missionTime={travelTime} onSpendCoins={handleSpendCoins} showTimer={!isReviewing} />}
+      {!isMissionEnding && showConfirmacaoModal && (
         <ModalConfirmacaoViagem
           onSeguirPlano={handleSeguirPlano}
           onMudarRota={handleMudarRota}
@@ -2523,7 +2745,7 @@ const DecolagemMarte = () => {
           isArrivalWithoutChallenge={!activeChallengeData}
         />
       )}
-      {showSOSModal && (
+      {!isMissionEnding && showSOSModal && (
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: '500px', textAlign: 'center', fontFamily: "'Courier New', monospace" }}>
             <h3 style={{ color: '#fff' }}>S.O.S. RECOVERY SYSTEM</h3>
@@ -2536,7 +2758,7 @@ const DecolagemMarte = () => {
           </div>
         </div>
       )}
-      {showO2Modal && (
+      {!isMissionEnding && showO2Modal && (
         <div className="modal-overlay">
           <div className="modal-content" style={{ maxWidth: '500px', textAlign: 'center', fontFamily: "'Courier New', monospace", color: '#fff', border: '2px solid #0bf', boxShadow: '0 0 20px #0bf' }}>
             <h3 style={{ textShadow: '0 0 10px #0bf' }}>TRANSFERÊNCIA DE OXIGÊNIO</h3>
@@ -2552,7 +2774,7 @@ const DecolagemMarte = () => {
       )}
 
       {/* MODAL DA TRIPULAÇÃO */}
-      {showTeamModal && teamData && (
+      {!isMissionEnding && showTeamModal && teamData && (
         <div className="modal-overlay" style={{ zIndex: 1002 }}>
           <div className="modal-content team-modal-details">
             <button type="button" className="close-button" onClick={() => setShowTeamModal(false)}>×</button>
@@ -2584,7 +2806,7 @@ const DecolagemMarte = () => {
       )}
 
       {/* OVERLAY DO VÍDEO DE S.O.S FULLSCREEN */}
-      {playingSosVideo && (
+      {!isMissionEnding && playingSosVideo && (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -2630,4 +2852,4 @@ const DecolagemMarte = () => {
 };
 
 
-export default DecolagemMarte;
+export default DecolagemMarte;

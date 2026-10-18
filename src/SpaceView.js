@@ -43,7 +43,14 @@ const planetImageMap = {
   salyut: '/images/stations/SALYUT-Rotacionando.webm',
   delfos: '/images/stations/DELFOS-Rotacionando.gif',
   boctok: '/images/stations/BOCTOK-Rotacionando.webm',
-  proteu: '/images/Planets/proteu-rotacionando.webm'
+  proteu: '/images/Planets/proteu-rotacionando.webm',
+  // ENCERRAMENTO DA MISSÃO: órbita da Terra. Se o .webm ainda não estiver em
+  // public/images/Planets, cai automaticamente para Terra.png (ver onError).
+  terra: '/images/Planets/Terra.webm'
+};
+
+const PLANET_VIDEO_FALLBACK = {
+  terra: '/images/Planets/Terra.png'
 };
 
 const PLANET_MUSIC_CONFIG = {
@@ -543,6 +550,14 @@ const SpaceView = ({
                 setPlanetImageLoaded(true);
                 if (scaleWrapperRef.current) scaleWrapperRef.current.style.opacity = 0;
               }}
+              onError={() => {
+                const fallback = PLANET_VIDEO_FALLBACK[planetName];
+                if (fallback) {
+                  console.warn(`[SpaceView] vídeo ${planetImage} não encontrado, usando ${fallback}`);
+                  setPlanetImage(fallback);
+                  setPlanetImageLoaded(true);
+                }
+              }}
               style={{ width: '100%', height: '100%', zIndex: forceLarge ? 1000 : 10, objectFit: 'contain', transformOrigin: 'center center' }}
             />
           ) : (
@@ -567,4 +582,4 @@ export default React.memo(SpaceView, (prevProps, nextProps) => {
     prevProps.distance === nextProps.distance &&
     prevProps.isActive === nextProps.isActive
   );
-});
+});
