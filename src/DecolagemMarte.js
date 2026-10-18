@@ -1640,8 +1640,34 @@ const DecolagemMarte = () => {
             const originStep = routeFromDB[currentRouteIndex];
             const nextStep = routeFromDB[currentRouteIndex + 1];
             if (!originStep || !nextStep) {
-              await saveIndexForCorrection(0);
-              setRefetchTrigger(prev => prev + 1);
+              // BUGFIX: antes, chegar ao ÚLTIMO destino da rota (não existe
+              // "próximo passo") e recarregar a página zerava o routeIndex
+              // para 0 — o grupo voltava para a Terra, a decolagem tocava de
+              // novo e o Virtus caía (a contagem de corpos visitados zerava).
+              // Agora o grupo fica parado no último destino e o mapa abre em
+              // modo obrigatório para planejar a continuação — o mesmo que
+              // acontece quando ele chega lá sem recarregar (só "MUDAR ROTA").
+              const lastIdx = routeFromDB.length - 1;
+              if (currentRouteIndex !== lastIdx) {
+                // índice fora da rota (maior que o fim): grava o último válido
+                await saveIndexForCorrection(lastIdx);
+              }
+              setRouteIndex(lastIdx);
+              setPlannedRoute(routeFromDB);
+              setOriginPlanet({ nome: (routeFromDB[lastIdx - 1] || routeFromDB[lastIdx]).name });
+              setSelectedPlanet({ nome: routeFromDB[lastIdx].name });
+              setDistanceKm(0);
+              distanceKmRef.current = 0;
+              setProgress(100);
+              arrivedAtMarsRef.current = true;
+              setArrivedAtMars(true);
+              isForcedMapEditRef.current = true;
+              setIsForcedMapEdit(true);
+              setShowStellarMap(true);
+              if (data.telemetryState) {
+                telemetryRef.current = { ...telemetryRef.current, ...data.telemetryState, atmosphere: { ...telemetryRef.current.atmosphere, o2: data.telemetryState.oxygen ?? 100 }, propulsion: { ...telemetryRef.current.propulsion, powerOutput: data.telemetryState.nuclearPropulsion ?? 100 } };
+                setTelemetry({ ...telemetryRef.current });
+              }
               return;
             }
             setRouteIndex(currentRouteIndex);
